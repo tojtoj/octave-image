@@ -53,10 +53,8 @@ function [Y, newmap] = cmpermute(X, map, index)
   newmap=map(index);
 
   ## build reverse index
-  rindex=zeros(length(index),1);
-  for i=1:length(index)
-    rindex(index(i))=i;
-  endfor
+  rindex = zeros(size(index));
+  rindex(index) = 1:length(index);
  
   ## readapt indices
   Y=rindex(X);
@@ -88,6 +86,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.2  2004/08/18 14:57:42  jmones
+% speed improvement suggested by Paul Kienzle
+%
 % Revision 1.1  2004/08/17 19:18:42  jmones
 % cmpermute added: Reorders colors in a colormap
 %
