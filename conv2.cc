@@ -17,6 +17,7 @@
  */
 
 #include <octave/oct.h>
+using namespace std;
 
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 
