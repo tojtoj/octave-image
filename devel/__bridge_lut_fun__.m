@@ -66,11 +66,14 @@ function g=__bridge_lut_fun__(X)
   g=x||p1||p2||p3||p4||p5||p6;
 endfunction
 
-%!assert(sum(makelut("bridge_lut_fun",3)),256+119);
+%!assert(sum(makelut("__bridge_lut_fun__",3)),256+119);
 
 
 %
 % $Log$
+% Revision 1.2  2004/09/08 15:07:18  pkienzle
+% Use new __ name in tests as well.
+%
 % Revision 1.1  2004/08/16 14:42:02  jmones
 % Functions used to code bwmorph
 %
