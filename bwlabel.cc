@@ -71,9 +71,9 @@ DEFUN_DLD( bwlabel, args, ,
     int nobj;                               // number of objects found in image
     
     // other variables
-    int lset[nr * nc];   // label table/tree
     int ntable;                             // number of elements in the component table/tree
     
+    OCTAVE_LOCAL_BUFFER(int, lset, nr * nc);   // label table/tree
     ntable = 0;
     lset[0] = 0;
     

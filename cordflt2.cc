@@ -168,7 +168,7 @@ octave_value_list do_filtering(MT A, int nth, boolMatrix dom, MT S)
 }
 
 // instantiate template functions
-template inline bool compare<double>(const double, const double);
+template bool compare<double>(const double, const double);
 template double selnth(double *, int, int);
 template Complex selnth(Complex *, int, int);
 template octave_value_list do_filtering<Matrix, double>(Matrix, int, boolMatrix, Matrix);

@@ -12,10 +12,10 @@
 
 #include <octave/oct.h>
 
-#define   UP     (-1)
-#define   DN     (+1)
-#define   RT     (+ioM)
-#define   LF     (-ioM)
+#define   ptUP     (-1)
+#define   ptDN     (+1)
+#define   ptRT     (+ioM)
+#define   ptLF     (-ioM)
 
 /*
  * check if the point needs to be filled, if so
@@ -102,7 +102,7 @@ DEFUN_DLD (bwfill, args, ,
  *  so that we can be more efficient in the main loop
  */
    int           ioM=   imM+2;
-   unsigned char imo[ (imM+2) * (imN+2) ];
+   OCTAVE_LOCAL_BUFFER(unsigned char, imo, (imM+2) * (imN+2));
 
    for (int i=0; i<imM; i++) 
       for (int j=0; j<imN; j++)
@@ -116,7 +116,7 @@ DEFUN_DLD (bwfill, args, ,
 
 // This is obviously big enough for the point stack, but I'm
 // sure it can be smaller. 
-   int     ptstack[ ioM*imN ];
+   OCTAVE_LOCAL_BUFFER(int, ptstack, ioM*imN );
 
    int seedidx= npoints; 
    npoints= 0;
@@ -130,16 +130,16 @@ DEFUN_DLD (bwfill, args, ,
       npoints--;
       int pt= ptstack[ npoints ];
       
-      checkpoint( pt + LF, imo, ptstack, &npoints );
-      checkpoint( pt + RT, imo, ptstack, &npoints );
-      checkpoint( pt + UP, imo, ptstack, &npoints );
-      checkpoint( pt + DN, imo, ptstack, &npoints );
+      checkpoint( pt + ptLF, imo, ptstack, &npoints );
+      checkpoint( pt + ptRT, imo, ptstack, &npoints );
+      checkpoint( pt + ptUP, imo, ptstack, &npoints );
+      checkpoint( pt + ptDN, imo, ptstack, &npoints );
       
       if (nb==8) {
-         checkpoint( pt + LF + UP, imo, ptstack, &npoints );
-         checkpoint( pt + RT + UP, imo, ptstack, &npoints );
-         checkpoint( pt + LF + DN, imo, ptstack, &npoints );
-         checkpoint( pt + RT + DN, imo, ptstack, &npoints );
+         checkpoint( pt + ptLF + ptUP, imo, ptstack, &npoints );
+         checkpoint( pt + ptRT + ptUP, imo, ptstack, &npoints );
+         checkpoint( pt + ptLF + ptDN, imo, ptstack, &npoints );
+         checkpoint( pt + ptRT + ptDN, imo, ptstack, &npoints );
       }
    } // while ( npoints
 
@@ -180,6 +180,11 @@ DEFUN_DLD (bwfill, args, ,
 
 /*
  * $Log$
+ * Revision 1.3  2003/02/20 23:03:57  pkienzle
+ * Use of "T x[n]" where n is not constant is a g++ extension so replace it with
+ * OCTAVE_LOCAL_BUFFER(T,x,n), and other things to keep the picky MipsPRO CC
+ * compiler happy.
+ *
  * Revision 1.2  2002/11/02 10:39:36  pkienzle
  * gcc 3.2 wants \n\ for multi-line strings.
  *
