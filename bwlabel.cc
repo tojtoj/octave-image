@@ -30,8 +30,6 @@
 
 
 #include <oct.h>
-#include <stdio.h>
-
 
 #define     NO_OBJECT       0
 #define     MIN(x, y)       (((x) < (y)) ? (x) : (y))
