@@ -202,7 +202,7 @@ function S = qtdecomp(I, p1, varargin)
 	  b(:,:,r)=I(offsets(r,1):rbc(r,1),offsets(r,2):rbc(r,2));
 	endfor
 
-	db=feval(fun, b, all_va_args);
+	db=feval(fun, b, varargin{:});
       else
 	error("qtdecomp: execution shouldn't reach here. Please report this as a bug.");
       endif
@@ -300,6 +300,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.6  2004/09/09 19:36:35  jmones
+% all_va_args -> varargin{:}. Now works on 2.1.58
+%
 % Revision 1.5  2004/09/08 14:07:22  pkienzle
 % Fix test for 'inline function'
 %
