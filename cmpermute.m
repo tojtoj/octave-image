@@ -71,44 +71,47 @@ endfunction
 %! [Y,newmap]=cmpermute([1:4],hot(4),4:-1:1)
 %! # colormap will be arranged in reverse order (so will image)
 
-%!shared X,map,Y,newmap,Y2,newmap2,Xd,mapd,Yd,newmapd,Y2d,newmap2d
-%! X=magic(10);
+%!shared X,map
+%! X=magic(16);
 %! [X,map]=cmunique(X);
+
+%!test # random permutation, 0-based index
 %! [Y,newmap]=cmpermute(X,map);
-%! [Y2,newmap2]=cmpermute(X,map,rows(map):-1:1);
-%! Xd=magic(20);
-%! [Xd,mapd]=cmunique(Xd);
-%! [Yd,newmapd]=cmpermute(Xd,mapd);
-%! [Y2d,newmap2d]=cmpermute(Xd,mapd,rows(mapd):-1:1);
+%! # test we didn't lose colors
+%! assert(sort(map),sortrows(newmap)); 
+%! # test if images are equal
+%! assert(map(double(X)+1),newmap(double(Y)+1));
 
-%!# test we didn't lose colors
-%!assert(sort(map),sortrows(newmap)); 
+%!test # reverse map, 0-based index
+%! [Y,newmap]=cmpermute(X,map,rows(map):-1:1);
+%! # we expect a reversed colormap
+%! assert(newmap(rows(newmap):-1:1,:),map);
+%! # we expect reversed indices in image
+%! assert(X,max(Y(:))-Y);
 
-%!# test if images are equal
-%!assert(map(double(X)+1),newmap(double(Y)+1));
+%!shared X,map
+%! X=magic(20);
+%! [X,map]=cmunique(X);
 
-%!# we expect a reversed colormap
-%!assert(newmap2(rows(newmap2):-1:1,:),map);
+%!test # random permutation, 1-based index
+%! [Y,newmap]=cmpermute(X,map);
+%! # test we didn't lose colors
+%! assert(sort(map),sortrows(newmap)); 
+%! # test if images are equal
+%! assert(map(X),newmap(Y));
 
-%!# we expect reversed indices in image
-%!assert(X,max(Y2(:))+1-Y2);
-
-%!# same tests on double indices
-
-%!# test we didn't lose colors
-%!assert(sort(mapd),sortrows(newmapd)); 
-
-%!# test if images are equal
-%!assert(mapd(Xd),newmapd(Yd));
-
-%!# we expect a reversed colormap
-%!assert(newmap2d(rows(newmap2d):-1:1,:),mapd);
-
-%!# we expect reversed indices in image
-%!assert(Xd,max(Y2d(:))+1-Y2d);
+%!test # reverse map, 1-based index
+%! [Y,newmap]=cmpermute(X,map,rows(map):-1:1);
+%! # we expect a reversed colormap
+%! assert(newmap(rows(newmap):-1:1,:),map);
+%! # we expect reversed indices in image
+%! assert(X,max(Y(:))+1-Y);
 
 %
 % $Log$
+% Revision 1.4  2004/09/08 15:01:28  pkienzle
+% Redo tests: reduce # of shared variables; force full range of uint8
+%
 % Revision 1.3  2004/09/08 14:13:08  jmones
 % Synchronized with cmunique. uint8 support added. Tests working for 2.1.58
 %
