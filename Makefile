@@ -4,7 +4,7 @@ ifdef HAVE_JPEG
 	JPEG=jpgwrite.oct jpgread.oct
 endif
 
-all: conv2.oct cordflt2.oct $(JPEG)
+all: conv2.oct cordflt2.oct bwlabel.oct $(JPEG)
 
 jpgread.oct: jpgread.cc
 	$(MKOCTFILE) $< -ljpeg
