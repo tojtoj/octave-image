@@ -30,17 +30,22 @@
 ##    multiplicative gaussian noise: A = A + A*noise
 ##    defaults to var=0.04
 
+## Modified: Stefan van der Walt <stefan@sun.ac.za>, 2004-02-24
+
 function A = imnoise(A, stype, a, b)
 
   if (nargin < 2 || nargin > 4 || !is_matrix(A) || !isstr(stype))
     usage("B = imnoise(A, type, parameters, ...)");
   endif
+  
+  valid = (min(A(:)) >= 0 && max(A(:)) <= 1);
 
   stype = tolower(stype);
   if (strcmp(stype, 'gaussian'))
     if (nargin < 3), a = 0.0; endif
     if (nargin < 4), b = 0.01; endif
-    A = A + (a + randn(size(A)) * b);
+    A = A + (a + randn(size(A)) * sqrt(b));
+    ## Variance of Gaussian data with mean 0 is E[X^2]
   elseif (strcmp(stype, 'salt & pepper'))
     if (nargin < 3), a = 0.05; endif
     noise = rand(size(A));
@@ -48,9 +53,20 @@ function A = imnoise(A, stype, a, b)
     A(noise >= 1-a/2) = 1;
   elseif (strcmp(stype, 'speckle'))
     if (nargin < 3), a = 0.04; endif
-    A = A .* (1 + randn(size(A))*a);
+    A = A .* (1 + randn(size(A))*sqrt(a));
   else
     error("imnoise: use type 'gaussian', 'salt & pepper', or 'speckle'");
   endif
+  
+  if valid
+    A(A>1) = 1;
+    A(A<0) = 0;
+  else
+    warning("Image should be in [0,1]");
+  endif
 
 endfunction
+
+%!assert(var(imnoise(ones(10)/2,'gaussian')(:)),0.01,0.005) # probabilistic
+%!assert(length(find(imnoise(ones(10)/2,'salt & pepper')~=0.5)),5,10) # probabilistic
+%!assert(var(imnoise(ones(10)/2,'speckle')(:)),0.01,0.005) # probabilistic
