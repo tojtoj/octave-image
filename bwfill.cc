@@ -12,11 +12,11 @@
 
 #include <octave/oct.h>
 
-#include <memory>
 #ifndef OCTAVE_LOCAL_BUFFER
+#include <vector>
 #define OCTAVE_LOCAL_BUFFER(T, buf, size) \
-  std::auto_ptr<T> buf ## _auto_ptr (new T [size]); \
-  T *buf = buf ## _auto_ptr.get ()
+  std::vector<T> buf ## _vector (size); \
+  T *buf = &(buf ## _vector[0])
 #endif
 
 #define   ptUP     (-1)
@@ -187,6 +187,9 @@ DEFUN_DLD (bwfill, args, ,
 
 /*
  * $Log$
+ * Revision 1.6  2004/01/29 21:13:20  pkienzle
+ * Use std::vector rather than std::auto_ptr for temporary memory
+ *
  * Revision 1.5  2003/05/15 21:25:40  pkienzle
  * OCTAVE_LOCAL_BUFFER now requires #include <memory>
  *
