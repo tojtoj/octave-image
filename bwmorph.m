@@ -572,31 +572,34 @@ endfunction
 
 
 ## Test skel-lantuejoul using Gozalez&Woods example (fig 8.39)
-%!shared slBW
+%!shared slBW, rslBW
 %! slBW=logical(zeros(12,7));
-
-%!test
 %! slBW(2,2)=logical(1);
 %! slBW(3:4,3:4)=logical(1);
-%! assert(bwmorph(slBW,'skel-lantuejoul',1),slBW);
+%! rslBW=slBW;
+%! slBW(5:6,3:5)=logical(1);
+%! slBW(7:11,2:6)=logical(1);
+%! rslBW([6,7,9],4)=logical(1);
 
 %!test
-%! #slBW(5:6,3:5)=logical(1);
-%! #slBW(7:11,2:6)=logical(1);
-%! assert(bwmorph(slBW,'skel-lantuejoul',2),slBW);
+%! assert(bwmorph(slBW,'skel-lantuejoul',1),[rslBW(1:5,:);logical(zeros(7,7))]);
 
 %!test
-%! slBW(6:7,4)=logical(1);
-%! assert(bwmorph(slBW,'skel-lantuejoul',3),slBW);
+%! assert(bwmorph(slBW,'skel-lantuejoul',2),[rslBW(1:8,:);logical(zeros(4,7))]);
 
 %!test
-%! slBW(9,4)=logical(1);
-%! assert(bwmorph(slBW,'skel-lantuejoul',Inf),slBW);
+%! assert(bwmorph(slBW,'skel-lantuejoul',3),rslBW);
+
+%!test
+%! assert(bwmorph(slBW,'skel-lantuejoul',Inf),rslBW);
 
 
 
 %
 % $Log$
+% Revision 1.4  2004/09/15 20:00:00  jmones
+% Updated tests to match Gonzalez&Woods example
+%
 % Revision 1.3  2004/09/15 13:51:10  pkienzle
 % Use logical in tests; reduce number of shared variables in tests.
 %
