@@ -15,19 +15,23 @@
 ## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} @var{map}= brighten (@var{beta},@var{map})
-## darkens or brightens the current colormap. 
-## The argument @var{beta} should be a scalar between -1...1,
+## @deftypefn {Function File} @var{map_out}= brighten (@var{map},@var{beta})
+## @deftypefnx {Function File} @var{map_out}= brighten (@var{beta})
+## darkens or brightens the given colormap.
+## If the @var{map} argument is omitted, the function is applied to the
+## current colormap.
+## Should the resulting colormap @var{map_out} not be assigned, it will be
+## written to the current colormap.
+## The argument @var{beta} should be a scalar between -1 and 1,
 ## where a negative value darkens and a positive value brightens
 ## the colormap.
-## If the @var{map} argument is omitted,
-## the function is applied to the current colormap
+##
 ## @end deftypefn
 
 ## Author:	Kai Habel <kai.habel@gmx.de>
 ## Date:	05. March 2000
 
-function [varargout] = brighten (m, beta)
+function [Rmap] = brighten (m, beta)
 
   global __current_color_map__
 
@@ -36,20 +40,16 @@ function [varargout] = brighten (m, beta)
     m = __current_color_map__;
 
   elseif (nargin == 2)
-    if (nargout == 0)
-      usage ("map_out=brighten(map,beta)")
-    endif
-
-    if !(is_scalar (beta) || beta < -1 || beta > 1)
-      error ("brighten(...,beta) beta must be a scalar in the range -1..1");
-    endif
-
-    if !( is_matrix (m) && size (m, 2) == 3 )
-      error ("brighten(map,beta) map must be a matrix of size nx3");
+    if ( (!is_matrix (m)) || (size (m, 2) != 3) )
+      error ("brighten(map,beta) map must be a matrix of size nx3.");
     endif
 
   else
-    usage ("brighten(...) number of arguments must be 1 or 2");
+    usage ("brighten(...) number of arguments must be 1 or 2.");
+  endif
+
+  if ( (!is_scalar (beta)) || (beta <= -1) || (beta >= 1) )
+    error ("brighten(...,beta) beta must be a scalar in the range (-1,1).");
   endif
 
   if (beta > 0)
@@ -59,9 +59,9 @@ function [varargout] = brighten (m, beta)
   endif
 
   if (nargout == 0)
-    __current_color_map__ = __current_color_map__ .^ gamma;
+    __current_color_map__ = m .^ gamma;
   else
-    vr_val_cnt = 1; varargout{vr_val_cnt++} = map .^ gamma;
+    Rmap = m .^ gamma;
   endif
 
 endfunction
