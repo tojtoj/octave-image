@@ -179,23 +179,33 @@ else
    error("imwrite: too many data matrices specified");
 end
 
-   pname= sprintf("convert %s %s:- '%s' 2>/dev/null",
-                  option_str, outputtype, fname);
-   fid= popen(pname ,'w');
+#  pname= sprintf("convert %s %s:- '%s' 2>/dev/null",
+#                 option_str, outputtype, fname);
+#  fid= popen(pname ,'w');
+
+   tnam= tmpnam();
+   cmd= sprintf("convert %s %s:%s '%s' 2>/dev/null",
+                 option_str, outputtype, tnam, fname);
+   fid= fopen(tnam, "wb");
+   
 #  disp(pname); disp(fid);
    if fid<0;
-      fclose(fid);
-      error(['could not popen ',pname,'. Is imagemagick installed?']);
+      error(['could not create file: ',tnam]);
    end
 
    fprintf(fid,"%s\n%d %d\n255\n",pnm_sig,wid,hig);
    write_count= fwrite(fid,data(:));
    if write_count != prod(size(data))
-      fclose(fid);
+      fclose(fid); unlink(tnam);
       error(['Unable to write image: ', fname ]);
    end
 
    fclose(fid);
+   [jnk,retcode] = system(cmd);
+   if retcode !=0 
+      error('could not call imagemagick convert');
+   end
+   unlink( tnam );
 
 unwind_protect_cleanup
 empty_list_elements_ok= save_empty_list_elements_ok;
@@ -203,6 +213,10 @@ end_unwind_protect
 
 #
 # $Log$
+# Revision 1.3  2002/03/19 18:14:13  aadler
+# unfortunately using popen seems to create problems, mostly
+# on win32, but also on linux, so we need to move to a tmpfile approach
+#
 # Revision 1.2  2002/03/17 05:26:14  aadler
 # now accept filenames with spaces
 #

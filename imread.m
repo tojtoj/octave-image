@@ -159,18 +159,25 @@ else
     outputtype="pgm";
 end
 
-   pname= sprintf("convert %s '%s' %s:- 2>/dev/null",
-                  option_str, fname, outputtype);
-   fid= popen(pname ,'r');
+#  pname= sprintf("convert %s '%s' %s:- 2>/dev/null",
+#  pname= sprintf("convert %s '%s' %s:- ",
+#                 option_str, fname, outputtype);
+#  fid= popen(pname ,'r');
 #  disp(pname); disp(fid);
+
+   tnam= tmpnam();
+   cmd= sprintf("convert %s '%s' %s:%s 2>/dev/null ",
+                  option_str, fname, outputtype, tnam);
+   system(cmd);
+   fid= fopen(tnam,"rb");
 #
 # can we open the pipe?
 # if not 1) The file format is wrong and the conver program has bailed out
 #        2) The apropriate converter program hasn't been installed
 #
    if fid<0;
-      fclose(fid);
-      error(['could not popen ' pname '. Is imagemagick installed?']);
+      unlink(tnam);
+      error(['could not read file: ' tnam]);
    end
 
 # get file type
@@ -182,8 +189,9 @@ end
    elseif strcmp(line, 'P3');   bpp=8; spp=3; bindata=0;
    elseif strcmp(line, 'P6');   bpp=8; spp=3; bindata=1;
    else
-      fclose(fid);
-      error(['Image format error for ' fname ]);
+#     pclose(fid);
+      fclose(fid); unlink(tnam);
+      error(['Image format error for ',fname,':line=', setstr(line)]);
    end
 
 # ignore comments
@@ -223,7 +231,8 @@ end
       end # feof
    end #if bindata
 
-   fclose( fid );
+#  pclose(fid);
+   fclose(fid); unlink(tnam);
 
    if spp==1
       greyimg= reshape( data(:), wid, hig )';
@@ -310,6 +319,10 @@ end_unwind_protect
 
 #
 # $Log$
+# Revision 1.3  2002/03/19 18:14:13  aadler
+# unfortunately using popen seems to create problems, mostly
+# on win32, but also on linux, so we need to move to a tmpfile approach
+#
 # Revision 1.2  2002/03/17 05:26:14  aadler
 # now accept filenames with spaces
 #
