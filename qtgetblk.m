@@ -35,7 +35,7 @@
 ## coordinates of the blocks returned.
 ##
 ## @end deftypefn
-## @seealso qtdecomp
+## @seealso qtdecomp, qtsetblk
 
 ## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 
@@ -134,3 +134,9 @@ endfunction
 
 
 
+%
+% $Log$
+% Revision 1.2  2004/08/11 19:52:41  jmones
+% qtsetblk added
+%
+%
