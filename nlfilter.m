@@ -53,12 +53,10 @@ function B = nlfilter(A, varargin)
   if(isstr(varargin{1}) && strcmp(varargin{1}, "indexed"))
     indexed=true;
     p+=1;
-    if(strcmp(typeinfo(A), 'uint8 matrix'))
-      padval=0; ## padval=uint8(0); in future...
-    elseif(strcmp(typeinfo(A), 'uint16 matrix'))
-      padval=0; ## padval=uint16(0); in future...
+    if(isa(A,"uint8") || isa(A,"uint16"))
+	padval=0;
     else
-      padval=1; ## array of double
+      padval=1; 
     endif
   else
     padval=0;
@@ -96,8 +94,8 @@ function B = nlfilter(A, varargin)
   ## Post-padding
   postpad=sblk-c;
   
-  ## Create room in output matrix
-  B=zeros(size(A));
+  ## Save A size
+  as=size(A);
 
   ## Pad data
   if(all(prepad==postpad))
@@ -117,12 +115,19 @@ function B = nlfilter(A, varargin)
   me=postpad(1)+prepad(1);
   ne=postpad(2)+prepad(2);
 	
-  ## Fill it!
-  for i=1:rows(B)
-    for j=1:columns(B)
-      B(i,j)=feval(fun,A(i:i+me,j:j+ne),varargin{p+1:nargin-1});
+  ## We concatenate everything to preserve fun return type
+  for i=1:as(1)
+    r=feval(fun,A(i:i+me,1:1+ne),varargin{p+1:nargin-1});
+    for j=2:as(2)
+      r=horzcat(r,feval(fun,A(i:i+me,j:j+ne),varargin{p+1:nargin-1}));
     endfor
+    if(i==1)
+      B=r;
+    else
+      B=vertcat(B,r);
+    endif
   endfor
+
 endfunction
 
 %!demo
@@ -133,10 +138,20 @@ endfunction
 %!assert(nlfilter(eye(4),'indexed',[2,3],inline("sum(x(:))","x")),[4,2,1,2;3,2,2,3;2,1,2,4;4,3,4,5]);
 %!assert(nlfilter(eye(4),'indexed',[2,3],inline("sum(x(:))==y","x","y"),2),[0,1,0,1;0,1,1,0;1,0,1,0;0,0,0,0]);
 
+% Check uint8 and uint16 padding
+%!assert(nlfilter(uint8(eye(4)),'indexed',[2,3],inline("sum(x(:))","x")),[2,2,1,0;1,2,2,1;0,1,2,2;0,0,1,1]);
+%!assert(nlfilter(uint16(eye(4)),'indexed',[2,3],inline("sum(x(:))","x")),[2,2,1,0;1,2,2,1;0,1,2,2;0,0,1,1]);
+
+% Check if function class is preserved
+%!assert(nlfilter(uint8(eye(4)),'indexed',[2,3],inline("int8(sum(x(:)))","x")),int8([2,2,1,0;1,2,2,1;0,1,2,2;0,0,1,1]));
+
 
 
 %
 % $Log$
+% Revision 1.3  2004/09/03 13:28:32  jmones
+% Corrected behaviour for int* and uint* types
+%
 % Revision 1.2  2004/08/15 19:43:11  jmones
 % corrected a typo in doc
 %
