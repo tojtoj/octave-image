@@ -1,8 +1,8 @@
 
 if test -e main/image/NOINSTALL ; then
 
-	dnl Not installing so don't test for libjpeg.
-	STATUS=noinstall
+	dnl Not installing so don't test for libjpeg/libpng.
+	STATUS=none
 
 else
 
@@ -11,14 +11,29 @@ else
 	if test $have_jpeg = yes ; then
 	    AC_CHECK_LIB(jpeg, jpeg_std_error, have_jpeg=yes, have_jpeg=no)
 	    if test $have_jpeg = no ; then
-		STATUS="libjpeg library not found"
+		STATUS="libjpeg not found"
 	    else
-		STATUS="yes"
+		STATUS="jpeg"
 		AC_SUBST(DEFHAVE_JPEG)
 		DEFHAVE_JPEG="HAVE_JPEG=1"
 	    fi
 	else
 	    STATUS="jpeglib.h not found"
+	fi
+
+	AC_DEFINE(have_png)
+	AC_CHECK_HEADER(png.h, have_png=yes, have_png=no)
+	if test $have_png = yes ; then
+	    AC_CHECK_LIB(png, png_check_sig, have_png=yes, have_png=no)
+	    if test $have_png = no ; then
+		STATUS="$STATUS, libpng not found"
+	    else
+		STATUS="$STATUS, png"
+		AC_SUBST(DEFHAVE_PNG)
+		DEFHAVE_PNG="HAVE_PNG=1"
+	    fi
+	else
+	    STATUS="$STATUS, png.h not found"
 	fi
 
 fi
@@ -28,4 +43,4 @@ dnl be displayed at the end of configuration so that the user doesn't
 dnl have to scan the list for critical details.
 
 STATUS_MSG="$STATUS_MSG
-   read/write JPEG: $STATUS"
+   read/write image formats: $STATUS"
