@@ -189,9 +189,9 @@ function B = padarray(A, padsize, padval, direction)
       elseif (isscalar(padval))
 	# Handle fixed value padding
 	if (padval==0)
-	  pad=zeros(ps);
+	  pad=zeros(ps,class(A));       ## class(pad) = class(A)
 	else
-	  pad=padval*ones(ps);
+	  pad=padval*ones(ps,class(A)); ## class(pad) = class(A)
 	endif
 	if(pre&&post)
 	  # check if this is not quicker than just 2 calls (one for each)
@@ -242,12 +242,11 @@ endfunction
 %!assert(padarray([1,2,3;4,5,6],[1,2]), \
 %!      [zeros(1,7);0,0,1,2,3,0,0;0,0,4,5,6,0,0;zeros(1,7)]);
 
-% This segfaults because of cat (uncomment when
-% cat(3,eye(2),eye(2)) works)
-%! %assert(padarray([1,2,3;4,5,6],[3,2,1]), cat(3, 			\
-%! %	zeros(7,7),							\
-%! %	[zeros(3,7); [zeros(2,2), [1,2,3;4,5,6], zeros(2,2)]; zeros(3,7)], \
-%! %	zeros(7,7))); 
+% Test padding on 3D array
+%!assert(padarray([1,2,3;4,5,6],[3,2,1]), cat(3, 			\
+%! 	zeros(8,7),							\
+%! 	[zeros(3,7); [zeros(2,2), [1,2,3;4,5,6], zeros(2,2)]; zeros(3,7)], \
+%! 	zeros(8,7))); 
 
 % Test if default param are ok
 %!assert(padarray([1,2],[4,5])==padarray([1,2],[4,5],0));
@@ -298,8 +297,51 @@ endfunction
 %! assert(padarray(A,[1,2],'symmetric','post'), B(3:5,4:8));
 %! assert(padarray(A,[1,2],'symmetric','both'), B(2:5,2:8));
 
+% Repeat some tests with int* uint* class types
+%!assert(padarray(int8([1;2]),[1]), int8([0;1;2;0]));
+%!assert(padarray(uint8([3,4]),[0,2]), uint8([0,0,3,4,0,0]));
+%!assert(padarray(int16([1;2]),[1],4), int16([4;1;2;4]));
+%!assert(padarray(uint16([1;2]),[1],0), uint16([0;1;2;0]));
+%!assert(padarray(int32([1;2]),[1],int32(4),'pre'), int32([4;1;2]));
+%!assert(padarray(uint32([1;2]),[1],6,'post'), uint32([1;2;6]));
+
+% Test circular padding with int* uint* class types
+%!test
+%! A=int8([1,2,3;4,5,6]);
+%! B=repmat(A,7,9);
+%! assert(padarray(A,[1,2],'circular','pre'), B(2:4,2:6));
+%! assert(padarray(A,[1,2],'circular','post'), B(3:5,4:8));
+%! assert(padarray(A,[1,2],'circular','both'), B(2:5,2:8));
+%! % This tests when padding is bigger than data
+%! assert(padarray(A,[5,10],'circular','both'), B(2:13,3:25));
+
+% Test replicate padding with int* uint* class types
+%!test
+%! A=uint8([1,2;3,4]);
+%! B=[ones(10,5,"uint8")*1,ones(10,5,"uint8")*2; \
+%!    ones(10,5,"uint8")*3,ones(10,5,"uint8")*4];
+%! assert(padarray(A,[9,4],'replicate','pre'), B(1:11,1:6));
+%! assert(padarray(A,[9,4],'replicate','post'), B(10:20,5:10));
+%! assert(padarray(A,[9,4],'replicate','both'), B);
+
+% Test symmetric padding with int* uint* class types
+%!test
+%! A=int16([1:3;4:6]);
+%! HA=int16([3:-1:1;6:-1:4]);
+%! VA=int16([4:6;1:3]);
+%! VHA=int16([6:-1:4;3:-1:1]);
+%! B=[VHA,VA,VHA; HA,A,HA; VHA,VA,VHA];
+%! assert(padarray(A,[1,2],'symmetric','pre'), B(2:4,2:6));
+%! assert(padarray(A,[1,2],'symmetric','post'), B(3:5,4:8));
+%! assert(padarray(A,[1,2],'symmetric','both'), B(2:5,2:8));
+
+
+
 %
 % $Log$
+% Revision 1.4  2004/09/03 13:37:10  jmones
+% Corrected behaviour for int* and uint* types
+%
 % Revision 1.3  2004/08/15 19:21:50  jmones
 % support column vector padsize
 %
