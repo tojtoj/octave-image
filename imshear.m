@@ -1,5 +1,22 @@
+## Copyright (C) 2002 Jeff Orchard
+##
+## This program is free software; you can redistribute it and/or
+## modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation; either version 2
+## of the License, or (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful, but
+## WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+## General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, write to the Free Software
+## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
 ## -*- texinfo -*-
-## @deftypefn {Function File} {} imshear (@var{M}, @var{axis}, @var{alpha}, @var{bbox})
+## @deftypefn {Function File} {} 
+##            imshear (@var{M}, @var{axis}, @var{alpha}, @var{bbox})
 ## Applies a shear to @var{M}.
 ##
 ## The argument @var{M} is either a matrix or an RGB image.
@@ -20,9 +37,9 @@
 ## 'loose' allows the image to grow to accomodate the new transformed image.
 ## 'crop' keeps the same size as the original, clipping any part of the image
 ## that is moved outside the bounding box.
-## 'wrap' keeps the same size as the original, but does not clip the part of the
-## image that is outside the bounding box. Instead, it wraps it back into the
-## image.
+## 'wrap' keeps the same size as the original, but does not clip the part 
+## of the image that is outside the bounding box. Instead, it wraps it back 
+## into the image.
 ##
 ## If called with only 3 arguments, @var{bbox} is set to 'loose' by default.
 ## @end deftypefn
