@@ -99,7 +99,7 @@
 #  -unsharp geometry    sharpen the image
 #  -wave geometry       alter an image along a sine wave
 
-
+# Author: Andy Adler
 
 function [out1,out2,out3]= imread(filename, options );
 
@@ -319,6 +319,9 @@ end_unwind_protect
 
 #
 # $Log$
+# Revision 1.4  2002/11/27 08:40:11  pkienzle
+# author/license updates
+#
 # Revision 1.3  2002/03/19 18:14:13  aadler
 # unfortunately using popen seems to create problems, mostly
 # on win32, but also on linux, so we need to move to a tmpfile approach

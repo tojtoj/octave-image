@@ -3,6 +3,7 @@
 ##   The values in X are indices into the given RGB colour map.
 
 ## This code is in the public domain.
+## Author: Paul Kienzle <pkienzle@users.sf.net>
 ## Based information from Jörn Daub's web page:
 ## http://www.daubnet.com/formats/BMP.html
 

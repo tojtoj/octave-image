@@ -9,6 +9,8 @@
 #
 # @end deftypefn
 
+# Author: Jeff Orchard <jjo@cs.sfu.ca>
+
 function Y = imtranslate(X, a, b, bbox_in)
 
 	bbox = "wrap";

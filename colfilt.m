@@ -24,6 +24,8 @@
 ## The present version does not handle 'distinct'
 
 ## This software is granted to the public domain
+## Author: Paul Kienzle <pkienzle@users.sf.net>
+
 function B = colfilt(A,filtsize,blksize,blktype,f,varargin)
 
    [m,n]=size(A);

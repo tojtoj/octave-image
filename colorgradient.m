@@ -10,6 +10,9 @@
 ##    x = linspace(0,1,200);
 ##    imagesc(x(:,ones(30,1)))';
 
+## This program is granted to the public domain.
+## Author: Paul Kienzle <pkienzle@users.sf.net>
+
 function ret = colorgradient(C,w,n)
   if nargin < 1 || nargin > 3
     usage("M = colorgradient(C,w,n)")

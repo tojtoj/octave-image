@@ -119,6 +119,7 @@
 #  -units type          PixelsPerInch, PixelsPerCentimeter, or Undefined
 #  -unsharp geometry    sharpen the image
 
+# Author: Andy Adler
 
 function imwrite(fname, p2, p3 ,p4 ,p5 );
 
@@ -213,6 +214,9 @@ end_unwind_protect
 
 #
 # $Log$
+# Revision 1.4  2002/11/27 08:40:11  pkienzle
+# author/license updates
+#
 # Revision 1.3  2002/03/19 18:14:13  aadler
 # unfortunately using popen seems to create problems, mostly
 # on win32, but also on linux, so we need to move to a tmpfile approach
