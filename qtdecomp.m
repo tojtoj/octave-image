@@ -66,6 +66,7 @@
 ## extra parameters to @var{fun}.
 ##
 ## @end deftypefn
+## @seealso qtgetblk
 
 ## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 
@@ -299,6 +300,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.3  2004/08/11 00:05:21  jmones
+% seealso qtgetblk added to doc
+%
 % Revision 1.2  2004/08/10 00:19:42  jmones
 % Corrected misleading comment.
 %
