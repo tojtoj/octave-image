@@ -26,6 +26,8 @@ Analysis and Statistics
  qtdecomp
  qtgetblk
  qtsetblk
+ graycomatrix
+ houghtf
 Filtering
  colfilt
  histeq 

@@ -9,6 +9,7 @@ ifdef HAVE_PNG
 endif
 
 all: conv2.oct cordflt2.oct bwlabel.oct bwfill.oct rotate_scale.oct \
+	houghtf.oct graycomatrix.oct \
 	$(JPEG) $(PNG)
 
 jpgread.oct: jpgread.cc
