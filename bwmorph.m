@@ -572,27 +572,34 @@ endfunction
 
 
 ## Test skel-lantuejoul using Gozalez&Woods example (fig 8.39)
-%!shared slBW,slBW2_1,slBW2_2,slBW2_3
-%! slBW=zeros(12,7);
-%! slBW(2,2)=1;
-%! slBW(3:4,3:4)=1;
-%! slBW2_1=slBW;
-%! slBW(5:6,3:5)=1;
-%! slBW(7:11,2:6)=1;
-%! slBW2_2=slBW2_1;
-%! slBW2_2(6:7,4)=1;
-%! slBW2_3=slBW2_2;
-%! slBW2_3(9,4)=1;
+%!shared slBW
+%! slBW=logical(zeros(12,7));
 
-%!assert(bwmorph(slBW,'skel-lantuejoul',1),slBW2_1);
-%!assert(bwmorph(slBW,'skel-lantuejoul',2),slBW2_2);
-%!assert(bwmorph(slBW,'skel-lantuejoul',3),slBW2_3);
-%!assert(bwmorph(slBW,'skel-lantuejoul',Inf),slBW2_3);
+%!test
+%! slBW(2,2)=logical(1);
+%! slBW(3:4,3:4)=logical(1);
+%! assert(bwmorph(slBW,'skel-lantuejoul',1),slBW);
+
+%!test
+%! #slBW(5:6,3:5)=logical(1);
+%! #slBW(7:11,2:6)=logical(1);
+%! assert(bwmorph(slBW,'skel-lantuejoul',2),slBW);
+
+%!test
+%! slBW(6:7,4)=logical(1);
+%! assert(bwmorph(slBW,'skel-lantuejoul',3),slBW);
+
+%!test
+%! slBW(9,4)=logical(1);
+%! assert(bwmorph(slBW,'skel-lantuejoul',Inf),slBW);
 
 
 
 %
 % $Log$
+% Revision 1.3  2004/09/15 13:51:10  pkienzle
+% Use logical in tests; reduce number of shared variables in tests.
+%
 % Revision 1.2  2004/09/01 22:35:47  jmones
 % Added Lantuejoul skeletonizing algorithm from Gonzalez&Woods
 %
