@@ -45,6 +45,7 @@ Black and white image functions
  dilate 
  erode 
  bwborder edge
+ conndef
 Colour controls
  cmpermute 
  cmunique 
@@ -98,3 +99,4 @@ Region-based and block processing
  roipoly
  poly2mask
  bestblk
+ blkproc
