@@ -27,7 +27,7 @@
 ## Author:	Kai Habel <kai.habel@gmx.de>
 ## Date:	05. March 2000
 
-function [...] = brighten (m, beta)
+function [varargout] = brighten (m, beta)
 
   global __current_color_map__
 
@@ -61,7 +61,7 @@ function [...] = brighten (m, beta)
   if (nargout == 0)
     __current_color_map__ = __current_color_map__ .^ gamma;
   else
-    vr_val (map .^ gamma);
+    vr_val_cnt = 1; varargout{vr_val_cnt++} = map .^ gamma;
   endif
 
 endfunction

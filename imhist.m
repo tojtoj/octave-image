@@ -26,7 +26,7 @@
 ## Author:	Kai Habel <kai.habel@gmx.de>
 ## July 2000 : Paul Kienzle code simplification for hist() call.
 
-function [...] = imhist (I, b)
+function [varargout] = imhist (I, b)
 
   if (nargin < 1 || nargin > 2)
     usage("imhist(image,n)");
@@ -63,8 +63,8 @@ function [...] = imhist (I, b)
   
   if (nargout == 2)
     [nn,xx] = hist (I(:), bins);
-    vr_val (nn);
-    vr_val (xx);
+    vr_val_cnt = 1; varargout{vr_val_cnt++} = nn;
+    varargout{vr_val_cnt++} = xx;
   else
     hist (I(:), bins);
   endif
