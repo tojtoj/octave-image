@@ -15,7 +15,7 @@ else
 	    else
 		STATUS="yes"
 		AC_SUBST(DEFHAVE_JPEG)
-		DEFHAVE_GINAC="HAVE_JPEG=1"
+		DEFHAVE_JPEG="HAVE_JPEG=1"
 	    fi
 	else
 	    STATUS="jpeglib.h not found"
