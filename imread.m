@@ -220,8 +220,8 @@ end
 
    if bindata
       if(bpp == 16)
-         # PGM format has MSB first, i.e. little endian
-         data = fread(fid, "uint16", 0, "ieee-le");
+         # PGM format has MSB first, i.e. big endian
+         data = fread(fid, "uint16", 0, "ieee-be");
       else
          data = fread(fid);
       endif
@@ -335,8 +335,8 @@ end_unwind_protect
 
 #
 # $Log$
-# Revision 1.7  2003/11/14 16:45:19  tpikonen
-# Added support for reading greyscale files with 16-bit dynamic range.
+# Revision 1.8  2003/11/14 16:55:10  tpikonen
+# Fix endianess bug in 16-bit reads.
 #
 # Revision 1.6  2003/09/12 14:22:42  adb014
 # Changes to allow use with latest CVS of octave (do_fortran_indexing, etc)
