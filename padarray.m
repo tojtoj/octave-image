@@ -294,6 +294,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.2  2004/08/11 15:04:59  pkienzle
+% Convert dos line endings to unix line endings
+%
 % Revision 1.1  2004/08/08 21:20:25  jmones
 % uintlut and padarray functions added
 %
