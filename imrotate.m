@@ -1,4 +1,4 @@
-## Copyright (C) 2002 Jeff Orchard
+## Copyright (C) 2004 Justus Piater
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
@@ -16,150 +16,127 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {} 
-##            imrotate(@var{M}, @var{theta}, @var{method}, @var{bbox})
-## Rotation of a 2D matrix.
+##            imrotate(@var{imgPre}, @var{theta}, @var{method}, @var{bbox})
+## Rotation of a 2D matrix about its center.
 ##
-## Applies a rotation of @var{THETA} degrees to matrix @var{M}.
+## Input parameters:
 ##
-## The @var{method} argument is not implemented.
-## This function uses Fourier interpolation,
-## decomposing the rotation matrix into 3 shears.
+##   @var{imgPre}   an input image matrix
 ##
-## @var{bbox} can be either 'loose' or 'crop'.
-## 'loose' allows the image to grow to accomodate the rotated image.
-## 'crop' keeps the same size as the original, clipping any part of the image
-## that is moved outside the bounding box.
+##   @var{theta}    the rotation angle in degrees counterclockwise
+##
+##   @var{method}   "nearest" neighbor (default; faster, but produces
+##                  aliasing effects) or "bilinear" interpolation
+##                     (preferred; does anti-aliasing)
+##
+##   @var{bbox}     "loose" (default) or "crop"
+##
+## Output parameters:
+##
+##   @var{imgPos}t  the rotated image matrix
+##
+##   @var{H}        the homography mapping original to rotated pixel
+##                   coordinates. To map a coordinate vector c = [x;y] to its
+##           rotated location, compute round((@var{H} * [c; 1])(1:2)).
 ## @end deftypefn
 
-## Author: Jeff Orchard <jjo@cs.sfu.ca>
-## Created: Oct. 14, 2002
+## Author: Justus H. Piater  <Justus.Piater@ULg.ac.be>
+## Created: 2004-10-18
+## Version: 0.1
 
-function fs = imrotate(f,theta,method,bbox)
+function [imgPost, H] = imrotate(imgPre, theta, method, bbox)
+  if (nargin < 2)
+    help("imrotate");
+    return;
+  endif
 
-	if ( nargin == 2 )
-		method = "fourier";
-		bbox = "loose";
-	elseif ( nargin == 3 )
-		bbox = "loose";
-	endif
+  theta = theta * pi/180;
 
-	# Get original dimensions.
-	[ydim_orig, xdim_orig] = size(f);
-	xcentre_orig = (xdim_orig+1) / 2;
-	ycentre_orig = (ydim_orig+1) / 2;
+  sizePre  = size(imgPre);
 
-	# Pre-process the angle ===========================================================
-	# Whichever 90 degree multiple theta is closest to, that multiple of 90 will
-	# be implemented by rot90. The remainder will be done by shears.
+  ## We think in x,y coordinates here (rather than row,column).
 
-	# This ensures that 0 <= theta < 360.
-	theta = rem( rem(theta,360) + 360, 360 );
+  R = [cos(theta) sin(theta); -sin(theta) cos(theta)];
 
-	# This is a flag to keep track of 90-degree rotations.
-	perp = 0;
+  if (nargin == 4 && strcmp(bbox, "crop"))
+    sizePost = sizePre;
+  else
+    ## Compute new size by projecting image corners through the rotation:
+    corners = [0, 0;
+	       (R * [sizePre(2); 1])';
+	       (R * [sizePre(2); sizePre(1)])';
+	       (R * [1; sizePre(1)])'          ];
+    sizePost(2) = ceil(max(corners(:,1))) - floor(min(corners(:,1)));
+    sizePost(1) = ceil(max(corners(:,2))) - floor(min(corners(:,2)));
+  endif
 
-	if ( theta>=0 && theta<=45 )
-		phi = theta;
-	elseif ( theta>45 && theta<=135 )
-		phi = theta - 90;
-		f = rot90(f,1);
-		perp = 1;
-	elseif ( theta>135 && theta<=225 )
-		phi = theta - 180;
-		f = rot90(f,2);
-	elseif ( theta>225 && theta<=315 )
-		phi = theta - 270;
-		f = rot90(f,3);
-		perp = 1;
-	else
-		phi = theta;
-	endif
+  ## Compute the translation part of the homography:
+  oPre  = ([sizePre(2) ; sizePre(1) ] + 1) / 2;
+  oPost = ([sizePost(2); sizePost(1)] + 1) / 2;
+  T = oPost - R * oPre;
 
+  ## And here is the homography mapping old to new coordinates:
+  H = [[R; 0 0] [T; 1]];
 
+  Hinv = inv(H);
 
-	if ( phi == 0 )
-		fs = f;
-		if ( strcmp(bbox,"loose") == 1 )
-			return;
-		else
-			xmax = xcentre_orig;
-			ymax = ycentre_orig;
-			if ( perp == 1 )
-				xmax = max([xmax ycentre_orig]);
-				ymax = max([ymax xcentre_orig]);
-				[ydim xdim] = size(fs);
-				xpad = ceil( xmax - (xdim+1)/2 );
-				ypad = ceil( ymax - (ydim+1)/2 );
-				fs = impad(fs, [xpad,xpad], [ypad,ypad], "zeros");
-			endif
-			xcentre_new = (size(fs,2)+1) / 2;
-			ycentre_new = (size(fs,1)+1) / 2;
-		endif
-	else
+  ## "Pre"  variables hold pre -rotation values;
+  ## "Post" variables hold post-rotation values.
 
-		# At this point, we can assume -45<theta<45 (degrees)
+  ## Target coordinates:
+  [xPost, yPost] = meshgrid(1:(sizePost(2)), 1:(sizePost(1)));
 
-		phi = phi * pi / 180;
-		theta = theta * pi / 180;
-		R = [ cos(theta) -sin(theta) ; sin(theta) cos(theta) ];
+  ## Compute corresponding source coordinates:
+  xPre = Hinv(1,1) * xPost + Hinv(1,2) * yPost + Hinv(1,3);
+  yPre = Hinv(2,1) * xPost + Hinv(2,2) * yPost + Hinv(2,3);
+  ## zPre is guaranteed to be 1, since the last row of H (and thus of
+  ## Hinv) is [0 0 1].
 
-		# Find max of each dimension... this will be expanded for "loose" and "crop"
-		xmax = xcentre_orig;
-		ymax = ycentre_orig;
+  ## Now map the image, either by nearest neighbor or by bilinear
+  ## interpolation:
+  if (nargin < 3 || !size(method) || strcmp(method, "nearest"))
+    ## nearest-neighbor: simply round Pre coordinates
+    xPre = round(xPre);
+    yPre = round(yPre);
+    valid = find(1 <= xPre & xPre <= sizePre(2) &
+		 1 <= yPre & yPre <= sizePre(1)  );
+    iPre  = sub2ind(sizePre , yPre (valid), xPre (valid));
+    iPost = sub2ind(sizePost, yPost(valid), xPost(valid));
 
-		# If we don't want wrapping, we have to zeropad.
-		# Cropping will be done later, if necessary.
-		if ( strcmp(bbox, "wrap") == 0 )
-			corners = ( [ xdim_orig xdim_orig -xdim_orig -xdim_orig ; ydim_orig -ydim_orig ydim_orig -ydim_orig ] + 1 )/ 2;
-			rot_corners = R * corners;
-			xmax = max([xmax rot_corners(1,:)]);
-			ymax = max([ymax rot_corners(2,:)]);
+    imgPost = zeros(sizePost);
+    imgPost(iPost) = imgPre(iPre);
+  else
+    ## bilinear interpolation between the four floor and ceiling coordinates
+    xPreFloor = floor(xPre);
+    xPreCeil  = ceil (xPre);
+    yPreFloor = floor(yPre);
+    yPreCeil  = ceil (yPre);
 
-			# If we are doing a 90-degree rotation first, we need to make sure our
-			# image is large enough to hold the rot90 image as well.
-			if ( perp == 1 )
-				xmax = max([xmax ycentre_orig]);
-				ymax = max([ymax xcentre_orig]);
-			endif
+    valid = find(1 <= xPreFloor & xPreCeil <= sizePre(2) &
+		 1 <= yPreFloor & yPreCeil <= sizePre(1)  );
 
-			[ydim xdim] = size(f);
-			xpad = ceil( xmax - xdim/2 );
-			ypad = ceil( ymax - ydim/2 );
-			f = impad(f, [xpad,xpad], [ypad,ypad], "zeros");
-			xcentre_new = (size(f,2)+1) / 2;
-			ycentre_new = (size(f,1)+1) / 2;
-		endif
+    xPreFloor = xPreFloor(valid);
+    xPreCeil  = xPreCeil (valid);
+    yPreFloor = yPreFloor(valid);
+    yPreCeil  = yPreCeil (valid);
 
-		size(f)
-		[S1 S2] = MakeShears(phi);
+    ## In the following, FC = floor(x), ceil(y), etc.
+    iPreFF = sub2ind(sizePre, yPreFloor, xPreFloor);
+    iPreCF = sub2ind(sizePre, yPreFloor, xPreCeil );
+    iPreCC = sub2ind(sizePre, yPreCeil , xPreCeil );
+    iPreFC = sub2ind(sizePre, yPreCeil , xPreFloor);
 
-		tic;
-		f1 = imshear(f, 'x', S1(1,2), 'wrap');
-		f2 = imshear(f1, 'y', S2(2,1), 'wrap');
-		fs = real( imshear(f2, 'x', S1(1,2), 'crop') );
-		toc
-	endif
+    ## We'll have to weight by the fractional part of the coordinates:
+    xPreFrac = xPre(valid) - xPreFloor;
+    yPreFrac = yPre(valid) - yPreFloor;
 
-	if ( strcmp(bbox, "crop") == 1 )
+    iPost = sub2ind(sizePost, yPost(valid), xPost(valid));
 
-		# Translate the current centre to centre_orig
-		fs = imtranslate(fs, xcentre_orig-xcentre_new, -ycentre_orig+ycentre_new, "wrap");
-
-		# Crop to original dimensions
-		fs = fs(1:ydim_orig, 1:xdim_orig);
-
-	elseif ( strcmp(bbox, "loose") == 1 )
-
-		# Find tight bounds on size of rotated image
-		# These should all be positive, or 0.
-		xmax_loose = ceil( xcentre_new + max(rot_corners(1,:)) );
-		xmin_loose = floor( xcentre_new - max(rot_corners(1,:)) );
-		ymax_loose = ceil( ycentre_new + max(rot_corners(2,:)) );
-		ymin_loose = floor( ycentre_new - max(rot_corners(2,:)) );
-
-		fs = fs( (ymin_loose+1):(ymax_loose-1) , (xmin_loose+1):(xmax_loose-1) );
-
-	endif
-
-
+    imgPost = zeros(sizePost);
+    imgPost(iPost) = ...
+	round(imgPre(iPreFF) .* (1 - xPreFrac) .* (1 - yPreFrac) + ...
+	      imgPre(iPreCF) .*      xPreFrac  .* (1 - yPreFrac) + ...
+	      imgPre(iPreCC) .*      xPreFrac  .*      yPreFrac  + ...
+	      imgPre(iPreFC) .* (1 - xPreFrac) .*      yPreFrac       );
+  endif
 endfunction
