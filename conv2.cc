@@ -65,6 +65,10 @@ conv2 (MArray<T>& R, MArray<T>& C, MArray2<T>& A, int ishape)
          outM= Am - Cm + 1;
          outN= An - Rn + 1;
          edgM= edgN= 0;
+      } else {
+         error("invalid shape specified=%d", ishape); 
+         jump_to_top_level (); 
+         panic_impossible ();
       }
 
 //    printf("A(%d,%d) C(%d) R(%d) O(%d,%d) E(%d,%d)\n",
@@ -161,6 +165,10 @@ conv2 (MArray2<T>&A, MArray2<T>&B, int ishape)
          outM= Am - Bm + 1;
          outN= An - Bn + 1;
          edgM= edgN= 0;
+      } else {
+         error("invalid shape specified=%d", ishape); 
+         jump_to_top_level (); 
+         panic_impossible ();
       }
 
 //    printf("A(%d,%d) B(%d,%d) O(%d,%d) E(%d,%d)\n",
