@@ -56,12 +56,15 @@ endfunction
 %! roicolor([1:10],2,4);
 %! % Returns '1' where input values are between 2 and 4 (both included).
 
-%!assert(roicolor([1:10],2,4),[0,1,1,1,zeros(1,6)]);
-%!assert(roicolor([1,2;3,4],3,3),[0,0;1,0]);
-%!assert(roicolor([1,2;3,4],[1,4]),[1,0;0,1]);
+%!assert(roicolor([1:10],2,4),logical([0,1,1,1,zeros(1,6)]));
+%!assert(roicolor([1,2;3,4],3,3),logical([0,0;1,0]));
+%!assert(roicolor([1,2;3,4],[1,4]),logical([1,0;0,1]));
 
 %
 % $Log$
+% Revision 1.3  2004/09/15 17:54:59  pkienzle
+% test that data type matches during assert
+%
 % Revision 1.2  2004/08/11 15:04:59  pkienzle
 % Convert dos line endings to unix line endings
 %
