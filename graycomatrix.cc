@@ -111,7 +111,7 @@ usage: P = graycomatrix(I, levels, distances, angles)\n\
 	}
     }
 
-    return octave_value_list(P);
+    return octave_value(P);
     
 }
 
