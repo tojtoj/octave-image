@@ -52,7 +52,7 @@ static bool any_bad_argument( const octave_value_list& );
 /*
 %!assert(bwlabel([0 1 0; 0 0 0; 1 0 1]),[0 1 0; 0 0 0; 2 0 3]);
 */
-DEFUN_DLD( bwlabel, args, ,
+DEFUN_DLD(bwlabel, args, ,
 "\n\
 [l,num] = bwlabel( bw, n ) - label foreground components of boolean image\n\
 \n\

@@ -7,8 +7,8 @@ Read/write
  imread 
  imwrite 
  imfinfo
-  imginfo
- loadimage saveimage bmpwrite jpgread jpgwrite
+ imginfo
+ loadimage saveimage bmpwrite jpgread jpgwrite pngread pngwrite
 Reshape
  imcrop 
  imresize 
@@ -16,6 +16,7 @@ Reshape
  imtranslate
  imshear
  impad 
+ rotate_scale
 Statistics
  corr2 
  imhist 
