@@ -37,7 +37,7 @@ function bmpwrite(x,map,file)
 
     ## raster image, each line on a 32-bit boundary, padded with zeros
     ## lines written bottom to top.
-    fwrite(file,postpad(flipud(x)',ceil(columns(x)/4)*4),"uchar",0,arch);
+    fwrite(file,postpad(flipud(x-1)',ceil(columns(x)/4)*4),"uchar",0,arch);
     fclose(file);
 endfunction
 
