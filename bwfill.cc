@@ -11,6 +11,9 @@
  */
 
 #include <octave/oct.h>
+#ifndef OCTAVE_LOCAL_BUFFER
+#define OCTAVE_LOCAL_BUFFER(T,v,n) T v[n]
+#endif
 
 #define   ptUP     (-1)
 #define   ptDN     (+1)
@@ -180,6 +183,9 @@ DEFUN_DLD (bwfill, args, ,
 
 /*
  * $Log$
+ * Revision 1.4  2003/03/05 15:31:52  pkienzle
+ * Backport to octave-2.1.36
+ *
  * Revision 1.3  2003/02/20 23:03:57  pkienzle
  * Use of "T x[n]" where n is not constant is a g++ extension so replace it with
  * OCTAVE_LOCAL_BUFFER(T,x,n), and other things to keep the picky MipsPRO CC

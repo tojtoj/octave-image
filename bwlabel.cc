@@ -30,6 +30,9 @@
 
 
 #include <oct.h>
+#ifndef OCTAVE_LOCAL_BUFFER
+#define OCTAVE_LOCAL_BUFFER(T,v,n) T v[n]
+#endif
 
 #define     NO_OBJECT       0
 #define     MIN(x, y)       (((x) < (y)) ? (x) : (y))
