@@ -9,7 +9,8 @@
 ##
 ## see also: conv2
 
-## Author: Stefan van der Walt <stefan@sun.ac.za>, 2004
+## Author: Stefan van der Walt <stefan@sun.ac.za>
+## Date: 2004
 
 function X = fftconv2(varargin)
     if (nargin < 2)
