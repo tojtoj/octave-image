@@ -24,6 +24,8 @@ Analysis and Statistics
  mean2 
  std2 
  qtdecomp
+ qtgetblk
+ qtsetblk
 Filtering
  colfilt
  histeq 
