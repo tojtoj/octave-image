@@ -1,15 +1,32 @@
-# -*- texinfo -*-
-# @deftypefn {Function File} {@var{Y}} = imtranslate (@var{M}, @var{x}, @var{y} [, @var{bbox}])
-# Translate a 2D image by (x,y) using Fourier interpolation.
-#
-# @var{M} is a matrix, and is translated to the right by @var{X} pixels
-# and translated up by @var{Y} pixels.
-#
-# @var{bbox} can be either 'crop' or 'wrap' (default).
-#
-# @end deftypefn
+## Copyright (C) 2002 Jeff Orchard
+##
+## This program is free software; you can redistribute it and/or
+## modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation; either version 2
+## of the License, or (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful, but
+## WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+## General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, write to the Free Software
+## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# Author: Jeff Orchard <jjo@cs.sfu.ca>
+## -*- texinfo -*-
+## @deftypefn {Function File} {@var{Y}} =
+##             imtranslate (@var{M}, @var{x}, @var{y} [, @var{bbox}])
+## Translate a 2D image by (x,y) using Fourier interpolation.
+##
+## @var{M} is a matrix, and is translated to the right by @var{X} pixels
+## and translated up by @var{Y} pixels.
+##
+## @var{bbox} can be either 'crop' or 'wrap' (default).
+##
+## @end deftypefn
+
+## Author: Jeff Orchard <jjo@cs.sfu.ca>
 
 function Y = imtranslate(X, a, b, bbox_in)
 
