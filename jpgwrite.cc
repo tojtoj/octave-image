@@ -9,7 +9,7 @@
  //                                                       
 
 #include <octave/oct.h>
-#include <iostream.h>
+#include <iostream>
 
 #ifdef __cplusplus
 extern "C" {

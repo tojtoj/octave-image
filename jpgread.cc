@@ -10,7 +10,7 @@
  //
 
 #include <octave/oct.h>
-#include <iostream.h>
+#include <iostream>
 
 /*
  * Simple jpeg reading MEX-file. 
