@@ -50,14 +50,20 @@ function [Y, newmap] = cmpermute(X, map, index)
   endswitch
 
   ## new colormap
-  newmap=map(index);
+  newmap=map(index,:);
 
   ## build reverse index
   rindex = zeros(size(index));
   rindex(index) = 1:length(index);
  
   ## readapt indices
-  Y=rindex(X);
+  if(isa(X,"uint8"))
+    rindex=uint8(rindex-1);
+    ## 0-based indices
+    Y=rindex(double(X)+1);
+  else
+    Y=rindex(X);
+  endif
 endfunction
 
 
@@ -65,17 +71,21 @@ endfunction
 %! [Y,newmap]=cmpermute([1:4],hot(4),4:-1:1)
 %! # colormap will be arranged in reverse order (so will image)
 
-%!shared X, map, Y, newmap, Y2, newmap2
-%! X=rand(10,10);
+%!shared X,map,Y,newmap,Y2,newmap2,Xd,mapd,Yd,newmapd,Y2d,newmap2d
+%! X=magic(10);
 %! [X,map]=cmunique(X);
 %! [Y,newmap]=cmpermute(X,map);
 %! [Y2,newmap2]=cmpermute(X,map,rows(map):-1:1);
+%! Xd=magic(20);
+%! [Xd,mapd]=cmunique(Xd);
+%! [Yd,newmapd]=cmpermute(Xd,mapd);
+%! [Y2d,newmap2d]=cmpermute(Xd,mapd,rows(mapd):-1:1);
 
 %!# test we didn't lose colors
-%!assert(sort(map),sort(newmap)); 
+%!assert(sort(map),sortrows(newmap)); 
 
 %!# test if images are equal
-%!assert(map(X),newmap(Y));
+%!assert(map(double(X)+1),newmap(double(Y)+1));
 
 %!# we expect a reversed colormap
 %!assert(newmap2(rows(newmap2):-1:1,:),map);
@@ -83,9 +93,25 @@ endfunction
 %!# we expect reversed indices in image
 %!assert(X,max(Y2(:))+1-Y2);
 
+%!# same tests on double indices
+
+%!# test we didn't lose colors
+%!assert(sort(mapd),sortrows(newmapd)); 
+
+%!# test if images are equal
+%!assert(mapd(Xd),newmapd(Yd));
+
+%!# we expect a reversed colormap
+%!assert(newmap2d(rows(newmap2d):-1:1,:),mapd);
+
+%!# we expect reversed indices in image
+%!assert(Xd,max(Y2d(:))+1-Y2d);
 
 %
 % $Log$
+% Revision 1.3  2004/09/08 14:13:08  jmones
+% Synchronized with cmunique. uint8 support added. Tests working for 2.1.58
+%
 % Revision 1.2  2004/08/18 14:57:42  jmones
 % speed improvement suggested by Paul Kienzle
 %
