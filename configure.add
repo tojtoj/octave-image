@@ -9,7 +9,7 @@ else
 	AC_DEFINE(have_jpeg)
 	AC_CHECK_HEADER(jpeglib.h, have_jpeg=yes, have_jpeg=no)
 	if test $have_jpeg = yes ; then
-	    AC_CHECK_LIB(jpeg, jpeg_std_error, have_jpeg=yes, have_jpeg=no)
+	    OF_CHECK_LIB(jpeg, jpeg_std_error, have_jpeg=yes, have_jpeg=no)
 	    if test $have_jpeg = no ; then
 		STATUS="libjpeg not found"
 	    else
@@ -24,7 +24,7 @@ else
 	AC_DEFINE(have_png)
 	AC_CHECK_HEADER(png.h, have_png=yes, have_png=no)
 	if test $have_png = yes ; then
-	    AC_CHECK_LIB(png, png_set_sig_bytes, have_png=yes, have_png=no)
+	    OF_CHECK_LIB(png, png_set_sig_bytes, have_png=yes, have_png=no)
 	    if test $have_png = no ; then
 		STATUS="$STATUS, libpng not found"
 	    else
