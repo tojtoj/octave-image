@@ -155,7 +155,7 @@ endfunction
 %!assert(blkproc(eye(6),[2,2],"sum"),blkproc(eye(6),[2,2],@sum));
 %!assert(blkproc(eye(6),[2,2],"sum"),blkproc(eye(6),[2,2],inline("sum(x)","x")));
 %!assert(blkproc(eye(6),[1,2],@sum),kron(eye(3),[1;1]));
-%!assert(blkproc(eye(6),[2,2],inline("any(x(:))","x")),eye(3));
+%!assert(blkproc(eye(6),[2,2],inline("any(x(:))","x")),eye(3)!=0);
 %!assert(blkproc(eye(6),[1,2],[1,1],inline("sum(x(:))","x")),[2,1,0;3,2,0;2,3,1;1,3,2;0,2,3;0,1,2]);
 %!assert(blkproc(eye(6),'indexed',[1,2],[1,1],inline("sum(x(:))","x")),[8,5,6;6,2,3;5,3,4;4,3,5;3,2,6;6,5,8]);
 %!assert(blkproc(eye(6),[2,3],[4,3],inline("sum(x(:))","x")),ones(3,2)*6);
@@ -172,6 +172,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.4  2004/11/15 16:04:20  pkienzle
+% Fix tests for functions which return boolean matrices
+%
 % Revision 1.3  2004/09/03 17:49:37  jmones
 % Improved uint8 and uint16 padding expections
 %

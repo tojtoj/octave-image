@@ -136,7 +136,7 @@ endfunction
 
 %!assert(nlfilter(eye(4),[2,3],inline("sum(x(:))","x")),[2,2,1,0;1,2,2,1;0,1,2,2;0,0,1,1]);
 %!assert(nlfilter(eye(4),'indexed',[2,3],inline("sum(x(:))","x")),[4,2,1,2;3,2,2,3;2,1,2,4;4,3,4,5]);
-%!assert(nlfilter(eye(4),'indexed',[2,3],inline("sum(x(:))==y","x","y"),2),[0,1,0,1;0,1,1,0;1,0,1,0;0,0,0,0]);
+%!assert(nlfilter(eye(4),'indexed',[2,3],inline("sum(x(:))==y","x","y"),2),[0,1,0,1;0,1,1,0;1,0,1,0;0,0,0,0]!=0);
 
 % Check uint8 and uint16 padding
 %!assert(nlfilter(uint8(eye(4)),'indexed',[2,3],inline("sum(x(:))","x")),[2,2,1,0;1,2,2,1;0,1,2,2;0,0,1,1]);
@@ -149,6 +149,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.4  2004/11/15 16:04:20  pkienzle
+% Fix tests for functions which return boolean matrices
+%
 % Revision 1.3  2004/09/03 13:28:32  jmones
 % Corrected behaviour for int* and uint* types
 %
