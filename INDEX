@@ -101,3 +101,5 @@ Region-based and block processing
  bestblk
  blkproc
  nlfilter
+ im2col
+ col2im
