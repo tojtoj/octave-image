@@ -299,6 +299,51 @@ function [imgPost, H] = imrotate(imgPre, thetaDeg, method, bbox)
 endfunction
 
 %!test
-%! X = rand(19);
-%! Z = imrotate(imrotate(X, 89.9, "nearest"), -89.9, "nearest");
-%! assert(norm(X-Z),0);
+%! ## Verify minimal loss across six rotations that add up to 360 +/- 1 deg.:
+%! methods = { "nearest", "bilinear", "bicubic", "Fourier" };
+%! angles     = [ 59  60  61  ];
+%! tolerances = [ 7.4 8.5 8.6	  # nearest
+%!                3.5 3.1 3.5     # bilinear
+%!                2.7 0.1 2.7     # bicubic
+%!                2.7 1.6 2.8 ];  # Fourier
+%! x = peaks(50);
+%! x -= min(min(x));	      # Fourier does not handle neg. values well
+%! for m = 1:(length(methods))
+%!   y = x;
+%!   for i = 1:5
+%!     y = imrotate(y, 60, methods(m), "crop");
+%!   end
+%!   for a = 1:(length(angles))
+%!     assert(norm((x - imrotate(y, angles(a), methods(m), "crop"))
+%!                 (10:40, 10:40)) < tolerances(m,a));
+%!   end
+%! end
+
+
+%!test
+%! ## Verify exactness of near-90 and 90-degree rotations:
+%! X = rand(99);
+%! for angle = [90 180 270]
+%!   for da = [-0.1 0.1]
+%!     Y = imrotate(X,   angle + da , "nearest");
+%!     Z = imrotate(Y, -(angle + da), "nearest");
+%!     assert(norm(X - Z) == 0); # exact zero-sum rotation
+%!     assert(norm(Y - imrotate(X, angle, "nearest")) == 0); # near zero-sum
+%!   end
+%! end
+
+
+%!test
+%! ## Verify preserved pixel density:
+%! methods = { "nearest", "bilinear", "bicubic", "Fourier" };
+%! ## This test does not seem to do justice to the Fourier method...:
+%! tolerances = [ 4 2.2 2.0 209 ];
+%! range = 3:9:100;
+%! for m = 1:(length(methods))
+%!   t = [];
+%!   for n = range
+%!     t(end + 1) = sum(imrotate(eye(n), 20, methods(m))(:));
+%!   end
+%!   assert(t, range, tolerances(m));
+%! end
+
