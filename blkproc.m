@@ -86,11 +86,7 @@ function B = blkproc(A, varargin)
     error("blkproc: required parameters haven't been supplied.");
   endif
 
-  ## This is weird but isvector in my Octave 2.1.57 reports 1 for inline
-  ## functions
-  if(!(isstr(varargin{p}) || 
-       strcmp(typeinfo(varargin{p}),"function handle")) && \
-     isvector(varargin{p}))
+  if(isvector(varargin{p}))
     if(length(varargin{p})!=2)
       error("blkproc: expected [mborder,nborder] but param has wrong length.");
     endif
@@ -105,7 +101,13 @@ function B = blkproc(A, varargin)
   if(nargin<p)
     error("blkproc: required parameters haven't been supplied.");
   endif
+
   fun=varargin{p};
+  if(!isa(fun,"function handle") &&
+     !isa(fun,"inline function") &&
+     !isstr(fun))
+    error("blkproc: invalid fun parameter.");
+  endif
   
   ## remaining params are params to fun
   ## extra params are p+1:nargin-1
@@ -116,7 +118,6 @@ function B = blkproc(A, varargin)
   ## block directly
   sp=mod(-size(A)',sblk);
 
-  ## TODO: check if this prevents A data type in ver>2.1.57
   if(any(sp))
     A=padarray(A,sp,padval,'post');
   endif
@@ -134,13 +135,13 @@ function B = blkproc(A, varargin)
 
   ## now we can process by blocks
   ## we try to preserve fun return type by concatenating everything
-  ## TODO: check if return type is preserved in ver>2.1.57
   for i=1:sblk(1):soa(1)
-    r=[];
-    for j=1:sblk(2):soa(2)
+    ## This assures r has the same class as returned by fun
+    r=feval(fun,A(i:i+eblk(1),1:1+eblk(2)),varargin{p+1:nargin-1});
+    for j=1+sblk(2):sblk(2):soa(2)
       r=horzcat(r,feval(fun,A(i:i+eblk(1),j:j+eblk(2)),varargin{p+1:nargin-1}));
     endfor
-    if(i==1) ## this workarrounds a bug in ver<=2.1.57 cat implementation
+    if(i==1) ## this assures B has the same class as A
       B=r;
     else
       B=vertcat(B,r);
@@ -153,14 +154,23 @@ endfunction
 %! # Returns a 3-by-3 diagonal
 
 
+%!assert(blkproc(eye(6),[2,2],"sum"),blkproc(eye(6),[2,2],@sum));
+%!assert(blkproc(eye(6),[2,2],"sum"),blkproc(eye(6),[2,2],inline("sum(x)","x")));
+%!assert(blkproc(eye(6),[1,2],@sum),kron(eye(3),[1;1]));
 %!assert(blkproc(eye(6),[2,2],inline("any(x(:))","x")),eye(3));
 %!assert(blkproc(eye(6),[1,2],[1,1],inline("sum(x(:))","x")),[2,1,0;3,2,0;2,3,1;1,3,2;0,2,3;0,1,2]);
 %!assert(blkproc(eye(6),'indexed',[1,2],[1,1],inline("sum(x(:))","x")),[8,5,6;6,2,3;5,3,4;4,3,5;3,2,6;6,5,8]);
 %!assert(blkproc(eye(6),[2,3],[4,3],inline("sum(x(:))","x")),ones(3,2)*6);
 
+% Some int* and uint* tests
+%!assert(blkproc(eye(6),[2,2],inline("int8(sum(x(:)))","x")),eye(3,"int8")*2);
+
 
 %
 % $Log$
+% Revision 1.2  2004/09/03 13:40:13  jmones
+% Check result has same class as function result, and improved fun param checking
+%
 % Revision 1.1  2004/08/15 19:27:46  jmones
 % blkproc: block process an image using user-supplied function
 %
