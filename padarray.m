@@ -243,7 +243,9 @@ endfunction
 %!      [zeros(1,7);0,0,1,2,3,0,0;0,0,4,5,6,0,0;zeros(1,7)]);
 
 % Test padding on 3D array
-%!assert(padarray([1,2,3;4,5,6],[3,2,1]), cat(3, 			\
+%!test
+%! int8(0); % fail for octave <= 2.1.57 without crashing
+%! assert(padarray([1,2,3;4,5,6],[3,2,1]), cat(3, 			\
 %! 	zeros(8,7),							\
 %! 	[zeros(3,7); [zeros(2,2), [1,2,3;4,5,6], zeros(2,2)]; zeros(3,7)], \
 %! 	zeros(8,7))); 
@@ -339,6 +341,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.5  2004/09/03 18:33:11  pkienzle
+% skip tests which use cat(3,X,Y) for octave <= 2.1.57
+%
 % Revision 1.4  2004/09/03 13:37:10  jmones
 % Corrected behaviour for int* and uint* types
 %
