@@ -124,8 +124,8 @@ function S = qtdecomp(I, p1, varargin)
       ## restrictive and don't need it at all.
     endif
     
-  elseif (strcmp(typeinfo(p1),"function handle") || \
-	  (isstr(p1) && strncmp(p1, "inline_func", 11)))
+  elseif strcmp(typeinfo(p1),"function handle") ...
+  	  || strcmp(typeinfo(p1),"inline function")
     ## function handles seem to return true to isscalar
     fun=p1;
     decision_method=2;
@@ -300,6 +300,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.5  2004/09/08 14:07:22  pkienzle
+% Fix test for 'inline function'
+%
 % Revision 1.4  2004/08/11 19:52:41  jmones
 % qtsetblk added
 %
