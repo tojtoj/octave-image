@@ -100,3 +100,4 @@ Region-based and block processing
  poly2mask
  bestblk
  blkproc
+ nlfilter
