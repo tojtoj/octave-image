@@ -48,7 +48,7 @@ function A = imnoise(A, stype, a, b)
     A(noise >= 1-a/2) = 1;
   elseif (strcmp(stype, 'speckle'))
     if (nargin < 3), a = 0.04; endif
-    A = A * (1 + randn(size(A))*a);
+    A = A .* (1 + randn(size(A))*a);
   else
     error("imnoise: use type 'gaussian', 'salt & pepper', or 'speckle'");
   endif
