@@ -90,7 +90,7 @@ usage: [H, R]  = houghtf(I[, angles])\n\
 	double cT = cos(theta); double sT = sin(theta);
 	for (int x = 0; x < r; x++) {
 	    for (int y = 0; y < c; y++) {
-		if ( I(y, x) == 1 ) {
+		if ( I(x, y) == 1 ) {
 		    int rho = (int)floor( cT*x + sT*y + 0.5 );
 		    int bin = (int)(rho - bins(0));
 		    if ( (bin > 0) && (bin < bins.length()) ) {
