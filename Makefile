@@ -1,4 +1,4 @@
-include ../../Makeconf
+sinclude ../../Makeconf
 
 ifdef HAVE_JPEG
 	JPEG=jpgwrite.oct jpgread.oct
