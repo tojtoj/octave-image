@@ -18,7 +18,9 @@ Reshape
  impad
  padarray 
  rotate_scale
+ MakeShears
 Analysis and Statistics
+ fftconv2
  corr2 
  imhist 
  mean2 
@@ -37,6 +39,7 @@ Filtering
  ordfilt2 cordflt2 
  uintlut
  stretchlim
+ makelut applylut
 Black and white image functions
  bwarea 
  bweuler 
