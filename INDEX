@@ -7,11 +7,14 @@ Read/write
  imread 
  imwrite 
  imfinfo
+  imginfo
  loadimage saveimage bmpwrite jpgread jpgwrite
 Reshape
  imcrop 
  imresize 
  imrotate
+ imtranslate
+ imshear
  impad 
 Statistics
  corr2 
@@ -19,6 +22,7 @@ Statistics
  mean2 
  std2 
 Filtering
+ colfilt
  histeq 
  imadjust 
  imnoise 
