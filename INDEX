@@ -91,9 +91,10 @@ Colour maps
  vga 
  contrast 
  colorgradient
-Region-based processing
+Region-based and block processing
  roicolor
  roifill
  roifilt2
  roipoly
  poly2mask
+ bestblk
