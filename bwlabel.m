@@ -15,6 +15,8 @@
 ## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 ##       [im2,npix,bb] = bwlabel(im,...)
+##
+## Find the connected regions of an image.
 ##  
 ## im  : RxC 0-1 matrix
 ##
