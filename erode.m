@@ -63,14 +63,6 @@ function BW2 = erode(BW1, SE, a, b)
     error("erode: alg not implemented.");
   endif
 
-  # store size of BW1
-  s=size(BW1);
-  
-  # calculate center pixel for SE
-  # TODO: check MATLAB to see if in case size(SE) is even 
-  c=floor((size(SE)+1)/2);
-  e=s+c-1;
-
   # count ones in mask
   thr=sum(SE(:));
 
@@ -79,9 +71,7 @@ function BW2 = erode(BW1, SE, a, b)
 
   for i=1:n
     # create result matrix
-    BW1=filter2(BW1,SE,'full');
-    # discard borders and "binarize"
-    BW1=BW1(e(1):-1:c(1),e(2):-1:c(2)) == thr;
+    BW1=filter2(SE,BW1) == thr;
   endfor
 
   BW2=BW1;

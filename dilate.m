@@ -63,22 +63,12 @@ function BW2 = dilate(BW1, SE, a, b)
     error("dilate: alg not implemented.");
   endif
 
-  # store size of BW1
-  s=size(BW1);
-  
-  # calculate center pixel for SE
-  # TODO: check MATLAB to see if in case size(SE) is even 
-  c=floor((size(SE)+1)/2);
-  e=s+c-1;
-
   # "Binarize" BW1, just in case image is not [1,0]
   BW1=BW1!=0;
 
   for i=1:n
     # create result matrix
-    BW1=filter2(BW1,SE,'full');
-    # discard borders 
-    BW1=BW1(e(1):-1:c(1),e(2):-1:c(2)) > 0;
+    BW1=filter2(SE,BW1)>0;
   endfor
 
   BW2=BW1;
