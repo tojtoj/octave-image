@@ -88,8 +88,11 @@ function A = col2im(B, sblock, sb, block_type)
       endif
       c=1;
       for i=1:mt
-	r=[];
-	for j=1:nt
+	## TODO: check if we can horzcat([],uint8([10;11])) in a
+	## future Octave version > 2.1.58 in order to deuglify this!
+	r=reshape(B(:,c),m,n);
+	c+=1;
+	for j=2:nt
 	  r=horzcat(r, reshape(B(:,c),m,n));
 	  c+=1;
 	endfor
@@ -148,8 +151,18 @@ endfunction
 %!assert(col2im(ones(1,(10-2+1)*(7-3+1)),[2,3],[10,7],'sliding'), ones((10-2+1),(7-3+1)));
 
 
+%!# disctint on uint8
+%!assert(col2im(uint8(B),[2,5],[6,10],'distinct'), uint8(Ad));
+
+%!# now sliding on uint8
+%!assert(col2im(ones(1,(10-2+1)*(7-3+1),"uint8"),[2,3],[10,7]), ones((10-2+1),(7-3+1),"uint8"));
+
+
 %
 % $Log$
+% Revision 1.2  2004/09/03 17:57:42  jmones
+% Added support for int* and uint* types
+%
 % Revision 1.1  2004/08/18 14:39:07  jmones
 % im2col and col2im added
 %
