@@ -573,6 +573,7 @@ endfunction
 
 ## Test skel-lantuejoul using Gozalez&Woods example (fig 8.39)
 %!shared slBW, rslBW
+%! uint8(0); # fail for 2.1.57 or less instead of crashing later
 %! slBW=logical(zeros(12,7));
 %! slBW(2,2)=true;
 %! slBW(3:4,3:4)=true;
@@ -581,22 +582,17 @@ endfunction
 %! slBW(7:11,2:6)=true;
 %! rslBW([6,7,9],4)=true;
 
-%!test
-%! assert(bwmorph(slBW,'skel-lantuejoul',1),[rslBW(1:5,:);logical(zeros(7,7))]);
-
-%!test
-%! assert(bwmorph(slBW,'skel-lantuejoul',2),[rslBW(1:8,:);logical(zeros(4,7))]);
-
-%!test
-%! assert(bwmorph(slBW,'skel-lantuejoul',3),rslBW);
-
-%!test
-%! assert(bwmorph(slBW,'skel-lantuejoul',Inf),rslBW);
-
+%!assert(bwmorph(slBW,'skel-lantuejoul',1),[rslBW(1:5,:);logical(zeros(7,7))]);
+%!assert(bwmorph(slBW,'skel-lantuejoul',2),[rslBW(1:8,:);logical(zeros(4,7))]);
+%!assert(bwmorph(slBW,'skel-lantuejoul',3),rslBW);
+%!assert(bwmorph(slBW,'skel-lantuejoul',Inf),rslBW);
 
 
 %
 % $Log$
+% Revision 1.6  2004/09/16 02:14:40  pkienzle
+% Use frivolous uint8() call to block tests for version 2.1.57 and earlier
+%
 % Revision 1.5  2004/09/15 20:36:57  jmones
 % logical(1) => true
 %
