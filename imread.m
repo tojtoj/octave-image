@@ -166,7 +166,7 @@ end
 #  disp(pname); disp(fid);
 
    tnam= tmpnam();
-   cmd= sprintf("convert %s '%s' %s:%s 2>/dev/null ",
+   cmd= sprintf("convert %s '%s' '%s:%s' 2>/dev/null ",
                   option_str, fname, outputtype, tnam);
    system(cmd);
    fid= fopen(tnam,"rb");
@@ -319,6 +319,10 @@ end_unwind_protect
 
 #
 # $Log$
+# Revision 1.5  2003/07/25 19:11:41  pkienzle
+# Make sure all files names referenced in system calls are wrapped in quotes
+# to protect against spaces in the path.
+#
 # Revision 1.4  2002/11/27 08:40:11  pkienzle
 # author/license updates
 #

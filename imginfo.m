@@ -15,7 +15,7 @@
 
 function [h,w] = imginfo (fn)
 
-[res,status] = system(sprintf("convert -verbose %s /dev/null",fn),1);
+[res,status] = system(sprintf("convert -verbose '%s' /dev/null",fn),1);
 
 if status,
   error (["imginfo : 'convert' exited with status %i ",\
