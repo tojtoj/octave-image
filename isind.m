@@ -17,25 +17,27 @@
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{bool}= isind (@var{X})
 ## returns true for an index image. All index values must
-## be intergers and greater than 1.
+## be intergers and greater than  or equal to 1.
 ## @end deftypefn
 
 ## Author:	Kai Habel <kai.habel@gmx.de>
 ## Date:	20/03/2000
 
-function bool = isind (X)
+function ret = isind (X)
 
-  bool = 0;	
-  if !(nargin == 1)
+  if nargin != 1
     usage ("isind(X)");
   endif
 
-  if (!is_matrix(X))
-    return;
-  endif
-
-  is_int = 1 - any (any (X - floor (X) ));
-  is_gt_one = all (all ( X > 1 ));
-  bool = is_int * is_gt_one;
+  ret =  isreal (X) && length (size (X)) == 2 ...
+	&& all ( X(:) == floor (X(:)) ) && all ( X(:) >= 1 ); 
 
 endfunction
+
+%!assert(isind([]))
+%!assert(isind(1:10))
+%!assert(!isind(0:10))
+%!assert(isind(1))
+%!assert(!isind(0))
+%!assert(!isind([1.3,2.4]))
+%!assert(isind([1,2;3,4]))
