@@ -159,7 +159,7 @@ else
     outputtype="pgm";
 end
 
-   pname= sprintf("convert %s %s %s:- 2>/dev/null",
+   pname= sprintf("convert %s '%s' %s:- 2>/dev/null",
                   option_str, fname, outputtype);
    fid= popen(pname ,'r');
 #  disp(pname); disp(fid);
@@ -310,6 +310,9 @@ end_unwind_protect
 
 #
 # $Log$
+# Revision 1.2  2002/03/17 05:26:14  aadler
+# now accept filenames with spaces
+#
 # Revision 1.1  2002/03/11 01:56:47  aadler
 # general image read/write functionality using imagemagick utilities
 #
