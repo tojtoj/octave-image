@@ -65,6 +65,8 @@ conv2 (MArray<T>& R, MArray<T>& C, MArray2<T>& A, Shape ishape)
       case SHAPE_VALID:
          outM= Am - Cm + 1;
          outN= An - Rn + 1;
+	 if (outM < 0) outM = 0;
+	 if (outN < 0) outN = 0;
          edgM= edgN= 0;
 	 break;
       }
@@ -165,6 +167,8 @@ conv2 (MArray2<T>&A, MArray2<T>&B, Shape ishape)
       case SHAPE_VALID:
          outM= Am - Bm + 1;
          outN= An - Bn + 1;
+	 if (outM < 0) outM = 0;
+	 if (outN < 0) outN = 0;
          edgM= edgN= 0;
 	 break;
       }
