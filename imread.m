@@ -294,11 +294,10 @@ elseif wantmap
       out2= ( simg(find( dimg ))*[1,1,1] - 1)/256;
    else
 #
-# attempt to generate a colourmap for r,g,b images, assume range is 0<v<1000
-# for each value ( This will also be inaccurate for noninteger v )
-# however, we shouldn't be getting any of that from the pnm converters
+# Generate a colourmap for RGB images by packing RGB into
+# an integer and assigning the unique values to a colormap.
 #
-      c_range= 1000;
+      c_range= 256; # use 65536 for 48 bit color
       [simg, sidx] = sort( round(redimg(:)) + ...
                   c_range *round(grnimg(:)) + ...
                 c_range^2 *round(bluimg(:)) );
@@ -307,10 +306,10 @@ elseif wantmap
       dimg= [1; diff(simg)>0 ];
       cimg= cumsum( dimg );
       out1= reshape( cimg( sidx ) , hig, wid );
-      tmpv= simg(find( dimg )) - (1 + c_range + c_range^2);
+      tmpv= simg(find( dimg ));
       out2= [ rem(tmpv,c_range), ...
               rem(floor(tmpv/c_range), c_range), ...
-              floor(tmpv/c_range^2) ]/256;
+              floor(tmpv/c_range^2) ]/c_range;
    end
 
 
@@ -335,6 +334,9 @@ end_unwind_protect
 
 #
 # $Log$
+# Revision 1.9  2004/02/18 14:54:10  pkienzle
+# Colour values from ppm are 0-255 not 1-256
+#
 # Revision 1.8  2003/11/14 16:55:10  tpikonen
 # Fix endianess bug in 16-bit reads.
 #
