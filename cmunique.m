@@ -63,10 +63,10 @@ function [Y, newmap] = cmunique(P1, P2)
   if(nargin==2)
     ## (X, map) case
     [newmap,i,j]=unique(P2,'rows');                 ## calculate unique colormap
-    if(isa(P1,"uint8") || isa(P1,"uint16"))         ## old indices are 0-based
-      Y=j(P1+1);                                    ## find new indices
-    else
+    if(isa(P1,"double"))
       Y=j(P1);                                      ## find new indices
+    else
+      Y=j(double(P1)+1);                            ## find new indices
     endif
   else
     switch(size(P1,3))
@@ -85,7 +85,7 @@ function [Y, newmap] = cmunique(P1, P2)
     endswitch
     
     ## if image was uint8 or uint16 we have to convert newmap to [0,1] range
-    if(isa(P1,"uint8") || isa(P1,"uint16"))
+    if(!isa(P1,"double"))
       newmap=double(newmap)/double(intmax(class(P1)));
     endif
   endif
@@ -168,7 +168,7 @@ endfunction
 
 %!# Random uint8 I image
 %!test
-%! I=uint8(rand(10,10)*255);
+%! I=uint8(rand(10,10)*256);
 %! Id=double(I)/255;
 %! [Y,newmap]=cmunique(I);
 %! assert(Id,newmap(:,1)(Y+1));
@@ -186,6 +186,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.4  2004/09/08 16:06:31  jmones
+% Solved problem with uint8 indexing and reduced tests on types (suggested by P. Kienzle)
+%
 % Revision 1.3  2004/09/03 17:07:26  jmones
 % Support for uint8 and uint16 types added.
 %
