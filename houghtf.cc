@@ -79,7 +79,7 @@ usage: [H, R]  = houghtf(I[, angles])\n\
     size(0) = r; size(1) = c;
     double diag_length = sqrt( size.sumsq()(0) );
     int nr_bins = 2 * (int)ceil(diag_length) - 1;
-    RowVector bins = RowVector( Range(1, nr_bins).matrix_value() ) - (int)ceil(nr_bins/2);
+    RowVector bins = RowVector( Range(1, nr_bins).matrix_value() ) - ceil(nr_bins/2.);
 
     Matrix J = Matrix(bins.length(), 0);
 
@@ -91,7 +91,7 @@ usage: [H, R]  = houghtf(I[, angles])\n\
 	for (int x = 0; x < r; x++) {
 	    for (int y = 0; y < c; y++) {
 		if ( I(y, x) == 1 ) {
-		    int rho = (int)round( cT*x + sT*y );
+		    int rho = (int)floor( cT*x + sT*y + 0.5 );
 		    int bin = (int)(rho - bins(0));
 		    if ( (bin > 0) && (bin < bins.length()) ) {
 			rho_count( bin )++;

@@ -84,8 +84,8 @@ usage: P = graycomatrix(I, levels, distances, angles)\n\
 		    
 		    double angle = th(th_idx);
 		    
-		    int row = r + (int)round(cos(angle) * d_val);
-		    int col = c - (int)round(sin(angle) * d_val);
+		    int row = r + (int)floor(cos(angle) * d_val + 0.5);
+		    int col = c - (int)floor(sin(angle) * d_val + 0.5);
 
 		    if ( ( row >= 0 ) && ( row < I.rows() ) &&
 			 ( col >= 0 ) && ( col < I.cols() ) ) {
