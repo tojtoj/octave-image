@@ -60,12 +60,10 @@ function B = blkproc(A, varargin)
   if(isstr(varargin{1}) && strcmp(varargin{1}, "indexed"))
     indexed=true;
     p+=1;
-    if(strcmp(typeinfo(A), 'uint8 matrix'))
-      padval=0; ## padval=uint8(0); in future...
-    elseif(strcmp(typeinfo(A), 'uint16 matrix'))
-      padval=0; ## padval=uint16(0); in future...
+    if(isa(A,"uint8") || isa(A,"uint16"))
+	padval=0;
     else
-      padval=1; ## array of double
+      padval=1; 
     endif
   else
     padval=0;
@@ -165,9 +163,18 @@ endfunction
 % Some int* and uint* tests
 %!assert(blkproc(eye(6),[2,2],inline("int8(sum(x(:)))","x")),eye(3,"int8")*2);
 
+% Padding is 0 even for indexed
+%!assert(blkproc(uint8(eye(6)),[1,2],[1,1],inline("sum(x(:))","x")),[2,1,0;3,2,0;2,3,1;1,3,2;0,2,3;0,1,2]);
+%!assert(blkproc(uint8(eye(6)),'indexed',[1,2],[1,1],inline("sum(x(:))","x")),[2,1,0;3,2,0;2,3,1;1,3,2;0,2,3;0,1,2]);
+%!assert(blkproc(uint16(eye(6)),[1,2],[1,1],inline("sum(x(:))","x")),[2,1,0;3,2,0;2,3,1;1,3,2;0,2,3;0,1,2]);
+%!assert(blkproc(uint16(eye(6)),'indexed',[1,2],[1,1],inline("sum(x(:))","x")),[2,1,0;3,2,0;2,3,1;1,3,2;0,2,3;0,1,2]);
+
 
 %
 % $Log$
+% Revision 1.3  2004/09/03 17:49:37  jmones
+% Improved uint8 and uint16 padding expections
+%
 % Revision 1.2  2004/09/03 13:40:13  jmones
 % Check result has same class as function result, and improved fun param checking
 %
