@@ -57,6 +57,9 @@
 
 function retval = impad(A, xpad, ypad, ...)
 
+empty_list_elements_ok_save = empty_list_elements_ok;
+unwind_protect
+
 padding = "zeros";
 const = 1;
 va_start();
@@ -130,6 +133,8 @@ if(strcmp(padding, "zeros"))
     error("Unknown padding type");
 endif
 
-empty_list_elements_ok = emptywarn;  
+unwind_protect_cleanup
+    empty_list_elements_ok = empty_list_elements_ok_save;
+end_unwind_protect
       
 endfunction
