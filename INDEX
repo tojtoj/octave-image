@@ -86,3 +86,8 @@ Colour maps
  vga 
  contrast 
  colorgradient
+Region-based processing
+ roicolor
+ roifill
+ roifilt2
+ roipoly
