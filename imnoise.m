@@ -32,7 +32,7 @@
 
 function A = imnoise(A, stype, a, b)
 
-  if (nargin < 3 || nargin > 4 || !is_matrix(A) || !isstr(stype))
+  if (nargin < 2 || nargin > 4 || !is_matrix(A) || !isstr(stype))
     usage("B = imnoise(A, type, parameters, ...)");
   endif
 
