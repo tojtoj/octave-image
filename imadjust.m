@@ -89,7 +89,7 @@ function ret = imadjust (I, in, out, gamma)
   endif
 
   ret = (I < il) .* ob;
-  ret = ret + (I >= il && I < ih) .* (ob + (ot - ob) .* ((I - il) / (ih - il)) .^ gamma);
+  ret = ret + (I >= il & I < ih) .* (ob + (ot - ob) .* ((I - il) / (ih - il)) .^ gamma);
   ret = ret + (I >= ih) .* ot;
 
   if (in(1) > in(2))
