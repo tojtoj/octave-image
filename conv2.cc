@@ -21,21 +21,19 @@ using namespace std;
 
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 
-#define SHAPE_FULL 1
-#define SHAPE_SAME 2
-#define SHAPE_VALID 3
+enum Shape { SHAPE_FULL, SHAPE_SAME, SHAPE_VALID };
 
 #if !defined (CXX_NEW_FRIEND_TEMPLATE_DECL)
 extern MArray2<double>
-conv2 (MArray<double>&, MArray<double>&, MArray2<double>&, int);
+conv2 (MArray<double>&, MArray<double>&, MArray2<double>&, Shape);
 
 extern MArray2<Complex>
-conv2 (MArray<Complex>&, MArray<Complex>&, MArray2<Complex>&, int);
+conv2 (MArray<Complex>&, MArray<Complex>&, MArray2<Complex>&, Shape);
 #endif
 
 template <class T>
 MArray2<T>
-conv2 (MArray<T>& R, MArray<T>& C, MArray2<T>& A, int ishape)
+conv2 (MArray<T>& R, MArray<T>& C, MArray2<T>& A, Shape ishape)
 {
       int          Rn=  R.length();
       int          Cm=  C.length();
@@ -48,27 +46,27 @@ conv2 (MArray<T>& R, MArray<T>& C, MArray2<T>& A, int ishape)
  *  on the third parameter if its separable, and the
  *  first if it's not
  */
-      int outM, outN, edgM, edgN;
-      if ( ishape == SHAPE_FULL ) {
+      int outM=0, outN=0, edgM=0, edgN=0;
+      switch (ishape) {
+      case SHAPE_FULL:
          outM= Am + Cm - 1;
          outN= An + Rn - 1;
          edgM= Cm - 1;
          edgN= Rn - 1;
-      } else if ( ishape == SHAPE_SAME ) {
+	 break;
+      case SHAPE_SAME:
          outM= Am;
          outN= An;
 // Matlab seems to arbitrarily choose this convention for
 // 'same' with even length R, C
          edgM= ( Cm - 1) /2;
          edgN= ( Rn - 1) /2;
-      } else if ( ishape == SHAPE_VALID ) {
+	 break;
+      case SHAPE_VALID:
          outM= Am - Cm + 1;
          outN= An - Rn + 1;
          edgM= edgN= 0;
-      } else {
-         error("invalid shape specified=%d", ishape); 
-         jump_to_top_level (); 
-         panic_impossible ();
+	 break;
       }
 
 //    printf("A(%d,%d) C(%d) R(%d) O(%d,%d) E(%d,%d)\n",
@@ -121,15 +119,15 @@ conv2 (MArray<T>& R, MArray<T>& C, MArray2<T>& A, int ishape)
 
 #if !defined (CXX_NEW_FRIEND_TEMPLATE_DECL)
 extern MArray2<double>
-conv2 (MArray2<double>&, MArray2<double>&, int);
+conv2 (MArray2<double>&, MArray2<double>&, Shape);
 
 extern MArray2<Complex>
-conv2 (MArray2<Complex>&, MArray2<Complex>&, int);
+conv2 (MArray2<Complex>&, MArray2<Complex>&, Shape);
 #endif
 
 template <class T>
 MArray2<T>
-conv2 (MArray2<T>&A, MArray2<T>&B, int ishape)
+conv2 (MArray2<T>&A, MArray2<T>&B, Shape ishape)
 {
 /* Convolution works fastest if we choose the A matrix to be
  *  the largest.
@@ -148,27 +146,27 @@ conv2 (MArray2<T>&A, MArray2<T>&B, int ishape)
       int     Bm = B.rows();
       int     Bn = B.columns();
 
-      int outM, outN, edgM, edgN;
-      if ( ishape == SHAPE_FULL ) {
+      int outM=0, outN=0, edgM=0, edgN=0;
+      switch (ishape) {
+      case SHAPE_FULL:
          outM= Am + Bm - 1;
          outN= An + Bn - 1;
          edgM= Bm - 1;
          edgN= Bn - 1;
-      } else if ( ishape == SHAPE_SAME ) {
+	 break;
+      case SHAPE_SAME:
          outM= Am;
          outN= An;
 // Matlab seems to arbitrarily choose this convention for
 // 'same' with even length R, C
          edgM= ( Bm - 1) /2;
          edgN= ( Bn - 1) /2;
-      } else if ( ishape == SHAPE_VALID ) {
+	 break;
+      case SHAPE_VALID:
          outM= Am - Bm + 1;
          outN= An - Bn + 1;
          edgM= edgN= 0;
-      } else {
-         error("invalid shape specified=%d", ishape); 
-         jump_to_top_level (); 
-         panic_impossible ();
+	 break;
       }
 
 //    printf("A(%d,%d) B(%d,%d) O(%d,%d) E(%d,%d)\n",
@@ -229,7 +227,7 @@ CONV2: do 2 dimensional convolution\n\
    int nargin = args.length ();
    string shape= "full";
    bool separable= false;
-   int ishape;
+   Shape ishape;
 
    if (nargin < 2 ) {
       print_usage ("conv2");
@@ -298,13 +296,13 @@ CONV2: do 2 dimensional convolution\n\
 
 
 template MArray2<double>
-conv2 (MArray<double>&, MArray<double>&, MArray2<double>&, int);
+conv2 (MArray<double>&, MArray<double>&, MArray2<double>&, Shape);
 
 template MArray2<double>
-conv2 (MArray2<double>&, MArray2<double>&, int);
+conv2 (MArray2<double>&, MArray2<double>&, Shape);
 
 template MArray2<Complex>
-conv2 (MArray<Complex>&, MArray<Complex>&, MArray2<Complex>&, int);
+conv2 (MArray<Complex>&, MArray<Complex>&, MArray2<Complex>&, Shape);
 
 template MArray2<Complex>
-conv2 (MArray2<Complex>&, MArray2<Complex>&, int);
+conv2 (MArray2<Complex>&, MArray2<Complex>&, Shape);
