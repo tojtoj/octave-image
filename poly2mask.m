@@ -62,6 +62,7 @@ function BW = poly2mask(x, y, m, n)
   endif
 
   ## create output matrix
+  uint8(0); ## This fails for octave < 2.1.58
   BW=logical(zeros(m,n,"uint8"));
 
   ## close polygon if needed
@@ -86,14 +87,14 @@ function BW = poly2mask(x, y, m, n)
   m_inv=(exmaxy-exminy)./(emaxy-eminy);   ## calculate inverse slope
   ge=[emaxy, eminy, exmaxy, m_inv];       ## build global edge table
   ge=sortrows(ge,[1,3]);                  ## sort on eminy and exminy
-  
+
   ## we add an extra dummy edge at the end just to avoid checking
   ## while indexing it
   ge=[-Inf,-Inf,-Inf,-Inf;ge];
-  
+
   ## initial parity is even (0)
   parity=0;
-  
+
   ## init scan line set to bottom line
   sl=ge(size(ge,1),1);
 
@@ -132,12 +133,11 @@ function BW = poly2mask(x, y, m, n)
       ## we eliminate segments outside window
       ie=ie(:,find(ie(1,:)<=n));
       ie=ie(:,find(ie(2,:)>=1));
-
       for i=1:columns(ie)
 	BW(sl,ie(1,i):ie(2,i))=true;
       endfor
     endif
-    
+
     ## decrement scan line
     sl-=1;
 
@@ -145,7 +145,7 @@ function BW = poly2mask(x, y, m, n)
     ## this discards ymin border of image (this differs from version at
     ## http://www.cs.rit.edu/~icss571/filling/ which discards ymax).
     ae=ae(find(ae(:,1)!=sl),:);
-    
+
     ## update x (x1=x0-1/m)
     ae(:,2)-=ae(:,3);
 
@@ -154,7 +154,7 @@ function BW = poly2mask(x, y, m, n)
       ae=vertcat(ae,ge(gei,2:4));
       gei-=1;
     endwhile
-    
+
     ## order the edges in ae by x value
     if(rows(ae)>0)
       ae=sortrows(ae,2);
@@ -235,6 +235,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.5  2004/09/07 14:47:50  pkienzle
+% Avoid segfaults on pre-2.1.58 octave.  Invisible whitespace changes.
+%
 % Revision 1.4  2004/09/03 17:12:36  jmones
 % Uses uint8 to save some temporal memory (suggested by David Bateman)
 %
