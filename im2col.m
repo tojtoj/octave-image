@@ -58,13 +58,21 @@
 ##
 ## @strong{Compatibility notes:}
 ## 
+## @itemize @bullet
+## @item
 ## 'sliding' blocks are arranged into @var{B} in a top-down and
 ## left-right order. Since this isn't explicity described in MATLAB
 ## documentation, we ignore if it does it this way. It has been
 ## deduced because im2col implements inverse operation as a simple
 ## reshape (if we chose left to right and then up to down order we would
 ## had to transpose result). If you have MATLAB please check this
-## issue. 
+## issue.
+## @item
+## MATLAB docs say that when using @code{'indexed'}, padding with 0 is
+## done for uint8 type. Since most functions do that too for uint16, we
+## have chosen to use 0 also for uint16, even if documentation doesn't
+## say it explicity, since it looks as an omission.
+## @end itemize
 ##
 ## @end deftypefn
 ## @seealso{col2im}
@@ -85,12 +93,10 @@ function B = im2col(A, varargin)
     endif
     indexed=true;
     p+=1;
-    if(strcmp(typeinfo(A), 'uint8 matrix'))
-      padval=0; ## padval=uint8(0); in future...
-    elseif(strcmp(typeinfo(A), 'uint16 matrix'))
-      padval=0; ## padval=uint16(0); in future...
+    if(isa(A,"uint8") || isa(A,"uint16"))
+	padval=0;
     else
-      padval=1; ## array of double
+      padval=1; 
     endif
   else
     padval=0;
@@ -133,7 +139,6 @@ function B = im2col(A, varargin)
       ## calc needed padding
       sp=mod(-size(A)',[m;n]);
 
-      ## TODO: check if this changes A data type in ver>2.1.57
       if(any(sp))
 	A=padarray(A,sp,padval,'post');
       endif
@@ -142,7 +147,13 @@ function B = im2col(A, varargin)
       B=[];
       for i=1:m:size(A,1) ## up to bottom
 	for j=1:n:size(A,2) ## left to right
-	  B=horzcat(B, A(i:i+m-1,j:j+n-1)(:));
+	  ## TODO: check if we can horzcat([],uint8([10;11])) in a
+	  ## future Octave version > 2.1.58
+	  if(isempty(B))
+	    B=A(i:i+m-1,j:j+n-1)(:);
+	  else
+	    B=horzcat(B, A(i:i+m-1,j:j+n-1)(:));
+	  endif
 	endfor
       endfor
       
@@ -157,7 +168,13 @@ function B = im2col(A, varargin)
       B=[];
       for j=1:1:size(A,2)-n+1 ## left to right
 	for i=1:1:size(A,1)-m+1 ## up to bottom
-	  B=horzcat(B, A(i:i+m-1,j:j+n-1)(:));
+	  ## TODO: check if we can horzcat([],uint8([10;11])) in a
+	  ## future Octave version > 2.1.58
+	  if(isempty(B))
+	    B=A(i:i+m-1,j:j+n-1)(:);
+	  else
+	    B=horzcat(B, A(i:i+m-1,j:j+n-1)(:));
+	  endif
 	endfor
       endfor
       
@@ -204,10 +221,28 @@ endfunction
 %!assert(im2col(As,[2,4],'sliding'), Bs);
 %!assert(im2col(As,[3,5],'sliding'), As(:));
 
+%!# disctint uint8 & uint16
+%!assert(im2col(uint8(A),[2,5],'distinct'), uint8(B));
+%!assert(im2col(uint16(A),[2,5],'distinct'), uint16(B));
+
+%!# padding uint8 & uint16 (to 0 even in indexed case)
+%!assert(im2col(uint8(Ap),[2,5],'distinct'), uint8(Bp0));
+%!assert(im2col(uint8(Ap),'indexed',[2,5],'distinct'), uint8(Bp0));
+%!assert(im2col(uint16(Ap),[2,5],'distinct'), uint16(Bp0));
+%!assert(im2col(uint16(Ap),'indexed',[2,5],'distinct'), uint16(Bp0));
+
+%!# now sliding uint8 & uint16
+%!assert(im2col(uint8(As),[2,4],'sliding'), uint8(Bs));
+%!assert(im2col(uint16(As),[2,4],'sliding'), uint16(Bs));
+
+
 
 
 %
 % $Log$
+% Revision 1.2  2004/09/03 17:37:08  jmones
+% Added support for int* and uint* types
+%
 % Revision 1.1  2004/08/18 14:39:07  jmones
 % im2col and col2im added
 %
