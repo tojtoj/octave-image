@@ -91,4 +91,4 @@ endfunction
 
 %!test
 %! A = reshape(1:36,6,6);
-%! assert(colfilt(A,[2,2],[3,3],'sliding','sum'), conv2(A,ones(2),'same');
+%! assert(colfilt(A,[2,2],[3,3],'sliding','sum'), conv2(A,ones(2),'same'));
