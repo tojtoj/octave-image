@@ -18,7 +18,7 @@
 ## @deftypefn {Function File} {@var{B} = } nlfilter (@var{A}, [@var{m},@var{n}], @var{fun})
 ## @deftypefnx {Function File} {@var{B} = } nlfilter (@var{A}, [@var{m},@var{n}], @var{fun}, ...)
 ## @deftypefnx {Function File} {@var{B} = } nlfilter (@var{A},'indexed', ...)
-## Processes image in siliding blocks using user-supplied function
+## Processes image in sliding blocks using user-supplied function
 ##
 ## @code{B=nlfilter(A,[m,n],fun)} passes sliding @var{m}-by-@var{n}
 ## blocks to user-supplied function @var{fun}. A block is build for
@@ -137,6 +137,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.2  2004/08/15 19:43:11  jmones
+% corrected a typo in doc
+%
 % Revision 1.1  2004/08/15 19:42:14  jmones
 % nlfilter: Processes image in siliding blocks using user-supplied function
 %
