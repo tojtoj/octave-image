@@ -1,0 +1,62 @@
+image >> Image processing
+Display
+ image 
+ imagesc 
+ imshow 
+Read/write
+ imread 
+ imwrite 
+ imfinfo
+ loadimage saveimage bmpwrite jpgread jpgwrite
+Reshape
+ imcrop 
+ imresize 
+ imrotate
+ impad 
+Statistics
+ corr2 
+ imhist 
+ mean2 
+ std2 
+Filtering
+ histeq 
+ imadjust 
+ imnoise 
+ medfilt2 
+ ordfilt2 cordflt2 
+Black and white image functions
+ bwarea 
+ bweuler 
+ bwfill 
+ bwlabel 
+ bwmorph 
+ bwperim 
+ bwselect 
+ dilate 
+ erode 
+ bwborder edge
+Colour controls
+ cmpermute 
+ cmunique 
+ imapprox 
+ hsv2rgb 
+ ntsc2rgb 
+ rgb2hsv 
+ rgb2ntsc 
+ rgb2ycbcr 
+ ycbcr2rgb 
+Representation
+ dither 
+ gray2ind 
+ grayslice 
+ im2bw 
+ ind2gray 
+ ind2rgb 
+ isbw 
+ isgray 
+ isind 
+ isrgb 
+ mat2gray 
+ rgb2gray 
+ rgb2ind 
+
