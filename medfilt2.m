@@ -34,6 +34,10 @@
 ## Created: 5.5.2000
 ## Keywords: image processing median filtering
 
+%!test
+%! b = [0,1,2,3;1,8,12,12;4,20,24,21;7,22,25,18];
+%! assert(medfilt2(b),[0,1,2,0;1,4,12,3;4,12,20,12;0,7,20,0]);
+
 function retval = medfilt2(A, varargin)
 
 padding = "zeros";
