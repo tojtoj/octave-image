@@ -15,7 +15,8 @@ Reshape
  imrotate
  imtranslate
  imshear
- impad 
+ impad
+ padarray 
  rotate_scale
 Statistics
  corr2 
@@ -29,6 +30,7 @@ Filtering
  imnoise 
  medfilt2 
  ordfilt2 cordflt2 
+ uintlut
 Black and white image functions
  bwarea 
  bweuler 
