@@ -93,8 +93,7 @@ function S = qtdecomp(I, p1, varargin)
     ## uniform interface (function handle) to decide whether to split or
     ## not blocks. We have decided not to do so because block
     ## rearrangement that is needed as a parameter to functions is
-    ## expensive and because it needs NDArray, which is only available
-    ## in Octave CVS.
+    ## expensive.
     decision_method=0;
   elseif (isreal(p1))
     ## p1 is threshold
@@ -300,6 +299,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.2  2004/08/10 00:19:42  jmones
+% Corrected misleading comment.
+%
 % Revision 1.1  2004/08/09 01:48:54  jmones
 % Added qtdecomp: quadtree decomposition
 %
