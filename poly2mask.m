@@ -62,7 +62,7 @@ function BW = poly2mask(x, y, m, n)
   endif
 
   ## create output matrix
-  BW=logical(zeros(m,n));
+  BW=logical(zeros(m,n,"uint8"));
 
   ## close polygon if needed
   if((x(1)!=x(length(x)))||(y(1)!=y(length(y))))
@@ -235,6 +235,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.4  2004/09/03 17:12:36  jmones
+% Uses uint8 to save some temporal memory (suggested by David Bateman)
+%
 % Revision 1.3  2004/09/03 13:32:07  jmones
 % Work with logical arrays from BW creation
 %
