@@ -38,12 +38,11 @@
 ## reach ymax, xmax border when filling to avoid enlarging shapes). In
 ## this function we scan the image backwards (we begin at ymax and end
 ## at ymin), and we don't reach ymin, xmin, which we believe should be
-## compatibile with MATLAB.
+## compatible with MATLAB.
 ## @end deftypefn
 
 
-## TODO: convert BW to logical at creation time as soon as bool matrix
-## TODO: arrays handle correctly assigning a bool (2.1.58?)
+## TODO: check how to create a logical BW without any conversion
 
 ## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 
@@ -63,7 +62,7 @@ function BW = poly2mask(x, y, m, n)
   endif
 
   ## create output matrix
-  BW=zeros(m,n);
+  BW=logical(zeros(m,n));
 
   ## close polygon if needed
   if((x(1)!=x(length(x)))||(y(1)!=y(length(y))))
@@ -135,7 +134,7 @@ function BW = poly2mask(x, y, m, n)
       ie=ie(:,find(ie(2,:)>=1));
 
       for i=1:columns(ie)
-	BW(sl,ie(1,i):ie(2,i))=1;
+	BW(sl,ie(1,i):ie(2,i))=true;
       endfor
     endif
     
@@ -161,9 +160,6 @@ function BW = poly2mask(x, y, m, n)
       ae=sortrows(ae,2);
     endif
   endwhile
-  
-  ## In the future, we'll work directly on a logical array.
-  BW=logical(BW);
 endfunction
 
 
@@ -239,6 +235,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.3  2004/09/03 13:32:07  jmones
+% Work with logical arrays from BW creation
+%
 % Revision 1.2  2004/08/11 17:39:51  jmones
 % Algorithm url in docs corrected.
 %
