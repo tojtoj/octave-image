@@ -103,9 +103,15 @@
 
 function [out1,out2,out3]= imread(filename, options );
 
-save_empty_list_elements_ok= empty_list_elements_ok;
+try save_empty_list_elements_ok= empty_list_elements_ok;
+catch save_empty_list_elements_ok= 0;
+end
+try save_warn_empty_list_elements= warn_empty_list_elements;
+catch save_warn_empty_list_elements= 0;
+end
 unwind_protect
 empty_list_elements_ok= 1;
+warn_empty_list_elements= 0;
 
 if (nargin == 0)
   usage (["img    =  imread (filename,options)\n", ...
@@ -315,10 +321,14 @@ end
 
 unwind_protect_cleanup
 empty_list_elements_ok= save_empty_list_elements_ok;
+warn_empty_list_elements= save_warn_empty_list_elements;
 end_unwind_protect
 
 #
 # $Log$
+# Revision 1.6  2003/09/12 14:22:42  adb014
+# Changes to allow use with latest CVS of octave (do_fortran_indexing, etc)
+#
 # Revision 1.5  2003/07/25 19:11:41  pkienzle
 # Make sure all files names referenced in system calls are wrapped in quotes
 # to protect against spaces in the path.

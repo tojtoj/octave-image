@@ -58,7 +58,12 @@
 
 function retval = impad(A, xpad, ypad, padding, const)
 
-empty_list_elements_ok_save = empty_list_elements_ok;
+try empty_list_elements_ok_save = empty_list_elements_ok;
+catch empty_list_elements_ok_save = 0;
+end
+try warn_empty_list_elements_save = warn_empty_list_elements;
+catch warn_empty_list_elements_save = 0;
+end
 unwind_protect
 
 if nargin < 4, padding = "zeros"; endif
@@ -72,6 +77,7 @@ retx = origx + xpad(1) + xpad(2);
 rety = origy + ypad(1) + ypad(2);
 
 empty_list_elements_ok = 1;
+warn_empty_list_elements = 0;
 
 if(strcmp(padding, "zeros"))
   retval = zeros(rety,retx);
@@ -130,6 +136,7 @@ endif
 
 unwind_protect_cleanup
     empty_list_elements_ok = empty_list_elements_ok_save;
+    warn_empty_list_elements = warn_empty_list_elements_save;
 end_unwind_protect
       
 endfunction
