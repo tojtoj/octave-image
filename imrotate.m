@@ -297,3 +297,8 @@ function [imgPost, H] = imrotate(imgPre, thetaDeg, method, bbox)
     error(sprintf("Interpolation method %s not implemented", method));
   endif
 endfunction
+
+%!test
+%! X = rand(19);
+%! Z = imrotate(imrotate(X, 89.9, "nearest"), -89.9, "nearest");
+%! assert(norm(X-Z),0);
