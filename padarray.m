@@ -81,6 +81,9 @@ function B = padarray(A, padsize, padval, direction)
     error("padarray: padsize must be a vector of positive integers.");
   endif
 
+  ## Assure padsize is a row vector
+  padsize=padsize(:).';
+
   # Check direction
   pre=false;
   post=false;
@@ -263,6 +266,9 @@ endfunction
 %!assert(padarray([1,2],[0,1],i,'post'), [1,2,i]);
 %!assert(padarray([1,2],[0,1],i,'both'), [i,1,2,i]);
 
+% Test vertical padsize
+%!assert(padarray([1,2],[0;1],i,'both'), [i,1,2,i]);
+
 % Test circular padding
 %!test
 %! A=[1,2,3;4,5,6];
@@ -294,6 +300,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.3  2004/08/15 19:21:50  jmones
+% support column vector padsize
+%
 % Revision 1.2  2004/08/11 15:04:59  pkienzle
 % Convert dos line endings to unix line endings
 %
