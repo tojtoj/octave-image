@@ -11,8 +11,12 @@
  */
 
 #include <octave/oct.h>
+
+#include <memory>
 #ifndef OCTAVE_LOCAL_BUFFER
-#define OCTAVE_LOCAL_BUFFER(T,v,n) T v[n]
+#define OCTAVE_LOCAL_BUFFER(T, buf, size) \
+  std::auto_ptr<T> buf ## _auto_ptr (new T [size]); \
+  T *buf = buf ## _auto_ptr.get ()
 #endif
 
 #define   ptUP     (-1)
@@ -183,6 +187,9 @@ DEFUN_DLD (bwfill, args, ,
 
 /*
  * $Log$
+ * Revision 1.5  2003/05/15 21:25:40  pkienzle
+ * OCTAVE_LOCAL_BUFFER now requires #include <memory>
+ *
  * Revision 1.4  2003/03/05 15:31:52  pkienzle
  * Backport to octave-2.1.36
  *
