@@ -34,6 +34,7 @@ Filtering
  medfilt2 
  ordfilt2 cordflt2 
  uintlut
+ stretchlim
 Black and white image functions
  bwarea 
  bweuler 
