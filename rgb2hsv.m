@@ -23,53 +23,44 @@
 ## Author:	Kai Habel <kai.habel@gmx.de>
 
 function hsval = rgb2hsv (rgb)
-  if (is_matrix (rgb))
-    nc = size (rgb, 2);
-    if (nc == 3)
-      #get saturation and value
-      v = max (rgb');
-      s = (v' > 0) .* (1 .- min (rgb') ./ v)';
-      #if v==0 set s to 0 too
-      s = isnan (s) .* 0;
+  if (columns(rgb) == 3)
 
-      #subtract minimum and divide trough maximum
-      #to get the bright and saturated colors
+    ## get the max and min
+    s = min (rgb')';
+    v = max (rgb')';
+    h = zeros(size(v));
 
-      sc = (rgb - kron ([1, 1, 1], min (rgb')'));
-      sv = sc ./ kron([1, 1, 1], max (sc')');
-      #if r=g=b (gray value) set hue to 0
-      sv = isnan (sv) .* 0;
-
-      #hue=f(color) must be splitted into 6 parts 
-      #2 for each color
-
-      #h1(green)
-      tmp = (sv(:, 1) == 1 & sv(:,3) == 0) .* (1/6 * sv(:,2) + eps);
-      #avoid problems with h2(red) since hue(0)==hue(1)
-      h = (tmp < 1/6) .* tmp; 
-      #h2(green)
-      h = h + ((h == 0) & sv(:,1) == 0 & sv(:,3) == 1)\
-        .* (-1/6 * sv(:,2) + 2/3 + eps);
-
-      #h1(red)
-      h = h + ((h == 0) & sv(:,2) == 1 & sv(:,3) == 0)\
-        .* (-1/6 * sv(:,1) + 1/3 + eps);
-      #h2(red)
-      h = h + ((h == 0) & sv(:,2) == 0 & sv(:,3) == 1)\
-        .* (1/6 * sv(:,1) + 2/3 + eps);
-
-      #h1(blue)
-      h = h + ((h == 0) & sv(:,1) == 1 & sv(:,2) == 0)\
-        .* (-1/6 * sv(:,3) + 1 + eps);
-      #h2(blue)
-      h = h + ((h == 0) & sv(:,1) == 0 & sv(:,2) == 1)\
-        .* (1/6 * sv(:,3) + 1/3);
-
-      hsval = [h, s, v'];
-
-    else
-      usage ("rgb2hsv(rgb_map): rgb_map must be a matrix of size nx3");
+    ## no hue
+    notgray = (s != v);
+    s(!notgray) = 0;
+    
+    ## blue hue
+    idx = (v == rgb(:,3) & notgray);
+    if any(idx)
+      h(idx) = 2/3 + 1/6 * (rgb(idx,1)-rgb(idx,2)) ./ (v(idx) - s(idx));
     endif
+	      
+    ## green hue
+    idx = (v == rgb(:,2) & notgray);
+    if any(idx)
+      h(idx) = 1/3 + 1/6 * (rgb(idx,3)-rgb(idx,1)) ./ (v(idx) - s(idx));
+    endif
+
+    ## red hue
+    idx = (v == rgb(:,1) & notgray); 
+    if any(idx)
+      h(idx) =       1/6 * (rgb(idx,2)-rgb(idx,3)) ./ (v(idx) - s(idx));
+    endif
+
+    ## correct for negative red
+    idx = (h < 0);
+    h(idx) = 1+h(idx);
+
+    ## set the saturation
+    s(notgray) = 1 - s(notgray) ./ v(notgray);
+
+    hsval = [h, s, v];
+
   else
     usage ("rgb2hsv(rgb_map): rgb_map must be a matrix of size nx3");
   endif
