@@ -59,4 +59,25 @@ Representation
  mat2gray 
  rgb2gray 
  rgb2ind 
-
+Colour maps
+ gray 
+ ocean
+ hsv rainbow
+ hot 
+ bone 
+ copper 
+ pink 
+ white 
+ flag 
+ jet 
+ prism 
+ cool 
+ autumn 
+ spring 
+ winter 
+ summer 
+ lines 
+ colorcube 
+ vga 
+ contrast 
+ colorgradient
