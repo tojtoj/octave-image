@@ -79,7 +79,7 @@ DEFUN_DLD (jpgwrite, args, ,
 //
 // Open jpg file
 //
-   string filename = args(0).string_value();
+   std::string filename = args(0).string_value();
    if ((outfile = fopen(filename.c_str(), "wb")) == NULL) {
       error("Couldn't open file");
       return retval;

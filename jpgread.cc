@@ -79,7 +79,7 @@ DEFUN_DLD (jpgread, args, nargout ,
 //
 // Open jpg file
 //
-   string filename = args(0).string_value();
+   std::string filename = args(0).string_value();
    if ((infile = fopen(filename.c_str(), "rb")) == NULL) {
       error("Couldn't open file");
       return retval;
