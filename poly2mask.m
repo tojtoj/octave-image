@@ -32,13 +32,13 @@
 ## (1:m,1:n), it is discarded or clipped.
 ##
 ## This function uses scan-line polygon filling algorithm as described
-## in http://www.cs.rit.edu/~icss571/ with some minor modifications:
-## capability of clipping and scan order, which can affect the results
-## of the algorithm (algorithm is described not to reach ymax, xmax
-## border when filling to avoid enlarging shapes). In this function we
-## scan the image backwards (we begin at ymax and end at ymin), and we
-## don't reach ymin, xmin, which we believe should be compatibile with
-## MATLAB.
+## in http://www.cs.rit.edu/~icss571/filling/ with some minor
+## modifications: capability of clipping and scan order, which can
+## affect the results of the algorithm (algorithm is described not to
+## reach ymax, xmax border when filling to avoid enlarging shapes). In
+## this function we scan the image backwards (we begin at ymax and end
+## at ymin), and we don't reach ymin, xmin, which we believe should be
+## compatibile with MATLAB.
 ## @end deftypefn
 
 
@@ -122,7 +122,7 @@ function BW = poly2mask(x, y, m, n)
       ie=round(reshape(ae(:,2),2,size(ae)/2));
 
       ## this discards left border of image (this differs from version at
-      ## http://www.cs.rit.edu/~icss571/filling which discards right
+      ## http://www.cs.rit.edu/~icss571/filling/ which discards right
       ## border) but keeps an exception when the point is a vertex.
       ie(1,:)+=ie(1,:)!=ie(2,:);
 
@@ -144,7 +144,7 @@ function BW = poly2mask(x, y, m, n)
 
     ## eliminate edges that eymax==sl
     ## this discards ymin border of image (this differs from version at
-    ## http://www.cs.rit.edu/~icss571/filling which discards ymax).
+    ## http://www.cs.rit.edu/~icss571/filling/ which discards ymax).
     ae=ae(find(ae(:,1)!=sl),:);
     
     ## update x (x1=x0-1/m)
@@ -239,6 +239,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.2  2004/08/11 17:39:51  jmones
+% Algorithm url in docs corrected.
+%
 % Revision 1.1  2004/08/11 17:34:11  jmones
 % poly2mask added: creates filled polygon bw mask
 %
