@@ -39,20 +39,18 @@
 ## Created: 5.5.2000
 ## Keywords: image processing filtering
 
-function retval = ordfilt2(A, nth, domain, ...)
+function retval = ordfilt2(A, nth, domain, varargin)
 
 S = zeros(size(domain));
 padding = "zeros";
-nargin = nargin - 3;
-va_start();
-while(nargin--)
-  a = va_arg();
+for i=1:length(varargin)
+  a = varargin{:};
   if(isstr(a))
     padding = a;
   elseif(is_matrix(a) && size(a) == size(domain))
     S = a;
   endif
-endwhile
+endfor
 
 if(!islogical(domain))
   %  warning("domain should be a boolean matrix, converting");

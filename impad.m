@@ -56,27 +56,21 @@
 ## A nice test matrix for padding:
 ## A = 10*[1:5]' * ones(1,5) + ones(5,1)*[1:5]
 
-function retval = impad(A, xpad, ypad, ...)
+function retval = impad(A, xpad, ypad, padding, const)
 
 empty_list_elements_ok_save = empty_list_elements_ok;
 unwind_protect
 
-padding = "zeros";
-const = 1;
-va_start();
-if(nargin > 3)
-  padding = va_arg();
-  if(nargin > 4)
-    const = va_arg();
-  endif
-endif
+if nargin < 4, padding = "zeros"; endif
+if nargin < 5, const = 1; endif
+if isscalar(xpad), xpad(2) = xpad(1); endif
+if isscalar(ypad), ypad(2) = ypad(1); endif
   
 origx = size(A,2);
 origy = size(A,1);
 retx = origx + xpad(1) + xpad(2);
 rety = origy + ypad(1) + ypad(2);
 
-emptywarn = empty_list_elements_ok;
 empty_list_elements_ok = 1;
 
 if(strcmp(padding, "zeros"))

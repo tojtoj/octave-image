@@ -24,7 +24,7 @@
 ## The present version does not handle 'distinct'
 
 ## This software is granted to the public domain
-function B = colfilt(A,filtsize,blksize,blktype,f,...)
+function B = colfilt(A,filtsize,blksize,blktype,f,varargin)
 
    [m,n]=size(A);
    r = filtsize(1);
@@ -56,7 +56,7 @@ function B = colfilt(A,filtsize,blksize,blktype,f,...)
      for i = 0:m/mblock-1
        for j = 0:n/nblock-1
          idxA(:) = padA(idx + (i*mblock + padm*j*nblock));
-         tmp(:) = feval(f,idxA,all_va_args);
+         tmp(:) = feval(f,idxA,varargin{:});
          B(1+i*mblock:(i+1)*mblock, 1+j*nblock:(j+1)*nblock) = tmp;
        end
      end
@@ -71,7 +71,7 @@ function B = colfilt(A,filtsize,blksize,blktype,f,...)
      idxA = zeros(r*c,m*n);
      idxA(:) = padA(:)(idx);
      B = zeros(size(A));
-     B(:) = feval(f,idxA,all_va_args);
+     B(:) = feval(f,idxA,varargin{:});
    case 'old-distinct' # processes the whole matrix at a time
      if (r*floor(m/r) != m || c*floor(n/c) != n)
         error("colfilt expected blocks to exactly fill A");
@@ -82,7 +82,7 @@ function B = colfilt(A,filtsize,blksize,blktype,f,...)
      idxA = zeros(r*c,m*n/r/c);
      idxA(:) = A(:)(idx);
      B = zeros(prod(size(A)),1);
-     B(idx) = feval(f,idxA,all_va_args);
+     B(idx) = feval(f,idxA,varargin{:});
      B = reshape(B,size(A));
    endswitch
 endfunction

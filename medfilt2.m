@@ -34,15 +34,13 @@
 ## Created: 5.5.2000
 ## Keywords: image processing median filtering
 
-function retval = medfilt2(A, ...)
+function retval = medfilt2(A, varargin)
 
 padding = "zeros";
 domain = logical(ones(3,3));
 
-nargin = nargin - 1;
-va_start();
-while(nargin--)
-  a = va_arg();
+for i=1:length(varargin)
+  a = varargin{i};
   if(isstr(a))
     padding = a;
   elseif(is_vector(a) && size(a) == [1, 2])
@@ -50,7 +48,7 @@ while(nargin--)
   elseif(is_matrix(a))
     domain = logical(a);
   endif
-endwhile
+endfor
 
 n = sum(sum(domain));
 if((n - 2*floor(n/2)) == 0) % n even - more work
@@ -64,6 +62,3 @@ else
 endif
 
 endfunction
-  
-  
-  
