@@ -14,7 +14,7 @@
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-##       [im2,npix,bb] = bwlabel(im,...)
+##       [im2,npix,bb] = bwlabel(im, mins, maxs, verbose)
 ##
 ## Find the connected regions of an image.
 ##  
@@ -28,54 +28,58 @@
 ## bb   : 4xQ int bounding boxes of the regions. Rows are minrow,
 ##        maxrow, mincol, maxcol.
 ##
-## Since the algorithm is slow, it will report progress if it has to do
-## more than 100 loops.
-##
 ## Options :
 ##
-## "verbose"  : Be verbose
-## "quiet"    : Don't report anything (overrides "verbose")
-## "prudent"  : Check that regions do not touch
-## "mins", m  : Minimum size of the regions
-## "maxs", m  : Maximum size of the regions
+## mins     : Minimum size of the regions (set to zero for no minimum)
+## maxs     : Maximum size of the regions (set to zero for no maximum)
+## verbose  : Level of output comments in range 0 to 2.
 ##
 
 ## Author:        Etienne Grossmann  <etienne@isr.ist.utl.pt>
-## Last modified: January 2000
+## Last modified: July 2002
+##
 
-function [im2,npix,bb] = bwlabel(im,...)
+## Modified by David Fletcher <david@megapico.co.uk> to avoid artificially
+## separate regions which actually touch (as indicated when "prudent" is set)
+## through addition of lrow update within loop over touching regions. Also
+## removed "sayif" function references, and call to read_options. Enabled
+## options, setting of output verbosity. "Prudent" is left in place, but
+## should no longer find any errors.
 
-[R,C]=size(im);
-tr = 0 ;
-				# Loop as little as possible
-if R<C, tr = 1; im = im' ; [R,C]=size(im); end
+function [im2,npix,bb] = bwlabel(im, mins, maxs, verbose)
 
-report = C>100 ;
-
-quiet = 0 ;
-verbose = 0 ;
-prudent = 1 ;
-mins = maxs = 0 ;
-
-
-filename = "bwlabel" ;
-opt0 = " verbose quiet " ;
-opt1 = " mins maxs " ;
-nargin-- ;
-read_options ;
-
+  if (nargin == 1)
+    mins = 0;
+    maxs = 0;
+    prudent = 1;
+    verbose = 0;
+  elseif (nargin == 2)
+    maxs = 0;
+    prudent = 1;
+    verbose = 0;
+  elseif (nargin == 3)
+    prudent = 1;
+    verbose = 0;
+  elseif ((nargin == 4) && (verbose >= 0) && (verbose <= 2))
+    prudent = 1;
+  else
+    usage ("bwlabel2(im, mins, maxs, verbose)");
+  endif
 
 if any(im(:)&im(:)!=1),
   printf("bwlabel : im is not binary\n");
   return
 end
 
-if quiet, verbose = report = 0 ; end
+
+[R,C]=size(im);
+tr = 0 ;
+				# Loop as little as possible
+if R<C, tr = 1; im = im' ; [R,C]=size(im); end
 
 gsize = 100 ;			# Predicted number of slices
 
 im2 = zeros(R,C);
-## keyboard
 				# find horizontal up/down going edges
 imup =  max(im2, diff([zeros(1,C);im])) ;
 imdo = -min(im2, diff([im;zeros(1,C)])) ;
@@ -91,26 +95,20 @@ npix = zeros(1,gsize);		# Sizes of regions (actual size is in
 				# region's first slice)
 bb = zeros(4,gsize);		# Bounding boxes
 
-if report && !verbose,
-  printf("bwlabel : There will be %i loops ... \n%5i ",C,0) ;
-end
+if (verbose >= 1) printf("bwlabel : There will be %i loops ... \n%5i ",C,0) ; endif;
 
 lrow = zeros(R,1);		# Last treated image column
  
 for i=1:C,
-  ## i
   t1 = find(imup(:,i)) ;
   t2 = find(imdo(:,i)) ;
   
   nrow = zeros(R,1);		# Next row
 
-  ## if i==42 || i==41,"i==42 || i==41", keyboard; end
-
   for j = 1:rows(t1(:)) ,	# Loop over slices of i'th column
 
     rc++ ;			# rc = number of current slice.
     im2(t1(j):t2(j),i) = rc ;
-    ## if rc==341, "rc==341",keyboard; end
 				# Slices from previous column that touch
 				# this slice.
     rr = create_set(lrow(t1(j):t2(j))) ;
@@ -119,14 +117,14 @@ for i=1:C,
     if rc>size(rnum,2),		# Get more space (uncertain effect on
 				# speed; avoids resizing rnum and npix)
       tmp = 2*(ceil(C*rc/i)-rc+1+rows(t1(:))-j) ;
-      sayif(verbose,"bwlabel : (i=%i) Foreseeing %i more regions\n",i,tmp);
+      if (verbose == 2) printf("bwlabel : (i=%i) Foreseeing %i more regions\n",i,tmp); endif;
       rnum = [ rnum, ones(1,tmp) ] ;
       npix = [ npix,zeros(1,tmp) ] ;
       bb = [ bb,zeros(4,tmp) ] ;
     end
 
     if isempty(rr),			# New region 
-      sayif(verbose,"bwlabel : creating region %i\n",rc);
+      if (verbose == 2) printf("bwlabel : creating region %i\n",rc); endif;
 
       r0 = rc ;			# r0 = number of the region
 
@@ -136,21 +134,22 @@ for i=1:C,
 
     else			# Add to already existing region #####
 
-      ## rr
       r0 = rnum(rr(1)) ;
+      [i, j, r0];
 
       bb(1,r0) = min(bb(1,r0),t1(j)) ;
       bb(2,r0) = max(bb(2,r0),t2(j)) ;
       bb(4,r0) = i ;
 
 				# Touches region r0
-      sayif(verbose,"bwlabel : adding to region %i\n",r0);
+      if (verbose == 2) printf("bwlabel : adding to region %i\n",r0); endif;
 
 				# Touches other regions too
       for k = rr(find(rr!=r0)),	# Loop over other touching regions, that
 				# should be merged to the first.
-	sayif(verbose,"bwlabel : merging regions %i and %i\n",k,r0);
+	if (verbose == 2) printf("bwlabel : merging regions %i and %i\n",k,r0); endif;
 	rnum(find(rnum==k)) = r0 ;
+	lrow(find(lrow==k)) = r0 ; ##Update lrow for next comparsion loop
 	npix(r0) = npix(r0) + npix(k) ;
 	bb([1,3],r0) = min(bb([1,3],r0)',bb([1,3],k)')' ;
 	bb([2,4],r0) = max(bb([2,4],r0)',bb([2,4],k)')' ;
@@ -165,17 +164,14 @@ for i=1:C,
     nrow(t1(j):t2(j)) = r0 ;
   end				# End of looping over slices
   lrow = nrow ;
-  if report && !verbose,
-    printf(".") ;
-    if !rem(i,70) && i<C, printf("\n%5i ",i); end
+  if (verbose >= 1)
+    printf(".");
+    if (!rem(i,70) && i<C) printf("\n%5i ",i); end
   end
 end				# End of looping over columns
-## length(regs)
-if report && !verbose,
-  printf("\n") ;
-end
-## im2
-## [ 1:rc ; rnum(1:rc) ]
+
+if (verbose >= 1) printf("\n"); endif;
+
 keep = ones(1,rc) ; 
 
 if mins, keep = keep & (npix(rnum(1:rc))>=mins) ; end
@@ -210,16 +206,18 @@ end
 ## keyboard
 if prudent,
 
-  sayif(verbose,"bwlabel : Checking coherence\n");
+  if (verbose >= 1) printf("bwlabel : Checking coherence\n"); endif;
 
   hcontact = im2 & im2!=[im2(:,2:C),zeros(R,1)] & [im2(:,2:C),zeros(R,1)] ;
   vcontact = im2 & im2!=[im2(2:R,:);zeros(1,C)] & [im2(2:R,:);zeros(1,C)] ;
   ok = 1 ;
-  if any(hcontact(:)),
+  if (any(hcontact(:)))
+    if (verbose == 2) [x,y] = find(hcontact) endif; 
     ok = 0 ;
     printf("bwlabel: Whoa! Found horizontally connected separated regions\n");
   end
-  if any(vcontact(:)),
+  if (any(vcontact(:)))
+    if (verbose == 2)[x,y] = find(vcontact) endif; 
     ok = 0 ;
     printf("bwlabel: Whoa! Found vertically connected separated regions\n");
   end
