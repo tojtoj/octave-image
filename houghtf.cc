@@ -24,7 +24,7 @@
 
 #include <octave/oct.h>
 
-DEFUN_DLD( houghtf, args, , "\
+DEFUN_DLD(houghtf, args, , "\
 \
 usage: [H, R]  = houghtf(I[, angles])\n\
 \n\

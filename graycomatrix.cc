@@ -24,7 +24,7 @@
 
 #include <octave/oct.h>
 
-DEFUN_DLD( graycomatrix, args, , "\
+DEFUN_DLD(graycomatrix, args, , "\
 \
 usage: P = graycomatrix(I, levels, distances, angles)\n\
 \n\
