@@ -18,11 +18,12 @@ Reshape
  impad
  padarray 
  rotate_scale
-Statistics
+Analysis and Statistics
  corr2 
  imhist 
  mean2 
  std2 
+ qtdecomp
 Filtering
  colfilt
  histeq 
