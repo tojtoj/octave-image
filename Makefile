@@ -1,6 +1,10 @@
 include ../../Makeconf
 
-all: conv2.oct cordflt2.oct jpgwrite.oct jpgread.oct
+ifdef HAVE_JPEG
+	JPEG=jpgwrite.oct jpgread.oct
+endif
+
+all: conv2.oct cordflt2.oct $(JPEG)
 
 jpgread.oct: jpgread.cc
 	$(MKOCTFILE) $< -ljpeg
