@@ -94,6 +94,26 @@
 ## its nearby borders. It preserver Euler number. Please read
 ## compatibility notes for more info.
 ##
+## It uses the same algorithm as skel-pratt but this could change for
+## compatibility in the future.
+##
+## @item 'skel-lantuejol'
+## Performs a skeletonization operation as described in Gonzalez & Woods
+## "Digital Image Processing" pp 538-540. The text references Lantuejoul
+## as authour of this algorithm.
+##
+## It has the beauty of being a clean and simple approach, but skeletons
+## are thicker than they need to and, in addition, not guaranteed to be
+## connected.
+##
+## This algorithm is iterative. It will be applied the minimum value of
+## @var{n} times or number of iterations specified in algorithm
+## description. It's most useful to run this algorithm with @code{n=Inf}.
+##
+## @item 'skel-pratt'
+## Performs a skeletonization operation as described by William K. Pratt
+## in "Digital Image Processing".
+##
 ## @item 'spur'
 ## Performs a remove spur operation. It sets pixel to 0 if it has only
 ## one eight-connected pixel in its neighbourhood.
@@ -152,6 +172,10 @@
 ## the "circles" image in MATLAB documentation, results are not the
 ## same. Perhaps MATLAB uses Blum's algoritm (for further info please
 ## read comments in code).
+## @item 'skel-pratt'
+## This option is not available in MATLAB.
+## @item 'skel-lantuejoul'
+## This option is not available in MATLAB.
 ## @item 'thicken'
 ## This implementation also thickens image borders. This can easily be
 ## avoided i necessary. MATLAB documentation doesn't state how it behaves.
@@ -159,6 +183,7 @@
 ##
 ## References:
 ## W. K. Pratt, "Digital Image Processing"
+## Gonzalez and Woods, "Digital Image Processing"
 ##
 ## @end deftypefn
 ## @seealso dilate erode makelut applylut
@@ -167,6 +192,8 @@
 ## TODO: As soon as Octave doesn't segfault when assigning values to a
 ## TODO: bool matrix, remove all conversions from lut to logical and
 ## TODO: just create it as a logical from the beginning.
+
+## TODO: n behaviour should be tested in all cases for compatibility.
 
 ## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 
@@ -380,7 +407,7 @@ function BW2 = bwmorph(BW, operation, n)
 		    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1]);
       cmd="BW2=BW&applylut(applylut(BW, lut1), lut2);";
 
-    case('skel')
+    case({'skel','skel-pratt'})
       ## WARNING: Result doesn't look as MATLAB's sample. It has been
       ## WARNING: coded following Pratt's guidelines for what he calls
       ## WARNING: is a "reasonably close approximation". I couldn't find
@@ -428,6 +455,23 @@ function BW2 = bwmorph(BW, operation, n)
 		    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1]);
       cmd="BW2=BW&applylut(applylut(BW, lut1), lut2);";
       postcmd="BW2=bwmorph(BW2,'bridge');";
+
+    case('skel-lantuejoul')
+      ## init values
+      se=ones(3,3);              ## structuring element used everywhere
+      BW2=zeros(size(BW));       ## skeleton result
+      eBW=BW;                    ## eBW will hold k-times eroded BW
+      i=1;
+      while i<=n
+	if(!any(eBW))            ## if erosion result is 0-matrix then
+	  break;                 ## we are over
+	endif
+	BW2|=eBW-dilate(erode(eBW, se), se); ## eBW - opening operation on eBW
+                                  	     ## contributes to skeleton
+	eBW=erode(eBW,se);        
+	i++;
+      endwhile
+      return;                    ## no general loop in this case
 
     case('spur')
       ## lut=makelut(inline("xor(x(2,2),(sum((x&[0,1,0;1,0,1;0,1,0])(:))==0)&&(sum((x&[1,0,1;0,0,0;1,0,1])(:))==1)&&x(2,2))","x"),3);
@@ -527,8 +571,31 @@ endfunction
 ## TODO: code tests 
 
 
+## Test skel-lantuejoul using Gozalez&Woods example (fig 8.39)
+%!shared slBW,slBW2_1,slBW2_2,slBW2_3
+%! slBW=zeros(12,7);
+%! slBW(2,2)=1;
+%! slBW(3:4,3:4)=1;
+%! slBW2_1=slBW;
+%! slBW(5:6,3:5)=1;
+%! slBW(7:11,2:6)=1;
+%! slBW2_2=slBW2_1;
+%! slBW2_2(6:7,4)=1;
+%! slBW2_3=slBW2_2;
+%! slBW2_3(9,4)=1;
+
+%!assert(bwmorph(slBW,'skel-lantuejoul',1),slBW2_1);
+%!assert(bwmorph(slBW,'skel-lantuejoul',2),slBW2_2);
+%!assert(bwmorph(slBW,'skel-lantuejoul',3),slBW2_3);
+%!assert(bwmorph(slBW,'skel-lantuejoul',Inf),slBW2_3);
+
+
+
 %
 % $Log$
+% Revision 1.2  2004/09/01 22:35:47  jmones
+% Added Lantuejoul skeletonizing algorithm from Gonzalez&Woods
+%
 % Revision 1.1  2004/08/15 19:47:04  jmones
 % bwmorph added: Perform a morphological operation on a binary image
 %
