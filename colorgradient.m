@@ -21,7 +21,7 @@ function ret = colorgradient(C,w,n)
   elseif nargin == 2
     if (length(w) == 1)
       n = w;
-      w = ones(length(C)-1,1);
+      w = ones(rows(C)-1,1);
     else
       n = rows(colormap);
     endif
@@ -34,9 +34,11 @@ function ret = colorgradient(C,w,n)
   w = 1+round((n-1)*cumsum([0;w(:)])/sum(w));
   map = zeros(n,3);
   for i=1:length(w)-1
-    map(w(i):w(i+1),1) = linspace(C(i,1),C(i+1,1),w(i+1)-w(i)+1)';
-    map(w(i):w(i+1),2) = linspace(C(i,2),C(i+1,2),w(i+1)-w(i)+1)';
-    map(w(i):w(i+1),3) = linspace(C(i,3),C(i+1,3),w(i+1)-w(i)+1)';
+    if (w(i) != w(i+1))
+      map(w(i):w(i+1),1) = linspace(C(i,1),C(i+1,1),w(i+1)-w(i)+1)';
+      map(w(i):w(i+1),2) = linspace(C(i,2),C(i+1,2),w(i+1)-w(i)+1)';
+      map(w(i):w(i+1),3) = linspace(C(i,3),C(i+1,3),w(i+1)-w(i)+1)';
+    endif
   endfor
 
   if nargout == 0
