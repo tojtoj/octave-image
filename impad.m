@@ -47,6 +47,7 @@
 ## repeates itself in two dimensions
 ## 
 ## @end table
+## @end deftypefn
 
 ## Author: Teemu Ikonen <tpikonen@pcu.helsinki.fi>
 ## Created: 5.5.2000
