@@ -28,9 +28,9 @@
 ##
 ## @code{[Y,newmap]=cmunique(RGB)} returns an indexed image @var{y}
 ## along with its associated colormap @var{newmap} computed from a
-## true-color image @var{RGB}, where @var{newmap} is the smallest
-## colormap possible (alhough it could be as long as number of pixels
-## in image).
+## true-color image @var{RGB} (a m-by-n-by-3 array), where @var{newmap}
+## is the smallest colormap possible (alhough it could be as long as
+## number of pixels in image).
 ##
 ## @code{[Y,newmap]=cmunique(I)} returns an indexed image @var{y}
 ## along with its associated colormap @var{newmap} computed from a
@@ -107,6 +107,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.2  2004/08/17 15:48:03  jmones
+% Clarified expected data for RGB images in doc
+%
 % Revision 1.1  2004/08/17 15:45:40  jmones
 % cmunique: Finds colormap with unique colors and corresponding image
 %
