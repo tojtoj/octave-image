@@ -574,12 +574,12 @@ endfunction
 ## Test skel-lantuejoul using Gozalez&Woods example (fig 8.39)
 %!shared slBW, rslBW
 %! slBW=logical(zeros(12,7));
-%! slBW(2,2)=logical(1);
-%! slBW(3:4,3:4)=logical(1);
+%! slBW(2,2)=true;
+%! slBW(3:4,3:4)=true;
 %! rslBW=slBW;
-%! slBW(5:6,3:5)=logical(1);
-%! slBW(7:11,2:6)=logical(1);
-%! rslBW([6,7,9],4)=logical(1);
+%! slBW(5:6,3:5)=true;
+%! slBW(7:11,2:6)=true;
+%! rslBW([6,7,9],4)=true;
 
 %!test
 %! assert(bwmorph(slBW,'skel-lantuejoul',1),[rslBW(1:5,:);logical(zeros(7,7))]);
@@ -597,6 +597,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.5  2004/09/15 20:36:57  jmones
+% logical(1) => true
+%
 % Revision 1.4  2004/09/15 20:00:00  jmones
 % Updated tests to match Gonzalez&Woods example
 %
