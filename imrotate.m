@@ -1,4 +1,4 @@
-## Copyright (C) 2004 Justus Piater
+## Copyright (C) 2004-2005 Justus Piater
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
@@ -21,19 +21,27 @@
 ##
 ## Input parameters:
 ##
-##   @var{imgPre}   an input image matrix
+##   @var{imgPre}   a gray-level image matrix
 ##
 ##   @var{theta}    the rotation angle in degrees counterclockwise
 ##
-##   @var{method}   "nearest" neighbor (default; faster, but produces
-##                  aliasing effects) or "bilinear" interpolation
-##                     (preferred; does anti-aliasing)
+##   @var{method}
+##     @itemize @w
+##       @item "nearest" neighbor: fast, but produces aliasing effects (default).
+##       @item "bilinear" interpolation: does anti-aliasing, but is slightly slower.
+##       @item "bicubic" interpolation: does anti-aliasing, preserves edges better than bilinear interpolation, but gray levels may slightly overshoot at sharp edges. This is probably the best method for most purposes, but also the slowest.
+##       @item "Fourier" uses Fourier interpolation, decomposing the rotation matrix into 3 shears. This method often results in different artifacts than homography-based methods.  Instead of slightly blurry edges, this method can result in ringing artifacts (little waves near high-contrast edges).  However, Fourier interpolation is better at maintaining the image information, so that unrotating will result in an image closer to the original than the other methods.
+##     @end itemize
 ##
-##   @var{bbox}     "loose" (default) or "crop"
+##   @var{bbox}
+##     @itemize @w
+##       @item "loose" grows the image to accommodate the rotated image (default).
+##       @item "crop" rotates the image about its center, clipping any part of the image that is moved outside its boundaries.
+##     @end itemize
 ##
 ## Output parameters:
 ##
-##   @var{imgPos}t  the rotated image matrix
+##   @var{imgPost}  the rotated image matrix
 ##
 ##   @var{H}        the homography mapping original to rotated pixel
 ##                   coordinates. To map a coordinate vector c = [x;y] to its
@@ -42,71 +50,138 @@
 
 ## Author: Justus H. Piater  <Justus.Piater@ULg.ac.be>
 ## Created: 2004-10-18
-## Version: 0.1
+## Version: 0.7
 
-function [imgPost, H] = imrotate(imgPre, theta, method, bbox)
-  if (nargin < 2)
-    help("imrotate");
-    return;
+function [imgPost, H] = imrotate(imgPre, thetaDeg, method, bbox)
+  if (nargin < 4)
+    bbox = "loose";
+    if (nargin < 3)
+      method = "nearest";
+      if (nargin < 2)
+	usage("imrotate(img, angle [, method [, bbox]]");
+      endif
+    endif
   endif
 
-  theta = theta * pi/180;
+  thetaDeg = mod(thetaDeg, 360); # some code below relies on positive angles
+  theta = thetaDeg * pi/180;
 
-  sizePre  = size(imgPre);
+  sizePre = size(imgPre);
 
-  ## We think in x,y coordinates here (rather than row,column).
+  ## We think in x,y coordinates here (rather than row,column), except
+  ## for size... variables that follow the usual size() convention. The
+  ## coordinate system is aligned with the pixel centers.
 
   R = [cos(theta) sin(theta); -sin(theta) cos(theta)];
 
-  if (nargin == 4 && strcmp(bbox, "crop"))
+  if (nargin >= 4 && strcmp(bbox, "crop"))
     sizePost = sizePre;
   else
-    ## Compute new size by projecting image corners through the rotation:
+    ## Compute new size by projecting zero-base image corner pixel
+    ## coordinates through the rotation:
     corners = [0, 0;
-	       (R * [sizePre(2); 1])';
-	       (R * [sizePre(2); sizePre(1)])';
-	       (R * [1; sizePre(1)])'          ];
-    sizePost(2) = ceil(max(corners(:,1))) - floor(min(corners(:,1)));
-    sizePost(1) = ceil(max(corners(:,2))) - floor(min(corners(:,2)));
+	       (R * [sizePre(2) - 1; 0             ])';
+	       (R * [sizePre(2) - 1; sizePre(1) - 1])';
+	       (R * [0             ; sizePre(1) - 1])' ];
+    sizePost(2) = round(max(corners(:,1)) - min(corners(:,1))) + 1;
+    sizePost(1) = round(max(corners(:,2)) - min(corners(:,2))) + 1;
+    ## This size computation yields perfect results for 0-degree (mod
+    ## 90) rotations and, together with the computation of the center of
+    ## rotation below, yields an image whose corresponding region is
+    ## identical to "crop". However, we may lose a boundary of a
+    ## fractional pixel for general angles.
   endif
 
-  ## Compute the translation part of the homography:
-  oPre  = ([sizePre(2) ; sizePre(1) ] + 1) / 2;
+  ## Compute the center of rotation and the translational part of the
+  ## homography:
+  oPre  = ([ sizePre(2);  sizePre(1)] + 1) / 2;
   oPost = ([sizePost(2); sizePost(1)] + 1) / 2;
-  T = oPost - R * oPre;
+  T = oPost - R * oPre;		# translation part of the homography
 
   ## And here is the homography mapping old to new coordinates:
   H = [[R; 0 0] [T; 1]];
 
-  Hinv = inv(H);
+  ## Treat trivial rotations specially (multiples of 90 degrees):
+  if (mod(thetaDeg, 90) == 0)
+    nRot90 = mod(thetaDeg, 360) / 90;
+    if (mod(thetaDeg, 180) == 0 || sizePre(1) == sizePre(2) ||
+	strcmp(bbox, "loose"))
+      imgPost = rot90(imgPre, nRot90);
+      return;
+    elseif (mod(sizePre(1), 2) == mod(sizePre(2), 2))
+      ## Here, bbox is "crop" and the rotation angle is +/- 90 degrees.
+      ## This works only if the image dimensions are of equal parity.
+      imgRot = rot90(imgPre, nRot90);
+      imgPost = zeros(sizePre);
+      hw = min(sizePre) / 2 - 0.5;
+      imgPost   (round(oPost(2) - hw) : round(oPost(2) + hw),
+		 round(oPost(1) - hw) : round(oPost(1) + hw) ) = ...
+	  imgRot(round(oPost(1) - hw) : round(oPost(1) + hw),
+		 round(oPost(2) - hw) : round(oPost(2) + hw) );
+      return;
+    else
+      ## Here, bbox is "crop", the rotation angle is +/- 90 degrees, and
+      ## the image dimensions are of unequal parity. This case cannot
+      ## correctly be handled by rot90() because the image square to be
+      ## cropped does not align with the pixels - we must interpolate. A
+      ## caller who wants to avoid this should ensure that the image
+      ## dimensions are of equal parity.
+    endif
+  end
 
-  ## "Pre"  variables hold pre -rotation values;
-  ## "Post" variables hold post-rotation values.
+  ## For better readability of this spaghetti implementation, I keep the
+  ## branches pertaining to the various 'method's all at the first
+  ## level, even though this causes a slight redundancy in the if
+  ## statements.
 
-  ## Target coordinates:
-  [xPost, yPost] = meshgrid(1:(sizePost(2)), 1:(sizePost(1)));
+  imgPost = [];
 
-  ## Compute corresponding source coordinates:
-  xPre = Hinv(1,1) * xPost + Hinv(1,2) * yPost + Hinv(1,3);
-  yPre = Hinv(2,1) * xPost + Hinv(2,2) * yPost + Hinv(2,3);
-  ## zPre is guaranteed to be 1, since the last row of H (and thus of
-  ## Hinv) is [0 0 1].
+  if (strcmp(method, "Fourier"))
+    imgPost = imrotate_Fourier(imgPre, thetaDeg, method, bbox);
+  else
+    ## This section pertains to all non-Fourier methods.
 
-  ## Now map the image, either by nearest neighbor or by bilinear
-  ## interpolation:
-  if (nargin < 3 || !size(method) || strcmp(method, "nearest"))
+    ## "Pre"  variables hold pre -rotation values;
+    ## "Post" variables hold post-rotation values.
+
+    ## General rotation: map pixel coordinates back from the Post to the
+    ## Pre img
+    Hinv = inv(H);
+
+    ## Target coordinates:
+    [xPost, yPost] = meshgrid(1:(sizePost(2)), 1:(sizePost(1)));
+
+    ## Compute corresponding source coordinates:
+    xPre = Hinv(1,1) * xPost + Hinv(1,2) * yPost + Hinv(1,3);
+    yPre = Hinv(2,1) * xPost + Hinv(2,2) * yPost + Hinv(2,3);
+    ## zPre is guaranteed to be 1, since the last row of H (and thus of
+    ## Hinv) is [0 0 1].
+  endif
+
+  ## Now map the image using the coordinates computed in the else branch above:
+  if (strcmp(method, "nearest"))
     ## nearest-neighbor: simply round Pre coordinates
     xPre = round(xPre);
     yPre = round(yPre);
     valid = find(1 <= xPre & xPre <= sizePre(2) &
 		 1 <= yPre & yPre <= sizePre(1)  );
+    if (!length(valid))
+      warning("input image too small");
+      imgPost = 0;
+      return;
+    endif
+    
     iPre  = sub2ind(sizePre , yPre (valid), xPre (valid));
     iPost = sub2ind(sizePost, yPost(valid), xPost(valid));
 
     imgPost = zeros(sizePost);
     imgPost(iPost) = imgPre(iPre);
-  else
-    ## bilinear interpolation between the four floor and ceiling coordinates
+  elseif(!strcmp(method, "Fourier"))
+    ## This section pertains to "bilinear" and "bicubic" methods.
+
+    ## With interpolation, one unavoidably loses up to one or two pixel
+    ## rows or columns at the image boundaries.
+
     xPreFloor = floor(xPre);
     xPreCeil  = ceil (xPre);
     yPreFloor = floor(yPre);
@@ -114,6 +189,11 @@ function [imgPost, H] = imrotate(imgPre, theta, method, bbox)
 
     valid = find(1 <= xPreFloor & xPreCeil <= sizePre(2) &
 		 1 <= yPreFloor & yPreCeil <= sizePre(1)  );
+    if (!length(valid))
+      warning("input image too small");
+      imgPost = 0;
+      return;
+    endif
 
     xPreFloor = xPreFloor(valid);
     xPreCeil  = xPreCeil (valid);
@@ -131,12 +211,89 @@ function [imgPost, H] = imrotate(imgPre, theta, method, bbox)
     yPreFrac = yPre(valid) - yPreFloor;
 
     iPost = sub2ind(sizePost, yPost(valid), xPost(valid));
+  endif
 
+  if (strcmp(method, "bilinear"))
     imgPost = zeros(sizePost);
-    imgPost(iPost) = ...
-	round(imgPre(iPreFF) .* (1 - xPreFrac) .* (1 - yPreFrac) + ...
-	      imgPre(iPreCF) .*      xPreFrac  .* (1 - yPreFrac) + ...
-	      imgPre(iPreCC) .*      xPreFrac  .*      yPreFrac  + ...
-	      imgPre(iPreFC) .* (1 - xPreFrac) .*      yPreFrac       );
+    ## bilinear interpolation between the four floor and ceiling coordinates
+    imgPost(iPost) = (imgPre(iPreFF) .* (1 - xPreFrac) .* (1 - yPreFrac) +
+		      imgPre(iPreCF) .*      xPreFrac  .* (1 - yPreFrac) +
+		      imgPre(iPreCC) .*      xPreFrac  .*      yPreFrac  +
+		      imgPre(iPreFC) .* (1 - xPreFrac) .*      yPreFrac   );
+  elseif (strcmp(method, "bicubic"))
+    ## bicubic interpolation (see Numerical Recipes)
+    ## This code, together with the prerequisites above, is not limited
+    ## to this particular use but applies to generic bicubic
+    ## interpolation in the following scenario:
+    ## - source data are stored in a matrix,
+    ## - interpolated coordinates may lie anywhere, no regularity is assumed.
+
+    ## precompute the required derivatives at the source image pixels:
+    imgPreDx  = conv2(imgPre  , [ 0.5 0 -0.5] , "same");
+    imgPreDy  = conv2(imgPre  , [-0.5 0  0.5]', "same");
+    imgPreDxy = conv2(imgPreDx, [-0.5 0  0.5]', "same");
+
+    ## Interpolation is done on a square of pixels and their
+    ## derivatives along x, y, and xy. The square is indexed as:
+    ##   43                        FF CF
+    ##   12  which corresponds to  FC CC
+
+    ## Coefficient matrix W
+    ## C11 12         21            31            41                p deriv
+    W = [1  0 -3  2    0  0  0  0   -3  0  9 -6    2  0 -6  4    ## 1
+	 0  0  0  0    0  0  0  0    3  0 -9  6   -2  0  6 -4	 ## 2
+	 0  0  0  0    0  0  0  0    0  0  9 -6    0  0 -6  4	 ## 3
+	 0  0  3 -2    0  0  0  0    0  0 -9  6    0  0  6 -4	 ## 4
+	 
+	 0  0  0  0    1  0 -3  2   -2  0  6 -4    1  0 -3  2	 ## 1 x
+	 0  0  0  0    0  0  0  0   -1  0  3 -2    1  0 -3  2	 ## 2 x
+	 0  0  0  0    0  0  0  0    0  0 -3  2    0  0  3 -2	 ## 3 x
+	 0  0  0  0    0  0  3 -2    0  0 -6  4    0  0  3 -2	 ## 4 x
+	 
+	 0  1 -2  1    0  0  0  0    0 -3  6 -3    0  2 -4  2	 ## 1 y
+	 0  0  0  0    0  0  0  0    0  3 -6  3    0 -2  4 -2	 ## 2 y
+	 0  0  0  0    0  0  0  0    0  0 -3  3    0  0  2 -2	 ## 3 y
+	 0  0 -1  1    0  0  0  0    0  0  3 -3    0  0 -2  2	 ## 4 y
+	 
+	 0  0  0  0    0  1 -2  1    0 -2  4 -2    0  1 -2  1	 ## 1 xy
+	 0  0  0  0    0  0  0  0    0 -1  2 -1    0  1 -2  1	 ## 2 xy
+	 0  0  0  0    0  0  0  0    0  0  1 -1    0  0 -1  1	 ## 3 xy
+	 0  0  0  0    0  0 -1  1    0  0  2 -2    0  0 -1  1];  ## 4 xy
+
+    u = 1 - yPreFrac;
+    values = zeros(size(valid));
+    for ci = 4:-1:1
+      ## compute ci'th row of matrix C:
+
+      col = 4*(ci - 1) + 1;
+      c{1} = (W( 1,col) * imgPre   (iPreFC) + W( 2,col) * imgPre   (iPreCC) +
+	      W( 5,col) * imgPreDx (iPreFC) + W( 6,col) * imgPreDx (iPreCC)  );
+
+      col++;
+      c{2} = (W( 9,col) * imgPreDy (iPreFC) + W(10,col) * imgPreDy (iPreCC) +
+	      W(13,col) * imgPreDxy(iPreFC) + W(14,col) * imgPreDxy(iPreCC)  );
+
+      for cii = 3:4
+	col++;
+	c{cii} = ...
+	    (W( 1,col) * imgPre   (iPreFC) + W( 2,col) * imgPre   (iPreCC) +
+	     W( 3,col) * imgPre   (iPreCF) + W( 4,col) * imgPre   (iPreFF) +
+	     W( 5,col) * imgPreDx (iPreFC) + W( 6,col) * imgPreDx (iPreCC) +
+	     W( 7,col) * imgPreDx (iPreCF) + W( 8,col) * imgPreDx (iPreFF) +
+	     W( 9,col) * imgPreDy (iPreFC) + W(10,col) * imgPreDy (iPreCC) +
+	     W(11,col) * imgPreDy (iPreCF) + W(12,col) * imgPreDy (iPreFF) +
+	     W(13,col) * imgPreDxy(iPreFC) + W(14,col) * imgPreDxy(iPreCC) +
+	     W(15,col) * imgPreDxy(iPreCF) + W(16,col) * imgPreDxy(iPreFF)  );
+      endfor
+
+      values .*= xPreFrac;
+      values  += ((c{4} .* u + c{3}) .* u + c{2}) .* u + c{1};
+    endfor
+    imgPost = zeros(sizePost);
+    imgPost(iPost) = values;
+  endif
+
+  if (!prod(size(imgPost)))
+    error(sprintf("Interpolation method %s not implemented", method));
   endif
 endfunction
