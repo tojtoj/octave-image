@@ -33,11 +33,9 @@
 
 function [Rmap] = brighten (m, beta)
 
-  global __current_color_map__
-
   if (nargin == 1)
     beta = m;
-    m = __current_color_map__;
+    m = colormap;
 
   elseif (nargin == 2)
     if ( (!is_matrix (m)) || (size (m, 2) != 3) )
@@ -59,7 +57,7 @@ function [Rmap] = brighten (m, beta)
   endif
 
   if (nargout == 0)
-    __current_color_map__ = m .^ gamma;
+    colormap (m .^ gamma);
   else
     Rmap = m .^ gamma;
   endif

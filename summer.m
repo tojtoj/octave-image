@@ -26,14 +26,9 @@
 ## Author:  Kai Habel <kai.habel@gmx.de>
 ## Date:  06/03/2000
 function map = summer (number)
-  global __current_color_map__
 
   if (nargin == 0)
-    if exist ("__current_color_map__")
-      number = rows (__current_color_map__);
-    else
-      number = 64;
-    endif
+    number = rows (colormap);
   elseif (nargin == 1)
     if (! is_scalar (number))
       error ("summer: argument must be a scalar");
