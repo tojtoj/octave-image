@@ -24,7 +24,7 @@ else
 	AC_DEFINE(have_png)
 	AC_CHECK_HEADER(png.h, have_png=yes, have_png=no)
 	if test $have_png = yes ; then
-	    AC_CHECK_LIB(png, png_check_sig, have_png=yes, have_png=no)
+	    AC_CHECK_LIB(png, png_set_sig_bytes, have_png=yes, have_png=no)
 	    if test $have_png = no ; then
 		STATUS="$STATUS, libpng not found"
 	    else
