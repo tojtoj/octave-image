@@ -206,22 +206,22 @@ conv2 (MArray2<T>&A, MArray2<T>&B, int ishape)
 }
 
 DEFUN_DLD (conv2, args, ,
-  "[...] = conv2 (...)
-CONV2: do 2 dimensional convolution
-
-  c= conv2(a,b) -> same as c= conv2(a,b,'full')
-
-  c= conv2(a,b,shape) returns 2-D convolution of a and b
-      where the size of c is given by
-     shape= 'full'  -> returns full 2-D convolution
-     shape= 'same'  -> same size as a. 'central' part of convolution
-     shape= 'valid' -> only parts which do not include zero-padded edges
-
-  c= conv2(a,b,shape) returns 2-D convolution of a and b
-
-  c= conv2(v1,v2,a) -> same as c= conv2(v1,v2,a,'full') 
-
-  c= conv2(v1,v2,a,shape) returns convolution of a by vector v1
+  "[...] = conv2 (...)\n\
+CONV2: do 2 dimensional convolution\n\
+\n\
+  c= conv2(a,b) -> same as c= conv2(a,b,'full')\n\
+\n\
+  c= conv2(a,b,shape) returns 2-D convolution of a and b\n\
+      where the size of c is given by\n\
+     shape= 'full'  -> returns full 2-D convolution\n\
+     shape= 'same'  -> same size as a. 'central' part of convolution\n\
+     shape= 'valid' -> only parts which do not include zero-padded edges\n\
+\n\
+  c= conv2(a,b,shape) returns 2-D convolution of a and b\n\
+\n\
+  c= conv2(v1,v2,a) -> same as c= conv2(v1,v2,a,'full')\n\
+\n\
+  c= conv2(v1,v2,a,shape) returns convolution of a by vector v1\n\
        in the column direction and vector v2 in the row direction ")
 {
    octave_value_list retval;

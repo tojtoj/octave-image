@@ -34,17 +34,16 @@ void checkpoint( int pt,
 }
 
 DEFUN_DLD (bwfill, args, ,
-  "[...] = bwfill (...)
-   [BW2,IDX] = BWFILL(BW1,Y,X,N) performs a flood-fill on BW1
-       
-       (X(k), Y(k)) are rows and columns of seed points
-
-   [BW2,IDX] = BWFILL(BW1,'holes',N) fills interior holes in BW1
-
-       N = 4 or 8(default) for neighborhood connectedness
-
-       IDX is the indices of the filled pixels
-       ")
+  "[...] = bwfill (...)\n\
+   [BW2,IDX] = BWFILL(BW1,Y,X,N) performs a flood-fill on BW1\n\
+\n\
+       (X(k), Y(k)) are rows and columns of seed points\n\
+\n\
+   [BW2,IDX] = BWFILL(BW1,'holes',N) fills interior holes in BW1\n\
+\n\
+       N = 4 or 8(default) for neighborhood connectedness\n\
+\n\
+       IDX is the indices of the filled pixels")
 {
    octave_value_list retval;
    octave_value tmp;
@@ -181,6 +180,9 @@ DEFUN_DLD (bwfill, args, ,
 
 /*
  * $Log$
+ * Revision 1.2  2002/11/02 10:39:36  pkienzle
+ * gcc 3.2 wants \n\ for multi-line strings.
+ *
  * Revision 1.1  2002/03/17 02:38:51  aadler
  * fill and edge detection operators
  *

@@ -178,11 +178,10 @@ template octave_value_list do_filtering<Matrix, double>(Matrix, int, boolMatrix,
 template octave_value_list do_filtering<ComplexMatrix, Complex>(ComplexMatrix, int, boolMatrix, ComplexMatrix);
 
 DEFUN_DLD(cordflt2, args, ,
-"function retval = cordflt2(A, nth, domain, S)
-
- Implementation of two-dimensional ordered filtering. User interface
- in ordfilt2.m
-")
+"function retval = cordflt2(A, nth, domain, S)\n\
+\n\
+ Implementation of two-dimensional ordered filtering. User interface\n\
+ in ordfilt2.m")
 {
     if(args.length() != 4) {
 	print_usage ("ordfilt2");
