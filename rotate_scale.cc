@@ -49,7 +49,8 @@ DEFUN_DLD (rotate_scale, args, ,
   "   example:\n"
   "  im0= zeros(100); im0(25:75,25:75)=1;\n"
   "  im1= rotate_scale( im0, [40,60;50,50],[60,90;60,90],[120,120]);\n"
-) {
+)
+{
    octave_value_list retval;
    if (args.length() < 4 ||
        !args(0).is_matrix_type() ||
@@ -93,10 +94,7 @@ DEFUN_DLD (rotate_scale, args, ,
    return retval;
 }
 
-#ifdef sqr
-#undef sqr
-#endif
-#define sqr(a) ((a)*(a))
+inline double sqr(double a) { return (a)*(a); }
 
 void
 calc_rotation_params(
