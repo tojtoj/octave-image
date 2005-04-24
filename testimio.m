@@ -1,3 +1,5 @@
+## This program is public domain.
+
 ## build image for image r/w tests
 x=linspace(-8,8,200);
 [xx,yy]=meshgrid(x,x);
