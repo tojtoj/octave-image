@@ -119,7 +119,12 @@
 #  -units type          PixelsPerInch, PixelsPerCentimeter, or Undefined
 #  -unsharp geometry    sharpen the image
 
-# Author: Andy Adler
+## imwrite.m (c) 2002 Andy Adler
+##
+## This is free software; you can redistribute it and/or modify it
+## under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2, or (at your option)
+## any later version. USE THIS SOFTWARE AT YOUR OWN RISK.
 
 function imwrite(fname, p2, p3 ,p4 ,p5 );
 
@@ -221,6 +226,9 @@ end_unwind_protect
 
 #
 # $Log$
+# Revision 1.7  2005/04/25 01:05:28  aadler
+# added GPL copyrights
+#
 # Revision 1.6  2003/09/12 14:22:42  adb014
 # Changes to allow use with latest CVS of octave (do_fortran_indexing, etc)
 #
