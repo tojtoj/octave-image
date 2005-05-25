@@ -1,3 +1,10 @@
+## Copyright (C) 2002 Andy Adler
+##
+## This program is free software; you can redistribute it and/or modify it
+## under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2, or (at your option)
+## any later version. USE THIS SOFTWARE AT YOUR OWN RISK.
+
 #IMREAD: read images into octave from various file formats
 #
 # Note: this requires the ImageMagick "convert" utility
@@ -98,13 +105,6 @@
 #  -type type           image type
 #  -unsharp geometry    sharpen the image
 #  -wave geometry       alter an image along a sine wave
-
-## imread.m (c) 2002 Andy Adler
-##
-## This is free software; you can redistribute it and/or modify it
-## under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 2, or (at your option)
-## any later version. USE THIS SOFTWARE AT YOUR OWN RISK.
 
 function [out1,out2,out3]= imread(filename, options );
 
@@ -339,6 +339,9 @@ end_unwind_protect
 
 #
 # $Log$
+# Revision 1.11  2005/05/25 03:43:40  pkienzle
+# Author/Copyright consistency
+#
 # Revision 1.10  2005/04/25 01:05:28  aadler
 # added GPL copyrights
 #

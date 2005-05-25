@@ -23,7 +23,7 @@
 ##
 ## NOTE : imginfo relies on the 'convert' program.
 
-## Author:        Etienne Grossmann  <etienne@isr.ist.utl.pt>
+## Author:        Etienne Grossmann <etienne@cs.uky.edu>
 ## Last modified: Setembro 2002
 
 function [h,w] = imginfo (fn)

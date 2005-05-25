@@ -1,3 +1,10 @@
+## Copyright (C) 2002 Andy Adler
+##
+## This program is free software; you can redistribute it and/or modify it
+## under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2, or (at your option)
+## any later version. USE THIS SOFTWARE AT YOUR OWN RISK.
+
 #IMWRITE: write image from octave to various file formats
 #
 # Note: this requires the ImageMagick "convert" utility.
@@ -119,13 +126,6 @@
 #  -units type          PixelsPerInch, PixelsPerCentimeter, or Undefined
 #  -unsharp geometry    sharpen the image
 
-## imwrite.m (c) 2002 Andy Adler
-##
-## This is free software; you can redistribute it and/or modify it
-## under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 2, or (at your option)
-## any later version. USE THIS SOFTWARE AT YOUR OWN RISK.
-
 function imwrite(fname, p2, p3 ,p4 ,p5 );
 
 try save_empty_list_elements_ok= empty_list_elements_ok;
@@ -226,6 +226,9 @@ end_unwind_protect
 
 #
 # $Log$
+# Revision 1.8  2005/05/25 03:43:40  pkienzle
+# Author/Copyright consistency
+#
 # Revision 1.7  2005/04/25 01:05:28  aadler
 # added GPL copyrights
 #

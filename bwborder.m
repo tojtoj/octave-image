@@ -21,7 +21,7 @@
 ## A pixel is on the border if it is set in im, and it has at least one
 ## neighbor that is not set.
 
-## Author:        Etienne Grossmann  <etienne@isr.ist.utl.pt>
+## Author:        Etienne Grossmann <etienne@cs.uky.edu>
 ## Last modified: January 2000
 
 function b = bwborder(im)

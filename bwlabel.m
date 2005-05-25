@@ -35,7 +35,7 @@
 ## verbose  : Level of output comments in range 0 to 2.
 ##
 
-## Author:        Etienne Grossmann  <etienne@isr.ist.utl.pt>
+## Author:        Etienne Grossmann <etienne@cs.uky.edu>
 ## Last modified: July 2002
 ##
 
