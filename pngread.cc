@@ -32,8 +32,8 @@ Loads PNG files to octave using libpng;
 
 */
 
+#include <png.h>
 #include <octave/oct.h>
-#include "png.h"
 
 typedef struct
 {
