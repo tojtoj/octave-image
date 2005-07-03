@@ -91,9 +91,9 @@ endfunction
 %! assert(bweuler(A,8),1);
 %! assert(bweuler(A),1);
 
-%
 % $Log$
+% Revision 1.2  2005/07/03 01:10:19  pkienzle
+% Try to correct for missing newline at the end of the file
+%
 % Revision 1.1  2004/08/15 19:33:20  jmones
 % bweuler: Calculates the Euler number of a binary image
-%
-%

@@ -98,9 +98,9 @@ endfunction
 
 
 
-%
 % $Log$
+% Revision 1.2  2005/07/03 01:10:19  pkienzle
+% Try to correct for missing newline at the end of the file
+%
 % Revision 1.1  2004/08/15 19:38:44  jmones
 % conndef added: Creates a connectivity array
-%
-%

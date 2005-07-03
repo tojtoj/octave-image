@@ -102,9 +102,9 @@ endfunction
 %!assert(bestblk([300;100],150),[30;100]);
 %!assert(bestblk([256,128],17),[16;16]);
 
-%
 % $Log$
+% Revision 1.2  2005/07/03 01:10:19  pkienzle
+% Try to correct for missing newline at the end of the file
+%
 % Revision 1.1  2004/08/15 19:01:05  jmones
 % bestblk added: Calculates best block size for block processing
-%
-%
