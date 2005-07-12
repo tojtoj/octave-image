@@ -51,7 +51,7 @@ function Y = imtranslate(X, a, b, bbox_in)
 			ypad = [0,-ceil(b)];
 		endif
 
-		X = impad(X, xpad, ypad, 'zeros')
+		X = impad(X, xpad, ypad, 'zeros');
 	endif
 
 
