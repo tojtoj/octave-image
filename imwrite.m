@@ -138,6 +138,9 @@ unwind_protect
 empty_list_elements_ok= 1;
 warn_empty_list_elements= 0;
 
+# some older versions of octave didn't seem handle piped output correctly
+usepipe=1;
+
 if  ( nargin <= 1 )     || ...
     ( ! isstr (fname))  || ...
     ( nargin == 2 && isstr(p2) )
@@ -191,33 +194,39 @@ else
    error("imwrite: too many data matrices specified");
 end
 
-#  pname= sprintf("convert %s %s:- '%s' 2>/dev/null",
-#                 option_str, outputtype, fname);
-#  fid= popen(pname ,'w');
+if usepipe
+   pname= sprintf("convert %s %s:- '%s' 2>/dev/null",
+                  option_str, outputtype, fname);
+   fid= popen(pname ,'w');
 
+   if fid<0;
+      error('could not create image data. Is ImageMagick installed?');
+   end
+else
    tnam= tmpnam();
    cmd= sprintf("convert %s '%s:%s' '%s' 2>/dev/null",
                  option_str, outputtype, tnam, fname);
    fid= fopen(tnam, "wb");
-   
-#  disp(pname); disp(fid);
-   if fid<0;
-      error(['could not create file: ',tnam]);
-   end
+end   
 
    fprintf(fid,"%s\n%d %d\n255\n",pnm_sig,wid,hig);
    write_count= fwrite(fid,data(:));
    if write_count != prod(size(data))
-      fclose(fid); unlink(tnam);
-      error(['Unable to write image: ', fname ]);
+      fclose(fid);
+      if ~usepipe
+         unlink(tnam);
+      end
+      error(['Problem writing image: ', fname ]);
    end
 
    fclose(fid);
-   [jnk,retcode] = system(cmd);
-   if retcode !=0 
-      error('could not call imagemagick convert');
+   if ~usepipe
+      [jnk,retcode] = system(cmd);
+      if retcode !=0 
+         error('could not call imagemagick convert');
+      end
+      unlink( tnam );
    end
-   unlink( tnam );
 
 unwind_protect_cleanup
 empty_list_elements_ok= save_empty_list_elements_ok;
@@ -226,6 +235,9 @@ end_unwind_protect
 
 #
 # $Log$
+# Revision 1.9  2005/07/21 16:03:02  aadler
+# Improve error messages and use pipes
+#
 # Revision 1.8  2005/05/25 03:43:40  pkienzle
 # Author/Copyright consistency
 #

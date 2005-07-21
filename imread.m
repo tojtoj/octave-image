@@ -118,6 +118,9 @@ unwind_protect
 empty_list_elements_ok= 1;
 warn_empty_list_elements= 0;
 
+# some older versions of octave didn't seem handle piped output correctly
+usepipe=1;
+
 if (nargin == 0)
   usage (["img    =  imread (filename,options)\n", ...
           "[r,g,b]=  imread (filename,options)\n", ...
@@ -170,25 +173,29 @@ else
     outputtype="pgm";
 end
 
-#  pname= sprintf("convert %s '%s' %s:- 2>/dev/null",
-#  pname= sprintf("convert %s '%s' %s:- ",
-#                 option_str, fname, outputtype);
-#  fid= popen(pname ,'r');
-#  disp(pname); disp(fid);
-
+if usepipe
+   pname= sprintf("convert %s '%s' %s:- 2>/dev/null",
+                  option_str, fname, outputtype);
+   fid= popen(pname ,'r');
+else
    tnam= tmpnam();
    cmd= sprintf("convert %s '%s' '%s:%s' 2>/dev/null ",
                   option_str, fname, outputtype, tnam);
    system(cmd);
    fid= fopen(tnam,"rb");
+end
+
+
 #
 # can we open the pipe?
 # if not 1) The file format is wrong and the conver program has bailed out
 #        2) The apropriate converter program hasn't been installed
 #
    if fid<0;
-      unlink(tnam);
-      error(['could not read file: ' tnam]);
+      if ~usepipe
+         unlink(tnam);
+      end
+      error('could not read image data. Is ImageMagick installed?');
    end
 
 # get file type
@@ -200,8 +207,11 @@ end
    elseif strcmp(line, 'P3');   bpp=8; spp=3; bindata=0;
    elseif strcmp(line, 'P6');   bpp=8; spp=3; bindata=1;
    else
-#     pclose(fid);
-      fclose(fid); unlink(tnam);
+      if usepipe
+         pclose(fid);
+      else
+         fclose(fid); unlink(tnam);
+      end
       error(['Image format error for ',fname,':line=', setstr(line)]);
    end
 
@@ -251,8 +261,11 @@ end
       end # feof
    end #if bindata
 
-#  pclose(fid);
-   fclose(fid); unlink(tnam);
+   if usepipe
+      pclose(fid);
+   else
+      fclose(fid); unlink(tnam);
+   end
 
    if spp==1
       greyimg= reshape( data(:), wid, hig )';
@@ -339,6 +352,9 @@ end_unwind_protect
 
 #
 # $Log$
+# Revision 1.12  2005/07/21 16:03:01  aadler
+# Improve error messages and use pipes
+#
 # Revision 1.11  2005/05/25 03:43:40  pkienzle
 # Author/Copyright consistency
 #
