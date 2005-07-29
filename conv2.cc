@@ -245,19 +245,19 @@ DEFUN_DLD (conv2, args, ,
   "-*- texinfo -*-\n\
 Perform 2 dimentional convolution of two matrices or vectors\n\
 @deftypefn {Loadable Function} {y =} conv2 (@var{a}, @var{b})\n\
-@var{y}= conv2(@var{a},@var{b}) performs the same as
+@var{y}= conv2(@var{a},@var{b}) performs the same as\n\
 @var{y}= conv2(@var{a},@var{b},'full') \n\
 \n\
 @deftypefn {Loadable Function} {y =} conv2 (@var{a}, @var{b}, @var{shape})\n\
-returns 2D convolution of @var{a} and @var{b} where the size
+returns 2D convolution of @var{a} and @var{b} where the size\n\
 of @var{c} is given by\n\
   @var{shape}= 'full'  -> returns full 2-D convolution\n\
   @var{shape}= 'same'  -> same size as a. 'central' part of convolution\n\
   @var{shape}= 'valid' -> only parts which do not include zero-padded edges\n\
 \n\
 @deftypefn {Loadable Function} {y =} conv2 (@var{v1}, @var{v2}, @var{M}, @var{shape})\n\
-  returns convolution of matrix @var{a} by
-       vector @var{v1} in the column direction and by
+  returns convolution of matrix @var{a} by\n\
+       vector @var{v1} in the column direction and by\n\
        vector @var{v2} in the row direction  \n\
 @end deftypefn")
 {
