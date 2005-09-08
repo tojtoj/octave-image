@@ -125,7 +125,7 @@ if (nargin == 0)
   usage (["img    =  imread (filename,options)\n", ...
           "[r,g,b]=  imread (filename,options)\n", ...
           "[img,map]=imread (filename,options)" ]);
-elseif (! isstr (filename))
+elseif (! ischar (filename))
   error ("imread: expecting filename as a string");
 endif
 
@@ -150,7 +150,7 @@ else
       for i= 1:length(options)
          option_str=[option_str," ", nth(options,i) ];
       end
-   elseif ( isstr( options ) )
+   elseif ( ischar( options ) )
       for i= 1:size(options,1)
          option_str=[option_str," ", options(i,:) ];
       end
@@ -352,6 +352,9 @@ end_unwind_protect
 
 #
 # $Log$
+# Revision 1.13  2005/09/08 02:00:17  pkienzle
+# [for Bill Denney] isstr -> ischar
+#
 # Revision 1.12  2005/07/21 16:03:01  aadler
 # Improve error messages and use pipes
 #

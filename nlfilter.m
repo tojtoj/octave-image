@@ -50,7 +50,7 @@ function B = nlfilter(A, varargin)
   ## check 'indexed' presence
   indexed=false;
   p=1;
-  if(isstr(varargin{1}) && strcmp(varargin{1}, "indexed"))
+  if(ischar(varargin{1}) && strcmp(varargin{1}, "indexed"))
     indexed=true;
     p+=1;
     if(isa(A,"uint8") || isa(A,"uint16"))
@@ -149,6 +149,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.5  2005/09/08 02:00:17  pkienzle
+% [for Bill Denney] isstr -> ischar
+%
 % Revision 1.4  2004/11/15 16:04:20  pkienzle
 % Fix tests for functions which return boolean matrices
 %

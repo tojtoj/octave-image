@@ -45,7 +45,7 @@ domain = logical(ones(3,3));
 
 for i=1:length(varargin)
   a = varargin{i};
-  if(isstr(a))
+  if(ischar(a))
     padding = a;
   elseif(is_vector(a) && size(a) == [1, 2])
     domain = logical(ones(a(2), a(1)));

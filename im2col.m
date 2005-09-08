@@ -87,7 +87,7 @@ function B = im2col(A, varargin)
   ## check 'indexed' presence
   indexed=false;
   p=1;
-  if(isstr(varargin{1}) && strcmp(varargin{1}, "indexed"))
+  if(ischar(varargin{1}) && strcmp(varargin{1}, "indexed"))
     if(nargin<3)
       usage("B=im2col(B [, 'indexed'], [m,n] [, block_type])");
     endif
@@ -116,7 +116,7 @@ function B = im2col(A, varargin)
   block_type='sliding';
   if(nargin>p)
     ## we have block_type param
-    if(!isstr(varargin{p}))
+    if(!ischar(varargin{p}))
       error("im2col: invalid parameter block_type.");
     endif
     block_type=varargin{p};
@@ -240,6 +240,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.3  2005/09/08 02:00:17  pkienzle
+% [for Bill Denney] isstr -> ischar
+%
 % Revision 1.2  2004/09/03 17:37:08  jmones
 % Added support for int* and uint* types
 %

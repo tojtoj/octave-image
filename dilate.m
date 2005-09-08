@@ -52,7 +52,7 @@ function BW2 = dilate(BW1, SE, a, b)
     alg=a;
     n=b;
   elseif nargin == 3
-    if isstr(a)
+    if ischar(a)
       alg=a;
     else
       n=a;

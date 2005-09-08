@@ -142,8 +142,8 @@ warn_empty_list_elements= 0;
 usepipe=1;
 
 if  ( nargin <= 1 )     || ...
-    ( ! isstr (fname))  || ...
-    ( nargin == 2 && isstr(p2) )
+    ( ! ischar (fname))  || ...
+    ( nargin == 2 && ischar(p2) )
     usage([ ...
     "imwrite( fname, img )\n", ...
     "imwrite( fname, img, map )\n", ...
@@ -160,7 +160,7 @@ n_mat= nargin-1;
 
 options= eval(sprintf("p%d",nargin));
 # process options strings if given
-if    isstr(options)
+if    ischar(options)
    n_mat--;
    for i= 1:size(options,1)
       option_str=[option_str," ", options(i,:) ];
@@ -235,6 +235,9 @@ end_unwind_protect
 
 #
 # $Log$
+# Revision 1.10  2005/09/08 02:00:17  pkienzle
+# [for Bill Denney] isstr -> ischar
+#
 # Revision 1.9  2005/07/21 16:03:02  aadler
 # Improve error messages and use pipes
 #

@@ -110,7 +110,7 @@ function B = padarray(A, padsize, padval, direction)
       ps=ds;
       ps(dim)=s;		       # padding size
 
-      if (isstr(padval))
+      if (ischar(padval))
 	# Init a "index all" cell array. All cases need it.
 	idx=cell();
 	for i=1:length(ds)
@@ -341,6 +341,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.6  2005/09/08 02:00:17  pkienzle
+% [for Bill Denney] isstr -> ischar
+%
 % Revision 1.5  2004/09/03 18:33:11  pkienzle
 % skip tests which use cat(3,X,Y) for octave <= 2.1.57
 %

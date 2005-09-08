@@ -45,7 +45,7 @@ S = zeros(size(domain));
 padding = "zeros";
 for i=1:length(varargin)
   a = varargin{:};
-  if(isstr(a))
+  if(ischar(a))
     padding = a;
   elseif(is_matrix(a) && size(a) == size(domain))
     S = a;
