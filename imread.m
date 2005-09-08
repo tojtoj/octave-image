@@ -212,7 +212,7 @@ end
       else
          fclose(fid); unlink(tnam);
       end
-      error(['Image format error for ',fname,':line=', setstr(line)]);
+      error(['Image format error for ',fname,':line=', char(line)]);
    end
 
 # ignore comments
@@ -352,6 +352,9 @@ end_unwind_protect
 
 #
 # $Log$
+# Revision 1.14  2005/09/08 03:12:29  pkienzle
+# [for Bill Denney] setstr -> char
+#
 # Revision 1.13  2005/09/08 02:00:17  pkienzle
 # [for Bill Denney] isstr -> ischar
 #
