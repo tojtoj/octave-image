@@ -54,7 +54,7 @@ function X = grayslice (I, v)
 
     v = (1:v - 1) / v;
 
-  elseif (is_vector(v))
+  elseif (isvector(v))
 
     if (any (v < 0) || (any (v > 1)))
       error ("slice vector must be in range [0,1]")

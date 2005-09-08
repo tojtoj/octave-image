@@ -36,7 +36,7 @@ function I = mat2gray (M, scale)
     Mmin = min (min (M));
     Mmax = max (max (M));
   else 
-    if (is_vector (scale))
+    if (isvector (scale))
       Mmin = min (scale (1), scale (2));
       Mmax = max (scale (1), scale (2));
     endif
