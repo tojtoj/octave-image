@@ -5,392 +5,141 @@
 ## the Free Software Foundation; either version 2, or (at your option)
 ## any later version. USE THIS SOFTWARE AT YOUR OWN RISK.
 
-#IMREAD: read images into octave from various file formats
-#
-# Note: this requires the ImageMagick "convert" utility
-#       get this from www.imagemagick.org if required
-#       additional documentation of options is available from the
-#       convert man page
-#
-# BASIC USAGE:
-# img    = imread( fname )
-#                 - img is a greyscale (0-255) of image in fname
-# [im,map]=imread( fname )
-#                 - map is a matrix of [r,g,b], 0-1 triples
-#                 - img is a matrix on indeces into map
-# [r,g,b]= imread( fname )
-#                 - r,g,b are red,green,blue (0-255) compondents
-#
-# Formats for image fname
-#   1. simple guess from extention ie "fig.jpg", "blah.gif"
-#   2. specify explicitly             "jpg:fig.jpg", "gif:blah.gif"
-#   3. specify subimage for multi-image format "tiff:file.tif[3]"
-#   4. raw images (row major format) specify geometry
-#                                      "raw:img[256x180]"
-#
-# IMREAD OPTIONS:
-# imread will support most of the options for convert.1
-#
-# img    = imread( fname , options)
-# [r,g,b]= imread( fname , options)
-#
-# where options is a string matrix (or list) of options
-#
-# example:   options= ["-rotate 25";
-#                      "-crop 200x200+150+150";
-#                      "-sample 200%" ];
-#   will rotate, crop, and then expand the image.
-#   note that the order of operations is important
-#
-# The following options are supported
-#  -antialias           remove pixel-aliasing
-#  -blur geometry       blur the image
-#  -border geometry     surround image with a border of color
-#  -bordercolor color   border color
-#  -colors value        maximum number of colors in the image
-#  -colorspace type     alternate image colorspace
-#  -contrast            enhance or reduce the image contrast
-#  -crop geometry       preferred size and location of the cropped image
-#  -despeckle           reduce the speckles within an image
-#  -dither              apply Floyd/Steinberg error diffusion to image
-#  -draw string         annotate the image with a graphic primitive
-#  -edge radius         apply a filter to detect edges in the image
-#  -emboss radius       emboss an image
-#  -enhance             apply a digital filter to enhance a noisy image
-#  -equalize            perform histogram equalization to an image
-#  -filter type         use this filter when resizing an image
-#  -flip                flip image in the vertical direction
-#  -flop                flop image in the horizontal direction
-#  -font name           font for rendering text
-#  -frame geometry      surround image with an ornamental border
-#  -fuzz distance       colors within this distance are considered equal
-#  -gamma value         level of gamma correction
-#  -geometry geometry   perferred size or location of the image
-#  -gaussian geometry   gaussian blur an image
-#  -gravity type        vertical and horizontal text placement
-#  -implode amount      implode image pixels about the center
-#  -intent type         Absolute, Perceptual, Relative, or Saturation
-#  -interlace type      None, Line, Plane, or Partition
-#  -level value         adjust the level of image contrast
-#  -map filename        transform image colors to match this set of colors
-#  -median radius       apply a median filter to the image
-#  -modulate value      vary the brightness, saturation, and hue
-#  -monochrome          transform image to black and white
-#  -mosaic              create an mosaic from an image sequence
-#  -negate              replace every pixel with its complementary color
-#  -noise radius        add or reduce noise in an image
-#  -normalize           transform image to span the full range of colors
-#  -paint radius        simulate an oil painting
-#  -raise value         lighten/darken image edges to create a 3-D effect
-#  -region geometry     apply options to a portion of the image
-#  -roll geometry       roll an image vertically or horizontally
-#  -rotate degrees      apply Paeth rotation to the image
-#  -sample geometry     scale image with pixel sampling
-#  -scale geometry      resize image
-#  -scene value         image scene number
-#  -segment values      segment an image
-#  -seed value          pseudo-random number generator seed value
-#  -shade degrees       shade the image using a distant light source
-#  -sharpen geometry    sharpen the image
-#  -shave geometry      shave pixels from the image edges
-#  -shear geometry      slide one edge of the image along the X or Y axis
-#  -size geometry       width and height of image
-#  -solarize threshold  negate all pixels above the threshold level
-#  -spread amount       displace image pixels by a random amount
-#  -swirl degrees       swirl image pixels about the center
-#  -texture filename    name of texture to tile onto the image background
-#  -threshold value     threshold the image
-#  -transparent color   make this color transparent within the image
-#  -treedepth value     depth of the color tree
-#  -type type           image type
-#  -unsharp geometry    sharpen the image
-#  -wave geometry       alter an image along a sine wave
+## usage: I = imread(fname)
+##
+## Read images from various file formats.
+##
+##   The size and numeric class of the output depends on the
+##   format of the image.  A colour image is returned as an
+##   MxNx3 matrix.  Grey-level and black-and-white images are
+##   of size MxN.
+##     The colour depth of the image determines the numeric
+##   class of the output: 'uint8' or 'uint16' for grey
+##   and colour, and 'logical' for black and white.
+##
+##   Note: For image formats other than jpeg and png, the
+##         ImageMagick "convert" and "identify" utilities
+##         are needed. ImageMagick can be found at
+##
+##         www.imagemagick.org
+##
 
-function [out1,out2,out3]= imread(filename, options );
+## Author: Andy Adler
+##
+## Modified: Stefan van der Walt <stefan@sun.ac.za>
+## Date: 24 January 2005
 
-try save_empty_list_elements_ok= empty_list_elements_ok;
-catch save_empty_list_elements_ok= 0;
-end
-try save_warn_empty_list_elements= warn_empty_list_elements;
-catch save_warn_empty_list_elements= 0;
-end
-unwind_protect
-empty_list_elements_ok= 1;
-warn_empty_list_elements= 0;
+function varargout = imread(filename, options)
+    if (nargin != 1)
+	usage("I = imread(filename)")
+    endif
 
-# some older versions of octave didn't seem handle piped output correctly
-usepipe=1;
+    if !isstr(filename)
+	error("imread: filename must be a string")
+    endif
 
-if (nargin == 0)
-  usage (["img    =  imread (filename,options)\n", ...
-          "[r,g,b]=  imread (filename,options)\n", ...
-          "[img,map]=imread (filename,options)" ]);
-elseif (! ischar (filename))
-  error ("imread: expecting filename as a string");
-endif
+    fn = file_in_path(IMAGEPATH, filename);
+    if isempty(fn)
+	error("imread: cannot find %s", filename);
+    endif
 
-if any(filename==':') || any(filename=='[')
-   # we've using special imagemagick characters, so we don't
-   # do any octave path processing
-   fname= filename;
-else
-   fname= file_in_path(IMAGEPATH,filename);
-   if isempty(fname)
-      error(['imread: file ' filename ' not found']);
-   end
-end
+    ## divert jpegs and pngs to "jpgread" and "pngread"
+    [ig, ig, ext] = fileparts(fn);
+    ext = upper(ext);
+    if ( file_in_loadpath("jpgread.oct") &&
+	(strcmp(ext, ".JPG") || strcmp(ext, ".JPEG")) )
+	varargout{1} = jpgread(fn);
+	break
+    endif
+    if ( file_in_loadpath("pngread.oct") && (strcmp(ext, ".PNG")) )
+	varargout{1} = pngread(fn);
+	break
+    endif	
 
-# Put together the options string
-# TODO: add some error checking here
-if nargin==1
-   option_str="";
-else
-   option_str="";
-   if     ( is_list( options ) )
-      for i= 1:length(options)
-         option_str=[option_str," ", nth(options,i) ];
-      end
-   elseif ( ischar( options ) )
-      for i= 1:size(options,1)
-         option_str=[option_str," ", options(i,:) ];
-      end
-   else
-     error ("imread: expecting options as a string");
-   end
-end
-#
-# decode the nargout to output what the user wants
-#
-if     nargout==3;
-    wantgreyscale= 0;
-    wantmap= 0;
-    outputtype="ppm";
-elseif nargout==2;
-    wantgreyscale= 0; wantmap= 1;
-    outputtype="ppm";
-else
-    wantgreyscale= 1; wantmap= 0;
-    outputtype="pgm";
-end
+    [ident, sys] = system(sprintf("identify -verbose %s | grep -e Depth -e Type",
+				  fn));
+    if (sys != 0)
+	error("imread: error running ImageMagick's 'identify' on %s", fn)
+    endif
+    depth = re_grab("Depth: ([[:digit:]]{1,2})", ident);
+    imtype = re_grab("Type: ([[:alpha:]]*)", ident);
 
-if usepipe
-   pname= sprintf("convert %s '%s' %s:- 2>/dev/null",
-                  option_str, fname, outputtype);
-   fid= popen(pname ,'r');
-else
-   tnam= tmpnam();
-   cmd= sprintf("convert %s '%s' '%s:%s' 2>/dev/null ",
-                  option_str, fname, outputtype, tnam);
-   system(cmd);
-   fid= fopen(tnam,"rb");
-end
+    depth = str2num(depth);
+    if isempty(depth) || (pow2(nextpow2(depth)) != depth)
+	error("imread: invalid image depth %s", depth)
+    endif
 
+    if !(strcmp(imtype, "Bilevel") || strcmp(imtype, "Grayscale") ||
+	 strcmp(imtype, "TrueColor"))
+	error("imread: unknown image type '%s'", imtype);
+    endif
 
-#
-# can we open the pipe?
-# if not 1) The file format is wrong and the conver program has bailed out
-#        2) The apropriate converter program hasn't been installed
-#
-   if fid<0;
-      if ~usepipe
-         unlink(tnam);
-      end
-      error('could not read image data. Is ImageMagick installed?');
-   end
+    switch (imtype)
+	case("Bilevel")
+	    fmt = "pgm";
+	case("Grayscale")
+	    fmt = "pgm";
+	case("TrueColor")
+	    fmt = "ppm";
+    endswitch
+    
+    ## Why are pipes so slow?
+    ##    cmd = sprintf("convert -flatten -strip %s %s:-", fn, fmt);
 
-# get file type
-   line= fgetl( fid );
-   if     strcmp(line, 'P1');   bpp=1; spp=1; bindata=0;
-   elseif strcmp(line, 'P4');   bpp=1; spp=1; bindata=1;
-   elseif strcmp(line, 'P2');   bpp=8; spp=1; bindata=0;
-   elseif strcmp(line, 'P5');   bpp=8; spp=1; bindata=1;
-   elseif strcmp(line, 'P3');   bpp=8; spp=3; bindata=0;
-   elseif strcmp(line, 'P6');   bpp=8; spp=3; bindata=1;
-   else
-      if usepipe
-         pclose(fid);
-      else
-         fclose(fid); unlink(tnam);
-      end
-      error(['Image format error for ',fname,':line=', char(line)]);
-   end
+    tmpf = tmpnam();
+    cmd = sprintf("convert -flatten -strip '%s' '%s:%s' 2>/dev/null",
+		  fn, fmt, tmpf);
 
-# ignore comments
-   line= fgetl( fid );
-   while length(line)==0 || line(1)=='#'
-      line= fgetl( fid );
-   end
+    [ignored, sys] = system(cmd);
+    
+    if (sys != 0)
+	error("imread: error running ImageMagick's 'convert'");
+	unlink(tmpf);
+    endif
+    
+    try
+	##fid = popen(cmd, "r");
+	fid = fopen(tmpf, "rb");
+    catch
+	unlink(tmpf);
+	error("imread: could not open temporary file %s", tmpf)
+    end_try_catch
 
-# get width, height
-   [wid, hig]= sscanf( line, '%d %d', 'C' );
+    fgetl(fid); # P5 or P6 (pgm or ppm)
+    [width, height] = sscanf(fgetl(fid), "%d %d", "C");
+    fgetl(fid); # ignore max components
 
-# get max component value
-   if bpp==8
-     max_component= sscanf( fgetl(fid), '%d' );
-     if (max_component > 255)
-       # The PGM standard supports only values below 65536
-       bpp = 16;
-     endif
-   end
+    if(depth == 16)
+	## PGM format has MSB first, i.e. big endian
+	data = fread(fid, "uint16", 0, "ieee-be");
+    else
+        data = fread(fid);
+    endif
+    
+    fclose(fid);
+    unlink(tmpnam);
 
-   if bindata
-      if(bpp == 16)
-         # PGM format has MSB first, i.e. big endian
-         data = fread(fid, "uint16", 0, "ieee-be");
-      else
-         data = fread(fid);
-      endif
-      numdata= size(data,1);
+    varargout = {};
+    switch (imtype)
+ 	case ("Bilevel")
+ 	    varargout{1} = logical(reshape(data, height, width)');
+ 	case ("Grayscale") 
+ 	    varargout{1} = uint8(reshape(data, height, width)');
+ 	case ("TrueColor")
+ 	    varargout{1} = cat(3, reshape(data(1:3:end), height, width)',
+ 			       reshape(data(2:3:end), height, width)',
+ 			       reshape(data(3:3:end), height, width)');
+ 	    eval(sprintf("varargout{1} = uint%d(varargout{1});", depth));
+		
+    endswitch
+endfunction
 
-      if bpp==1
-         data= rem( floor( (data*ones(1,8)) ./ ...
-                 (ones(length(data),1)*[128 64 32 16 8 4 2 1]) ), 2)';
-      end
-   else
-      numdata= wid*hig*spp;
-      data= zeros( numdata,1 );
-      dptr= 1;
-
-         line= fgetl( fid );
-      while !feof( fid)
-         rdata= sscanf( line ,' %d');
-         nptr= dptr + size(rdata,1);
-         data( dptr:nptr-1 ) = rdata;
-         dptr= nptr;
-         line= fgetl( fid );
-      end # feof
-   end #if bindata
-
-   if usepipe
-      pclose(fid);
-   else
-      fclose(fid); unlink(tnam);
-   end
-
-   if spp==1
-      greyimg= reshape( data(:), wid, hig )';
-   elseif spp==3
-      redimg= reshape( data(1:spp:numdata), wid, hig )';
-      grnimg= reshape( data(2:spp:numdata), wid, hig )';
-      bluimg= reshape( data(3:spp:numdata), wid, hig )';
-   else
-      error(sprintf("imread: don't know how to handle pnm with spp=%d",spp));
-   end
-
-
-#   This section outputs the image in the desired output format
-# if the user requested the colour map, the we regenerate it from
-# the image.
-#
-#   Of course, 1) This may result in huge colourmaps
-#              2) The colourmap will not be in the same order as
-#                   in the original file
-
-if wantgreyscale
-
-   if exist('greyimg')
-      out1= greyimg;
-   elseif exist('idximg')
-      greymap= mean(map')';
-      out1= reshape( greymap( idximg ) , size(idximg,1), size(idximg,2) );
-   else
-      out1= ( redimg+grnimg+bluimg ) / 3 ;
-   end
-
-elseif wantmap
-
-   if exist('idximg')
-      out1= idximg;
-      out2= map;
-   elseif exist('greyimg')
-      [simg, sidx] = sort( greyimg(:) );
-      [jnkval, sidx] = sort( sidx );
-
-      dimg= [1; diff(simg)>0 ];
-      cimg= cumsum( dimg );
-      out1= reshape( cimg( sidx ) , hig, wid);
-      out2= ( simg(find( dimg ))*[1,1,1] - 1)/256;
-   else
-#
-# Generate a colourmap for RGB images by packing RGB into
-# an integer and assigning the unique values to a colormap.
-#
-      c_range= 256; # use 65536 for 48 bit color
-      [simg, sidx] = sort( round(redimg(:)) + ...
-                  c_range *round(grnimg(:)) + ...
-                c_range^2 *round(bluimg(:)) );
-      [jnkval, sidx] = sort( sidx );
-
-      dimg= [1; diff(simg)>0 ];
-      cimg= cumsum( dimg );
-      out1= reshape( cimg( sidx ) , hig, wid );
-      tmpv= simg(find( dimg ));
-      out2= [ rem(tmpv,c_range), ...
-              rem(floor(tmpv/c_range), c_range), ...
-              floor(tmpv/c_range^2) ]/c_range;
-   end
-
-
-else
-
-   if exist('greyimg')
-      out1= greyimg;
-      out2= greyimg;
-      out3= greyimg;
-   else
-      out1= redimg;
-      out2= grnimg;
-      out3= bluimg;
-   end
-
-end
-
-unwind_protect_cleanup
-empty_list_elements_ok= save_empty_list_elements_ok;
-warn_empty_list_elements= save_warn_empty_list_elements;
-end_unwind_protect
-
-#
-# $Log$
-# Revision 1.14  2005/09/08 03:12:29  pkienzle
-# [for Bill Denney] setstr -> char
-#
-# Revision 1.13  2005/09/08 02:00:17  pkienzle
-# [for Bill Denney] isstr -> ischar
-#
-# Revision 1.12  2005/07/21 16:03:01  aadler
-# Improve error messages and use pipes
-#
-# Revision 1.11  2005/05/25 03:43:40  pkienzle
-# Author/Copyright consistency
-#
-# Revision 1.10  2005/04/25 01:05:28  aadler
-# added GPL copyrights
-#
-# Revision 1.9  2004/02/18 14:54:10  pkienzle
-# Colour values from ppm are 0-255 not 1-256
-#
-# Revision 1.8  2003/11/14 16:55:10  tpikonen
-# Fix endianess bug in 16-bit reads.
-#
-# Revision 1.6  2003/09/12 14:22:42  adb014
-# Changes to allow use with latest CVS of octave (do_fortran_indexing, etc)
-#
-# Revision 1.5  2003/07/25 19:11:41  pkienzle
-# Make sure all files names referenced in system calls are wrapped in quotes
-# to protect against spaces in the path.
-#
-# Revision 1.4  2002/11/27 08:40:11  pkienzle
-# author/license updates
-#
-# Revision 1.3  2002/03/19 18:14:13  aadler
-# unfortunately using popen seems to create problems, mostly
-# on win32, but also on linux, so we need to move to a tmpfile approach
-#
-# Revision 1.2  2002/03/17 05:26:14  aadler
-# now accept filenames with spaces
-#
-# Revision 1.1  2002/03/11 01:56:47  aadler
-# general image read/write functionality using imagemagick utilities
-#
-#
+function value = re_grab(re, str)
+    idx = regexp(re, str);
+    if !isempty(idx)
+	idx = idx(2,:);
+	value = substr(str, idx(1), diff(idx)+1);	
+    else
+	value = "";
+    endif    
+endfunction

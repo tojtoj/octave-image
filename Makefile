@@ -22,6 +22,6 @@ pngread.oct: pngread.cc
 	$(MKOCTFILE) $< -lpng
 
 pngwrite.oct:
-	$(LN_S) pngread.oct $@
+	${MKOCTFILE) $< -lpng
 
 clean: ; -$(RM) *.o octave-core core *.oct *~
