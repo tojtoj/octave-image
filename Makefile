@@ -21,7 +21,7 @@ jpgwrite.oct: jpgwrite.cc
 pngread.oct: pngread.cc
 	$(MKOCTFILE) $< -lpng
 
-pngwrite.oct:
-	${MKOCTFILE) $< -lpng
+pngwrite.oct: pngwrite.cc
+	$(MKOCTFILE) $< -lpng
 
 clean: ; -$(RM) *.o octave-core core *.oct *~
