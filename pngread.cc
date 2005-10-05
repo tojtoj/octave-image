@@ -54,9 +54,14 @@ extern "C" {
 canvas *load_canvas(char *filename);
 
 DEFUN_DLD (pngread, args, nargout ,"\
-pngread reads a png file from disk.\n\
-    [R,G,B,A] = pngread('filename') reads the specified file\n\
-    and returns the Red, Green, Blue and Alpha intensity matrices.\n")
+Read a PNG file from disk.\n\n\
+usage: I = pngread('filename')\n\
+\n\
+For a grey-level image, the output is an MxN matrix. For a\n\
+colour image, an MxNx3 matrix is returned, containing the\n\
+red, green and blue components. The output is of class 'uint8'.\n\
+\n\
+See also: imread.")
 {
   octave_value_list retval;
   int nargin  = args.length();
