@@ -90,14 +90,12 @@ pngwrite writes a png file to the disk.\n\
        return retval;
      }
    
-   octave_stdout << "we reached point A" << std::endl;
    canvas *pic=new_canvas(image_width, image_height, image_width*4);
    if (!pic) {
        error("pngwrite out of memory");
        return retval;
    }
 
-   octave_stdout << "we reached point B" << std::endl;
    for(int i=0; i < pic->width; i++) {
        for(int j=0; j < pic->height; j++) {
 	   pic->row_pointers[j][i*4+0]=(unsigned char)(red(j,i));
@@ -107,7 +105,6 @@ pngwrite writes a png file to the disk.\n\
        }
    }
    
-   octave_stdout << "we reached point C" << std::endl;
 
    save_canvas(pic,(char *)args(0).string_value().c_str());
    delete_canvas(pic);
