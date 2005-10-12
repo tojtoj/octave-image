@@ -21,8 +21,11 @@ if exist("jpgwrite")
   stats=stat("test.jpg");
   assert(stats.size,6423);
   disp(">jpgread");
-  [Rr,Gr,Br] = jpgread('test.jpg');
-  assert([max(Rw(:)-Rr(:))<30,max(Gw(:)-Gr(:))<30,max(Bw(:)-Br(:))<30]);
+  im = jpgread('test.jpg');
+  Rr = im(:,:,1); Gr = im(:,:,2); Br = im(:,:,3);
+  assert([max(double(Rw(:))-double(Rr(:)))<30, \
+          max(double(Gw(:))-double(Gr(:)))<30, \
+	  max(double(Bw(:))-double(Br(:)))<30]);
   unlink('test.jpg');
 else
   disp(">jpgread ... not available");
@@ -35,11 +38,11 @@ if exist("pngwrite")
   stats=stat("test.png");
   assert(stats.size,24738);
   disp(">pngread");
-  [Rr,Gr,Br,Ar] = pngread('test.png');
-  assert(Rr,Rw);
-  assert(Gr,Gw);
-  assert(Br,Bw);
-  assert(Ar,Aw);
+  im = pngread('test.png');
+  Rr = im(:,:,1); Gr = im(:,:,2); Br = im(:,:,3);
+  assert([max(double(Rw(:))-double(Rr(:)))<30, \
+          max(double(Gw(:))-double(Gr(:)))<30, \
+	  max(double(Bw(:))-double(Br(:)))<30]);
   unlink('test.png');
 else
   disp(">pngread ... not available");
