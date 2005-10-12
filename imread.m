@@ -56,12 +56,12 @@ function varargout = imread(filename, options)
 	break
     endif	
 
-    [ident, sys] = system(sprintf("identify -verbose %s | grep -e Depth -e Type",
+    [ident, sys] = system(sprintf('identify -verbose %s | grep -e "Red: " -e Type',
 				  fn));
     if (sys != 0)
 	error("imread: error running ImageMagick's 'identify' on %s", fn)
     endif
-    depth = re_grab("Depth: ([[:digit:]]{1,2})", ident);
+    depth = re_grab("Red: ([[:digit:]]{1,2})", ident);
     imtype = re_grab("Type: ([[:alpha:]]*)", ident);
 
     depth = str2num(depth);
