@@ -53,15 +53,19 @@ extern "C" {
 
 canvas *load_canvas(char *filename);
 
-DEFUN_DLD (pngread, args, nargout ,"\
-Read a PNG file from disk.\n\n\
-usage: I = pngread('filename')\n\
+DEFUN_DLD (pngread, args, nargout ,
+"-*- texinfo -*-\n\
+@deftypefn {Loadable Function} {[@var{I}, @var{alpha}] =} pngread(@var{filename})\n\
 \n\
-For a grey-level image, the output is an MxN matrix. For a\n\
-colour image, an MxNx3 matrix is returned, containing the\n\
-red, green and blue components. The output is of class 'uint8'.\n\
+Read a PNG file from disk.\n\
 \n\
-See also: imread.")
+The image is returned as a matrix of dimension MxN (for grey-level images)\n\
+or MxNx3 (for colour images).  The numeric type of @var{I} and @var{alpha}\n\
+is @code{uint8} for grey-level and RGB images, or @code{logical} for\n\
+black-and-white images.\n\
+\n\
+@end deftypefn\n\
+@seealso{imread}")
 {
   octave_value_list retval;
   int nargin  = args.length();
@@ -94,32 +98,44 @@ See also: imread.")
   if (pic->bit_depth > 1 && pic->bit_depth < 8)
       pic->bit_depth = 8;
 
-  NDArray out = NDArray(dim, 0);
+  NDArray out(dim);
   
+  dim.resize(2);
+  NDArray alpha(dim);
+   
   Array<int> coord = Array<int> (3);
-  Matrix alpha ( pic->height , pic->width );
   
   for (unsigned long j=0; j < pic->height; j++) {
       coord(0) = j;
       for (unsigned long i=0; i < pic->width; i++) {
 	  coord(1) = i;
 
-	  for (int c = 0; c < dim(2); c++) {
+	  for (int c = 0; c < out.dims()(2); c++) {
 	      coord(2) = c;
-	      out(coord) = pic->row_pointers[j][i*3+c];
+	      out(coord) = pic->row_pointers[j][i*4+c];
 	  }
-	  alpha(j,i) = pic->row_pointers[j][i*3+3];
+	  alpha(j,i) = pic->row_pointers[j][i*4+3];
       }
   }
   out = out.squeeze();
 
   switch (pic->bit_depth) {
-  case 1: retval.append((boolNDArray)out); break;
-  case 8: retval.append((uint8NDArray)out); break;
-  case 16: retval.append((uint16NDArray)out); break;
-  default: retval.append(out);
+  case 1: 
+     retval.append((boolNDArray)out);
+     retval.append((boolNDArray)alpha);
+     break;
+  case 8:
+     retval.append((uint8NDArray)out);
+     retval.append((uint8NDArray)alpha);
+     break;
+  case 16:
+     retval.append((uint16NDArray)out);
+     retval.append((uint16NDArray)alpha);
+     break;
+  default:
+     retval.append(out);
+     retval.append(alpha);
   }
-  retval.append(alpha);
 
   delete_canvas(pic);
   return retval;
@@ -190,15 +206,15 @@ canvas *load_canvas(char *filename)
       png_set_tRNS_to_alpha(png_ptr);
   }
   
-  // Assume black background
-  if (color_type & PNG_COLOR_MASK_ALPHA) {
-      png_set_strip_alpha(png_ptr);
-  }
-
   // Always transform image to RGB
   if (color_type == PNG_COLOR_TYPE_GRAY 
       || color_type == PNG_COLOR_TYPE_GRAY_ALPHA) 
-      png_set_gray_to_rgb(png_ptr);  
+      png_set_gray_to_rgb(png_ptr);
+   
+  // If no alpha layer is present, create one
+  if (color_type == PNG_COLOR_TYPE_GRAY
+      || color_type == PNG_COLOR_TYPE_RGB)
+     png_set_add_alpha(png_ptr, 0xff, PNG_FILLER_AFTER);
 
   if (bit_depth < 8) {
       png_set_packing(png_ptr);
@@ -208,9 +224,8 @@ canvas *load_canvas(char *filename)
   if (bit_depth == 16) {
       png_set_strip_16(png_ptr);
   }
-
+   
   png_read_update_info(png_ptr,info_ptr);
-
 
   // Read the data from the file
   int stride = png_get_rowbytes(png_ptr, info_ptr);
