@@ -85,20 +85,18 @@ function varargout = imread(filename, options)
     
     ## Why are pipes so slow?
     ##    cmd = sprintf("convert -flatten -strip %s %s:-", fn, fmt);
-
-    tmpf = tmpnam();
-    cmd = sprintf("convert -flatten -strip '%s' '%s:%s' 2>/dev/null",
-		  fn, fmt, tmpf);
-
-    [ignored, sys] = system(cmd);
     
+    tmpf = [tmpnam(), ".", fmt];
+    cmd = sprintf("convert -flatten -strip +compress '%s' '%s' 2>/dev/null",
+		  fn, tmpf);
+
+    [ignored, sys] = system(cmd);    
     if (sys != 0)
 	error("imread: error running ImageMagick's 'convert'");
 	unlink(tmpf);
     endif
-    
+
     try
-	##fid = popen(cmd, "r");
 	fid = fopen(tmpf, "rb");
     catch
 	unlink(tmpf);
@@ -109,26 +107,35 @@ function varargout = imread(filename, options)
     [width, height] = sscanf(fgetl(fid), "%d %d", "C");
     fgetl(fid); # ignore max components
 
-    if(depth == 16)
+    if (depth == 16)
 	## PGM format has MSB first, i.e. big endian
-	data = fread(fid, "uint16", 0, "ieee-be");
+	[data, count] = fread(fid, "uint16", 0, "ieee-be");
     else
-        data = fread(fid);
+        [data, count] = fread(fid, "uint8");
     endif
     
     fclose(fid);
-    unlink(tmpnam);
+    unlink(tmpf);
+
+    if (imtype == "TrueColor")
+	channels = 3;
+    else
+	channels = 1;
+    endif
+    if (count != width*height*channels)
+	error("imread: image data chunk has invalid size")
+    endif
 
     varargout = {};
     switch (imtype)
  	case ("Bilevel")
- 	    varargout{1} = logical(reshape(data, height, width)');
+ 	    varargout{1} = logical(reshape(data, width, height)');
  	case ("Grayscale") 
- 	    varargout{1} = uint8(reshape(data, height, width)');
+ 	    varargout{1} = uint8(reshape(data, width, height)');
  	case ("TrueColor")
- 	    varargout{1} = cat(3, reshape(data(1:3:end), height, width)',
- 			       reshape(data(2:3:end), height, width)',
- 			       reshape(data(3:3:end), height, width)');
+ 	    varargout{1} = cat(3, reshape(data(1:3:end), width, height)',
+ 			       reshape(data(2:3:end), width, height)',
+ 			       reshape(data(3:3:end), width, height)');
  	    eval(sprintf("varargout{1} = uint%d(varargout{1});", depth));
 		
     endswitch
