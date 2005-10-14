@@ -23,9 +23,9 @@ if exist("jpgwrite")
   disp(">jpgread");
   im = jpgread('test.jpg');
   Rr = im(:,:,1); Gr = im(:,:,2); Br = im(:,:,3);
-  assert([max(double(Rw(:))-double(Rr(:)))<30, \
-          max(double(Gw(:))-double(Gr(:)))<30, \
-	  max(double(Bw(:))-double(Br(:)))<30]);
+  assert(all(Rw(:)-double(Rr(:))<35));
+  assert(all(Gw(:)-double(Gr(:))<35));
+  assert(all(Bw(:)-double(Br(:))<35));
   unlink('test.jpg');
 else
   disp(">jpgread ... not available");
@@ -40,9 +40,15 @@ if exist("pngwrite")
   disp(">pngread");
   im = pngread('test.png');
   Rr = im(:,:,1); Gr = im(:,:,2); Br = im(:,:,3);
-  assert([max(double(Rw(:))-double(Rr(:)))<30, \
-          max(double(Gw(:))-double(Gr(:)))<30, \
-	  max(double(Bw(:))-double(Br(:)))<30]);
+  assert(all(double(Rr(:))==Rw(:)));
+  assert(all(double(Gr(:))==Gw(:)));
+  assert(all(double(Br(:))==Bw(:)));
+  [im,Ar] = pngread('test.png');
+  Rr = im(:,:,1); Gr = im(:,:,2); Br = im(:,:,3);
+  assert(all(double(Rr(:))==Rw(:)));
+  assert(all(double(Gr(:))==Gw(:)));
+  assert(all(double(Br(:))==Bw(:)));
+  assert(all(double(Ar(:))==Aw(:)));
   unlink('test.png');
 else
   disp(">pngread ... not available");
