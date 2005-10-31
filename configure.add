@@ -1,7 +1,7 @@
 
 if test -e main/image/NOINSTALL ; then
 
-	dnl Not installing so don't test for libjpeg/libpng.
+	dnl Not installing so don't test for libjpeg/libpng/libMagick++.
 	STATUS=none
 
 else
@@ -35,6 +35,16 @@ else
 	else
 	    STATUS="$STATUS, png.h not found"
 	fi
+
+	AC_CHECK_PROG(HAVE_MAGICKXX, Magick++-config, yes)
+	if test $HAVE_MAGICKXX ; then
+		STATUS="$STATUS, ImageMagick++"
+		AC_SUBST(DEFHAVE_MAGICKXX)		
+		DEFHAVE_MAGICKXX="HAVE_MAGICKXX=1"	
+	else
+	    STATUS="$STATUS, ImageMagick++ not found"
+	fi
+
 
 fi
 

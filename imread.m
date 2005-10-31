@@ -29,7 +29,7 @@
 ## Modified: Stefan van der Walt <stefan@sun.ac.za>
 ## Date: 24 January 2005
 
-function varargout = imread(filename, options)
+function varargout = imread(filename, varargin)
     if (nargin != 1)
 	usage("I = imread(filename)")
     endif
@@ -43,9 +43,14 @@ function varargout = imread(filename, options)
 	error("imread: cannot find %s", filename);
     endif
 
-    ## divert jpegs and pngs to "jpgread" and "pngread"
+
     [ig, ig, ext] = fileparts(fn);
     ext = upper(ext);
+    if ( file_in_loadpath("__magick_read__.oct") )
+        varargout{:} = __magick_read__(fn, varargin{:});
+        break
+    endif
+    ## divert jpegs and pngs to "jpgread" and "pngread"
     if ( file_in_loadpath("jpgread.oct") &&
 	(strcmp(ext, ".JPG") || strcmp(ext, ".JPEG")) )
 	varargout{1} = jpgread(fn);

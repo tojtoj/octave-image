@@ -8,9 +8,13 @@ ifdef HAVE_PNG
 	PNG=pngread.oct pngwrite.oct
 endif
 
+ifdef HAVE_MAGICKXX
+	IMAGEMAGICK=__imagemagick__.oct __magick_read__.oct
+endif
+
 all: conv2.oct cordflt2.oct bwlabel.oct bwfill.oct rotate_scale.oct \
 	houghtf.oct graycomatrix.oct \
-	$(JPEG) $(PNG)
+	$(JPEG) $(PNG) $(IMAGEMAGICK)
 
 jpgread.oct: jpgread.cc
 	$(MKOCTFILE) $< -ljpeg
@@ -23,5 +27,11 @@ pngread.oct: pngread.cc
 
 pngwrite.oct: pngwrite.cc
 	$(MKOCTFILE) $< -lpng
+	
+__imagemagick__.oct: __imagemagick__.cc
+	$(MKOCTFILE) $< -lMagick++ -lMagick
+	
+__magick_read__.oct: __imagemagick__.oct
+	$(LN_S) __imagemagick__.oct $@
 
 clean: ; -$(RM) *.o octave-core core *.oct *~
