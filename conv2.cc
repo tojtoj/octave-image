@@ -1,13 +1,18 @@
 /*
  * conv2: 2D convolution for octave
  *
- * Copyright (C) 1999 Andy Adler
- * This code has no warrany whatsoever.
- * Do what you like with this code as long as you
- *     leave this copyright in place.
- *
  * $Id$
-
+ * 
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation; either version 2, or (at your option) any
+ * later version.
+ * 
+ * This software is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * for more details.
+ * 
 ## 2000-05-17: Paul Kienzle
 ##    * change argument to vector conversion to work for 2.1 series octave
 ##      as well as 2.0 series
