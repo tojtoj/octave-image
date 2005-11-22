@@ -37,19 +37,9 @@ Load PNG files to octave using libpng;
  * - Fix bugs, restructure
  */
 
-#include <octave/oct.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "png.h"
-
-#ifdef __cplusplus
-} //extern "C"
-#endif
-
 #include "pngcanvas.h"
+#include <octave/oct.h>
 
 canvas *load_canvas(char *filename);
 

@@ -37,19 +37,9 @@ Write PNG files to disk from octave
  * - Fix bugs, restructure
  */
 
-#include <octave/oct.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "png.h"
-
-#ifdef __cplusplus
-} //extern "C"
-#endif
-
 #include "pngcanvas.h"
+#include <octave/oct.h>
 
 void save_canvas(canvas *can, char *filename);
 
