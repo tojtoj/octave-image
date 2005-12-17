@@ -248,22 +248,24 @@ conv2 (MArray2<T>&A, MArray2<T>&B, Shape ishape)
 */
 DEFUN_DLD (conv2, args, ,
   "-*- texinfo -*-\n\
-Perform 2 dimentional convolution of two matrices or vectors\n\
-@deftypefn {Loadable Function} {y =} conv2 (@var{a}, @var{b})\n\
-@var{y}= conv2(@var{a},@var{b}) performs the same as\n\
-@var{y}= conv2(@var{a},@var{b},'full') \n\
-\n\
 @deftypefn {Loadable Function} {y =} conv2 (@var{a}, @var{b}, @var{shape})\n\
-returns 2D convolution of @var{a} and @var{b} where the size\n\
-of @var{c} is given by\n\
-  @var{shape}= 'full'  -> returns full 2-D convolution\n\
-  @var{shape}= 'same'  -> same size as a. 'central' part of convolution\n\
-  @var{shape}= 'valid' -> only parts which do not include zero-padded edges\n\
+@deftypefnx {Loadable Function} {y =} conv2 (@var{v1}, @var{v2}, @var{M}, @var{shape})\n\
 \n\
-@deftypefn {Loadable Function} {y =} conv2 (@var{v1}, @var{v2}, @var{M}, @var{shape})\n\
-  returns convolution of matrix @var{a} by\n\
-       vector @var{v1} in the column direction and by\n\
-       vector @var{v2} in the row direction  \n\
+Returns 2D convolution of @var{a} and @var{b} where the size\n\
+of @var{c} is given by\n\
+\n\
+@table @asis\n\
+@item @var{shape}= 'full'\n\
+returns full 2-D convolution\n\
+@item @var{shape}= 'same'\n\
+same size as a. 'central' part of convolution\n\
+@item @var{shape}= 'valid'\n\
+only parts which do not include zero-padded edges\n\
+@end table\n\
+\n\
+By default @var{shape} is 'full'. When the third argument is a matrix\n\
+returns the convolution of the matrix @var{M} by the vector @var{v1}\n\
+in the column direction and by vector @var{v2} in the row direction\n\
 @end deftypefn")
 {
   octave_value_list retval;
