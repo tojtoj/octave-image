@@ -1,4 +1,4 @@
-/*
+/* Copyright (C) 1999-2005 Andy Adler
  * conv2: 2D convolution for octave
  *
  * $Id$
