@@ -83,7 +83,7 @@ endfunction
 %! [vals,r,c]=qtgetblk(eye(4),qtdecomp(eye(4)),2)
 %! % Returns 2 blocks, at [1,3] and [3,1] (2*2 zeros blocks)
 
-%!shared A,S,v8a,v4a,v2a,v8b,v4b,v2b,v8c,v4c,v2c,i8,i4,i2,r8,r4,r2,c8,c4,c2               
+%!shared A,S
 %! A=[ 1, 4, 2, 5,54,55,61,62;
 %!     3, 6, 3, 1,58,53,67,65;
 %!     3, 6, 3, 1,58,53,67,65;
@@ -93,49 +93,58 @@ endfunction
 %!    23,22,26,25,99,99,99,99;    
 %!    22,22,24,22,99,99,99,99];
 %! S=qtdecomp(A,10);
-%! [v8a]=qtgetblk(A,S,8);
-%! [v4a]=qtgetblk(A,S,4);
-%! [v2a]=qtgetblk(A,S,2);
-%! [v8c,i8]=qtgetblk(A,S,8);
-%! [v4c,i4]=qtgetblk(A,S,4);
-%! [v2c,i2]=qtgetblk(A,S,2);
-%! [v8b,r8,c8]=qtgetblk(A,S,8);
-%! [v4b,r4,c4]=qtgetblk(A,S,4);
-%! [v2b,r2,c2]=qtgetblk(A,S,2);
-%! [v8c,r8,c8]=qtgetblk(A,S,8);
-%! [v4c,r4,c4]=qtgetblk(A,S,4);
-%! [v2c,r2,c2]=qtgetblk(A,S,2);
 
-%!assert(v8a,[]);
-%!assert(v8a, v8b);
-%!assert(v8a, v8c);
-%!assert(v4a, v4b);
-%!assert(v4a, v4c);
-%!assert(v2a, v2b);
-%!assert(v2a, v2c);
+%!test
+%! [va]=qtgetblk(A,S,8);
+%! [vb,r,c]=qtgetblk(A,S,8);
+%! [vc,i]=qtgetblk(A,S,8);
+%! assert(va, vb);
+%! assert(va, vc);
+%! assert(i,[]);
+%! assert(r,[]);
+%! assert(c,[]);
+%! R=[];
+%! assert(va,R);
 
-%!# Workaround to eye(3,A(1:4,1:4),A(5:8,5:8)) which won't work for Octave <= 2.1.57
-%!test    
+
+%!test
+%! [va]=qtgetblk(A,S,4);
+%! [vb,r,c]=qtgetblk(A,S,4);
+%! [vc,i]=qtgetblk(A,S,4);
+%! assert(va, vb);
+%! assert(va, vc);
+%! assert(i, find(full(S)==4));
+%! assert(r,[1;5]);
+%! assert(c,[1;5]);
 %! R=zeros(4,4,2);
 %! R(:,:,1)=A(1:4,1:4);
 %! R(:,:,2)=A(5:8,5:8);
-%! assert(v4a,R);
+%! assert(va,R);
 
-%!assert(i8,[]);
-%!assert(i4, find(full(S)==4));
-%!assert(i2, find(full(S)==2));
-
-%!assert(r8,[]);
-%!assert(c8,[]);
-%!assert(r4,[1;5]);
-%!assert(c4,[1;5]);
-%!assert(r2,[7;5;7;1;3;1;3]);
-%!assert(c2,[1;3;3;5;5;7;7]);
-
-
+%!test
+%! [va]=qtgetblk(A,S,2);
+%! [vb,r,c]=qtgetblk(A,S,2);
+%! [vc,i]=qtgetblk(A,S,2);
+%! assert(va, vb);
+%! assert(va, vc);
+%! assert(i, find(full(S)==2));
+%! assert(r,[7;5;7;1;3;1;3]);
+%! assert(c,[1;3;3;5;5;7;7]);
+%! R=zeros(2,2,7);
+%! R(:,:,1)=A(7:8,1:2);
+%! R(:,:,2)=A(5:6,3:4);
+%! R(:,:,3)=A(7:8,3:4);
+%! R(:,:,4)=A(1:2,5:6);
+%! R(:,:,5)=A(3:4,5:6);
+%! R(:,:,6)=A(1:2,7:8);
+%! R(:,:,7)=A(3:4,7:8);
+%! assert(va,R);
 
 %
 % $Log$
+% Revision 1.3  2006/01/02 20:53:42  pkienzle
+% Reduce number of shared variables in tests
+%
 % Revision 1.2  2004/08/11 19:52:41  jmones
 % qtsetblk added
 %
