@@ -235,7 +235,7 @@ endfunction
 %!assert(full(qtdecomp(eye(5))), reshape([5,zeros(1,24)],5,5));
 %!assert(full(qtdecomp(eye(6))), repmat(reshape([3,zeros(1,8)],3,3),2,2));
 
-%!shared A, B1, B2, B4, O2, O4, Req, R1, R10, R10m2
+%!shared A, B2, B4
 %! A=[ 1, 4, 2, 5,54,55,61,62;
 %!     3, 6, 3, 1,58,53,67,65;
 %!     3, 6, 3, 1,58,53,67,65;
@@ -244,19 +244,8 @@ endfunction
 %!    27,42,42,42,99,99,99,99;    
 %!    23,22,26,25,99,99,99,99;    
 %!    22,22,24,22,99,99,99,99];
-%! B1=[1];
 %! B2=[2,0;0,0];
-%! B4=reshape([4,zeros(1,15)],4,4);
-%! O2=ones(2,2);
-%! O4=ones(4,4);
-%! Req=[O4,O4; 
-%!      [O2,B2;O2,O2],B4];
-%! R1=[O4,O4;
-%!    [O2,B2;B2,O2],B4];
-%! R10=[[B4,[B2,B2;B2,B2]];
-%!      [[O2,B2;B2,B2],B4]];
-%! R10m2=[[B4,[B2,B2;B2,B2]];
-%!        [[B2,B2;B2,B2],B4]];
+%! B4=zeros(4); B4(1,1)=4;
 
 %!# Test 'equal' method
 %!test
@@ -264,13 +253,22 @@ endfunction
 %! b=[2,0;0,0];
 %! assert(full(qtdecomp(eye(4))), [a,b;b,a]);
 
-%!assert(full(qtdecomp(A)), Req);
+%!test
+%! R=[ones(4,8); [ones(2),B2;ones(2,4)], B4];
+%! assert(full(qtdecomp(A)), R);
+%! assert(full(qtdecomp(A,0)), R);
 
 %!# Test 'threshold' method
-%!assert(full(qtdecomp(A,0)), Req);
-%!assert(full(qtdecomp(A,1)), R1);
-%!assert(full(qtdecomp(A,10)), R10);
-%!assert(full(qtdecomp(A,10,2)), R10m2);
+%!test
+%! R=[ones(4,8); [ones(2),B2;B2,ones(2)],B4];
+%! assert(full(qtdecomp(A,1)), R);
+%!test
+%! R=[[B4,[B2,B2;B2,B2]]; [[ones(2),B2;B2,B2],B4]];
+%! assert(full(qtdecomp(A,10)), R);
+%!test
+%! R=[[B4,[B2,B2;B2,B2]]; [[B2,B2;B2,B2],B4]];
+%! assert(full(qtdecomp(A,10,2)), R);
+
 %!assert(full(qtdecomp(A,100,[2, 4])), [B4,B4;B4,B4]);
 
 %!# Test 'fun' method
@@ -284,22 +282,25 @@ endfunction
 %!# no params
 %!test
 %! first_eq=inline("(A(1,1,:)!=(54*ones(1,1,[size(A),1](3))))(:)","A");
-%! assert(full(qtdecomp(A,first_eq)),[O4,B4;O4,O4]); 
+%! assert(full(qtdecomp(A,first_eq)),[ones(4),B4;ones(4,8)]); 
 
 %!# 1 param
 %!test
 %! first_eq=inline("(A(1,1,:)!=(c*ones(1,1,[size(A),1](3))))(:)","A","c");
-%! assert(full(qtdecomp(A,first_eq,54)),[O4,B4;O4,O4]); 
+%! assert(full(qtdecomp(A,first_eq,54)),[ones(4),B4;ones(4,8)]); 
 
 %!# 3 params
 %!test
 %! first_eq=inline("(A(1,1,:)!=((c1+c2+c3)*ones(1,1,[size(A),1](3))))(:)","A","c1","c2","c3");
-%! assert(full(qtdecomp(A,first_eq,4,40,10)),[O4,B4;O4,O4]); 
+%! assert(full(qtdecomp(A,first_eq,4,40,10)),[ones(4),B4;ones(4,8)]); 
 
 
 
 %
 % $Log$
+% Revision 1.7  2006/01/02 22:05:06  pkienzle
+% Reduce number of shared variables in tests
+%
 % Revision 1.6  2004/09/09 19:36:35  jmones
 % all_va_args -> varargin{:}. Now works on 2.1.58
 %
