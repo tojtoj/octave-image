@@ -235,6 +235,12 @@ endfunction
 %!assert(full(qtdecomp(eye(5))), reshape([5,zeros(1,24)],5,5));
 %!assert(full(qtdecomp(eye(6))), repmat(reshape([3,zeros(1,8)],3,3),2,2));
 
+%!# Test 'equal' method
+%!test
+%! a=ones(2,2);
+%! b=[2,0;0,0];
+%! assert(full(qtdecomp(eye(4))), [a,b;b,a]);
+
 %!shared A, B2, B4
 %! A=[ 1, 4, 2, 5,54,55,61,62;
 %!     3, 6, 3, 1,58,53,67,65;
@@ -247,12 +253,6 @@ endfunction
 %! B2=[2,0;0,0];
 %! B4=zeros(4); B4(1,1)=4;
 
-%!# Test 'equal' method
-%!test
-%! a=ones(2,2);
-%! b=[2,0;0,0];
-%! assert(full(qtdecomp(eye(4))), [a,b;b,a]);
-
 %!test
 %! R=[ones(4,8); [ones(2),B2;ones(2,4)], B4];
 %! assert(full(qtdecomp(A)), R);
@@ -262,9 +262,11 @@ endfunction
 %!test
 %! R=[ones(4,8); [ones(2),B2;B2,ones(2)],B4];
 %! assert(full(qtdecomp(A,1)), R);
+
 %!test
 %! R=[[B4,[B2,B2;B2,B2]]; [[ones(2),B2;B2,B2],B4]];
 %! assert(full(qtdecomp(A,10)), R);
+
 %!test
 %! R=[[B4,[B2,B2;B2,B2]]; [[B2,B2;B2,B2],B4]];
 %! assert(full(qtdecomp(A,10,2)), R);
@@ -298,6 +300,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.8  2006/01/03 02:09:15  pkienzle
+% Reorder tests so that shared variables are displayed unless relevant.
+%
 % Revision 1.7  2006/01/02 22:05:06  pkienzle
 % Reduce number of shared variables in tests
 %
