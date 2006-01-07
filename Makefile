@@ -31,7 +31,7 @@ pngwrite.oct: pngwrite.cc
 __imagemagick__.oct: __imagemagick__.cc
 	$(MKOCTFILE) $< -lMagick++ -lMagick
 	
-__magick_read__.oct: __imagemagick__.oct
-	$(LN_S) __imagemagick__.oct $@
+__magick_read__$(OCTLINK): __imagemagick__.oct
+	$(MKOCTLINK) __imagemagick__.oct $@
 
 clean: ; -$(RM) *.o octave-core core *.oct *~
