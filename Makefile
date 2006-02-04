@@ -9,7 +9,7 @@ ifdef HAVE_PNG
 endif
 
 ifdef HAVE_MAGICKXX
-	IMAGEMAGICK=__imagemagick__.oct __magick_read__.oct
+	IMAGEMAGICK=__imagemagick__.oct __magick_read__$(OCTLINK)
 endif
 
 all: conv2.oct cordflt2.oct bwlabel.oct bwfill.oct rotate_scale.oct \
