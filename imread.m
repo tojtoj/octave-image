@@ -45,11 +45,8 @@ function varargout = imread(filename, varargin)
 
 
     [ig, ig, ext] = fileparts(fn);
-    ext = upper(ext);
-    if ( file_in_loadpath("__magick_read__.oct") )
-        varargout{:} = __magick_read__(fn, varargin{:});
-        break
-    endif
+    ext = upper(ext);    
+    
     ## divert jpegs and pngs to "jpgread" and "pngread"
     if ( file_in_loadpath("jpgread.oct") &&
 	(strcmp(ext, ".JPG") || strcmp(ext, ".JPEG")) )
@@ -59,8 +56,14 @@ function varargout = imread(filename, varargin)
     if ( file_in_loadpath("pngread.oct") && (strcmp(ext, ".PNG")) )
 	varargout{1} = pngread(fn);
 	break
-    endif	
-
+    endif
+    
+    ## alternately, use imagemagick
+    if ( file_in_loadpath("__magick_read__.oct") )
+      varargout{:} = __magick_read__(fn, varargin{:});
+      break
+    endif
+    
     [ident, sys] = system(sprintf('identify -verbose %s | grep -e "Red: " -e Type',
 				  fn));
     if (sys != 0)
