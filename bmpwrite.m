@@ -55,7 +55,7 @@ function bmpwrite_indexed(x,map,file)
     [h,w] = size(x);
     padw = ceil(w/4)*4-w;
     header = 14+40+4*rows(map);
-    filesize = header+(r+padw)*c;
+    filesize = header+(w+padw)*h;
     arch = "ieee-le";
     file = fopen(file, "wb");
     fwrite(file,toascii("BM"),"uchar",0,arch); # file tag
@@ -83,6 +83,6 @@ function bmpwrite_indexed(x,map,file)
 
     ## raster image, each line on a 32-bit boundary, padded with zeros
     ## lines written bottom to top.
-    fwrite(file,[flipud(x-1)',zeros(c,padw)],"uchar",0,arch);
+    fwrite(file,[flipud(x-1)';zeros(padw,h)],"uchar",0,arch);
     fclose(file);
 endfunction
