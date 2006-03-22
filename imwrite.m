@@ -221,7 +221,7 @@ end
 
    fclose(fid);
    if ~usepipe
-      [jnk,retcode] = system(cmd);
+      retcode = system(cmd);
       if retcode !=0 
          error('could not call imagemagick convert');
       end
@@ -235,6 +235,9 @@ end_unwind_protect
 
 #
 # $Log$
+# Revision 1.11  2006/03/22 17:50:47  qspencer
+# Change calls to 'system' function to reflect new ordering of output arguments.
+#
 # Revision 1.10  2005/09/08 02:00:17  pkienzle
 # [for Bill Denney] isstr -> ischar
 #

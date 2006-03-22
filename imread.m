@@ -64,7 +64,7 @@ function varargout = imread(filename, varargin)
       break
     endif
     
-    [ident, sys] = system(sprintf('identify -verbose %s | grep -e "Red: " -e Type',
+    [sys, ident] = system(sprintf('identify -verbose %s | grep -e "Red: " -e Type',
 				  fn));
     if (sys != 0)
 	error("imread: error running ImageMagick's 'identify' on %s", fn)
@@ -98,7 +98,7 @@ function varargout = imread(filename, varargin)
     cmd = sprintf("convert -flatten -strip +compress '%s' '%s' 2>/dev/null",
 		  fn, tmpf);
 
-    [ignored, sys] = system(cmd);    
+    sys = system(cmd);    
     if (sys != 0)
 	error("imread: error running ImageMagick's 'convert'");
 	unlink(tmpf);
