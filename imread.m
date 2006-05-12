@@ -150,11 +150,10 @@ function varargout = imread(filename, varargin)
 endfunction
 
 function value = re_grab(re, str)
-    idx = regexp(re, str);
-    if !isempty(idx)
-	idx = idx(2,:);
-	value = substr(str, idx(1), diff(idx)+1);	
-    else
-	value = "";
-    endif    
+  T = regexp(str,re,'tokens');
+  if (isempty(T))
+    value = "";
+  else
+    value = T{1}{1};
+  endif
 endfunction
