@@ -100,7 +100,7 @@ DEFUN_DLD (jpgread, args, nargout ,
     // We bail out if the input parameters are bad
     //
     if ((nargin != 1) || !args(0).is_string() || (nargout != 1)) {
-	print_usage ("jpgread");
+	print_usage ();
 	return retval;
     }    
     

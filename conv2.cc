@@ -277,7 +277,7 @@ in the column direction and by vector @var{v2} in the row direction\n\
 
   if (nargin < 2 )
     {
-     print_usage ("conv2");
+     print_usage ();
      return retval;
     }
   else if (nargin == 3)
@@ -302,7 +302,7 @@ in the column direction and by vector @var{v2} in the row direction\n\
   else
     {
       error("Shape type not valid");
-      print_usage ("conv2");
+      print_usage ();
       return retval;
     }
 
@@ -317,7 +317,7 @@ in the column direction and by vector @var{v2} in the row direction\n\
           ||
          !( 1== args(1).rows() || 1== args(1).columns() ) )
          {
-          print_usage ("conv2");
+          print_usage ();
           return retval;
          }
 

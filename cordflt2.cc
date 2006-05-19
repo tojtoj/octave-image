@@ -184,7 +184,7 @@ DEFUN_DLD(cordflt2, args, ,
  in ordfilt2.m")
 {
     if(args.length() != 4) {
-	print_usage ("ordfilt2");
+	print_usage ();
 	return octave_value_list();
     }
     

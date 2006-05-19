@@ -57,7 +57,7 @@ pngwrite writes a png file to the disk.\n\
    // We bail out if the input parameters are bad
    //
    if (nargin < 5 || !args(0).is_string() ) {
-     print_usage ("pngwrite");
+     print_usage ();
      return retval;
    }
 

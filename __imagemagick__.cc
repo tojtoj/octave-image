@@ -234,7 +234,7 @@ Read images with ImageMagick++. User interface in imread.m.\n\
     int i;    
     if(args.length() > 2 || args.length() < 1 || !args(0).is_string() \
        || nargout > 3) {
-      print_usage ("magick_read");
+      print_usage ();
       return octave_value_list();
     }
     Array<int> frameidx;

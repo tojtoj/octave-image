@@ -64,7 +64,7 @@ black-and-white images.\n\
   // We bail out if the input parameters are bad
   //
   if (nargin != 1 || !args(0).is_string()) {
-    print_usage ("pngread");
+    print_usage ();
     return retval;
   }
   

@@ -43,7 +43,7 @@ usage: [H, R]  = houghtf(I[, angles])\n\
     if (args.length() == 1) {
 	DEF_THETA = true;
     } else if (args.length() != 2) {
-	print_usage("houghtf");
+	print_usage ();
 	return retval;
     } 
 
@@ -57,7 +57,7 @@ usage: [H, R]  = houghtf(I[, angles])\n\
     }
 
     if (error_state) {
-	print_usage("houghtf");
+	print_usage ();
 	return retval;
     }
 

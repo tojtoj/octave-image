@@ -47,7 +47,7 @@ usage: P = graycomatrix(I, levels, distances, angles)\n\
     octave_value_list retval;
 
     if (args.length() != 4) {
-	print_usage("graycomatrix");
+	print_usage ();
 	// 'I' must be integer values [0, nr_of_levels-1]
 
 	return retval;
@@ -60,7 +60,7 @@ usage: P = graycomatrix(I, levels, distances, angles)\n\
     ColumnVector th = ColumnVector(args(3).vector_value());
 
     if (error_state) {
-	print_usage("graycomatrix");
+	print_usage ();
 	return retval;
     }
 

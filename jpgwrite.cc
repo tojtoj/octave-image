@@ -71,7 +71,7 @@ DEFUN_DLD (jpgwrite, args, ,
 // We bail out if the input parameters are bad
 //
    if (nargin < 2 || !args(0).is_string() ) {
-      print_usage ("jpgwrite");
+      print_usage ();
       return retval;
    }
 

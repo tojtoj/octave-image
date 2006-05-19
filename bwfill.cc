@@ -58,7 +58,7 @@ DEFUN_DLD (bwfill, args, ,
    int nargin = args.length ();
 
    if (nargin < 2 ) {
-      print_usage ("bwfill");
+      print_usage ();
       return retval;
    }
 
@@ -187,8 +187,8 @@ DEFUN_DLD (bwfill, args, ,
 
 /*
  * $Log$
- * Revision 1.6  2004/01/29 21:13:20  pkienzle
- * Use std::vector rather than std::auto_ptr for temporary memory
+ * Revision 1.7  2006/05/19 06:58:50  jwe
+ * *** empty log message ***
  *
  * Revision 1.5  2003/05/15 21:25:40  pkienzle
  * OCTAVE_LOCAL_BUFFER now requires #include <memory>

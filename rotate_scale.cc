@@ -58,7 +58,7 @@ DEFUN_DLD (rotate_scale, args, ,
        !args(2).is_matrix_type() ||
        !args(3).is_matrix_type()
        ) {
-      print_usage ("rotate_scale");
+      print_usage ();
       return retval;
    }
 
