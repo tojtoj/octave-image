@@ -12,7 +12,7 @@ ifdef HAVE_MAGICKXX
 	IMAGEMAGICK=__imagemagick__.oct __magick_read__$(OCTLINK)
 endif
 
-all: conv2.oct cordflt2.oct bwlabel.oct bwfill.oct rotate_scale.oct \
+all: cordflt2.oct bwlabel.oct bwfill.oct rotate_scale.oct \
 	houghtf.oct graycomatrix.oct \
 	$(JPEG) $(PNG) $(IMAGEMAGICK)
 
@@ -27,10 +27,10 @@ pngread.oct: pngread.cc
 
 pngwrite.oct: pngwrite.cc
 	$(MKOCTFILE) $< -lpng
-	
+
 __imagemagick__.oct: __imagemagick__.cc
 	$(MKOCTFILE) $< -lMagick++ -lMagick
-	
+
 __magick_read__$(OCTLINK): __imagemagick__.oct
 	$(MKOCTLINK) __imagemagick__.oct $@
 
