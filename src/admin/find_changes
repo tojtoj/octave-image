@@ -1,0 +1,172 @@
+#!/usr/bin/perl -w
+
+=head1 NAME find_changes.pl - Find patterns in text files and propose changes.
+
+This script passes lines of text through a perl function with the aim of
+reporting the occurence of patterns and proposing changes to be
+done. L<patch> should be used to actually modify the original files.
+
+=head1 SYNOPSIS
+
+find_changes.pl [options] changes_def file(s).txt ... E<gt> changes_patch
+
+Reads and executes the perl F<changes_def> file, which must contain the
+definition of a function called C<change_line()>, and then reads the
+F<file(s).txt> line by line.
+
+For each line of each file, the function F<change_line()> is called with the
+line as single argument, which can be modified inplace.
+
+If any change is done to the line, it is reported by printing to stdout a
+universal diff patch.
+
+=head2 Modifying files
+
+It is then recommended to inspect and edit the file F<changes_patch>,
+removing lines that should not be changed. Once this is done, the changes
+can be done in the original files by using C<patch -p0 < changes_patch>.
+
+=head2 Commenting on lines
+
+If a function C<comment_line()> is present, each line will be passed to it
+and its output will be shown on standard error.
+
+=head1 OPTIONS
+
+=over 4
+
+=item -p, --patch
+
+Output a patch (default).
+
+=item -d
+
+Use another output format, adapted to some F<do_changes.pl> script.
+
+=item -v, --verbose
+
+Print some info on stderr during execution.
+
+=item -h, --help
+
+Print a help message and exit.
+
+=head1 COPYRIGHT
+
+This file is distributed under the terms of the GNU General Public Licence.
+
+=head1 AUTHOR Etienne Grossmann E<lt>etienne@isr.ist.utl.ptE<gt>
+
+=cut
+
+###
+sub help {system ("perldoc $0|cat")}
+
+$patch = 1;
+$verbose = 0;
+				# Read options
+
+while (@ARGV && ($ARGV[0] =~ /^\-/)) {
+    if    ($ARGV[0] =~ /^\-(h|\-help)$/){ help(); exit 0;}
+    elsif ($ARGV[0] =~ /^\-(v|\-verbose)$/){ $verbose = 1;}
+    elsif ($ARGV[0] =~ /^\-(p|\-patch)$/) { 
+	$patch = 1;
+    } elsif ($ARGV[0] =~ /^\-(d)$/) { 
+	$patch = 0;
+    } else {
+	die "Unknown option '$ARGV[0]'. Try '$0 --help'";
+    }
+    
+    shift @ARGV;
+}
+
+die "No definition file specified" unless @ARGV;
+
+$dfile = shift @ARGV;
+
+				# Read and compile definition file
+print STDERR "Definition file is $dfile\n" if $verbose;
+
+if (!defined (do ($dfile))) {
+    if ($!) {
+	print STDERR "Can't find $dfile : '$!'\n";
+	exit 1;
+    } elsif ($@) {
+	print STDERR "Can't compile $dfile : '$@'\n";
+	exit 1;
+    } else {
+	print STDERR "Problem with $dfile : do returns undefined\n";
+	exit 1;
+    }
+} 
+
+if (!defined (&change_line)) {
+    print STDERR "File '$dfile' does not define a function 'change_line()'\n";
+    exit 1;
+}
+
+$has_comment = defined (&comment_line);
+
+foreach my $f (@ARGV) {
+
+    if (!$patch) {
+	unless (open FF, "<$f") {
+	    print "## Whoa!!! Can't open file '$f'. Skipping";
+	    next;
+	}
+	print STDERR "Scanning file $f\n" if $verbose;
+	
+	
+	local $lnum = 0;
+	while (! eof (FF)) {
+	    
+	    my $line = <FF>;	# Read a line
+	    my $olin = $line;
+	    $lnum++;
+	    
+	    if ($has_comment) {
+		if ($comment = &comment_line ($line)) {
+		    $comment = "## $comment" if $comment !~ /^\s*\#/;
+		    $comment .= "\n" if $comment !~ /\n$/;
+		    print "$f:$.:$comment";
+		}
+	    }
+	    
+	    &change_line ($line);
+	    if ($olin ne $line) {
+		print "$f:$.:$olin";
+	    }
+	}
+	close FF;
+    } else {			# Do a patch. Using diff, what else?
+	my $nf = "$f.new";
+	my $i = 1;
+	while (-e $nf) {	# Find a name for the temp file.
+	    $nf = $f . ".new." . $i ;
+	}
+	unless (open FF, "<$f") {
+	    print STDERR "## Whoa!!! Can't open file '$f'. Skipping\n";
+	}
+	unless (open GG, ">$nf") {
+	    print STDERR "## Whoa!!! Can't open temp file '$nf'. Skipping\n";
+	    next;
+	}
+	print STDERR "## Scanning file $f\n" if $verbose;
+
+	while (! eof (FF)) {	# Create (temp) transformed file
+	    
+	    my $line = <FF>;	# Read a line
+	    
+	    &change_line ($line);
+	    print GG $line;
+	}
+	close FF; close GG;
+				# Call diff and modify slightly the output
+	my $tmp = `diff -u $f $nf`;
+	$tmp =~ s{^\+\+\+ $nf}{+++ $f}m;
+	print $tmp;
+
+	unlink($nf) or print STDERR "## Whoa!!! Can't remove temp file '$nf'\n";
+    }
+}
+

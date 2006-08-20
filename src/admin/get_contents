@@ -1,0 +1,181 @@
+#!/usr/bin/env perl
+#
+# Traverse the directory tree and look for files called 'CONTENTS'.
+# Insert the text from these files into octave-forge documentation
+# files such as the top-level README, and the developer's guide.
+# Issues:
+#   - Entries in the README appear in the sort order of
+#     the directory names the CONTENTS files are in.  This
+#     isn't necessarily the best sequence since some directories
+#     such as main/ should appear first.
+#   - At the moment the text in the CONTENTS files should be plain
+#     text.  Planning to allow texinfo for layout control in .html
+#     files.
+#
+# Albert Danial Jan 2 2002
+
+use strict;
+use File::Find;
+
+my $location = `pwd`;
+my $PATH     = "";
+if ($location =~ m{^(.*)/admin$}) {
+    chdir "..";
+    $PATH = "$1/";
+}
+
+my @files = ();       # to contain relative path names of each CONTENTS file
+find(\&wanted, ".");  # start here & descend recursively; populate @files
+
+fill_README(@files);         # creates 'README' from 'template.readme'
+fill_developer_html(@files); # creates 'new_developer.html' from 'template.ndev'
+
+# # # # # # # 
+
+sub fill_README {  # {{{1
+    my (@files, ) = @_;
+    my $template = "admin/template.readme";    # -> reads
+    my $RM       = "README";                   # -> writes
+    if (!-r $template) {
+        warn "Unable to read the file '$template'; cannot make README\n";
+        return;
+    }
+    open(IN,  $template) or die "Unable to read $template: $!\n";
+    my @template_data = <IN>;  # slurp the entire file
+    close IN;
+
+    my $added_contents = 0;
+    my $top_of_file    = 1;
+    open(README, ">$RM")    or die "Unable to write $RM: $!\n";
+    foreach my $t (@template_data) {
+        if      ($top_of_file) {      # skip over warning lines in
+            next if $t =~ /^-> /;     # template starting with '->'
+            $top_of_file = 0;
+        } elsif ($added_contents) {
+            print README $t;
+            next;
+        } elsif ($t =~ /^Project organization/) {
+            print README "$t\n";
+            foreach (sort @files) {
+                open(CONTENTS, $_) or die "Cannot read $_: $!\n";
+                my @c = <CONTENTS>;
+                close CONTENTS;
+                m{^(.*)/(.*?)$}; # match directory and file's basename
+                my $dir  = $1;
+                my $file = $2;
+                $dir     =~ s{^\./}{};  # strip leading  ./
+                print README "$dir/\n";
+                foreach my $line (@c) {
+                    print README "\t$line";
+                }
+                print README "\n";
+            }
+            $added_contents = 1;
+        } else {
+            print README $t;
+        }
+    }
+    close README;
+    warn "Use 'cvs diff ${PATH}${RM}' to determine if updates are needed.\n";
+    warn "Use 'cvs commit ${PATH}${RM}' to update README.\n";
+}  # 1}}}
+
+# # # # # # # 
+
+sub fill_developer_html {  # {{{1
+    my (@files, ) = @_;
+    my $template = "admin/template.ndev";          # <- reads
+    my $RM       = "doc/new_developer.html";       # <- writes
+    if (!-r $template) {
+        warn "Unable to read the file '$template'; cannot make README\n";
+        return;
+    }
+    open(IN,  $template) or die "Unable to read $template: $!\n";
+    my @template_data = <IN>;  # slurp the entire file
+    close IN;
+
+    my $added_contents = 0;
+    my $top_of_file    = 1;
+    open(README, ">$RM")    or die "Unable to write $RM: $!\n";
+    foreach my $t (@template_data) {
+        if      ($top_of_file) {      # skip over warning lines in
+            next if $t =~ /^-> /;     # template starting with '->'
+            $top_of_file = 0;
+        } elsif ($added_contents) {
+            print README $t;
+            next;
+        } elsif ($t =~ /^>>>INSERT CONTENTS HERE<<</) {
+            foreach (sort @files) {
+                open(CONTENTS, $_) or die "Cannot read $_: $!\n";
+                my @c = <CONTENTS>;
+                close CONTENTS;
+                text_bullet_list_to_HTML(\@c);
+                m{^(.*)/(.*?)$}; # match directory and file's basename
+                my $dir  = $1;
+                my $file = $2;
+                $dir     =~ s{^\./}{};  # strip leading  ./
+                print README "\t<li> <b><tt>$dir/</tt></b><br>\n";
+                foreach my $line (@c) {
+                    # use fixed font for words that end with /
+                    # (ie, directory names).
+                    $line =~ s{\s(\S+/)([.,\s])}{ <tt>$1</tt>$2}g;
+                    print README "\t$line";
+                }
+                print README "\n";
+            }
+            $added_contents = 1;
+        } else {
+            print README $t;
+        }
+    }
+    close README;
+    warn "Use 'scp ${PATH}${RM} \$OFHOME' to update the web.\n";
+}  # 1}}}
+
+# # # # # # # 
+
+sub text_bullet_list_to_HTML { # {{{1
+    # Takes an array of plain text lines and embeds <ul>, <li>, and </ul>
+    # tags as appropriate to turn a text bullet list (denoted by *) into
+    # an html equivalent.
+    # Can only handle a single bullet list.
+    my ($ra_contents, ) = @_;
+    my $found_list = 0;
+    foreach my $l (@{$ra_contents}) {
+        if ($l =~ /^\s*\*/) {
+            $found_list = 1;
+            last;
+        }
+    }
+    return unless $found_list; # bail if no list found
+
+    # find the first and last lines of the bullet list
+    my $start_line = 0;
+    for (my $i = 0; $i < scalar @{$ra_contents}; $i++) {
+        if ($ra_contents->[$i] =~ /^\s*\*/) {
+            $start_line = $i;
+            last;
+        }
+    }
+    my $end_line   = 0;
+    for (my $i = scalar @{$ra_contents} - 1; $i >= 0; $i--) {
+        if ($ra_contents->[$i] =~ /^\s*\*/) {
+            $end_line   = $i;
+            last;
+        }
+    }
+
+    # finally, insert the HTML
+    for (my $i = 0; $i < scalar @{$ra_contents}; $i++) {
+        $ra_contents->[$i] =~ s{^(\s*)\*}{$1 <li>};
+        $ra_contents->[$i] = "<ul> " . $ra_contents->[$i] if $i == $start_line;
+        $ra_contents->[$i] = $ra_contents->[$i] . "</ul>" if $i == $end_line;
+    }
+} # 1}}}
+
+# # # # # # # 
+
+sub wanted { # populates global array @files
+    return unless -f and /^CONTENTS$/;
+    push @files, "$File::Find::dir/$_";
+}
