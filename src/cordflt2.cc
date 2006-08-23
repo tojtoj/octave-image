@@ -16,11 +16,6 @@
 
 #include <octave/oct.h>
 
-#ifdef HAVE_OCTAVE_20
-typedef Matrix boolMatrix;
-#define bool_matrix_value matrix_value
-#endif
-
 #define SWAP(a, b) { SWAP_temp = (a); (a)=(b); (b) = SWAP_temp; }
 
 // Template function for comparison

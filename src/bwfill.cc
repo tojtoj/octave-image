@@ -12,13 +12,6 @@
 
 #include <octave/oct.h>
 
-#ifndef OCTAVE_LOCAL_BUFFER
-#include <vector>
-#define OCTAVE_LOCAL_BUFFER(T, buf, size) \
-  std::vector<T> buf ## _vector (size); \
-  T *buf = &(buf ## _vector[0])
-#endif
-
 #define   ptUP     (-1)
 #define   ptDN     (+1)
 #define   ptRT     (+ioM)
@@ -187,6 +180,9 @@ DEFUN_DLD (bwfill, args, ,
 
 /*
  * $Log$
+ * Revision 1.2  2006/08/23 23:58:45  adb014
+ * remove cruft of #ifdef
+ *
  * Revision 1.1  2006/08/20 12:59:36  hauberg
  * Changed the structure to match the package system
  *
