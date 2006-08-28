@@ -1,0 +1,1 @@
+autoload ("__magick_read__", which ("__imagemagick__"));
