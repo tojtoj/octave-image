@@ -219,3 +219,30 @@ DEFUN_DLD (jpgwrite, args, ,
    return retval;
 
 }
+
+%!test
+%! if exist("jpgwrite","file")
+%!   ## build test image for r/w tests
+%!   x=linspace(-8,8,200);
+%!   [xx,yy]=meshgrid(x,x);
+%!   r=sqrt(xx.^2+yy.^2) + eps;
+%!   map=colormap(hsv);
+%!   A=sin(r)./r;
+%!   minval = min(A(:));
+%!   maxval = max(A(:));
+%!   z = round ((A-minval)/(maxval - minval) * (rows(colormap) - 1)) + 1;
+%!   Rw=Gw=Bw=z;
+%!   Rw(:)=fix(255*map(z,1));
+%!   Gw(:)=fix(255*map(z,2));
+%!   Bw(:)=fix(255*map(z,3));
+%!   Aw=fix(255*(1-r/max(r(:)))); ## Fade to nothing at the corners
+%!   jpgwrite('test.jpg',Rw,Gw,Bw);
+%!   stats=stat("test.jpg");
+%!   assert(stats.size,6423);
+%!   im = jpgread('test.jpg');
+%!   Rr = im(:,:,1); Gr = im(:,:,2); Br = im(:,:,3);
+%!   assert(all(Rw(:)-double(Rr(:))<35));
+%!   assert(all(Gw(:)-double(Gr(:))<35));
+%!   assert(all(Bw(:)-double(Br(:))<35));
+%!   unlink('test.jpg');
+%! endif

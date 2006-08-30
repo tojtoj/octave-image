@@ -164,3 +164,36 @@ void save_canvas(canvas *can,char *filename)
   png_destroy_write_struct(&png_ptr, &info_ptr);          
   fclose(fp); 
 }
+
+%!test
+%! if exist("jpgwrite","file")
+%!   ## build test image for r/w tests
+%!   x=linspace(-8,8,200);
+%!   [xx,yy]=meshgrid(x,x);
+%!   r=sqrt(xx.^2+yy.^2) + eps;
+%!   map=colormap(hsv);
+%!   A=sin(r)./r;
+%!   minval = min(A(:));
+%!   maxval = max(A(:));
+%!   z = round ((A-minval)/(maxval - minval) * (rows(colormap) - 1)) + 1;
+%!   Rw=Gw=Bw=z;
+%!   Rw(:)=fix(255*map(z,1));
+%!   Gw(:)=fix(255*map(z,2));
+%!   Bw(:)=fix(255*map(z,3));
+%!   Aw=fix(255*(1-r/max(r(:)))); ## Fade to nothing at the corners
+%!   pngwrite('test.png',Rw,Gw,Bw,Aw);
+%!   stats=stat("test.png");
+%!   assert(stats.size,24738);
+%!   im = pngread('test.png');
+%!   Rr = im(:,:,1); Gr = im(:,:,2); Br = im(:,:,3);
+%!   assert(all(double(Rr(:))==Rw(:)));
+%!   assert(all(double(Gr(:))==Gw(:)));
+%!   assert(all(double(Br(:))==Bw(:)));
+%!   [im,Ar] = pngread('test.png');
+%!   Rr = im(:,:,1); Gr = im(:,:,2); Br = im(:,:,3);
+%!   assert(all(double(Rr(:))==Rw(:)));
+%!   assert(all(double(Gr(:))==Gw(:)));
+%!   assert(all(double(Br(:))==Bw(:)));
+%!   assert(all(double(Ar(:))==Aw(:)));
+%!   unlink('test.png');
+%! endif
