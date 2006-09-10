@@ -220,6 +220,8 @@ DEFUN_DLD (jpgwrite, args, ,
 
 }
 
+/*
+
 %!test
 %! if exist("jpgwrite","file")
 %!   ## build test image for r/w tests
@@ -246,3 +248,5 @@ DEFUN_DLD (jpgwrite, args, ,
 %!   assert(all(Bw(:)-double(Br(:))<35));
 %!   unlink('test.jpg');
 %! endif
+
+*/

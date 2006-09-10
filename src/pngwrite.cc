@@ -165,6 +165,8 @@ void save_canvas(canvas *can,char *filename)
   fclose(fp); 
 }
 
+/*
+
 %!test
 %! if exist("jpgwrite","file")
 %!   ## build test image for r/w tests
@@ -197,3 +199,5 @@ void save_canvas(canvas *can,char *filename)
 %!   assert(all(double(Ar(:))==Aw(:)));
 %!   unlink('test.png');
 %! endif
+
+*/
