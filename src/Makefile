@@ -9,7 +9,7 @@ ifdef HAVE_PNG
 endif
 
 ifdef HAVE_MAGICKXX
-	IMAGEMAGICK=__imagemagick__.oct
+	IMAGEMAGICK=__magick_read__.oct
 endif
 
 all: cordflt2.oct bwlabel.oct bwfill.oct rotate_scale.oct \
@@ -28,7 +28,7 @@ pngread.oct: pngread.cc
 pngwrite.oct: pngwrite.cc
 	$(MKOCTFILE) $< -lpng
 
-__imagemagick__.oct: __imagemagick__.cc
+__magick_read__.oct: __magick_read__.cc
 	$(MKOCTFILE) $< -lMagick++ -lMagick
 
 clean: ; -$(RM) *.o octave-core core *.oct *~

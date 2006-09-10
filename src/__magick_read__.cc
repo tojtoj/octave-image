@@ -4,6 +4,12 @@
 using namespace std;
 using namespace Magick;
 
+unsigned int scaleQuantumToDepth (const Quantum &_quantum, unsigned int depth)
+{
+  return (static_cast<unsigned int> (static_cast<double>(_quantum) / 
+				     QuantumRange * ((1 << depth) - 1)));
+}
+
 octave_value_list read_indexed_images(vector<Image> imvec, Array<int> frameidx, bool wantalpha)
 {
     octave_value_list output;
@@ -105,7 +111,8 @@ octave_value_list read_indexed_images(vector<Image> imvec, Array<int> frameidx, 
 }
 
 template <class T>
-octave_value_list read_images(vector<Image> imvec, Array<int> frameidx)
+octave_value_list read_images(vector<Image> imvec, Array<int> frameidx,
+			      unsigned int depth)
 {
   int i;
   T im;  
@@ -113,7 +120,6 @@ octave_value_list read_images(vector<Image> imvec, Array<int> frameidx)
   int columns = imvec[0].baseColumns();
   int nframes = frameidx.length();
   ImageType type = imvec[0].type();
-  
   int x, y, frame;
   const PixelPacket *pix;
   dim_vector idim = dim_vector();
@@ -133,7 +139,7 @@ octave_value_list read_images(vector<Image> imvec, Array<int> frameidx)
 	      i = 0;      
 	      for(y=0; y < rows; y++) {
 		  for(x=0; x < columns; x++) {        
-		      im(y, x, frame) = pix[i++].red;
+		    im(y, x, frame) = scaleQuantumToDepth (pix[i++].red, depth);
 		  }
 	      }
 	  }
@@ -150,9 +156,9 @@ octave_value_list read_images(vector<Image> imvec, Array<int> frameidx)
 		  for(x=0; x < columns; x++) {
 		      idx(1) = x;
 		      idx(2) = 0;
-		      im(idx) = pix[i].red;
+		      im(idx) = scaleQuantumToDepth (pix[i].red, depth);
 		      idx(2) = 1;
-		      im(idx) = pix[i].opacity;
+		      im(idx) = scaleQuantumToDepth (pix[i].opacity, depth);
 		      i++;
 		  }
 	      }
@@ -171,11 +177,11 @@ octave_value_list read_images(vector<Image> imvec, Array<int> frameidx)
 		  for(x=0; x < columns; x++) {
 		      idx(1) = x;
 		      idx(2) = 0;
-		      im(idx) = pix[i].red;
+		      im(idx) = scaleQuantumToDepth (pix[i].red, depth);
 		      idx(2) = 1;
-		      im(idx) = pix[i].green;
+		      im(idx) = scaleQuantumToDepth (pix[i].green, depth);
 		      idx(2) = 2;
-		      im(idx) = pix[i].blue;
+		      im(idx) = scaleQuantumToDepth (pix[i].blue, depth);
 		      i++;
 		  }
 	      }
@@ -195,13 +201,13 @@ octave_value_list read_images(vector<Image> imvec, Array<int> frameidx)
 		  for(x=0; x < columns; x++) {
 		      idx(1) = x;
 		      idx(2) = 0;
-		      im(idx) = pix[i].red;
+		      im(idx) = scaleQuantumToDepth (pix[i].red, depth);
 		      idx(2) = 1;
-		      im(idx) = pix[i].green;
+		      im(idx) = scaleQuantumToDepth (pix[i].green, depth);
 		      idx(2) = 2;
-		      im(idx) = pix[i].blue;
+		      im(idx) = scaleQuantumToDepth (pix[i].blue, depth);
 		      idx(2) = 3;
-		      im(idx) = pix[i].opacity;
+		      im(idx) = scaleQuantumToDepth (pix[i].opacity, depth);
 		      i++;
 		  }
 	      }
@@ -217,9 +223,14 @@ octave_value_list read_images(vector<Image> imvec, Array<int> frameidx)
 }
 
 // instantiate templates
-template octave_value_list read_images<boolNDArray>(vector<Image>, Array<int>);
-template octave_value_list read_images<uint8NDArray>(vector<Image>, Array<int>);
-template octave_value_list read_images<uint16NDArray>(vector<Image>, Array<int>);
+template octave_value_list read_images<boolNDArray>(vector<Image>, Array<int>,
+						    unsigned int depth);
+template octave_value_list read_images<uint8NDArray>(vector<Image>, 
+						     Array<int>,
+						     unsigned int depth);
+template octave_value_list read_images<uint16NDArray>(vector<Image>, 
+						      Array<int>,
+						      unsigned int depth);
 
 DEFUN_DLD(__magick_read__, args, nargout,
 "function m = __imagemagick_read__(fname[, index])\n\
@@ -276,22 +287,22 @@ Read images with ImageMagick++. User interface in imread.m.\n\
     if(klass == PseudoClass && nargout > 1) {
 	output = read_indexed_images(imvec, frameidx, (nargout == 3));
     } else {
-	int depth = imvec[0].modulusDepth();
+	unsigned int depth = imvec[0].modulusDepth();
 	i = 0;
 	while(depth >>= 1) i++;
 	depth = 1 << i;
 	
 	switch(depth) {
 	    case 1:
-		output = read_images<boolNDArray>(imvec, frameidx);
+		output = read_images<boolNDArray>(imvec, frameidx, depth);
 	    break;
 	    case 2:
 	    case 4:
 	    case 8:
-		output = read_images<uint8NDArray>(imvec, frameidx);		
+		output = read_images<uint8NDArray>(imvec, frameidx, depth);		
 	    break;
 	    case 16:
-		output = read_images<uint16NDArray>(imvec, frameidx);		
+		output = read_images<uint16NDArray>(imvec, frameidx, depth);		
 	    break;
 	    case 32:
 	    case 64:
