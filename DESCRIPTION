@@ -6,5 +6,8 @@ Maintainer: The Octave Community
 Title: Image Processing.
 Description: Add a description to this package!
 Depends: octave (>= 2.9.7)
+BuildRequires: libpng-devel [Mandriva] libpng3-devel
+BuildRequires: libjpeg-devel [Mandriva] libjpeg62-devel
+SystemRequirements: ImageMagick
 License: GPL version 2 or later
 Url: http://octave.sf.net
