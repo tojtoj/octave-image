@@ -4,7 +4,7 @@ Date: 2006-08-05
 Author: Various Authors
 Maintainer: The Octave Community
 Title: Image Processing.
-Description: Add a description to this package!
+Description: Image read, write and manipulation tools.
 Depends: octave (>= 2.9.7)
 BuildRequires: libpng-devel [Mandriva] libpng3-devel
 BuildRequires: libjpeg-devel [Mandriva] libjpeg62-devel
