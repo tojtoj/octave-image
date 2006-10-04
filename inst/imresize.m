@@ -15,37 +15,32 @@
 ## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} @var{B}= imresize (@var{A}, @var{m})
-## Scales the image @var{A} by a factor @var{m} using nearest neighbour
-## interpolation. If @var{m} is less than 1 the image size will be reduced,
-## and if @var{m} is greater than 1 the image will be enlarged. If the image
-## is being enlarged the it will be convolved with a 11x11 Gaussian FIR filter
-## to reduce aliasing. See below on how to alter this behavior.
-##
+## @deftypefn  {Function File} @var{B}= imresize (@var{A}, @var{m})
 ## @deftypefnx {Function File} @var{B}= imresize (@var{A}, @var{m}, @var{method})
-## Same as above except @var{method} interpolation is performed instead of
-## using nearest neighbour. @var{method} can be any method supported by interp2.
-##
 ## @deftypefnx {Function File} @var{B}= imresize (@var{A}, [@var{mrow} @var{mcol}])
-## Scales the image @var{A} to be of size @var{mrow}x@var{mcol} using nearest
-## neighbour interpolation. If the image is being enlarged it will be convolved
-## with a lowpass FIR filter as described above.
-##
 ## @deftypefnx {Function File} @var{B}= imresize (@var{A}, [@var{mrow} @var{mcol}], @var{method})
-## Same as above except @var{method} interpolation is performed instead of using
-## nearest neighbour. @var{method} can be any method supported by interp2.
-##
 ## @deftypefnx {Function File} @var{B}= imresize (..., @var{method}, @var{fsize})
-## If the image the image is being enlarged it will usually be convolved with
-## a 11x11 Gaussian FIR filter. By setting @var{fsize} to 0 this will be turned
-## off, and if @var{fsize} > 0 the image will be convolved with a @var{fsize}
-## by @var{fsize} Gaussian FIR filter.
-##
 ## @deftypefnx {Function File} @var{B}= imresize (..., @var{method}, @var{filter})
-## If the image size is being reduced and the @var{filter} argument is passed to 
-## imresize the image will be convolved with @var{filter} before the resizing
-## takes place.
+## Resizes the image @var{A} to a given size using any interpolation
+## method supported by @code{interp2}.
 ##
+## If the second argument is a scalar @var{m} the image will be scaled
+## by a factor @var{m}. If the second argument is a two-vector 
+## [@var{mrow}, @var{mcol}] the resulting image will be resized to have
+## this size.
+##
+## The third argument controls the kind of interpolation used to perform
+## the resizing. This can be any method supported by @code{interp2}, and
+## defaults to nearest neighbour interpolation.
+##
+## The fourth argument controls if the image is filtered before resizing
+## to prevent aliasing. If the fourth argument is a two-vector 
+## [@code{frow}, @code{fcol}], the image will be convolved with a
+## @code{frow}x@code{fcol} gaussian filter. If it is a matrix it will
+## be used as a filter. The default is not to filter the image if it
+## is reduced in size, and to filter it by an 11x11 gaussian filter if
+## the image is enlarged. Setting the filter to 0 will turn of any
+## filtering.
 ## @seealso{interp2}
 ## @end deftypefn
 
