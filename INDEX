@@ -13,6 +13,7 @@ Reshape
  imcrop 
  imresize 
  imrotate
+ imrotate_Fourier
  imtranslate
  imshear
  impad
