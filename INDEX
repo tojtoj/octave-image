@@ -8,7 +8,7 @@ Read/write
  imwrite 
  imfinfo
  imginfo
- loadimage saveimage bmpwrite jpgread jpgwrite pngread pngwrite
+ bmpwrite jpgread jpgwrite pngread pngwrite
 Reshape
  imcrop 
  imresize 
@@ -57,10 +57,6 @@ Colour controls
  cmpermute 
  cmunique 
  imapprox 
- hsv2rgb 
- ntsc2rgb 
- rgb2hsv 
- rgb2ntsc 
  rgb2ycbcr 
  ycbcr2rgb 
 Representation
@@ -78,8 +74,6 @@ Representation
  rgb2gray 
  rgb2ind 
 Colour maps
- gray 
- ocean
  hsv rainbow
  hot 
  bone 
