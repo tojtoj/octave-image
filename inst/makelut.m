@@ -54,7 +54,7 @@ function lut = makelut(fun, n, varargin)
   w=reshape(2.^[nq-1:-1:0],n,n);
   for i=0:c-1
     idx=bitand(w,i)>0;
-    lut(i+1)= feval(fun, idx, all_va_args);
+    lut(i+1)= feval(fun, idx, varargin{:});
   endfor
 endfunction
 
