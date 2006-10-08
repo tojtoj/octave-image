@@ -84,7 +84,7 @@ function B = blkproc(A, varargin)
     error("blkproc: required parameters haven't been supplied.");
   endif
 
-  if(isvector(varargin{p}))
+  if(isvector(varargin{p}) && isnumeric(varargin{p})) 
     if(length(varargin{p})!=2)
       error("blkproc: expected [mborder,nborder] but param has wrong length.");
     endif
@@ -101,7 +101,7 @@ function B = blkproc(A, varargin)
   endif
 
   fun=varargin{p};
-  if(!isa(fun,"function handle") &&
+  if(!isa(fun,"function_handle") &&
      !isa(fun,"inline function") &&
      !ischar(fun))
     error("blkproc: invalid fun parameter.");
@@ -172,6 +172,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.2  2006/10/08 21:41:04  adb014
+% check isnumeric for vector and 'function_handle' not 'function handle' in isa test
+%
 % Revision 1.1  2006/08/20 12:59:31  hauberg
 % Changed the structure to match the package system
 %
