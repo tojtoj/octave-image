@@ -306,7 +306,14 @@ endfunction
 %!                3.5 3.1 3.5     # bilinear
 %!                2.7 0.1 2.7     # bicubic
 %!                2.7 1.6 2.8 ];  # Fourier
-%! x = peaks(50);
+%!
+%! # This is peaks(50) without the dependency on the plot package
+%! x = y = linspace(-3,3,50);
+%! [X,Y] = meshgrid(x,y);
+%! x = 3*(1-X).^2.*exp(-X.^2 - (Y+1).^2) \
+%!      - 10*(X/5 - X.^3 - Y.^5).*exp(-X.^2-Y.^2) \
+%!      - 1/3*exp(-(X+1).^2 - Y.^2);
+%!
 %! x -= min(min(x));	      # Fourier does not handle neg. values well
 %! for m = 1:(length(methods))
 %!   y = x;
