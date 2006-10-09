@@ -159,7 +159,7 @@ function S = qtdecomp(I, p1, varargin)
       if(curr_size<mindim)
 	error("qtdecomp: maxdim restriction collides with mindim restriction.");
       endif
-      els=transpose([0:divs-1]*curr_size+1);
+      els=([0:divs-1]*curr_size+1).';
       offsets=[kron(els,ones(divs,1)), kron(ones(divs,1),els)];
     endif
   endif
@@ -241,7 +241,7 @@ endfunction
 %! b=[2,0;0,0];
 %! assert(full(qtdecomp(eye(4))), [a,b;b,a]);
 
-%!shared A, B2, B4
+%!shared A, B2, B4, f
 %! A=[ 1, 4, 2, 5,54,55,61,62;
 %!     3, 6, 3, 1,58,53,67,65;
 %!     3, 6, 3, 1,58,53,67,65;
@@ -273,33 +273,44 @@ endfunction
 
 %!assert(full(qtdecomp(A,100,[2, 4])), [B4,B4;B4,B4]);
 
-%!# Test 'fun' method
-%!# Can't define a function inside tests because Octave
-%!# complains about nested functions. If you know how to
-%!# do it please add function handle tests.
+%!function y = f(A,c1,c2,c3)
+%! if (nargin < 2)
+%!   c1 = 54;
+%! endif
+%! if (nargin < 3)
+%!   c2 = 0;
+%! endif
+%! if (nargin < 4)
+%!   c3 = 0;
+%! endif
+%! y = (A(1,1,:)!=((c1+c2+c3)*ones(1,1,size(A,3))))(:);
 
-%!# inline version
-%!# We use [size(A),1](3) as a trick since size(A,3) fails if A is 2D.
+%!assert(full(qtdecomp(A,@f)),[ones(4),B4;ones(4,8)]); 
+%!assert(full(qtdecomp(A,@f,54)),[ones(4),B4;ones(4,8)]);
+%!assert(full(qtdecomp(A,@f,4,40,10)),[ones(4),B4;ones(4,8)]);
 
 %!# no params
 %!test
-%! first_eq=inline("(A(1,1,:)!=(54*ones(1,1,[size(A),1](3))))(:)","A");
+%! first_eq=inline("(A(1,1,:)!=(54*ones(1,1,size(A,3))))(:)","A");
 %! assert(full(qtdecomp(A,first_eq)),[ones(4),B4;ones(4,8)]); 
 
 %!# 1 param
 %!test
-%! first_eq=inline("(A(1,1,:)!=(c*ones(1,1,[size(A),1](3))))(:)","A","c");
+%! first_eq=inline("(A(1,1,:)!=(c*ones(1,1,size(A,3))))(:)","A","c");
 %! assert(full(qtdecomp(A,first_eq,54)),[ones(4),B4;ones(4,8)]); 
 
 %!# 3 params
 %!test
-%! first_eq=inline("(A(1,1,:)!=((c1+c2+c3)*ones(1,1,[size(A),1](3))))(:)","A","c1","c2","c3");
+%! first_eq=inline("(A(1,1,:)!=((c1+c2+c3)*ones(1,1,size(A,3))))(:)","A","c1","c2","c3");
 %! assert(full(qtdecomp(A,first_eq,4,40,10)),[ones(4),B4;ones(4,8)]); 
 
 
 
 %
 % $Log$
+% Revision 1.2  2006/10/09 19:58:09  adb014
+% Remove dependency on miscellaneous transpose function. Simplify tests and add function handle tests
+%
 % Revision 1.1  2006/08/20 12:59:35  hauberg
 % Changed the structure to match the package system
 %
