@@ -185,8 +185,8 @@
 ## W. K. Pratt, "Digital Image Processing"
 ## Gonzalez and Woods, "Digital Image Processing"
 ##
+## @seealso{dilate, erode, makelut, applylut}
 ## @end deftypefn
-## @seealso dilate erode makelut applylut
 
 
 ## TODO: As soon as Octave doesn't segfault when assigning values to a
@@ -590,6 +590,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.2  2006/10/15 08:04:55  hauberg
+% Fixed texinfo in bwmorph
+%
 % Revision 1.1  2006/08/20 12:59:32  hauberg
 % Changed the structure to match the package system
 %
