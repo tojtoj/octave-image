@@ -16,8 +16,12 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{bool}= isgray (@var{I})
-## returns true for an intensity image. All intensity values must
-## be in the range [0,1].
+## returns true for an intensity image. An variable is a gray scale image
+## if it is 2-dimensional matrix, and
+## @itemize @bullet
+## @item is of class double and all values are in the range [0, 1], or
+## @item is of class uint8 or uint16.
+## @end itemize
 ## @end deftypefn
 
 ## Author:	Kai Habel <kai.habel@gmx.de>
@@ -25,16 +29,18 @@
 
 function bool = isgray (I)
 
-  bool = 0;
-
-  if !(nargin == 1)
-    usage ("isgray(I)");
+  if (nargin != 1)
+    print_usage ();
   endif
 
-  if (!is_matrix(I))
-    return;
+  bool = false;
+  if (ismatrix(I) && ndims(I) == 2)
+    switch(class(I))
+    case "double"
+      bool = all(I(:) >= 0 && I(:) <= 1);
+    case {"uint8", "uint16"}
+      bool = true;
+    endswitch
   endif
-
-  bool = all (all ((I >= 0) && (I <= 1)));
 
 endfunction
