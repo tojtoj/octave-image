@@ -141,6 +141,13 @@ warn_empty_list_elements= 0;
 # some older versions of octave didn't seem handle piped output correctly
 usepipe=1;
 
+# Support matlabs input order
+if (nargin >= 2 && ismatrix(fname) && ischar(p2))
+  tmp = p2;
+  p2 = fname;
+  fname = tmp;
+endif
+
 if  ( nargin <= 1 )     || ...
     ( ! ischar (fname))  || ...
     ( nargin == 2 && ischar(p2) )
@@ -152,6 +159,8 @@ if  ( nargin <= 1 )     || ...
     "imwrite( fname, img, map, options )\n", ...
     "imwrite( fname, r,g,b, options );\n"]);
 endif
+
+fname = tilde_expand(fname);
 
 # Put together the options string
 # TODO: add some error checking to options
@@ -179,9 +188,9 @@ if n_mat==1
    pnm_sig="P5";
 elseif n_mat==2
    img= p2';
-   data= [ 255*reshape(p3(img,1),1, hig*wid);
-           255*reshape(p3(img,2),1, hig*wid);
-           255*reshape(p3(img,3),1, hig*wid) ];
+   data= [ reshape(p3(img,1),1, hig*wid);
+           reshape(p3(img,2),1, hig*wid);
+           reshape(p3(img,3),1, hig*wid) ];
    outputtype="ppm";
    pnm_sig="P6";
 elseif n_mat==3
@@ -193,6 +202,17 @@ elseif n_mat==3
 else
    error("imwrite: too many data matrices specified");
 end
+
+# Scale data depending on data type
+switch(class(data))
+case "double"
+  data *= 255;
+case "uint8"
+case "uint16"
+  data /= 255;
+otherwise
+  error("imwrite: unsupported data type %s", class(data));
+endswitch
 
 if usepipe
    pname= sprintf("convert %s %s:- '%s' 2>/dev/null",
@@ -235,6 +255,9 @@ end_unwind_protect
 
 #
 # $Log$
+# Revision 1.2  2006/11/26 10:47:39  hauberg
+# Compatibility changes
+#
 # Revision 1.1  2006/08/20 12:59:34  hauberg
 # Changed the structure to match the package system
 #
