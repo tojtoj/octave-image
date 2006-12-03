@@ -41,6 +41,7 @@ Filtering
  uintlut
  stretchlim
  makelut applylut
+ deriche
 Black and white image functions
  bwarea 
  bweuler 
