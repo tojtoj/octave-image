@@ -28,6 +28,11 @@
 ##
 ## Modified: Stefan van der Walt <stefan@sun.ac.za>
 ## Date: 24 January 2005
+##
+## Modified: Thomas Weber <thomas.weber.mail@gmail.com>
+## Date: 20 December 2006
+## Change parsing of imagemagick's output to get the 'color' depth for grayscale
+## images
 
 function varargout = imread(filename, varargin)
     if (nargin != 1)
@@ -64,12 +69,12 @@ function varargout = imread(filename, varargin)
       break
     endif
     
-    [sys, ident] = system(sprintf('identify -verbose %s | grep -e "Red: " -e Type',
-				  fn));
+    [sys, ident] = system(sprintf('identify -verbose %s | grep -e "bits" -e Type',
+				  fn))
     if (sys != 0)
 	error("imread: error running ImageMagick's 'identify' on %s", fn)
     endif
-    depth = re_grab("Red: ([[:digit:]]{1,2})", ident);
+    depth = re_grab("([[:digit:]]{1,2})-bits", ident)
     imtype = re_grab("Type: ([[:alpha:]]*)", ident);
 
     depth = str2num(depth);
