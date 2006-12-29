@@ -44,6 +44,7 @@ function D = bwdist(bw, method = "euclidian")
     case "e" 
       ## Euclidian distance transform
       D = __bwdist(bw);
+      D = sqrt(D);
     otherwise
       error("bwdist: unsupported method '%s'", method);
   endswitch
