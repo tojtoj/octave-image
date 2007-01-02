@@ -22,16 +22,16 @@
 ## OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 ## SUCH DAMAGE.
 
-## FFTCONV2 Convolve 2 dimensional signals using the FFT.
+## -*- texinfo -*-
+## @deftypefn {Function File} fftconv2 (@var{a}, @var{b}, @var{shape})
+## @deftypefnx{Function File} fftconv2 (@var{v1}, @var{v2}, @var{a}, @var{shape})
+## Convolve 2 dimensional signals using the FFT.
 ##
-## usage: fftconv2(a, b[, shape])
-##        fftconv2(v1, v2, a, shape)
-##
-## This method is faster but less accurate for large a,b.  It
-## also uses more memory. A small complex component will be 
-## introduced even if both a and b are real.
-##
-## see also: conv2
+## This method is faster but less accurate than @var{conv2} for large @var{a} and @var{b}.
+## It also uses more memory. A small complex component will be 
+## introduced even if both @var{a} and @var{b} are real.
+## @seealso{conv2}
+## @end deftypefn
 
 ## Author: Stefan van der Walt <stefan@sun.ac.za>
 ## Date: 2004

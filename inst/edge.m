@@ -1,55 +1,89 @@
-function [imout, thresh] = edge( im, method, thresh, param2 )
-# EDGE: find image edges
-# [imout, thresh] = edge( im, method, thresh, param2 )
-#
-# OUTPUT
-#  imout  -> output image
-#  thresh -> output thresholds
-#
-# INPUT
-#  im     -> input image (greyscale)
-#  thresh -> threshold value (value is estimated if not given)
-#  
-# The following methods are based on high pass filtering the image in
-#   two directions, calculating a combined edge weight from and then thresholding
-#
-# method = 'roberts'
-#     filt1= [1 0 ; 0 -1];   filt2= rot90( filt1 )
-#     combine= sqrt( filt1^2 + filt2^2 )  
-# method = 'sobel'
-#     filt1= [1 2 1;0 0 0;-1 -2 -1];      filt2= rot90( filt1 ) 
-#     combine= sqrt( filt1^2 + filt2^2 )  
-# method = 'prewitt'
-#     filt1= [1 1 1;0 0 0;-1 -1 -1];      filt2= rot90( filt1 ) 
-#     combine= sqrt( filt1^2 + filt2^2 )  
-# method = 'kirsh'
-#     filt1= [1 2 1;0 0 0;-1 -2 -1];  filt2 .. filt8 are 45 degree rotations of filt1
-#     combine= max( filt1 ... filt8 )
-#
-# methods based on filtering the image and finding zero crossings
-#
-# method = 'log' -> Laplacian of Gaussians 
-#      param2 is the standard deviation of the filter, default is 2
-# method = 'zerocross' -> generic zero-crossing filter
-#      param2 is the user supplied filter
-# 
-# method = 'andy' -> my idea
-#      A.Adler's idea (c) 1999. somewhat based on the canny method
-#      Step 1: Do a sobel edge detection and to generate an image at
-#               a high and low threshold
-#      Step 2: Edge extend all edges in the LT image by several pixels,
-#               in the vertical, horizontal, and 45degree directions.
-#               Combine these into edge extended (EE) image
-#      Step 3: Dilate the EE image by 1 step
-#      Step 4: Select all EE features that are connected to features in
-#               the HT image
-#                
-#      Parameters:
-#        param2(1)==0 or 4 or 8 -> perform x connected dilatation (step 3)
-#        param2(2)    dilatation coeficient (threshold) in step 3
-#        param2(3)    length of edge extention convolution (step 2)
-#        param2(4)    coeficient of extention convolution in step 2
-#        defaults = [8 1 3 3]
+## -*- texinfo -*-
+## @deftypefn {Function File} {[@var{imout}, @var{thresh}] = } edge(@var{im}, @var{method}, @var{thresh}, @var{param2})
+## Find image edges
+##
+## The output is
+## @table @code
+## @item @var{imout}
+## Output image
+## @item @var{thresh}
+## Output thresholds
+## @end table
+##
+## The input is
+## @table @code
+## @item @var{im}
+## Input image (greyscale)
+## @item @var{thresh}
+## Threshold value (value is estimated if not given)
+## @end table
+##
+## The following methods are based on high pass filtering the image in
+## two directions, calculating a combined edge weight from and then thresholding
+##
+## @table @code
+## @item method = 'roberts'
+## @example
+## filt1= [1 0 ; 0 -1];   filt2= rot90( filt1 )
+## combine= sqrt( filt1^2 + filt2^2 )  
+## @end example
+## @item method = 'sobel'
+## @example
+## filt1= [1 2 1;0 0 0;-1 -2 -1];      filt2= rot90( filt1 ) 
+## combine= sqrt( filt1^2 + filt2^2 )  
+## @end example
+## @item method = 'prewitt'
+## @example
+## filt1= [1 1 1;0 0 0;-1 -1 -1];      filt2= rot90( filt1 ) 
+## combine= sqrt( filt1^2 + filt2^2 )
+## @end example
+## @item method = 'kirsh'
+## @example
+## filt1= [1 2 1;0 0 0;-1 -2 -1];  filt2 .. filt8 are 45 degree rotations of filt1
+## combine= max( filt1 ... filt8 )
+## @end example
+## @end table
+##
+## Methods based on filtering the image and finding zero crossings
+##
+## @table @code
+## @item method = 'log'
+## Laplacian of Gaussian.
+## @var{param2} is the standard deviation of the filter, default is 2.
+## @item method = 'zerocross'
+## generic zero-crossing filter.
+## @var{param2} is the user supplied filter.
+## @item method = 'andy'
+## A.Adler's idea (c) 1999. somewhat based on the canny method. The steps are
+## @enumerate
+## @item
+## Do a sobel edge detection and to generate an image at
+## a high and low threshold.
+## @item
+## Edge extend all edges in the LT image by several pixels,
+## in the vertical, horizontal, and 45degree directions.
+## Combine these into edge extended (EE) image.
+## @item
+## Dilate the EE image by 1 step.
+## @item
+## Select all EE features that are connected to features in
+## the HT image.
+## @end enumerate
+## 
+## The parameters for the method are:
+## @table @code
+## @item param2(1)==0 or 4 or 8
+## Perform x connected dilatation (step 3).
+## @item param2(2)
+## Dilatation coeficient (threshold) in step 3.
+## @item param2(3)
+## Length of edge extention convolution (step 2).
+## @item param2(4)
+## Coeficient of extention convolution in step 2.
+## @end table
+## defaults = [8 1 3 3]
+## @end table
+## @end deftypefn
 
 # Copyright (C) 1999 Andy Adler
 # This code has no warrany whatsoever.
@@ -57,6 +91,8 @@ function [imout, thresh] = edge( im, method, thresh, param2 )
 #     leave this copyright in place.
 #
 # $Id$
+
+function [imout, thresh] = edge( im, method, thresh, param2 )
 
 [n,m]= size(im);
 xx= 2:m-1;
@@ -220,6 +256,9 @@ end
 
 # 
 # $Log$
+# Revision 1.2  2007/01/02 21:58:38  hauberg
+# Documentation is now in Texinfo (looks better on the website)
+#
 # Revision 1.1  2006/08/20 12:59:32  hauberg
 # Changed the structure to match the package system
 #

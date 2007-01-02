@@ -14,6 +14,56 @@
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
+## -*- texinfo -*-
+## @deftypefn {Function File} {@var{filter} = } fspecial(@var{type}, @var{arg1}, @var{arg2})
+## Create spatial filters for image processing.
+##
+## @var{type} determines the shape of the filter and can be
+## @table @code
+## @item 'average'
+## Rectangular averaging filter.
+## @item 'disk'
+## Circular averaging filter.
+## @item 'gaussian'
+## Gaussian filter.
+## @item 'log'
+## Laplacian of Gaussian.
+## @item 'laplacian'
+## 3x3 approximation of the laplacian.
+## @item 'unsharp'
+## Sharpening filter.
+## @item 'motion'
+## Moion blur filter of width 1 pixel.
+## @item 'sobel'
+## Horizontal Sobel edge filter.
+## @item 'prewitt'
+## Horizontal Prewitt edge filter.
+## @end table
+##
+## The parameters that need to be specified depend on the filtertype.
+##
+## Examples of use and associated default values:
+## @example
+##  f = fspecial('average',sze)           # sze can be a 1 or 2 vector
+##                                        # default is [3, 3].
+##  f = fspecial('disk',radius)           # default radius = 5
+##  f = fspecial('gaussian',sze, sigma)   # default sigma is 0.5
+##  f = fspecial('laplacian',sze, sigma)  # default sze is [5, 5]
+##                                        # default sigma is 0.5
+##  f = fspecial('log');
+##  f = fspecial('motion', length, angle) # default length is 9
+##                                        # default angle is 0 (degrees)
+##  f = fspecial('sobel');
+##  f = fspecial('prewitt');
+## @end example
+## When sze is specified as a single value the filter will be square.
+## @end deftypefn
+
+## Remarks by Søren Hauberg (jan. 2nd 2007)
+## The motion filter and most of the documentation was taken from Peter Kovesi's
+## GPL'ed implementation of fspecial from 
+## http://www.csse.uwa.edu.au/~pk/research/matlabfns/OctaveCode/fspecial.m
+
 function [ f ] = fspecial (type, arg1, arg2)
   if (!ischar(type))
     error("fspecial: first argument must be a string");

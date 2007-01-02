@@ -1,12 +1,15 @@
-## bmpwrite(X,map,file)
-##   Write the bitmap X into file (8-bit indexed uncompressed).
-##   The values in X are indices into the given RGB colour map.
-## bmpwrite(X,file)
-##   Write the bitmap X into file (24-bit truecolor uncompressed).
-##   X is an m x n x 3 array of R,G,B values.
+## -*- texinfo -*-
+## @deftypefn {Function File} bmpwrite (@var{X}, @var{map}, @var{file})
+## Write the bitmap @var{X} into @var{file} (8-bit indexed uncompressed).
+## The values in @var{X} are indices into the given RGB colour @var{map}.
+## @deftypefnx{Function File} bmpwrite (@var{X}, @var{file})
+## Write the bitmap @var{X} into @var{file} (24-bit truecolor uncompressed).
+## @var{X} is an m x n x 3 array of R,G,B values.
+## @end deftypefn
 
 ## This code is in the public domain.
 ## Author: Paul Kienzle <pkienzle@users.sf.net>
+
 
 function bmpwrite(x,map,file)
   if nargin==2

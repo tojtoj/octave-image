@@ -11,17 +11,23 @@
 ## for more details.
 ##
 
-## [h,w] = imginfo (filename) - Get image size from file
-##  hw   = imginfo (filename)
-## 
-## filename : string : Name of image file
+## -*- texinfo -*-
+## @deftypefn {Function File} {@var{hw} =} imginfo (@var{filename})
+## @deftypefnx{Function File} {[@var{h}, @var{w}] =} imginfo (@var{filename})
+## Get image size from file @var{filename}.
 ##
-## h        : 1      : Height of image, in pixels
-## w        : 1      : Width  of image, in pixels
-##    or
-## hw=[h,w] : 2      : Height and width of image 
+## The output is the size of the image
+## @table @code
+## @item @var{h}
+## Height of image, in pixels.
+## @item @var{w}
+## Width  of image, in pixels.
+## @item @var{hw} = [@var{h}, @var{w}]
+## Height and width of image.
+## @end table
 ##
 ## NOTE : imginfo relies on the 'convert' program.
+## @end deftypefn
 
 ## Author:        Etienne Grossmann <etienne@cs.uky.edu>
 ## Last modified: Setembro 2002

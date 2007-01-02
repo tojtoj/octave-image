@@ -1,30 +1,31 @@
-# $Id$
-function result = deriche(img, alpha, method)
-# OUTPUT
-# method  0 (default)
-#    magnitude of gradient
-# method = 1 
-#    vector gradient (last index 1 for H, 2 for V)
-# 
-# INPUT
-#  img    -> input image (as matrix of doubles) 
-#  alpha  -> filter paramter (scale)
-#
-# Deriche 2D image gradient using recursive filters. Precessing time is 
-# independent of alpha.
-# taken from:
-# Klette, Zamperoni: Handbuch der Operatoren für die Bildverarbeitung, vieweg 
-# 2.Aufl. 1995 pp 224-229
-# algorithm: Deriche R.: Fast algorithms for low-level vision: IEEE Trans. 
-# PAMI-12 (1990) pp 78-87
-#
-# Due to the inherent recursive nature of the algorithms the octave 
-# implementation is rather slow compared to a C implementation although I have
-# vectorized it as far as possible at the expense of memory consuption. As a 
-# side effect the evaluation order had to be modified compared to the Klette / 
-# Zamperoni approach. (A C Implementation can easily process PAL a video stream in 
-# realtime on moderate hardware.)
-#
+## -*- texinfo -*-
+## @deftypefn {Function File} @var{result} = deriche(@var{img}, @var{alpha}, @var{method})
+## Deriche 2D image gradient using recursive filters. Precessing time is 
+## independent of alpha.
+## taken from:
+## Klette, Zamperoni: Handbuch der Operatoren für die Bildverarbeitung, vieweg 
+## 2.Aufl. 1995 pp 224-229
+## algorithm: Deriche R.: Fast algorithms for low-level vision: IEEE Trans. 
+## PAMI-12 (1990) pp 78-87
+##
+## @table @code
+## @item @var{img}
+## Input image (as matrix of doubles).
+## @item @var{alpha}
+## Filter paramter (scale).
+## @item method
+## If 0 (default) magnitude of gradient, and if 1
+## vector gradient (last index 1 for H, 2 for V)
+## @end table
+##
+## Due to the inherent recursive nature of the algorithms the octave 
+## implementation is rather slow compared to a C implementation although I have
+## vectorized it as far as possible at the expense of memory consuption. As a 
+## side effect the evaluation order had to be modified compared to the Klette / 
+## Zamperoni approach. (A C Implementation can easily process PAL a video stream in 
+## realtime on moderate hardware.)
+## @end deftypefn
+
 # (C)opyright Christian Kotz 2006
 # This code has no warrany whatsoever.
 # Do what you like with this code as long as you
@@ -35,6 +36,9 @@ function result = deriche(img, alpha, method)
 # version:  0.1
 #
 ## $Log$
+## Revision 1.3  2007/01/02 21:58:38  hauberg
+## Documentation is now in Texinfo (looks better on the website)
+##
 ## Revision 1.2  2006/12/08 06:41:30  cocus
 ## interface changed to match cc implementation. (returns magnitude by default)
 ##
@@ -55,6 +59,7 @@ function result = deriche(img, alpha, method)
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+function result = deriche(img, alpha, method)
 
 if nargin < 2
   alpha = 1.0

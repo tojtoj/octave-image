@@ -1,27 +1,32 @@
-## COLFILT Apply filter to matrix blocks
-## colfilt(A,[r c],[m n],'sliding',f,...)
-##   For each r x c overlapping subblock of A, add a column in matrix C
-##   f(C,...) should return a row vector which is then reshaped into a
-##   a matrix of size A and returned.  A is processed in chunks of size m x n.
-## colfilt(A,[r c],[m n],'distinct',f,...)
-##   For each r x c non-overlapping subblock of A, add a column in matrix C
-##   f(C,...) should return a matrix of size C each column of which is
-##   placed back into the subblock from whence it came.  A is processed
-##   in chunks of size m x n.
+## -*- texinfo -*-
+## @deftypefn {Function File} colfilt(@var{A}, [@var{r}, @var{c}], [@var{m}, @var{n}], 'sliding', @var{f},...)
+## Apply filter to matrix blocks
 ##
-## The present version requires [m n], but for compatibility it should
-## be optional.  Use colfilt(A,[r c],size(A),...)
+##   For each @var{r} x @var{c} overlapping subblock of @var{A}, add a column in matrix @var{C}
+##   @var{f}(@var{C},...) should return a row vector which is then reshaped into a
+##   a matrix of size @var{A} and returned. @var{A} is processed in chunks of size @var{m} x @var{n}.
+## @deftypefnx{Function File} colfilt(@var{A}, [@var{r}, @var{c}], [@var{m}, @var{n}], 'distinct', @var{f},...)
+##   For each @var{r} x @var{c} non-overlapping subblock of @var{A}, add a column in matrix @var{C}
+##   @var{f}(@var{C},...) should return a matrix of size @var{C} each column of which is
+##   placed back into the subblock from whence it came. @var{A} is processed
+##   in chunks of size @var{m} x @var{n}.
 ##
-## The present version requires that [m n] divide size(A), but for
-## compatibility it should work even if [m n] does not divide A. Use
+## The present version requires [@var{m}, @var{n}], but for compatibility it should
+## be optional.  Use colfilt(@var{A},[@var{r}, @var{c}], size(@var{A}),...)
+##
+## The present version requires that [@var{m}, @var{n}] divide size(@var{A}), but for
+## compatibility it should work even if [@var{m}, @var{n}] does not divide @var{A}. Use
 ## the following instead:
-##    [r c] = size(A);
-##    padA = zeros (m*ceil(r/m),n*ceil(c/n));
-##    padA(1:r,1:c) = A;
-##    B = colfilt(padA,...);
-##    B = B(1:r,1:c);
+## @example
+## [r, c] = size(A);
+## padA = zeros (m*ceil(r/m),n*ceil(c/n));
+## padA(1:r,1:c) = A;
+## B = colfilt(padA,...);
+## B = B(1:r,1:c);
+## @end example
 ##
 ## The present version does not handle 'distinct'
+## @end deftypefn
 
 ## This software is granted to the public domain
 ## Author: Paul Kienzle <pkienzle@users.sf.net>

@@ -14,21 +14,22 @@
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-## usage: B = imnoise (A, type)
+## -*- texinfo -*-
+## @deftypefn {Function File} {@var{B} =} imnoise (@var{A}, @var{type})
+## Adds noise to image in @var{A}.
 ##
-## Adds noise to image in A.
-##
-## imnoise (A, 'gaussian' [, mean [, var]])
-##    additive gaussian noise: A = A + noise
-##    defaults to mean=0, var=0.01
-##
-## imnoise (A, 'salt & pepper' [, density])
-##    lost pixels: A = 0 or 1 for density*100% of the pixels
-##    defaults to density=0.05, or 5%
-##
-## imnoise (A, 'speckle' [, var])
-##    multiplicative gaussian noise: A = A + A*noise
-##    defaults to var=0.04
+## @table @code
+## @item imnoise (A, 'gaussian' [, mean [, var]])
+## additive gaussian noise: @var{B} = @var{A} + noise
+## defaults to mean=0, var=0.01
+## @item  imnoise (A, 'salt & pepper' [, density])
+## lost pixels: A = 0 or 1 for density*100% of the pixels
+## defaults to density=0.05, or 5%
+## @item imnoise (A, 'speckle' [, var])
+## multiplicative gaussian noise: @var{B} = @var{A} + @var{A}*noise
+## defaults to var=0.04
+## @end table
+## @end deftypefn
 
 ## Modified: Stefan van der Walt <stefan@sun.ac.za>, 2004-02-24
 

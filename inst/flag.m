@@ -20,8 +20,8 @@
 ## (cycling through red, white, blue and black)
 ## The argument @var{n} should be a scalar.  If it
 ## is omitted, the length of the current colormap or 64 is assumed.
-## @end deftypefn
 ## @seealso{colormap}
+## @end deftypefn
 
 ## Author:  Kai Habel <kai.habel@gmx.de>
 

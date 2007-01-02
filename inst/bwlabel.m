@@ -14,26 +14,39 @@
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-##       [im2,npix,bb] = bwlabel(im, mins, maxs, verbose)
+## -*- texinfo -*-
+## @deftypefn {Function File} {[@var{im2}, @var{npix} ,@var{bb}] = } bwlabel(@var{im}, @var{mins}, @var{maxs}, @var{verbose})
 ##
 ## Find the connected regions of an image.
 ##  
-## im  : RxC 0-1 matrix
+## @table @code
+## @item @var{im}
+## RxC 0-1 matrix
 ##
-## im2 : RxC int matrix in which the connected regions of im have been
-##       numbered. 4-neighborhoods are considered.
+## @item @var{im2}
+## RxC int matrix in which the connected regions of im have been
+## numbered. 4-neighborhoods are considered.
 ##
-## npix : 1xQ int number of pixel in each region
+## @item @var{npix}
+## 1xQ int number of pixel in each region
 ##
-## bb   : 4xQ int bounding boxes of the regions. Rows are minrow,
-##        maxrow, mincol, maxcol.
+## @item @var{bb}
+## 4xQ int bounding boxes of the regions. Rows are minrow,
+## maxrow, mincol, maxcol.
+## @end table
 ##
 ## Options :
 ##
-## mins     : Minimum size of the regions (set to zero for no minimum)
-## maxs     : Maximum size of the regions (set to zero for no maximum)
-## verbose  : Level of output comments in range 0 to 2.
+## @table @code
+## @item @var{mins}
+## Minimum size of the regions (set to zero for no minimum)
+## @item @var{maxs}
+## Maximum size of the regions (set to zero for no maximum)
+## @item @var{verbose}
+## Level of output comments in range 0 to 2.
+## @end table
 ##
+## @end deftypefn
 
 ## Author:        Etienne Grossmann <etienne@cs.uky.edu>
 ## Last modified: July 2002

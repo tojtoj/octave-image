@@ -1,14 +1,18 @@
-## M = colorgradient(C,w,n)
+## -*- texinfo -*-
+## @deftypefn {Function File} @var{M} = colorgradient(@var{C}, @var{w}, @var{n})
 ## Define a colour map which smoothly traverses the given colors.
-## C contains the colours, one row per r,g,b value.
-## w(i) is the relative length of the transition from colour i to colour i+1
+## @var{C} contains the colours, one row per r,g,b value.
+## @var{w}(i) is the relative length of the transition from colour i to colour i+1
 ## in the entire gradient.  The default is ones(rows(C)-1,1).
 ## n is the length of the colour map.  The default is rows(colormap).
 ##
-## E.g., 
-##    colorgradient([0,0,1; 1,1,0; 1,0,0])  # blue -> yellow -> red
-##    x = linspace(0,1,200);
-##    imagesc(x(:,ones(30,1)))';
+## E.g.,
+## @example 
+## colorgradient([0,0,1; 1,1,0; 1,0,0])  # blue -> yellow -> red
+## x = linspace(0,1,200);
+## imagesc(x(:,ones(30,1)))';
+## @end example
+## @end deftypefn
 
 ## This program is granted to the public domain.
 ## Author: Paul Kienzle <pkienzle@users.sf.net>

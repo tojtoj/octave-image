@@ -5,24 +5,22 @@
 ## the Free Software Foundation; either version 2, or (at your option)
 ## any later version. USE THIS SOFTWARE AT YOUR OWN RISK.
 
-## usage: I = imread(fname)
-##
+## -*- texinfo -*-
+## @deftypefn {Function File} {@var{I} =} imread(@var{filename})
 ## Read images from various file formats.
 ##
-##   The size and numeric class of the output depends on the
-##   format of the image.  A colour image is returned as an
-##   MxNx3 matrix.  Grey-level and black-and-white images are
-##   of size MxN.
-##     The colour depth of the image determines the numeric
-##   class of the output: 'uint8' or 'uint16' for grey
-##   and colour, and 'logical' for black and white.
+## The size and numeric class of the output depends on the
+## format of the image.  A colour image is returned as an
+## MxNx3 matrix.  Grey-level and black-and-white images are
+## of size MxN.
+## The colour depth of the image determines the numeric
+## class of the output: 'uint8' or 'uint16' for grey
+## and colour, and 'logical' for black and white.
 ##
-##   Note: For image formats other than jpeg and png, the
-##         ImageMagick "convert" and "identify" utilities
-##         are needed. ImageMagick can be found at
-##
-##         www.imagemagick.org
-##
+## Note: For image formats other than jpeg and png, the
+## ImageMagick "convert" and "identify" utilities
+## are needed. ImageMagick can be found at www.imagemagick.org
+## @end deftypefn
 
 ## Author: Andy Adler
 ##
