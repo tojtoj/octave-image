@@ -13,6 +13,9 @@
   *
   * History: 
   * $Log$
+  * Revision 1.2  2007/01/04 21:58:50  hauberg
+  * Texinfo-fication of the help texts
+  *
   * Revision 1.1  2006/12/08 06:43:30  cocus
   * fast c implementation to replace m file deriche.m
   *
@@ -34,8 +37,8 @@
 "
 */
  
- static void dericheAbs(const double  *p, double *q, unsigned w, 	unsigned h, unsigned linLen, double alpha);
- static void dericheVec(const double  *p, double *q, unsigned w,  unsigned h, unsigned linLen, double alpha);
+ static void dericheAbs(const double  *p, double *q, int w, int h, int linLen, double alpha);
+ static void dericheVec(const double  *p, double *q, int w, int h, int linLen, double alpha);
  
  DEFUN_DLD(deriche, args, ,
             "-*- texinfo -*-\n\
@@ -104,7 +107,7 @@
  }
  
  // q has to be dense gapless, for w and liLen may differ
- static void dericheAbs(const double  *p, double *q, unsigned w, unsigned h, unsigned linLen, double alpha){
+ static void dericheAbs(const double  *p, double *q, int w, int h, int linLen, double alpha){
   double a(1.0-exp(-alpha));
   a = - (a*a);
   double b1(-2.0 * exp(-alpha));
@@ -114,7 +117,7 @@
   double a2(a1-a0*b1);
   double a3(-a0*b2);
   double *tmp = 0;
-  unsigned const sz = h*w;	 
+  //const int sz = h*w;	// unused 
   try {
     tmp = new double[2*h*w + 2*w];
 	  if (!tmp) error("alloc error");
@@ -125,7 +128,7 @@
     double* Z2 = Z3 + w;
   
     const double  *ze; // int8
-    double  *za; // int8
+    //double  *za; // int8 // unused
     double *Ba1;
     double *Ba2;
 
@@ -206,7 +209,7 @@
   }
 
   // q has to be dense gapless, for w and liLen may differ
-  static void dericheVec(const double  *p, double *q, unsigned w, unsigned h, unsigned linLen, double alpha){
+  static void dericheVec(const double  *p, double *q, int w, int h, int linLen, double alpha){
   double a(1.0-exp(-alpha));
   a = - (a*a);
   double b1(-2.0 * exp(-alpha));
@@ -217,7 +220,7 @@
   double a3(-a0*b2);
   double *tmp = 0;
   double *r=q+h*w;
-  unsigned const sz = h*w;	 
+  //const int sz = h*w;	 // unused
   try {
     tmp = new double[2*h*w + 2*w];
 	  if (!tmp) error("alloc error");
@@ -228,7 +231,7 @@
     double* Z2 = Z3 + w;
   
     const double  *ze; // int8
-    double  *za; // int8
+    //double  *za; // int8 // unused
     double *Ba1;
     double *Ba2;
 

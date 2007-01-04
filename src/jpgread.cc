@@ -74,18 +74,19 @@ oct_error_exit (j_common_ptr cinfo)
     longjmp(octerr->setjmp_buffer, 1);
 }
 
-DEFUN_DLD (jpgread, args, nargout ,
-"usage: I = jpgread('filename')\n\
+DEFUN_DLD (jpgread, args, nargout , "\
+-*- texinfo -*-\n\
+@deftypefn {Function File} {@var{I} =} jpgread(@var{filename})\n\
+Read a JPEG file from disk.\n\
 \n\
-  Read a JPEG file from disk.\n\
+For a grey-level image, the output is an MxN matrix. For a\n\
+colour image, three such matrices are returned (MxNx3),\n\
+representing the red, green and blue components. The output\n\
+is of class 'uint8'.\n\
 \n\
-  For a grey-level image, the output is an MxN matrix. For a\n\
-  colour image, three such matrices are returned (MxNx3),\n\
-  representing the red, green and blue components. The output\n\
-  is of class 'uint8'.\n\
-\n\
-  See also: imread, im2double, im2gray, im2rgb.")
-{ 
+@seealso{imread, im2double, im2gray, im2rgb}\n\
+@end deftypefn\n\
+") { 
     octave_value_list retval;
     int nargin  = args.length();
     
@@ -162,7 +163,7 @@ DEFUN_DLD (jpgread, args, nargout ,
 	coord(0) = j;
 	for (unsigned long i=0; i<cinfo.output_width; i++) {
 	    coord(1) = i;
-	    for (unsigned int c = 0; c < cinfo.output_components; c++) {
+	    for (int c = 0; c < cinfo.output_components; c++) {
 		coord(2) = c;
 		out(coord) = buffer[0][i*cinfo.output_components+c];
 	    }

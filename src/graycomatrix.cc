@@ -25,20 +25,20 @@
 #include <octave/oct.h>
 
 DEFUN_DLD(graycomatrix, args, , "\
-\
-usage: P = graycomatrix(I, levels, distances, angles)\n\
+-*- texinfo -*-\n\
+@deftypefn {Function File} {@var{P} =} graycomatrix(@var{im}, @var{levels}, @var{distances}, @var{angles})\n\
+Calculates the gray-level co-occurrence matrix @var{P} of a gray-level image @var{im}.\n\
 \n\
-  Calculate the gray-level co-occurrence matrix P = f(i,j,d,theta)\n\
-  of a gray-level image.\n\
+@var{P} is a 4-dimensional matrix (histogram). The value @var{P}(@var{i},@var{j},@var{d},@var{theta})\n\
+is the number of times that gray-level @var{j} occurs at a distance @var{d} and\n\
+at an angle @var{theta} from gray-level @var{i}.\n\
 \n\
-  P is a 4-dimensional matrix (histogram). The value P(i,j,d,theta)\n\
-  is the number of times that gray-level j occurs at a distance 'd' and\n\
-  at an angle 'theta' from gray-level j.\n\
-\n\
-  'I' is the input image which should contain integers in [0, levels-1],\n\
-  where 'levels' indicate the number of gray-levels counted (typically\n\
-  256 for an 8-bit image).  'distances' and 'angles' are vectors of\n\
-  the different distances and angles to use.\n" ) {
+@var{im} is the input image which should contain integers in [0, @var{levels}-1],\n\
+where @var{levels} indicate the number of gray-levels counted (typically\n\
+256 for an 8-bit image). @var{distances} and @var{angles} are vectors of\n\
+the different distances and angles to use.\n\
+@end deftypefn\n\
+" ) {
 
     // 4-dimensional histogram
     // P = f(i, j, d, theta) where i and j are gray levels
@@ -71,8 +71,8 @@ usage: P = graycomatrix(I, levels, distances, angles)\n\
     NDArray P = NDArray(dim, 0);
 
     // Run through image
-    int d_max = (int)ceil(d.max());
-    int cnt = 0;
+    //int d_max = (int)ceil(d.max()); //unused
+    //int cnt = 0; //unused
 
     for (int r = 0; r < I.rows(); r++) {
 	for (int c = 0; c < I.columns(); c++) {

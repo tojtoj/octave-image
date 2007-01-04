@@ -232,15 +232,16 @@ template octave_value_list read_images<uint16NDArray>(vector<Image>,
 						      Array<int>,
 						      unsigned int depth);
 
-DEFUN_DLD(__magick_read__, args, nargout,
-"function m = __imagemagick_read__(fname[, index])\n\
-function [m, colormap] = __imagemagick_read__(fname[, index])\n\
-function [m, colormap, alpha] = __imagemagick_read__(fname[, index])\n\
-\n\
-Read images with ImageMagick++. User interface in imread.m.\n\
-\n\
-")
-{
+DEFUN_DLD(__magick_read__, args, nargout, "\
+-*- texinfo -*-\n\
+@deftypefn {Function File} {@var{m} =} __imagemagick_read__(@var{fname}, @var{index})\n\
+@deftypefnx{Function File} {[@var{m}, @var{colormap}] =} __imagemagick_read__(@var{fname}, @var{index})\n\
+@deftypefnx{Function File} {[@var{m}, @var{colormap}, @var{alpha}] =} __imagemagick_read__(@var{fname}, @var{index})\n\
+Read images with ImageMagick++. In general you should not be using this function.\n\
+Instead you should use @code{imread}.\n\
+@seealso{imread}\n\
+@end deftypefn\n\
+") {
     octave_value_list output;
     int i;    
     if(args.length() > 2 || args.length() < 1 || !args(0).is_string() \

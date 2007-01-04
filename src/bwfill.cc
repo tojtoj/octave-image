@@ -33,17 +33,23 @@ void checkpoint( int pt,
    (*npoints)++;
 }
 
-DEFUN_DLD (bwfill, args, ,
-  "[...] = bwfill (...)\n\
-   [BW2,IDX] = BWFILL(BW1,Y,X,N) performs a flood-fill on BW1\n\
+DEFUN_DLD (bwfill, args, ,"\
+-*- texinfo -*-\n\
+@deftypefn {Function File} {[@var{bw2}, @var{idx}] =} bwfill(@var{bw1}, @var{r}, @var{c}, @var{n})\n\
+Perform a flood-fill operation on the binary image @var{bw1}.\n\
+The flood-filling starts in the pixel (@var{r}, @var{c}). If @var{r} and @var{c}\n\
+are vectors of the same length, each pixel pair (@var{r}(i), @var{c}(i)) will\n\
+be a starting point for a flood-fill operation.\n\
+The argument @var{n} changes the neighborhood connectivity for the flood-fill\n\
+operation. @var{n} can be either 4 or 8, and has a default value of 8.\n\
 \n\
-       (X(k), Y(k)) are rows and columns of seed points\n\
-\n\
-   [BW2,IDX] = BWFILL(BW1,'holes',N) fills interior holes in BW1\n\
-\n\
-       N = 4 or 8(default) for neighborhood connectedness\n\
-\n\
-       IDX is the indices of the filled pixels")
+The output is the processed image @var{bw2} and the indexes of the filled\n\
+pixels @var{idx}\n\
+@deftypefnx{Function File} {[@var{bw2}, @var{idx}] =} bwfill(@var{bw1}, \"holes\", @var{n})\n\
+If the string \"holes\" is given instead of starting points for the flood-fill\n\
+operation, the function finds interior holes in @var{bw1} and fills them.\n\
+@end deftypefn\n\
+")
 {
    octave_value_list retval;
    octave_value tmp;
@@ -180,6 +186,9 @@ DEFUN_DLD (bwfill, args, ,
 
 /*
  * $Log$
+ * Revision 1.3  2007/01/04 21:58:50  hauberg
+ * Texinfo-fication of the help texts
+ *
  * Revision 1.2  2006/08/23 23:58:45  adb014
  * remove cruft of #ifdef
  *

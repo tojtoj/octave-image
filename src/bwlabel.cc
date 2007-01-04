@@ -44,18 +44,23 @@ static bool any_bad_argument( const octave_value_list& );
 /*
 %!assert(bwlabel([0 1 0; 0 0 0; 1 0 1]),[0 1 0; 0 0 0; 2 0 3]);
 */
-DEFUN_DLD(bwlabel, args, ,
-"\n\
-[l,num] = bwlabel( bw, n ) - label foreground components of boolean image\n\
+DEFUN_DLD(bwlabel, args, , "\
+-*- texinfo -*-\n\
+@deftypefn {Function File} {[@var{l}, @var{num}] =} bwlabel(@var{bw}, @var{n})\n\
+Labels foreground objects in the binary image @var{bw}.\n\
+The output @var{l} is a matrix where 0 indicates a background pixel,\n\
+1 indicates that the pixel belong to object number 1, 2 that the pixel\n\
+belong to object number 2, etc.\n\
+The total number of objects is @var{num}.\n\
 \n\
-    bw  -   boolean image array\n\
-    n   -   neighborhood connectedness (4, 6,or 8)\n\
+To pixels belong to the same object if the are neighbors. By default\n\
+the algorithm uses 6-connectivity to define a neighborhood, but this\n\
+can be changed through the argument @var{n} that can be either 4, 6, or 8.\n\
 \n\
-    l   -   label image array\n\
-    num -   number of components labeled\n\
-\n\
-    The algorithm is derived from  BKP Horn, Robot Vision, MIT Press,\n\
-    1986, p 65 - 89 \n" )
+The algorithm is derived from  BKP Horn, Robot Vision, MIT Press,\n\
+1986, p 65 - 89\n\
+@end deftypefn\n\
+")
 {
     if ( any_bad_argument(args) )
         return octave_value_list();

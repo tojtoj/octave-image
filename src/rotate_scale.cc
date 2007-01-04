@@ -29,28 +29,27 @@ do_interpolation (
               const double * img0,
               double       * img1 );
 
-DEFUN_DLD (rotate_scale, args, ,
-  "ROTATE_SCALE: arbitrary rotation and scaling of an image\n"
-  "              using fast bilinear interpolation\n"
-  "im1 = rotate_scale(im0, lm0, lm1, out_size)\n"
-  "  where:\n"
-  "im0 = input image\n"
-  "lm0 = landmarks of points in original image [ x1,x2;y1,y2 ]\n"
-  "im1 = output image, where size(im1) == out_size\n"
-  "lm1 = landmarks of points in output image [ x1,x2;y1,y2 ]\n"
-  "\n"
-  "   note1: two landmarks must be specified for lm0 and lm1\n"
-  "   note2: all images have a single component\n"
-  "   to use this for colour images, use:\n"
-  "  r_im1= rotate_scale( red_im0, lm0, lm1, out_size)\n"
-  "  g_im1= rotate_scale( grn_im0, lm0, lm1, out_size)\n"
-  "  b_im1= rotate_scale( blu_im0, lm0, lm1, out_size)\n"
-  "\n"
-  "   example:\n"
-  "  im0= zeros(100); im0(25:75,25:75)=1;\n"
-  "  im1= rotate_scale( im0, [40,60;50,50],[60,90;60,90],[120,120]);\n"
-)
-{
+DEFUN_DLD (rotate_scale, args, , "\
+-*- texinfo -*-\n\
+@deftypefn {Function File} {@var{im1} =} rotate_scale(@var{im0}, @var{lm0}, @var{lm1}, @var{out_size})\n\
+Arbitrary rotation and scaling of a gray-scale image using fast bilinear interpolation.\n\
+\n\
+The image @var{im0} will be rotated and scaled such that the landmark points in\n\
+@var{lm0} in the image will be placed in the landmark points in @var{lm1} in\n\
+the output image @var{im1}. The landmark points are given as a 2 by 2 matrix\n\
+where the first row contains the x-coordinates of the landmarks, and the second\n\
+row contains the y-coordinates.\n\
+\n\
+The size of the output image is given in the vector @var{out_size}.\n\
+\n\
+The following example shows basic usage of the function\n\
+@example\n\
+im0 = zeros(100); im0(25:75, 25:75)=1;\n\
+im1 = rotate_scale( im0, [40,60; 50,50], [60,90; 60,90], [120,120]);\n\
+@end example\n\
+@seealso{imrotate, imresize}\n\
+@end deftypefn\n\
+") {
    octave_value_list retval;
    if (args.length() < 4 ||
        !args(0).is_matrix_type() ||

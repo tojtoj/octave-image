@@ -172,11 +172,14 @@ template octave_value_list do_filtering<Matrix, double>(Matrix, int, boolMatrix,
 //template int compare<Complex>(const Complex, const Complex);
 template octave_value_list do_filtering<ComplexMatrix, Complex>(ComplexMatrix, int, boolMatrix, ComplexMatrix);
 
-DEFUN_DLD(cordflt2, args, ,
-"function retval = cordflt2(A, nth, domain, S)\n\
-\n\
- Implementation of two-dimensional ordered filtering. User interface\n\
- in ordfilt2.m")
+DEFUN_DLD(cordflt2, args, , "\
+-*- texinfo -*-\n\
+@deftypefn {Function File} cordflt2(@var{A}, @var{nth}, @var{domain}, @var{S})\n\
+Implementation of two-dimensional ordered filtering. In general this function\n\
+should NOT be used. Instead use @code{ordfilt2}.\n\
+@seealso{ordfilt2}\n\
+@end deftypefn\n\
+")
 {
     if(args.length() != 4) {
 	print_usage ();

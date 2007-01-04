@@ -43,20 +43,25 @@ extern "C" {
  * ftp://ftp.uu.net/graphics/jpeg/jpegsrc.v6.tar.gz
  */
 
-DEFUN_DLD (jpgwrite, args, ,
-"JPGWRITE Write a JPEG file to disk.\n\
-   jpgwrite('filename',R,G,B,quality) writes the specified file\n\
-   using the Red, Green, and Blue intensity matrices, at the given quality.\n\
-   \n\
-   jpgwrite('filename',M,quality) writes a grey-scale image.\n\
-   \n\
-   Data must be [0 255] or the high bytes will be lost\n\
-   \n\
-   If specified, quality should be in the range 1-100 and will default to \n\
-   75 if not specified.  100 is best quality, 1 is best compression.\n\
-   \n\
-   See also JPGREAD")
-{
+DEFUN_DLD (jpgwrite, args, , "\
+-*- texinfo -*-\n\
+@deftypefn {Function File} jpgwrite(@var{filename}, @var{R}, @var{G}, @var{B}, @var{quality})\n\
+@deftypefnx{Function File} jpgwrite(@var{filename}, @var{I}, @var{quality})\n\
+Write a JPEG file to disc.\n\
+\n\
+If three matrices @var{R}, @var{G}, and @var{B} are given the function will write\n\
+a color image to the disc, where @var{R} is the red channel, @var{G} the green channel,\n\
+and @var{B} the blue channel of the image.\n\
+\n\
+If only one matrix @var{I} is given the function writes a gray-scale image to the disc.\n\
+\n\
+In all cases the data matrices should have integer values between 0 and 255.\n\
+\n\
+If specified, @var{quality} should be in the range 1-100 and will default to\n\
+75 if not specified. 100 is best quality, and 1 is best compression.\n\
+@seealso{jpgread, imwrite}\n\
+@end deftypefn\n\
+") {
    octave_value_list retval;
    int nargin  = args.length();
 

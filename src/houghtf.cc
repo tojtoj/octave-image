@@ -25,17 +25,18 @@
 #include <octave/oct.h>
 
 DEFUN_DLD(houghtf, args, , "\
-\
-usage: [H, R]  = houghtf(I[, angles])\n\
+-*- texinfo -*-\n\
+@deftypefn {Function File} {[@var{H}, @var{R}] =} houghtf(@var{I}, @var{angles})\n\
+Calculate the straight line Hough transform of a binary image @var{I}.\n\
 \n\
-  Calculate the straight line Hough transform of an image.\n\
+The angles are given in degrees and defaults to -90:90.\n\
 \n\
-  The image, I, should be a binary image in [0,1].  The angles are given\n\
-  in degrees and defaults to -90..90.\n\
+@var{H} is the resulting Hough transform, and @var{R} is the radial distances.\n\
 \n\
-  H is the resulting transform, R the radial distances.\n\
-\n\
-  See also: Digital Image Processing by Gonzales & Woods (2nd ed., p. 587)\n") {
+The algorithm is described in\n\
+Digital Image Processing by Gonzales & Woods (2nd ed., p. 587)\n\
+@end deftypefn\n\
+") {
 
     octave_value_list retval;
     bool DEF_THETA = false;

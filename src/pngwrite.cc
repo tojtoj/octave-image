@@ -44,12 +44,14 @@ Write PNG files to disk from octave
 void save_canvas(canvas *can, char *filename);
 
 DEFUN_DLD (pngwrite, args, ,"\
-pngwrite writes a png file to the disk.\n\
-    pngwrite('filename',R,G,B,A) writes the specified file\n\
-    using the Red, Green, Blue and Alpha matrices.\n\
-    \n\
-    Data must be [0 255] or the high bytes will be lost.")
-{
+-*- texinfo -*-\n\
+@deftypefn {Function File} pngwrite(@var{filename}, @var{R}, @var{G}, @var{B}, @var{A})\n\
+Writes a png file to the disk using the Red, Green, Blue and Alpha matrices.\n\
+\n\
+Data must be [0 255] or the high bytes will be lost.\n\
+@seealso{imwrite}\n\
+@end deftypefn\n\
+") {
    octave_value_list retval;
    int nargin  = args.length();
    
