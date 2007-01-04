@@ -20,8 +20,8 @@
 ## (gives a sephia tone on b/w images)
 ## The argument @var{n} should be a scalar.  If it
 ## is omitted, the length of the current colormap or 64 is assumed.
-## @end deftypefn
 ## @seealso{colormap}
+## @end deftypefn
 
 ## Author:  Kai Habel <kai.habel@gmx.de>
 

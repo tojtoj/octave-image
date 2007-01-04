@@ -74,8 +74,8 @@
 ## say it explicity, since it looks as an omission.
 ## @end itemize
 ##
-## @end deftypefn
 ## @seealso{col2im}
+## @end deftypefn
 
 ## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 
@@ -240,6 +240,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.3  2007/01/04 23:47:43  hauberg
+% Put seealso before end deftypefn
+%
 % Revision 1.2  2007/01/04 23:37:54  hauberg
 % Minor changes in help text
 %

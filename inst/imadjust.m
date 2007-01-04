@@ -93,8 +93,8 @@
 ## images and by 65535 for uint16 as in MATLAB.
 ## @end itemize
 ## 
-## @end deftypefn
 ## @seealso{stretchlim, brighten}
+## @end deftypefn
 
 ## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 
@@ -347,6 +347,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.2  2007/01/04 23:47:43  hauberg
+% Put seealso before end deftypefn
+%
 % Revision 1.1  2006/08/20 12:59:33  hauberg
 % Changed the structure to match the package system
 %

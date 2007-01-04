@@ -34,8 +34,8 @@
 ## vectors, @var{r} and @var{c}, which contain the row and column
 ## coordinates of the blocks returned.
 ##
+## @seealso{qtdecomp, qtsetblk}
 ## @end deftypefn
-## @seealso qtdecomp, qtsetblk
 
 ## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 
@@ -142,6 +142,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.3  2007/01/04 23:50:47  hauberg
+% Put seealso before end deftypefn
+%
 % Revision 1.2  2007/01/04 23:41:47  hauberg
 % Minor changes in help text
 %

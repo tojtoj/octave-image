@@ -27,8 +27,8 @@
 ## Optional variable @var{padding} defines the padding used in augmenting 
 ## the borders of @var{A}. See impad for details.
 ##
-## @end deftypefn
 ## @seealso{ordfilt2}
+## @end deftypefn
 
 ## Author: Teemu Ikonen <tpikonen@pcu.helsinki.fi>
 ## Created: 5.5.2000

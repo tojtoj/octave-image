@@ -65,8 +65,8 @@
 ## S = qtdecomp(I, fun, ...) behaves as qtdecomp(I, fun) but passes
 ## extra parameters to @var{fun}.
 ##
+## @seealso{qtgetblk, qtsetblk}
 ## @end deftypefn
-## @seealso qtgetblk, qtsetblk
 
 ## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 
@@ -308,6 +308,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.4  2007/01/04 23:50:47  hauberg
+% Put seealso before end deftypefn
+%
 % Revision 1.3  2007/01/04 23:41:47  hauberg
 % Minor changes in help text
 %

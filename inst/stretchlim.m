@@ -64,8 +64,8 @@
 ## MATLAB behaviour.
 ## @end itemize
 ##
+## @seealso{imadjust}
 ## @end deftypefn
-## @seealso imadjust
 
 ## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 

@@ -23,8 +23,8 @@
 ## @var{I} to @var{dim}-by-@var{dim} blocks in @var{vals}, which is
 ## itself a @var{dim}-by-@var{dim}-by-k array. k is the number of
 ## @var{dim}-by-@var{dim} blocks in the quadtree decomposition.
+## @seealso{qtdecomp, qtgetblk}
 ## @end deftypefn
-## @seealso qtdecomp, qtgetblk
 
 ## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 
@@ -96,6 +96,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.3  2007/01/04 23:50:47  hauberg
+% Put seealso before end deftypefn
+%
 % Revision 1.2  2007/01/04 23:41:47  hauberg
 % Minor changes in help text
 %

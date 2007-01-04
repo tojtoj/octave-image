@@ -34,8 +34,8 @@
 ##
 ## makelut also passes parameters @var{P1}, @var{P2}, .... to @var{fun}. 
 ##
-## @end deftypefn
 ## @seealso{applylut}
+## @end deftypefn
 
 ## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 

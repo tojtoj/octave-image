@@ -31,8 +31,8 @@
 ## Optional variable @var{padding} determines how the matrix @var{A} 
 ## is padded from the edges. See impad for details.
 ## 
-## @end deftypefn
 ## @seealso{medfilt2}
+## @end deftypefn
 
 
 ## Author: Teemu Ikonen <tpikonen@pcu.helsinki.fi>
