@@ -38,8 +38,8 @@
 ## X = grayslice(I,[0.1,0.33,0.75,0.9])
 ## @end group
 ##
-## @end deftypefn
 ## @seealso{im2bw}
+## @end deftypefn
 
 ## Author:	Kai Habel <kai.habel@gmx.de>
 ## Date:	03. August 2000

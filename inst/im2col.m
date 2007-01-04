@@ -18,7 +18,7 @@
 ## @deftypefn {Function File} {@var{B} = } im2col (@var{A}, [@var{m},@var{n}], @var{block_type})
 ## @deftypefnx {Function File} {@var{B} = } im2col (@var{A}, [@var{m},@var{n}])
 ## @deftypefnx {Function File} {@var{B} = } im2col (@var{A}, 'indexed', ...)
-## Rearranges image blocks into columns
+## Rearranges image blocks into columns.
 ##
 ## @code{B=im2col(A, [m, n], blocktype)} rearranges blocks in @var{A}
 ## into columns in a way that's determined by @var{block_type}, which
@@ -240,6 +240,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.2  2007/01/04 23:37:54  hauberg
+% Minor changes in help text
+%
 % Revision 1.1  2006/08/20 12:59:33  hauberg
 % Changed the structure to match the package system
 %

@@ -38,8 +38,8 @@
 ## @code{round(min(dimension/10,k/2))} which minimizes padding.
 ##
 ##
-## @end deftypefn
 ## @seealso{blkproc}
+## @end deftypefn
 
 
 ## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
@@ -103,6 +103,9 @@ endfunction
 %!assert(bestblk([256,128],17),[16;16]);
 
 % $Log$
+% Revision 1.2  2007/01/04 23:44:22  hauberg
+% Minor changes in help text
+%
 % Revision 1.1  2006/08/20 12:59:31  hauberg
 % Changed the structure to match the package system
 %

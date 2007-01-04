@@ -26,8 +26,8 @@
 ## matrix which assigns each of the neighbours a bit in the resulting
 ## index. Then @var{LUT} is accessed to compute the result.
 ##
-## @end deftypefn
 ## @seealso{makelut}
+## @end deftypefn
 
 ## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 

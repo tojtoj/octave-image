@@ -1,6 +1,6 @@
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {[@var{imout}, @var{idx}] =} bwselect(@var{im}, @var{cols}, @var{rows}, @var{connect})
-## Select connected regions in a binary image
+## Select connected regions in a binary image.
 ##
 ## @table @code
 ## @item @var{im}
@@ -36,6 +36,9 @@ imout( idx ) = 1;
 
 # 
 # $Log$
+# Revision 1.3  2007/01/04 23:41:47  hauberg
+# Minor changes in help text
+#
 # Revision 1.2  2007/01/02 21:58:38  hauberg
 # Documentation is now in Texinfo (looks better on the website)
 #

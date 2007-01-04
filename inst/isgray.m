@@ -16,7 +16,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{bool}= isgray (@var{I})
-## returns true for an intensity image. An variable is a gray scale image
+## Returns true for an gray-scale intensity image. An variable is a gray scale image
 ## if it is 2-dimensional matrix, and
 ## @itemize @bullet
 ## @item is of class double and all values are in the range [0, 1], or

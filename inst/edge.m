@@ -1,6 +1,6 @@
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {[@var{imout}, @var{thresh}] = } edge(@var{im}, @var{method}, @var{thresh}, @var{param2})
-## Find image edges
+## Find image edges.
 ##
 ## The output is
 ## @table @code
@@ -256,6 +256,9 @@ end
 
 # 
 # $Log$
+# Revision 1.3  2007/01/04 23:41:47  hauberg
+# Minor changes in help text
+#
 # Revision 1.2  2007/01/02 21:58:38  hauberg
 # Documentation is now in Texinfo (looks better on the website)
 #

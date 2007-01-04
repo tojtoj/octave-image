@@ -19,7 +19,7 @@
 ## @deftypefnx {Function File} {@var{B} = } blkproc (@var{A}, [@var{m},@var{n}], @var{fun}, ...)
 ## @deftypefnx {Function File} {@var{B} = } blkproc (@var{A}, [@var{m},@var{n}], [@var{mborder},@var{nborder}], @var{fun}, @var{...})
 ## @deftypefnx {Function File} {@var{B} = } blkproc (@var{A}, 'indexed', ...)
-## Processes image in blocks using user-supplied function
+## Processes image in blocks using user-supplied function.
 ##
 ## @code{B=blkproc(A,[m,n],fun)} divides image @var{A} in
 ## @var{m}-by-@var{n} blocks, and passes them to user-supplied function
@@ -172,6 +172,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.3  2007/01/04 23:37:54  hauberg
+% Minor changes in help text
+%
 % Revision 1.2  2006/10/08 21:41:04  adb014
 % check isnumeric for vector and 'function_handle' not 'function handle' in isa test
 %

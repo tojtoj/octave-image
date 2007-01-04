@@ -15,14 +15,21 @@
 ## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} @var{J}= histeq (@var{I},@var{n})
-## histogram equalization
+## @deftypefn {Function File} @var{J}= histeq (@var{I}, @var{n})
+## Histogram equalization of a gray-scale image. The histogram contains
+## @var{n} bins, which defaults to 64.
+## @seealso{imhist}
 ## @end deftypefn
 
 ## Author:	Kai Habel <kai.habel@gmx.de>
 ## Date:	08. August 2000
 
 function J = histeq (I, n)
+  if (nargin == 0)
+    print_usage();
+  elseif (nargin == 1)
+    n = 64;
+  endif
 
   [r,c] = size (I); 
   [X,map] = gray2ind(I);

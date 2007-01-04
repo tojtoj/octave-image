@@ -15,9 +15,8 @@
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {} 
-##            imshear (@var{M}, @var{axis}, @var{alpha}, @var{bbox})
-## Applies a shear to @var{M}.
+## @deftypefn {Function File} {} imshear (@var{M}, @var{axis}, @var{alpha}, @var{bbox})
+## Applies a shear to the image @var{M}.
 ##
 ## The argument @var{M} is either a matrix or an RGB image.
 ##

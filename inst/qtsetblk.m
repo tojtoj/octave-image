@@ -16,7 +16,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{J} = } qtsetblk (@var{I},@var{S},@var{dim},@var{vals})
-## Set block values in a quadtree decomposition
+## Set block values in a quadtree decomposition.
 ##
 ## J=qtsetblk(I,S,dim,vals) sets all the @var{dim}-by-@var{dim} blocks
 ## in the quadtree decomposition (@var{S} returned by qtdecomp) of
@@ -96,6 +96,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.2  2007/01/04 23:41:47  hauberg
+% Minor changes in help text
+%
 % Revision 1.1  2006/08/20 12:59:35  hauberg
 % Changed the structure to match the package system
 %

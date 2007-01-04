@@ -16,7 +16,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{flag} = } isrgb (@var{A})
-## Returns true if parameter is a RGB image
+## Returns true if parameter is a RGB image.
 ##
 ## @code{flag=isrgb(A)} returns 1 if @var{A} is a RGB image and 0 if
 ## not.

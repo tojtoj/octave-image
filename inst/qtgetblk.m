@@ -18,7 +18,7 @@
 ## @deftypefn {Function File} {[@var{vals}] = } qtgetblk (@var{I},@var{S},@var{dim})
 ## @deftypefnx {Function File} {[@var{vals},@var{idx}] = } qtgetblk (@var{I},@var{S},@var{dim})
 ## @deftypefnx {Function File} {[@var{vals},@var{r},@var{c}] = } qtgetblk (@var{I},@var{S},@var{dim})
-## Obtain block values from a quadtree decomposition
+## Obtain block values from a quadtree decomposition.
 ##
 ## [vals]=qtgetblk(I,S,dim) returns a dim-by-dim-by-k array in
 ## @var{vals} which contains the dim-by-dim blocks in the quadtree
@@ -142,6 +142,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.2  2007/01/04 23:41:47  hauberg
+% Minor changes in help text
+%
 % Revision 1.1  2006/08/20 12:59:35  hauberg
 % Changed the structure to match the package system
 %

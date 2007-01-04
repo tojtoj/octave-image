@@ -15,8 +15,7 @@
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {} 
-##            imrotate(@var{imgPre}, @var{theta}, @var{method}, @var{bbox})
+## @deftypefn {Function File} {} imrotate(@var{imgPre}, @var{theta}, @var{method}, @var{bbox})
 ## Rotation of a 2D matrix about its center.
 ##
 ## Input parameters:

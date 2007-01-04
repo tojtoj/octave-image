@@ -37,8 +37,8 @@
 ## BW2 = dilate(BW1, SE, ..., n) returns the result of @var{n} dilation
 ## operations on @var{BW1}.
 ##
-## @end deftypefn
 ## @seealso{erode}
+## @end deftypefn
 
 ## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 

@@ -16,10 +16,10 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{s}= std2 (@var{I})
-## returns the standard deviation for a 2d real type matrix.
+## Returns the standard deviation for a 2d real type matrix.
 ## Uses @code{std (I(:))}
-## @end deftypefn
 ## @seealso{mean2,std}
+## @end deftypefn
 
 ## Author:	Kai Habel <kai.habel@gmx.de>
 ## Date:	01/08/2000
@@ -27,11 +27,11 @@
 function s = std2 (I)
 
   if !(nargin == 1)
-    usage ("std2(I)");
+    print_usage ();
   endif
 
   if !(is_matrix(I) && isreal(I))
-	error("argument must be a real type matrix");
+	error("std2: argument must be a real type matrix");
   endif
 
   s = std (I(:));

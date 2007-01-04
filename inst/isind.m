@@ -16,7 +16,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{bool}= isind (@var{X})
-## returns true for an index image. All index values must
+## Returns true for an index image. All index values must
 ## be intergers and greater than  or equal to 1.
 ## @end deftypefn
 

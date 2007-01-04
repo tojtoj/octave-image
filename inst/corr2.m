@@ -15,9 +15,10 @@
 ## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} @var{r}= corr2 (@var{I},@var{J})
-## returns the correlation coefficient between @var{I} and @var{j}.
-## @var{I,J} must be real type matrices or vectors of same size
+## @deftypefn {Function File} @var{r} = corr2 (@var{I},@var{J})
+## Returns the correlation coefficient between @var{I} and @var{j}.
+## @var{I}, @var{J} must be real type matrices or vectors of same size.
+## @seealso{cov, std2}
 ## @end deftypefn
 
 
@@ -26,16 +27,16 @@
 
 function r = corr2 (I, J)
 
-  if !(nargin == 2)
-    usage ("corr2(I,J)");
+  if (nargin != 2)
+    print_usage ();
   endif
 
   if !(is_matrix(I) && isreal(I) && is_matrix(J) && isreal(J))
-	error("argument must be a real type matrix");
+	error("corr2: argument must be a real type matrix");
   endif
 
   if (size (I) != size (J))
-    error("arguments must be of same size")
+    error("corr2: arguments must be of same size")
   endif
   
   r = cov (I, J) / (std2(I)*std2(J));    

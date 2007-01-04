@@ -16,9 +16,9 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{eul} = } bweuler (@var{BW},@var{n})
-## Calculates the Euler number of a binary image
+## Calculates the Euler number of a binary image.
 ##
-## eul=bweuler(BW,n) calculates the Euler number @var{eul} of a binary
+## @var{eul}=bweuler(@var{BW}, @var{n}) calculates the Euler number @var{eul} of a binary
 ## image @var{BW}, which is a scalar whose value is the total number of
 ## objects in an image minus the number of holes.
 ##
@@ -37,8 +37,8 @@
 ## References:
 ## W. K. Pratt, "Digital Image Processing", 3rd Edition, pp 593-595
 ##
-## @end deftypefn
 ## @seealso qtgetblk
+## @end deftypefn
 
 ## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 
@@ -92,6 +92,9 @@ endfunction
 %! assert(bweuler(A),1);
 
 % $Log$
+% Revision 1.2  2007/01/04 23:41:47  hauberg
+% Minor changes in help text
+%
 % Revision 1.1  2006/08/20 12:59:31  hauberg
 % Changed the structure to match the package system
 %

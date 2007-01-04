@@ -16,7 +16,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{BW} = } poly2mask (@var{x},@var{y},@var{m},@var{n})
-## Convert a polygon to a region mask
+## Convert a polygon to a region mask.
 ##
 ## BW=poly2mask(x,y,m,n) converts a polygon, specified by a list of
 ## vertices in @var{x} and @var{y} and returns in a @var{m}-by-@var{n}
@@ -235,6 +235,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.2  2007/01/04 23:37:54  hauberg
+% Minor changes in help text
+%
 % Revision 1.1  2006/08/20 12:59:35  hauberg
 % Changed the structure to match the package system
 %

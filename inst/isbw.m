@@ -16,7 +16,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{bool}= isbw (@var{BW})
-## returns true for a black-white (binary) image.
+## Returns true for a black-white (binary) image.
 ## All values must be either 0 or 1
 ## @end deftypefn
 

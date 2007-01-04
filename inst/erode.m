@@ -37,8 +37,8 @@
 ## BW2 = erosion(BW1, SE, ..., n) returns the result of @var{n} erosion
 ## operations on @var{BW1}.
 ##
-## @end deftypefn
 ## @seealso{dilate}
+## @end deftypefn
 
 ## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 

@@ -16,10 +16,10 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{m}= mean2 (@var{I})
-## returns the mean value for a 2d real type matrix.
+## Returns the mean value for a 2d real type matrix.
 ## Uses @code{mean(I(:))}
-## @end deftypefn
 ## @seealso{std2,mean}
+## @end deftypefn
 
 
 ## Author:	Kai Habel <kai.habel@gmx.de>
@@ -28,11 +28,11 @@
 function m = mean2 (I)
 
   if !(nargin == 1)
-    usage ("mean2(I)");
+    print_usage();
   endif
 
   if !(is_matrix(I) && isreal(I))
-	error("argument must be a real type matrix");
+	error("mean2: argument must be a real type matrix");
   endif
 
   m = mean (I(:));

@@ -16,6 +16,8 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{b} = } bwborder (@var{im})
+## Finds the borders of foreground objects in a binary image.
+##
 ## @var{b} is the borders in the 0-1 matrix @var{im}. 4-neighborhood is considered.
 ## 
 ## A pixel is on the border if it is set in @var{im}, and it has at least one

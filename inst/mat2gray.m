@@ -16,7 +16,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{I}= mat2gray (@var{M},[min max])
-## converts a matrix to a intensity image
+## Converts a matrix to a intensity image
 ## @end deftypefn
 
 ## Author:	Kai Habel <kai.habel@gmx.de>

@@ -19,9 +19,9 @@
 ## @deftypefnx {Function File} {} imhist (@var{I})
 ## @deftypefnx {Function File} {} imhist (@var{X},@var{cmap})
 ## @deftypefnx {Function File} {[@var{n,x}] = } imhist (...)
-## Shows the histogram of an image using hist 
-## @end deftypefn
+## Shows the histogram of an image using hist.
 ## @seealso{hist}
+## @end deftypefn
 
 ## Author:	Kai Habel <kai.habel@gmx.de>
 ## July 2000 : Paul Kienzle code simplification for hist() call.
@@ -29,7 +29,7 @@
 function [varargout] = imhist (I, b)
 
   if (nargin < 1 || nargin > 2)
-    usage("imhist(image,n)");
+    print_usage();
   endif
 
   b_is_colormap = 0;

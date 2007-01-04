@@ -21,7 +21,7 @@
 ## @deftypefnx {Function File} {@var{S} = } qtdecomp (@var{I},@var{threshold},@var{[mindim maxdim]})
 ## @deftypefnx {Function File} {@var{S} = } qtdecomp (@var{I},@var{fun})
 ## @deftypefnx {Function File} {@var{S} = } qtdecomp (@var{I},@var{fun},@var{P1},@var{P2},...)
-## Performs quadtree decomposition
+## Performs quadtree decomposition.
 ##
 ## qtdecomp decomposes a square image @var{I} into four equal-sized
 ## blocks. Then it performs some kind of test on each block to decide if
@@ -308,6 +308,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.3  2007/01/04 23:41:47  hauberg
+% Minor changes in help text
+%
 % Revision 1.2  2006/10/09 19:58:09  adb014
 % Remove dependency on miscellaneous transpose function. Simplify tests and add function handle tests
 %

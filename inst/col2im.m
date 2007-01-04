@@ -17,7 +17,7 @@
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{A} = } col2im (@var{B}, [@var{m},@var{n}], [@var{mm},@var{nn}], @var{block_type})
 ## @deftypefnx {Function File} {@var{A} = } col2im (@var{B}, [@var{m},@var{n}], [@var{mm},@var{nn}])
-## Rearranges matrix columns into blocks
+## Rearranges matrix columns into blocks.
 ##
 ## @code{A=col2im(B,[m,n],[mm,nn],block_type)} rearranges columns of
 ## matrix @var{B} intro blocks in a way controlled by @var{block_type}
@@ -160,6 +160,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.2  2007/01/04 23:37:54  hauberg
+% Minor changes in help text
+%
 % Revision 1.1  2006/08/20 12:59:32  hauberg
 % Changed the structure to match the package system
 %

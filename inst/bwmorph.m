@@ -17,7 +17,7 @@
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{BW2} = } bwmorph (@var{BW},@var{operation})
 ## @deftypefnx {Function File} {@var{BW2} = } bwmorph (@var{BW},@var{operation},@var{n})
-## Perform a morphological operation on a binary image
+## Perform a morphological operation on a binary image.
 ##
 ## BW2=bwmorph(BW,operation) performs a morphological operation
 ## specified by @var{operation} on binary image @var{BW}. All possible
@@ -590,6 +590,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.3  2007/01/04 23:41:47  hauberg
+% Minor changes in help text
+%
 % Revision 1.2  2006/10/15 08:04:55  hauberg
 % Fixed texinfo in bwmorph
 %

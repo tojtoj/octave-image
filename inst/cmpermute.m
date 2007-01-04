@@ -17,7 +17,7 @@
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {[@var{Y}, @var{newmap}] = } cmpermute (@var{X},@var{map})
 ## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] = } cmpermute (@var{X},@var{map},@var{index})
-## Reorders colors in a colormap
+## Reorders colors in a colormap.
 ##
 ## @code{[Y,newmap]=cmpermute(X,map)} rearranges colormap @var{map}
 ## randomly returning colormap @var{newmap} and generates indexed image
@@ -109,6 +109,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.2  2007/01/04 23:44:22  hauberg
+% Minor changes in help text
+%
 % Revision 1.1  2006/08/20 12:59:32  hauberg
 % Changed the structure to match the package system
 %

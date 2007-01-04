@@ -15,8 +15,7 @@
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {@var{Y}} =
-##             imtranslate (@var{M}, @var{x}, @var{y} [, @var{bbox}])
+## @deftypefn {Function File} {@var{Y}} = imtranslate (@var{M}, @var{x}, @var{y} [, @var{bbox}])
 ## Translate a 2D image by (x,y) using Fourier interpolation.
 ##
 ## @var{M} is a matrix, and is translated to the right by @var{X} pixels

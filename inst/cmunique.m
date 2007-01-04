@@ -18,7 +18,7 @@
 ## @deftypefn {Function File} {[@var{Y}, @var{newmap}] = } cmunique (@var{X},@var{map})
 ## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] = } cmunique (@var{RGB})
 ## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] = } cmunique (@var{I})
-## Finds colormap with unique colors and corresponding image
+## Finds colormap with unique colors and corresponding image.
 ##
 ## @code{[Y,newmap]=cmunique(X,map)} returns an indexed image @var{y}
 ## along with its associated colormap @var{newmap} equivalent (which
@@ -186,6 +186,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.2  2007/01/04 23:44:22  hauberg
+% Minor changes in help text
+%
 % Revision 1.1  2006/08/20 12:59:32  hauberg
 % Changed the structure to match the package system
 %

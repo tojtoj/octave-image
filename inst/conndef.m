@@ -16,7 +16,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{conn} = } conndef (@var{num_dims}, @var{type})
-## Creates a connectivity array
+## Creates a connectivity array.
 ##
 ## @code{conn=conndef(num_dims,type)} creates a connectivity array
 ## (@var{CONN}) of @var{num_dims} dimensions and which type is defined
@@ -99,6 +99,9 @@ endfunction
 
 
 % $Log$
+% Revision 1.2  2007/01/04 23:41:47  hauberg
+% Minor changes in help text
+%
 % Revision 1.1  2006/08/20 12:59:32  hauberg
 % Changed the structure to match the package system
 %
