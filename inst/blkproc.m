@@ -44,8 +44,8 @@
 ## uint16 images and 1 for double images. Keep in mind that if 'indexed'
 ## is not specified padding is always done using 0.
 ##
-## @end deftypefn
 ## @seealso{colfilt,inline,bestblk}
+## @end deftypefn
 
 ## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 
@@ -172,6 +172,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.4  2007/01/04 23:44:22  hauberg
+% Minor changes in help text
+%
 % Revision 1.3  2007/01/04 23:37:54  hauberg
 % Minor changes in help text
 %

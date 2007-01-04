@@ -40,8 +40,8 @@
 ## @code{A=col2im(B,[m,n],[mm,nn])} takes @code{distinct} as a default
 ## value for @var{block_type}.
 ##
-## @end deftypefn
 ## @seealso{im2col}
+## @end deftypefn
 
 ## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 
@@ -160,6 +160,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.3  2007/01/04 23:46:17  hauberg
+% Minor changes in help text
+%
 % Revision 1.2  2007/01/04 23:37:54  hauberg
 % Minor changes in help text
 %
