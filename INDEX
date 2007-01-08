@@ -33,6 +33,7 @@ Analysis and Statistics
  houghtf
 Filtering
  colfilt
+ fspecial
  histeq 
  imadjust 
  imnoise 
@@ -43,7 +44,8 @@ Filtering
  makelut applylut
  deriche
 Black and white image functions
- bwarea 
+ bwarea
+ bwdist 
  bweuler 
  bwfill 
  bwlabel 
