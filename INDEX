@@ -33,6 +33,7 @@ Analysis and Statistics
  qtsetblk
  graycomatrix
  houghtf
+ graythresh
 Filtering
  colfilt
  fspecial
