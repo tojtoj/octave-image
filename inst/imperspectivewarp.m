@@ -81,7 +81,7 @@ function [warped, valid] = imperspectivewarp(im, P, interp = "bilinear", bbox = 
     error("imperspectivewarp: transformation matrix not valid");
   endif
   
-  if (!any(strcmpi(interp, {"nearest", "linear", "bilinear", "cubic", "bicubic", "pchip"})))
+  if (!any(strcmpi(interp, {"nearest", "linear", "bilinear", "cubic", "bicubic"})))
     error("imperspectivewarp: unsupported interpolation method");
   endif
   if (any(strcmpi(interp, {"bilinear", "bicubic"})))
