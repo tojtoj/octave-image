@@ -17,7 +17,7 @@
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{BW}= im2bw (@var{I},threshold)
 ## @deftypefnx {Function File} @var{BW}= im2bw (@var{X},@var{cmap},threshold)
-## converts image data types to a black-white (binary) image.
+## Converts image data types to a black-white (binary) image.
 ## The treshold value should be in the range [0,1].
 ## @end deftypefn
 
@@ -25,26 +25,49 @@
 ## Date:	19. March 2000
 
 function BW = im2bw (img, a, b)
-
-  if ( nargin < 2 || nargin > 3)
-    usage("im2bw(I) number of arguments must be 2 or 3");
+  if (nargin < 2 || nargin > 3)
+    usage("im2bw: number of arguments must be 2 or 3");
+  endif
+  
+  ## Convert img to gray scale
+  if (isrgb(img))
+    img = rgb2gray(img);
+    if (nargin != 2)
+      error("im2bw: two input arguments must be given when the image is a color image");
+    endif
+    t = a;
+  elseif (isind (img) && ismatrix(a) && columns (a) == 3)
+    img = ind2gray (img, a);
+    if (nargin != 3)
+      error("im2bw: three input arguments must be given when the image is indexed");
+    endif
+    t = b;
+  elseif (isgray(img))
+    if (nargin != 2)
+      error("im2bw: two input arguments must be given when the image is gray scale");
+    endif
+    t = a;
+  else
+    error ("im2bw: first input argument must be an image");
   endif
 
-  if (isgray (img))
-    if (is_scalar (a))
-      BW = (img >= a);
-    else
-      error ("threshold value must be scalar");
+  ## Do the thresholding
+  if (isscalar (a))
+    if (a < 0 || a > 1)
+      error("im2bw: threshold must be in the interval [0, 1]");
     endif
-  elseif (isind (img))
-    if (is_matrix (a) && columns (a) == 3)
-      if (is_scalar (b))
-        I = ind2gray (img, a);
-        BW = (I >= b);
-      endif
-    endif
+    switch (class(img))
+      case {"double", "single"} % octave doesn't support single yet, but it shouldn't hurt...
+        BW = (img >= a);
+      case {"uint8"}
+        BW = (img >= 255*a);
+      case {"uint16"}
+        BW = (img >= 65535*a);
+      otherwise
+        error("im2bw: unsupport image class");
+    endswitch
   else
-    error ("image matrix must be of index or intensity type");
+    error ("im2bw: threshold value must be scalar");
   endif
 
 endfunction
