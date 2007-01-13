@@ -10,7 +10,9 @@ Read/write
  imginfo
  bmpwrite jpgread jpgwrite pngread pngwrite
 Reshape
- imcrop 
+ imcrop
+ imremap
+ imperspectivewarp 
  imresize 
  imrotate
  imrotate_Fourier

@@ -1,4 +1,4 @@
-## Copyright (C) 2005 Søren Hauberg
+## Copyright (C) 2005 S�ren Hauberg
 ## 
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -15,47 +15,47 @@
 ## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 ## -*- texinfo -*-
-## @deftypefn  {Function File} @var{B}= imresize (@var{A}, @var{m})
-## @deftypefnx {Function File} @var{B}= imresize (@var{A}, @var{m}, @var{method})
+## @deftypefn {Function File} @var{B}= imresize (@var{A}, @var{m})
+## Scales the image @var{A} by a factor @var{m} using nearest neighbour
+## interpolation. If @var{m} is less than 1 the image size will be reduced,
+## and if @var{m} is greater than 1 the image will be enlarged. If the image
+## is being enlarged the it will be convolved with a 11x11 Gaussian FIR filter
+## to reduce aliasing. See below on how to alter this behavior.
+##
+## @deftypefnx {Function File} @var{B}= imresize (@var{A}, @var{m}, @var{interp})
+## Same as above except @var{interp} interpolation is performed instead of
+## using nearest neighbour. @var{interp} can be any interpolation method supported by interp2.
+##
 ## @deftypefnx {Function File} @var{B}= imresize (@var{A}, [@var{mrow} @var{mcol}])
-## @deftypefnx {Function File} @var{B}= imresize (@var{A}, [@var{mrow} @var{mcol}], @var{method})
-## @deftypefnx {Function File} @var{B}= imresize (..., @var{method}, @var{fsize})
-## @deftypefnx {Function File} @var{B}= imresize (..., @var{method}, @var{filter})
-## Resizes the image @var{A} to a given size using any interpolation
-## method supported by @code{interp2}.
+## Scales the image @var{A} to be of size @var{mrow}x@var{mcol} using nearest
+## neighbour interpolation. If the image is being enlarged it will be convolved
+## with a lowpass FIR filter as described above.
 ##
-## If the second argument is a scalar @var{m} the image will be scaled
-## by a factor @var{m}. If the second argument is a two-vector 
-## [@var{mrow}, @var{mcol}] the resulting image will be resized to have
-## this size.
+## @deftypefnx {Function File} @var{B}= imresize (@var{A}, [@var{mrow} @var{mcol}], @var{interp})
+## Same as above except @var{interp} interpolation is performed instead of using
+## nearest neighbour. @var{interp} can be any interpolation method supported by interp2.
 ##
-## The third argument controls the kind of interpolation used to perform
-## the resizing. This can be any method supported by @code{interp2}, and
-## defaults to nearest neighbour interpolation.
+## @deftypefnx {Function File} @var{B}= imresize (..., @var{interp}, @var{fsize})
+## If the image the image is being reduced it will usually be convolved with
+## a 11x11 Gaussian FIR filter. By setting @var{fsize} to 0 this will be turned
+## off, and if @var{fsize} > 0 the image will be convolved with a @var{fsize}
+## by @var{fsize} Gaussian FIR filter.
 ##
-## The fourth argument controls if the image is filtered before resizing
-## to prevent aliasing. If the fourth argument is a two-vector 
-## [@code{frow}, @code{fcol}], the image will be convolved with a
-## @code{frow}x@code{fcol} gaussian filter. If it is a matrix it will
-## be used as a filter. The default is not to filter the image if it
-## is reduced in size, and to filter it by an 11x11 gaussian filter if
-## the image is enlarged. Setting the filter to 0 will turn of any
-## filtering.
-## @seealso{interp2}
+## @deftypefnx {Function File} @var{B}= imresize (..., @var{interp}, @var{filter})
+## If the image size is being reduced and the @var{filter} argument is passed to
+## imresize the image will be convolved with @var{filter} before the resizing
+## takes place.
+##
+## @seealso{imremap, imrotate, interp2}
 ## @end deftypefn
 
-## Author: Søren Hauberg <hauberg at gmail dot com>
-## 
-## 2005-04-14 Søren Hauberg <hauberg at gmail dot com>
-## * Initial revision
-
-function [ ret ] = imresize (im, m, method, filter)
-  if (!isgray(im))
-    error("The first argument has to be a gray-scale image.");
+function ret = imresize(im, m, interp = "nearest", filter = 11)
+  if (!isgray(im) && !isrgb(im))
+    error("imresize: the first argument has must be an image");
   endif
-  [row col] = size(im);
+  [row, col, num_planes] = size(im);
 
-  # Handle the argument that describes the size of the result
+  ## Handle the argument that describes the size of the result
   if (length(m) == 1)
     new_row = round(row*m);
     new_col = round(col*m);
@@ -64,36 +64,37 @@ function [ ret ] = imresize (im, m, method, filter)
     new_col = m(2);
     m = min( new_row/row, new_col/col );
   else
-    error("Bad second argument");
+    error("imresize: second argument mest be a scalar or a 2-vector");
   end
 
-  # Handle the method argument
-  if (nargin < 3)
-    method = "nearest";
+  ## Handle the method argument
+  if (!any(strcmpi(interp, {"nearest", "linear", "bilinear", "cubic", "bicubic", "pchip"})))
+    error("imresize: unsupported interpolation method");
   endif
 
-  # Handle the filterargument
-  if (!strcmp(method, "nearest"))
-    if (nargin < 4)
-      filter = 11;
-    endif
-    if (m > 1 & filter > 0)
-      # If the image is being enlarged and filter > 0 then
-      # convolve the image with a filter*filter gaussian.
-      mu = round(filter/2);
+  ## Handle the filter argument
+  if (!strcmp(interp, "nearest") && m < 1)
+    if (isscalar(filter) && filter > 0)
+      ## If the image is being reduced and filter > 0 then
+      ## convolve the image with a filter*filter gaussian.
+      mu = (filter/2);
       sigma = mu/3;
       x = 1:filter;
       gauss = 1/sqrt(2*pi*sigma^2) * exp( (-(x-mu).^2)/(2*sigma^2) );
-      im = conv2(gauss, gauss, im, "same");
-    elseif (m < 1 & nargin == 4)
-      # If the image size is being reduced and a fourth argument
-      # is given, use it as a FIR filter.
-      im = conv2(im, filter, "same");
+      for i = 1:num_planes
+          im(:,:,i) = conv2(gauss, gauss, im(:,:,i), "same");
+      endfor
+    elseif (nargin >= 4 && ismatrix(filter) && ndims(filter) == 2)
+      ## If the image size is being reduced and a fourth argument
+      ## is given, use it as a FIR filter.
+      for i = 1:num_planes
+        im(:,:,i) = conv2(im(:,:,i), filter, "same");
+      endfor
     endif
   endif
   
-  # Perform the actual resizing
-  [XI YI] = meshgrid( linspace(1,col,new_col), linspace(1,row,new_row) );
-  ret = interp2(im, XI, YI, method);
+  ## Perform the actual resizing
+  [XI, YI] = meshgrid( linspace(1,col,new_col), linspace(1,row,new_row) );
+  ret = imremap(im, XI, YI, interp);
 
 endfunction
