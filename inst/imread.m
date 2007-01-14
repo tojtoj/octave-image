@@ -68,8 +68,7 @@ function varargout = imread(filename, varargin)
       break
     endif
     
-    [sys, ident] = system(sprintf('identify -verbose %s | grep -e "bits" -e Type',
-				  fn))
+    [sys, ident] = system(sprintf('identify -verbose %s | grep -e "bits" -e Type', fn));
     if (sys != 0)
 	error("imread: error running ImageMagick's 'identify' on %s", fn)
     endif
