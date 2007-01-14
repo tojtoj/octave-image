@@ -34,17 +34,17 @@
 
 function varargout = imread(filename, varargin)
     if (nargin != 1)
-	usage("I = imread(filename)")
+      usage("I = imread(filename)")
     endif
 
     if !isstr(filename)
-	error("imread: filename must be a string")
+      error("imread: filename must be a string")
     endif
 
     filename = tilde_expand(filename);
     fn = file_in_path(IMAGE_PATH, filename);
     if isempty(fn)
-	error("imread: cannot find %s", filename);
+      error("imread: cannot find %s", filename);
     endif
 
 
@@ -53,13 +53,13 @@ function varargout = imread(filename, varargin)
     
     ## divert jpegs and pngs to "jpgread" and "pngread"
     if ( file_in_loadpath("jpgread.oct") &&
-	(strcmp(ext, ".JPG") || strcmp(ext, ".JPEG")) )
-	varargout{1} = jpgread(fn);
-	break
+      (strcmp(ext, ".JPG") || strcmp(ext, ".JPEG")) )
+      varargout{1} = jpgread(fn);
+      break
     endif
     if ( file_in_loadpath("pngread.oct") && (strcmp(ext, ".PNG")) )
-	varargout{1} = pngread(fn);
-	break
+      varargout{1} = pngread(fn);
+      break
     endif
     
     ## alternately, use imagemagick
@@ -70,28 +70,28 @@ function varargout = imread(filename, varargin)
     
     [sys, ident] = system(sprintf('identify -verbose %s | grep -e "bits" -e Type', fn));
     if (sys != 0)
-	error("imread: error running ImageMagick's 'identify' on %s", fn)
+      error("imread: error running ImageMagick's 'identify' on %s", fn);
     endif
-    depth = re_grab("([[:digit:]]{1,2})-bits", ident)
+    depth = re_grab("([[:digit:]]{1,2})-bits", ident);
     imtype = re_grab("Type: ([[:alpha:]]*)", ident);
 
     depth = str2num(depth);
     if isempty(depth) || (pow2(nextpow2(depth)) != depth)
-	error("imread: invalid image depth %s", depth)
+      error("imread: invalid image depth %s", depth);
     endif
 
-    if !(strcmp(imtype, "Bilevel") || strcmp(imtype, "Grayscale") ||
-	 strcmp(imtype, "TrueColor"))
-	error("imread: unknown image type '%s'", imtype);
+    if !( strcmp(imtype, "Bilevel")   || strcmp(imtype, "Grayscale") ||
+          strcmp(imtype, "TrueColor") || strcmp(imtype, "TrueColorMatte") )
+      error("imread: unknown image type '%s'", imtype);
     endif
 
     switch (imtype)
-	case("Bilevel")
-	    fmt = "pgm";
-	case("Grayscale")
-	    fmt = "pgm";
-	case("TrueColor")
-	    fmt = "ppm";
+    case {"Bilevel"}
+      fmt = "pgm";
+    case {"Grayscale"}
+      fmt = "pgm";
+    case {"TrueColor", "TrueColorMatte"}
+      fmt = "ppm";
     endswitch
     
     ## Why are pipes so slow?
@@ -103,15 +103,15 @@ function varargout = imread(filename, varargin)
 
     sys = system(cmd);    
     if (sys != 0)
-	error("imread: error running ImageMagick's 'convert'");
-	unlink(tmpf);
+      error("imread: error running ImageMagick's 'convert'");
+      unlink(tmpf);
     endif
 
     try
-	fid = fopen(tmpf, "rb");
+      fid = fopen(tmpf, "rb");
     catch
-	unlink(tmpf);
-	error("imread: could not open temporary file %s", tmpf)
+      unlink(tmpf);
+      error("imread: could not open temporary file %s", tmpf)
     end_try_catch
 
     fgetl(fid); # P5 or P6 (pgm or ppm)
@@ -122,33 +122,32 @@ function varargout = imread(filename, varargin)
 	## PGM format has MSB first, i.e. big endian
 	[data, count] = fread(fid, "uint16", 0, "ieee-be");
     else
-        [data, count] = fread(fid, "uint8");
+      [data, count] = fread(fid, "uint8");
     endif
     
     fclose(fid);
     unlink(tmpf);
 
-    if (imtype == "TrueColor")
-	channels = 3;
+    if (any(strcmp(imtype, {"TrueColor", "TrueColorMatte"})))
+      channels = 3;
     else
-	channels = 1;
+      channels = 1;
     endif
     if (count != width*height*channels)
-	error("imread: image data chunk has invalid size")
+      error("imread: image data chunk has invalid size")
     endif
 
     varargout = {};
     switch (imtype)
- 	case ("Bilevel")
- 	    varargout{1} = logical(reshape(data, width, height)');
- 	case ("Grayscale") 
- 	    varargout{1} = uint8(reshape(data, width, height)');
- 	case ("TrueColor")
- 	    varargout{1} = cat(3, reshape(data(1:3:end), width, height)',
- 			       reshape(data(2:3:end), width, height)',
- 			       reshape(data(3:3:end), width, height)');
- 	    eval(sprintf("varargout{1} = uint%d(varargout{1});", depth));
-		
+ 	case {"Bilevel"}
+      varargout{1} = logical(reshape(data, width, height)');
+ 	case {"Grayscale"}
+      varargout{1} = uint8(reshape(data, width, height)');
+ 	case {"TrueColor", "TrueColorMatte"}
+      varargout{1} = cat(3, reshape(data(1:3:end), width, height)',
+                            reshape(data(2:3:end), width, height)',
+                            reshape(data(3:3:end), width, height)');
+      eval(sprintf("varargout{1} = uint%d(varargout{1});", depth));
     endswitch
 endfunction
 
