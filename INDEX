@@ -70,6 +70,9 @@ Representation
  gray2ind 
  grayslice 
  im2bw 
+ im2double
+ im2uint8
+ im2uint16
  ind2gray 
  ind2rgb 
  isbw 
