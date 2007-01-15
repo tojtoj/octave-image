@@ -136,7 +136,7 @@ canvas *load_canvas(char *filename)
   png_structp png_ptr;
   png_infop info_ptr;
   
-  FILE *infile = fopen(filename,"r");
+  FILE *infile = fopen(filename,"rb");
   if (!infile) {
     error("pngread could not open file %s", filename); 
     return NULL;
