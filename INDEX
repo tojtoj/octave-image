@@ -82,6 +82,7 @@ Representation
  mat2gray 
  rgb2gray 
  rgb2ind 
+ label2rgb
 Colour maps
  hsv rainbow
  hot 
