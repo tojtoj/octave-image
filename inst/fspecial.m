@@ -90,7 +90,7 @@ function [ f ] = fspecial (type, arg1, arg2)
         radius = 5;
       endif
       ## Create the filter
-      [x,y] = meshgrid(-c2:c2, -r2:r2);
+      [x,y] = meshgrid(-radius:radius, -radius:radius);
       r = sqrt(x.^2 + y.^2);
       f = (r <= radius);
       ## Normalize the filter to integral 1

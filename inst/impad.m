@@ -56,87 +56,89 @@
 ## A nice test matrix for padding:
 ## A = 10*[1:5]' * ones(1,5) + ones(5,1)*[1:5]
 
-function retval = impad(A, xpad, ypad, padding, const)
+function retim = impad(im, xpad, ypad, padding = "zeros", const = 1)
+  ## Input checking
+  if (!isgray(im) && !isrgb(im))
+    error("impad: first input argument must be an image");
+  endif
+  if (isscalar(xpad) && xpad >= 0)
+    xpad(2) = xpad;
+  elseif (!isreal(xpad) || numel(xpad) != 2 || any(xpad < 0))
+    error("impad: xpad must be a positive scalar or 2-vector");
+  endif
+  if (isscalar(ypad) && ypad >= 0)
+    ypad(2) = ypad;
+  elseif (!isreal(ypad) || numel(ypad) != 2 || any(ypad < 0))
+    error("impad: ypad must be a positive scalar or 2-vector");
+  endif
+  if (!isscalar(const))
+    error("impad: fifth input argument must be a scalar");
+  endif
 
-try empty_list_elements_ok_save = empty_list_elements_ok;
-catch empty_list_elements_ok_save = 0;
-end
-try warn_empty_list_elements_save = warn_empty_list_elements;
-catch warn_empty_list_elements_save = 0;
-end
-unwind_protect
+  origx = size(im,2);
+  origy = size(im,1);
+  retx = origx + xpad(1) + xpad(2);
+  rety = origy + ypad(1) + ypad(2);
+  cl = class(im);
 
-if nargin < 4, padding = "zeros"; endif
-if nargin < 5, const = 1; endif
-if isscalar(xpad), xpad(2) = xpad(1); endif
-if isscalar(ypad), ypad(2) = ypad(1); endif
-  
-origx = size(A,2);
-origy = size(A,1);
-retx = origx + xpad(1) + xpad(2);
-rety = origy + ypad(1) + ypad(2);
-
-empty_list_elements_ok = 1;
-warn_empty_list_elements = 0;
-
-if(strcmp(padding, "zeros"))
-  retval = zeros(rety,retx);
-  retval(ypad(1)+1 : ypad(1)+origy, xpad(1)+1 : xpad(1)+origx) = A;
-  elseif(strcmp(padding,"ones"))
-    retval = ones(rety,retx);
-    retval(ypad(1)+1 : ypad(1)+origy, xpad(1)+1 : xpad(1)+origx) = A;
-  elseif(strcmp(padding,"constant"))
-    retval = const.*ones(rety,retx);
-    retval(ypad(1)+1 : ypad(1)+origy, xpad(1)+1 : xpad(1)+origx) = A;
-  elseif(strcmp(padding,"replicate"))
-    y1 = origy-ypad(1)+1;
-    x1 = origx-xpad(1)+1;    
-    if(y1 < 1 || x1 < 1 || ypad(2) > origy || xpad(2) > origx)
-      error("Too large padding for this padding type");
-    else
-      yrange1 = y1 : origy;
-      yrange2 = 1 : ypad(2);
-      xrange1 = x1 : origx;
-      xrange2 = 1 : xpad(2);
-      retval = [ A(yrange1, xrange1), A(yrange1, :), A(yrange1, xrange2);
-                 A(:, xrange1),       A,             A(:, xrange2);
-                 A(yrange2, xrange1), A(yrange2, :), A(yrange2, xrange2) ];
-    endif                        
-  elseif(strcmp(padding,"symmetric"))
-    y2 = origy-ypad(2)+1;
-    x2 = origx-xpad(2)+1;
-    if(ypad(1) > origy || xpad(1) > origx || y2 < 1 || x2 < 1)
-      error("Too large padding for this padding type");
-    else
-      yrange1 = 1 : ypad(1);
-      yrange2 = y2 : origy;
-      xrange1 = 1 : xpad(1);
-      xrange2 = x2 : origx;
-      retval = [ fliplr(flipud(A(yrange1, xrange1))), flipud(A(yrange1, :)), fliplr(flipud(A(yrange1, xrange2)));
-                 fliplr(A(:, xrange1)), A, fliplr(A(:, xrange2));
-                 fliplr(flipud(A(yrange2, xrange1))), flipud(A(yrange2, :)), fliplr(flipud(A(yrange2, xrange2))) ];
-    endif      
-  elseif(strcmp(padding,"reflect"))
-    y2 = origy-ypad(2);
-    x2 = origx-xpad(2);
-    if(ypad(1)+1 > origy || xpad(1)+1 > origx || y2 < 1 || x2 < 1)
-      error("Too large padding for this padding type");
-    else
-      yrange1 = 2 : ypad(1)+1;
-      yrange2 = y2 : origy-1;
-      xrange1 = 2 : xpad(1)+1;
-      xrange2 = x2 : origx-1;
-      retval = [ fliplr(flipud(A(yrange1, xrange1))), flipud(A(yrange1, :)), fliplr(flipud(A(yrange1, xrange2)));
-                 fliplr(A(:, xrange1)), A, fliplr(A(:, xrange2));
-                 fliplr(flipud(A(yrange2, xrange1))), flipud(A(yrange2, :)), fliplr(flipud(A(yrange2, xrange2))) ];
-    endif
-  else    
-    error("Unknown padding type");
-endif
-
-unwind_protect_cleanup
-    empty_list_elements_ok = empty_list_elements_ok_save;
-    warn_empty_list_elements = warn_empty_list_elements_save;
-end_unwind_protect
-      
+  for iter = size(im,3):-1:1
+    A = im(:,:,iter);
+    switch (lower(padding))
+      case "zeros"
+        retval = zeros(rety, retx, cl);
+        retval(ypad(1)+1 : ypad(1)+origy, xpad(1)+1 : xpad(1)+origx) = A;
+      case "ones"
+        retval = ones(rety, retx, cl);
+        retval(ypad(1)+1 : ypad(1)+origy, xpad(1)+1 : xpad(1)+origx) = A;
+      case "constant"
+        retval = const.*ones(rety, retx, cl);
+        retval(ypad(1)+1 : ypad(1)+origy, xpad(1)+1 : xpad(1)+origx) = A;
+      case "replicate"
+        y1 = origy-ypad(1)+1;
+        x1 = origx-xpad(1)+1;    
+        if (y1 < 1 || x1 < 1 || ypad(2) > origy || xpad(2) > origx)
+          error("impad: too large padding for this padding type");
+        else
+          yrange1 = y1:origy;
+          yrange2 = 1:ypad(2);
+          xrange1 = x1:origx;
+          xrange2 = 1:xpad(2);
+          retval = [ A(yrange1, xrange1), A(yrange1, :), A(yrange1, xrange2);
+                     A(:, xrange1),       A,             A(:, xrange2);
+                     A(yrange2, xrange1), A(yrange2, :), A(yrange2, xrange2) ];
+        endif                        
+      case "symmetric"
+        y2 = origy-ypad(2)+1;
+        x2 = origx-xpad(2)+1;
+        if (ypad(1) > origy || xpad(1) > origx || y2 < 1 || x2 < 1)
+          error("impad: too large padding for this padding type");
+        else
+          yrange1 = 1 : ypad(1);
+          yrange2 = y2 : origy;
+          xrange1 = 1 : xpad(1);
+          xrange2 = x2 : origx;
+          retval = [ fliplr(flipud(A(yrange1, xrange1))), flipud(A(yrange1, :)), fliplr(flipud(A(yrange1, xrange2)));
+                     fliplr(A(:, xrange1)), A, fliplr(A(:, xrange2));
+                     fliplr(flipud(A(yrange2, xrange1))), flipud(A(yrange2, :)), fliplr(flipud(A(yrange2, xrange2))) ];
+        endif      
+      case "reflect"
+        y2 = origy-ypad(2);
+        x2 = origx-xpad(2);
+        if (ypad(1)+1 > origy || xpad(1)+1 > origx || y2 < 1 || x2 < 1)
+          error("impad: too large padding for this padding type");
+        else
+          yrange1 = 2 : ypad(1)+1;
+          yrange2 = y2 : origy-1;
+          xrange1 = 2 : xpad(1)+1;
+          xrange2 = x2 : origx-1;
+          retval = [ fliplr(flipud(A(yrange1, xrange1))), flipud(A(yrange1, :)), fliplr(flipud(A(yrange1, xrange2)));
+                     fliplr(A(:, xrange1)), A, fliplr(A(:, xrange2));
+                     fliplr(flipud(A(yrange2, xrange1))), flipud(A(yrange2, :)), fliplr(flipud(A(yrange2, xrange2))) ];
+        endif
+      otherwise   
+        error("impad: unknown padding type");
+    endswitch
+    
+    retim(:,:,iter) = retval;
+  endfor      
 endfunction
