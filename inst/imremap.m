@@ -91,7 +91,11 @@ function [warped, valid] = imremap(im, XI, YI, interp = "bilinear", extrapval = 
 
   ## Change the class of the results according to the class of the image
   c = class(im);
-  if (strcmpi(c, "uint8"))
+  if (strcmpi(c, "double"))
+    ## Remove overshooting causes by bicubic interpolation
+    warped(warped>1) = 1;
+    warped(warped<0) = 0;
+  elseif (strcmpi(c, "uint8"))
     warped = uint8(warped);
   elseif (strcmpi(c, "uint16"))
     warped = uint16(warped);

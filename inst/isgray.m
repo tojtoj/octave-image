@@ -37,7 +37,7 @@ function bool = isgray (I)
   if (ismatrix(I) && ndims(I) == 2)
     switch(class(I))
     case "double"
-      bool = all(I(:) >= 0 && I(:) <= 1);
+      bool = all((I(:) >= 0 & I(:) <= 1) | isnan(I(:)));
     case {"uint8", "uint16"}
       bool = true;
     endswitch

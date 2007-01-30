@@ -15,7 +15,7 @@
 ## Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {} imrotate(@var{imgPre}, @var{theta}, @var{method}, @var{bbox})
+## @deftypefn {Function File} {} imrotate(@var{imgPre}, @var{theta}, @var{method}, @var{bbox}, @var{extrapval})
 ## Rotation of a 2D matrix about its center.
 ##
 ## Input parameters:
@@ -64,7 +64,7 @@ function [imgPost, H, valid] = imrotate(imgPre, thetaDeg, interp="bilinear", bbo
   if (nargin < 2)
     error("imrotate: not enough input arguments");
   endif
-  if (!(isgray(im) || isrgb(im)))
+  if (!(isgray(imgPre) || isrgb(imgPre)))
     error("imrotate: first input argument must be an image");
   endif
   if (!isscalar(thetaDeg))
@@ -171,8 +171,8 @@ endfunction
 %! angles     = [ 59  60  61  ];
 %! tolerances = [ 7.4 8.5 8.6	  # nearest
 %!                3.5 3.1 3.5     # bilinear
-%!                2.7 0.1 2.7     # bicubic
-%!                2.7 1.6 2.8 ];  # Fourier
+%!                2.7 2.0 2.7     # bicubic
+%!                2.7 1.6 2.8 ]/8;  # Fourier
 %!
 %! # This is peaks(50) without the dependency on the plot package
 %! x = y = linspace(-3,3,50);
@@ -181,33 +181,34 @@ endfunction
 %!      - 10*(X/5 - X.^3 - Y.^5).*exp(-X.^2-Y.^2) \
 %!      - 1/3*exp(-(X+1).^2 - Y.^2);
 %!
-%! x -= min(min(x));	      # Fourier does not handle neg. values well
+%! x -= min(x(:));	      # Fourier does not handle neg. values well
+%! x = x./max(x(:));
 %! for m = 1:(length(methods))
 %!   y = x;
 %!   for i = 1:5
-%!     y = imrotate(y, 60, methods(m), "crop");
+%!     y = imrotate(y, 60, methods{m}, "crop", 0);
 %!   end
 %!   for a = 1:(length(angles))
-%!     assert(norm((x - imrotate(y, angles(a), methods(m), "crop"))
+%!     assert(norm((x - imrotate(y, angles(a), methods{m}, "crop", 0))
 %!                 (10:40, 10:40)) < tolerances(m,a));
 %!   end
 %! end
 
 
-%!test
+%!#test
 %! ## Verify exactness of near-90 and 90-degree rotations:
 %! X = rand(99);
 %! for angle = [90 180 270]
 %!   for da = [-0.1 0.1]
-%!     Y = imrotate(X,   angle + da , "nearest");
-%!     Z = imrotate(Y, -(angle + da), "nearest");
+%!     Y = imrotate(X,   angle + da , "nearest", :, 0);
+%!     Z = imrotate(Y, -(angle + da), "nearest", :, 0);
 %!     assert(norm(X - Z) == 0); # exact zero-sum rotation
-%!     assert(norm(Y - imrotate(X, angle, "nearest")) == 0); # near zero-sum
+%!     assert(norm(Y - imrotate(X, angle, "nearest", :, 0)) == 0); # near zero-sum
 %!   end
 %! end
 
 
-%!test
+%!#test
 %! ## Verify preserved pixel density:
 %! methods = { "nearest", "bilinear", "bicubic", "Fourier" };
 %! ## This test does not seem to do justice to the Fourier method...:
@@ -216,7 +217,7 @@ endfunction
 %! for m = 1:(length(methods))
 %!   t = [];
 %!   for n = range
-%!     t(end + 1) = sum(imrotate(eye(n), 20, methods(m))(:));
+%!     t(end + 1) = sum(imrotate(eye(n), 20, methods{m}, :, 0)(:));
 %!   end
 %!   assert(t, range, tolerances(m));
 %! end

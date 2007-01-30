@@ -58,7 +58,7 @@
 
 function retim = impad(im, xpad, ypad, padding = "zeros", const = 1)
   ## Input checking
-  if (!isgray(im) && !isrgb(im))
+  if (!ismatrix(im) || ndims(im) < 2 || ndims(im) > 3)
     error("impad: first input argument must be an image");
   endif
   if (isscalar(xpad) && xpad >= 0)

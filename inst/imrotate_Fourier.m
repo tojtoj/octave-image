@@ -33,14 +33,18 @@
 ## Author: Jeff Orchard <jorchard@cs.uwaterloo.ca>
 ## Created: Oct. 14, 2002
 
-function fs = imrotate_Fourier(f,theta,method,bbox)
+function fs = imrotate_Fourier(f, theta, method="fourier", bbox="loose")
 
-	if ( nargin == 2 )
-		method = "fourier";
-		bbox = "loose";
-	elseif ( nargin == 3 )
-		bbox = "loose";
-	endif
+    ## Input checking
+    if (nargin < 2)
+      error("imrotate_Fourier: not enough input arguments");
+    endif
+    if (!isgray(f))
+      error("imrotate_Fourier: first input argument must be a gray-scale image");
+    endif
+    if (!isscalar(theta))
+      error("imrotate_Fourier: second input argument must be a real scalar");
+    endif
 
 	# Get original dimensions.
 	[ydim_orig, xdim_orig] = size(f);
@@ -166,5 +170,10 @@ function fs = imrotate_Fourier(f,theta,method,bbox)
 
 	endif
 
+    ## Prevent overshooting
+    if (strcmp(class(f), "double"))
+      fs(fs>1) = 1;
+      fs(fs<0) = 0;
+    endif
 
 endfunction
