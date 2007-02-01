@@ -4,18 +4,18 @@
 ## The values in @var{X} are indices into the given RGB colour @var{map}.
 ## @deftypefnx{Function File} bmpwrite (@var{X}, @var{file})
 ## Write the bitmap @var{X} into @var{file} (24-bit truecolor uncompressed).
-## @var{X} is an m x n x 3 array of R,G,B values.
+## @var{X} is an m x n x 3 array of R,G,B integer values in the range 0 to 255.
 ## @end deftypefn
 
 ## This code is in the public domain.
 ## Author: Paul Kienzle <pkienzle@users.sf.net>
 
 
-function bmpwrite(x,map,file)
+function bmpwrite(x,colormap_or_file,file)
   if nargin==2
-     bmpwrite_truecolor(x,map);
+     bmpwrite_truecolor(x,colormap_or_file);
   else
-     bmpwrite_indexed(x,map,file);
+     bmpwrite_indexed(x,colormap_or_file,file);
   endif
 endfunction
 
