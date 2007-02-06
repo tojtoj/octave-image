@@ -55,6 +55,10 @@ function bmpwrite_truecolor(x,file)
 endfunction
 
 function bmpwrite_indexed(x,map,file)
+
+    if rows(map) > 256, 
+      error("bmpwrite supports at most 256 color indexed images"); 
+    endif
     [h,w] = size(x);
     padw = ceil(w/4)*4-w;
     header = 14+40+4*rows(map);
