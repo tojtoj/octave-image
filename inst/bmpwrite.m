@@ -13,14 +13,14 @@
 
 function bmpwrite(x,colormap_or_file,file)
   if nargin==2
-     bmpwrite_truecolor(x,colormap_or_file);
+     bmpwrite_truecolor(x(:,:,1),x(:,:,2),x(:,:,3),colormap_or_file);
   else
      bmpwrite_indexed(x,colormap_or_file,file);
   endif
 endfunction
 
-function bmpwrite_truecolor(x,file)
-    h = rows(x); w = columns(x);
+function bmpwrite_truecolor(R,G,B,file)
+    h = rows(R); w = columns(R);
     padw = ceil(3*w/4)*4-3*w;
     header = 14+40;
     filesize = header+h*(3*w+padw);
@@ -45,9 +45,9 @@ function bmpwrite_truecolor(x,file)
     fwrite(file,0,"long",0,arch);           # number of "important" colors
 
     ## raster image, lines written bottom to top.
-    R = x(end:-1:1,:,1)';
-    G = x(end:-1:1,:,2)';
-    B = x(end:-1:1,:,3)';
+    R = R(end:-1:1,:)';
+    G = G(end:-1:1,:)';
+    B = B(end:-1:1,:)';
     RGB=[B(:),G(:),R(:)]';  # Now [[B;G;R],[B;G;R],...,[B;G;R]]
     RGB=reshape(RGB,3*w,h); # Now [[B;G;R;...;B;G;R],...,[B;G;R;...;B;G;R]]
     fwrite(file,[RGB;zeros(padw,h)],"uchar",0,arch);
@@ -57,7 +57,11 @@ endfunction
 function bmpwrite_indexed(x,map,file)
 
     if rows(map) > 256, 
-      error("bmpwrite supports at most 256 color indexed images"); 
+      bmpwrite_truecolor(reshape(map(x,1),size(x))*255,
+			 reshape(map(x,2),size(x))*255,
+			 reshape(map(x,3),size(x))*255,
+			 file);
+      return;
     endif
     [h,w] = size(x);
     padw = ceil(w/4)*4-w;
