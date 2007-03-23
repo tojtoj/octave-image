@@ -12,7 +12,7 @@
 ##
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, write to the Free Software
-## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{A} = } col2im (@var{B}, [@var{m},@var{n}], [@var{mm},@var{nn}], @var{block_type})
@@ -160,6 +160,9 @@ endfunction
 
 %
 % $Log$
+% Revision 1.4  2007/03/23 16:14:36  adb014
+% Update the FSF address
+%
 % Revision 1.3  2007/01/04 23:46:17  hauberg
 % Minor changes in help text
 %
