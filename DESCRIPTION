@@ -12,8 +12,8 @@ Description: The Octave-forge Image package provides functions for
  operations, linear filtering, and much more.
 Depends: octave (>= 2.9.7)
 Autoload: yes
-BuildRequires: libpng-devel [Mandriva] libpng3-devel
-BuildRequires: libjpeg-devel [Mandriva] libjpeg62-devel
+BuildRequires: png-devel
+BuildRequires: jpeg-devel
 SystemRequirements: ImageMagick
 License: GPL version 2 or later
 Url: http://octave.sf.net
