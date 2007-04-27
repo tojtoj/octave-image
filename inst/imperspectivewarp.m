@@ -12,7 +12,7 @@
 ## 
 ## You should have received a copy of the GNU General Public License
 ## along with this file.  If not, write to the Free Software Foundation,
-## 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+## 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{warped} = imperspectivewarp(@var{im}, @var{P}, @var{interp}, @var{bbox}, @var{extrapval})
@@ -43,6 +43,8 @@
 ## The entire warped result is returned. This is the default behavior.
 ## @item "crop"
 ## The central part of the image of the same size as the input image is returned.
+## @item "same"
+## The size and coordinate system of the input image is keept.
 ## @end table
 ##
 ## All values of the result that fall outside the original image will
@@ -89,7 +91,7 @@ function [warped, valid] = imperspectivewarp(im, P, interp = "bilinear", bbox = 
   endif
   interp = lower(interp);
   
-  if (!any(strcmpi(bbox, {"loose", "crop"})))
+  if (!any(strcmpi(bbox, {"loose", "crop", "same"})))
     error("imperspectivewarp: bounding box must be either 'loose' or 'crop'");
   endif
   
@@ -121,6 +123,9 @@ function [warped, valid] = imperspectivewarp(im, P, interp = "bilinear", bbox = 
     yd = (yl - y)/2;
     x1 += xd; x2 -= xd;
     y1 += yd; y2 -= yd;
+  elseif (strcmpi(bbox, "same"))
+    x1 = 1; x2 = x;
+    y1 = 1; y2 = y;
   endif
  
   ## Transform coordinates
