@@ -21,7 +21,6 @@ Reshape
  impad
  padarray 
  rotate_scale
- MakeShears
 Analysis and Statistics
  fftconv2
  corr2 

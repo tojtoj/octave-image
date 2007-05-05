@@ -137,7 +137,7 @@ function fs = imrotate_Fourier(f, theta, method="fourier", bbox="loose")
 		endif
 
 		#size(f)
-		[S1 S2] = MakeShears(phi);
+		[S1, S2] = MakeShears(phi);
 
 		tic;
 		f1 = imshear(f, 'x', S1(1,2), 'loose');
@@ -176,4 +176,12 @@ function fs = imrotate_Fourier(f, theta, method="fourier", bbox="loose")
       fs(fs<0) = 0;
     endif
 
+endfunction
+
+function [S1, S2] = MakeShears(theta)
+    S1 = eye(2);
+    S2 = eye(2);
+
+    S1(1,2) = -tan(theta/2);
+    S2(2,1) = sin(theta);
 endfunction
