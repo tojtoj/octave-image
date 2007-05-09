@@ -63,7 +63,8 @@ function [warped, valid] = imperspectivewarp(im, P, interp = "bilinear", bbox = 
     print_usage();
   endif
   
-  if (!(isgray(im) || isrgb(im)))
+  [imrows, imcols, imchannels, tmp] = size(im);
+  if (tmp != 1 || (imchannels != 1 && imchannels != 3))
     error("imperspectivewarp: first input argument must be an image");
   endif
   
@@ -148,19 +149,19 @@ endfunction
 %! I = tril(ones(100)) + abs(rand(100)); I(I>1) = 1;
 %! I(20:30, 20:30) = !I(20:30, 20:30);
 %! I(70:80, 70:80) = !I(70:80, 70:80);
-%! imshow(I);
+%! figure(), imshow(I);
 %! ## Resize the image to the double size and show it
 %! P = diag([1, 1, 0.5]);
 %! warped = imperspectivewarp(I, P);
-%! imshow(warped);
+%! figure(), imshow(warped);
 
 %!demo
 %! ## Generate a synthetic image and show it
 %! I = tril(ones(100)) + abs(rand(100)); I(I>1) = 1;
 %! I(20:30, 20:30) = !I(20:30, 20:30);
 %! I(70:80, 70:80) = !I(70:80, 70:80);
-%! imshow(I);
+%! figure(), imshow(I);
 %! ## Rotate the image around (0, 0) by -0.4 radians and show it
 %! R = [cos(-0.4) sin(-0.4); -sin(-0.4) cos(-0.4)];
 %! warped = imperspectivewarp(I, R);
-%! imshow(warped);
+%! figure(), imshow(warped);

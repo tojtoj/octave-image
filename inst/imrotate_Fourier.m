@@ -39,7 +39,8 @@ function fs = imrotate_Fourier(f, theta, method="fourier", bbox="loose")
     if (nargin < 2)
       error("imrotate_Fourier: not enough input arguments");
     endif
-    if (!isgray(f))
+    [imrows, imcols, tmp] = size(im);
+    if (tmp != 1)
       error("imrotate_Fourier: first input argument must be a gray-scale image");
     endif
     if (!isscalar(theta))

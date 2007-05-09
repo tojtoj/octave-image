@@ -58,7 +58,8 @@ function [warped, valid] = imremap(im, XI, YI, interp = "bilinear", extrapval = 
     print_usage();
   endif
   
-  if (!(isgray(im) || isrgb(im)))
+  [imrows, imcols, imchannels, tmp] = size(im);
+  if (tmp != 1 || (imchannels != 1 && imchannels != 3))
     error("imremap: first input argument must be an image");
   endif
   
@@ -79,7 +80,7 @@ function [warped, valid] = imremap(im, XI, YI, interp = "bilinear", extrapval = 
   endif
   
   ## Interpolate
-  if (isgray(im))
+  if (imchannels == 1) # Gray
     warped = grayinterp(im, XI, YI, interp, NA);
   else # rgb image
     for i = 3:-1:1
@@ -92,7 +93,7 @@ function [warped, valid] = imremap(im, XI, YI, interp = "bilinear", extrapval = 
   ## Change the class of the results according to the class of the image
   c = class(im);
   if (strcmpi(c, "double"))
-    ## Remove overshooting causes by bicubic interpolation
+    ## Remove overshooting caused by bicubic interpolation
     warped(warped>1) = 1;
     warped(warped<0) = 0;
   elseif (strcmpi(c, "uint8"))

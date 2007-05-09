@@ -64,7 +64,8 @@ function [imgPost, H, valid] = imrotate(imgPre, thetaDeg, interp="bilinear", bbo
   if (nargin < 2)
     error("imrotate: not enough input arguments");
   endif
-  if (!(isgray(imgPre) || isrgb(imgPre)))
+  [imrows, imcols, imchannels, tmp] = size(imgPre);
+  if (tmp != 1 || (imchannels != 1 && imchannels != 3))
     error("imrotate: first input argument must be an image");
   endif
   if (!isscalar(thetaDeg))

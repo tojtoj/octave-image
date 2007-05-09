@@ -50,10 +50,14 @@
 ## @end deftypefn
 
 function ret = imresize(im, m, interp = "nearest", filter = 11)
-  if (!isgray(im) && !isrgb(im))
+  if (nargin < 2)
+    error("imresize: not enough input arguments");
+  endif
+  
+  [row, col, num_planes, tmp] = size(im);
+  if (tmp != 1 || (num_planes != 1 && num_planes != 3))
     error("imresize: the first argument has must be an image");
   endif
-  [row, col, num_planes] = size(im);
 
   ## Handle the argument that describes the size of the result
   if (length(m) == 1)
