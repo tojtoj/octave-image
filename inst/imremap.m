@@ -196,9 +196,15 @@ endfunction
 ## This version of sub2ind behaves as if the data was symmetrically padded
 function ind = sym_sub2ind(sz, Y, X)
   Y(Y<1) = 1 - Y(Y<1);
-  Y(Y>sz(1)) = 2*sz(1) - Y(Y>sz(1));
+  while (any(Y(:)>2*sz(1)))
+    Y(Y>2*sz(1)) = round( Y(Y>2*sz(1))/2 );
+  endwhile
+  Y(Y>sz(1)) = 1 + 2*sz(1) - Y(Y>sz(1));
   X(X<1) = 1 - X(X<1);
-  X(X>sz(2)) = 2*sz(2) - X(X>sz(2));
+  while (any(X(:)>2*sz(2)))
+    X(X>2*sz(2)) = round( X(X>2*sz(2))/2 );
+  endwhile
+  X(X>sz(2)) = 1 + 2*sz(2) - X(X>sz(2));
   ind = sub2ind(sz, Y, X);
 endfunction
 

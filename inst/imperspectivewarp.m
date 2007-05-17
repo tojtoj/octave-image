@@ -93,7 +93,7 @@ function [warped, valid] = imperspectivewarp(im, P, interp = "bilinear", bbox = 
   interp = lower(interp);
   
   if (!any(strcmpi(bbox, {"loose", "crop", "same"})))
-    error("imperspectivewarp: bounding box must be either 'loose' or 'crop'");
+    error("imperspectivewarp: bounding box must be either 'loose', 'crop', or 'same'");
   endif
   
   if (!isscalar(extrapolation_value))
