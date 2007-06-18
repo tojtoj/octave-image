@@ -64,7 +64,7 @@ function varargout = imread(filename, varargin)
     
     ## alternately, use imagemagick
     if ( file_in_loadpath("__magick_read__.oct") )
-      [varargout{:}] = __magick_read__(fn, varargin{:});
+      [varargout{1:nargout}] = __magick_read__(fn, varargin{:});
       break
     endif
     
