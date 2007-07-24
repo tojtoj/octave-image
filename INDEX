@@ -83,20 +83,7 @@ Representation
  rgb2ind 
  label2rgb
 Colour maps
- hsv rainbow
- hot 
- bone 
- copper 
- pink 
- white 
  flag 
- jet 
- prism 
- cool 
- autumn 
- spring 
- winter 
- summer 
  lines 
  colorcube 
  vga 
