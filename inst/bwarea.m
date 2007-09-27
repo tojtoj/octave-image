@@ -1,4 +1,4 @@
-## Copyright (C) 2005 SÃ¸ren Hauberg
+## Copyright (C) 2005  Søren Hauberg
 ## 
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -25,9 +25,9 @@
 ## and not the image object.
 ## @end deftypefn
 
-## Author: SÃ¸ren Hauberg <hauberg at gmail dot com>
+## Author: Søren Hauberg <hauberg at gmail dot com>
 ## 
-## 2005-06-05 SÃ¸ren Hauberg <hauberg at gmail dot com>
+## 2005-06-05 Søren Hauberg <hauberg at gmail dot com>
 ## * Initial revision
 
 
