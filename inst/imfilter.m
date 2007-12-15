@@ -113,22 +113,14 @@ function retval = imfilter(im, f, varargin)
   else # res_size == "full"
     res_size = "same";
   endif
-  if (imchannels == 1)
-    if (strcmpi(ftype, "corr"))
-      retval = filter2(f, im, res_size);
-    else
-      retval = conv2(im, f, res_size);
-    endif
-  else # imchannelse == 3
-    if (strcmpi(ftype, "corr"))
-      for i = 3:-1:1
-        retval(:,:,i) = filter2(f, im(:,:,i), res_size);
-      endfor
-    else
-      for i = 3:-1:1
-        retval(:,:,i) = conv2(im(:,:,i), f, res_size);
-      endfor
-    endif
+  if (strcmpi(ftype, "corr"))
+    for i = imchannels:-1:1
+      retval(:,:,i) = filter2(f, im(:,:,i), res_size);
+    endfor
+  else
+    for i = imchannels:-1:1
+      retval(:,:,i) = conv2(im(:,:,i), f, res_size);
+    endfor
   endif
   
   ## Change the class of the output to the class of the input
