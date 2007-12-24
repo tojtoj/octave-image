@@ -36,6 +36,7 @@ Analysis and Statistics
 Filtering
  colfilt
  fspecial
+ imsmooth
  histeq 
  imadjust 
  imnoise 
