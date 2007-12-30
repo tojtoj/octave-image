@@ -60,7 +60,7 @@ function Y = imtranslate(X, a, b, bbox_in)
 	py = exp(-2*pi*i*b*(0:dimy-1)/dimy)';
 	P = py * px;
 	y = x .* P;
-	Y = abs( ifftshift(ifft2(fftshift(y))) );
+	Y = real( ifftshift(ifft2(fftshift(y))) );
 	#Y = ifftshift(ifft2(fftshift(y)));
 
 	if ( strcmp(bbox, "crop")==1 )
