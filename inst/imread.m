@@ -134,7 +134,8 @@ function varargout = imread(filename, varargin)
       channels = 1;
     endif
     if (count != width*height*channels)
-      error("imread: image data chunk has invalid size")
+      error("imread: image data chunk has invalid size %i != %i*%i*%i == %i",
+	    count, width, height, channels, width*height*channels);
     endif
 
     varargout = {};
