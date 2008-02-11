@@ -14,14 +14,20 @@
 ## along with this program; If not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} @var{J}= histeq (@var{I}, @var{n})
+## @deftypefn {Function File} @var{J} = histeq (@var{I}, @var{n})
 ## Histogram equalization of a gray-scale image. The histogram contains
 ## @var{n} bins, which defaults to 64.
+##
+## @var{I}: Image in double format, with values from 0.0 to 1.0
+##
+## @var{J}: Returned image, in double format as well
 ## @seealso{imhist}
 ## @end deftypefn
 
 ## Author:	Kai Habel <kai.habel@gmx.de>
 ## Date:	08. August 2000
+## Modified-by: Jonas Wagner <j.b.w@gmx.ch>
+## Date:        11. February 2008
 
 function J = histeq (I, n)
   if (nargin == 0)
@@ -30,10 +36,12 @@ function J = histeq (I, n)
     n = 64;
   endif
 
-  [r,c] = size (I); 
-  [X,map] = gray2ind(I);
-  [nn,xx] = imhist(I);
-  Icdf = ceil (n * cumsum (1/prod(size(I)) * nn));
+  [r,c] = size(I); 
+  I = mat2gray(I);
+  [X,map] = gray2ind(I, n);
+  [nn,xx] = imhist(I, n);
+  Icdf = 1 / prod(size(I)) * cumsum(nn);
   J = reshape(Icdf(X),r,c);
-  plot(Icdf,'b;;');
+  plot(Icdf,'b');
+  legend( 'Image Cumulative Density Function');
 endfunction
