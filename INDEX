@@ -47,6 +47,7 @@ Filtering
  stretchlim
  makelut applylut
  deriche
+ radon
 Black and white image functions
  bwarea
  bwdist 
