@@ -13,7 +13,7 @@ ifdef HAVE_MAGICKXX
 endif
 
 all: cordflt2.oct bwlabel.oct bwfill.oct rotate_scale.oct \
-	houghtf.oct graycomatrix.oct deriche.oct __bwdist.oct \
+	houghtf.oct graycomatrix.oct deriche.oct __bwdist.oct nonmax_supress.oct \
 	$(JPEG) $(PNG) $(IMAGEMAGICK)
 
 jpgread.oct: jpgread.cc

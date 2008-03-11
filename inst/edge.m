@@ -1,60 +1,128 @@
+## Copyright (C) 2008 Søren Hauberg
+## 
+## This program is free software; you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 3 of the License, or
+## (at your option) any later version.
+## 
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+## 
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, write to the Free Software
+## Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+##
+## Note: The implementation and help text for the 'andy' edge detector came with
+## the following notice:
+##   Copyright (C) 1999 Andy Adler
+##   This code has no warrany whatsoever.
+##   Do what you like with this code as long as you
+##   leave this copyright in place.
+
 ## -*- texinfo -*-
-## @deftypefn {Function File} {[@var{imout}, @var{thresh}] = } edge(@var{im}, @var{method}, @var{thresh}, @var{param2})
-## Find image edges.
+## @deftypefn {Function File} @var{bw} = edge (@var{im})
+## @deftypefnx {Function File} @var{bw} = edge (@var{im}, "sobel")
+## Finds the edges in @var{im} using the Sobel approximation to the
+## derivatives. Edge points are defined as points where the length of
+## the gradient exceeds a threshold and is larger than it's neighbours
+## in either the horizontal or vertical direction.
+## @deftypefnx {Function File} @var{bw} = edge (@var{im}, "sobel", @var{thresh})
+## Same as above except @var{thresh} is used as a threshold.
+## @deftypefnx {Function File} @var{bw} = edge (@var{im}, "sobel", @var{thresh}, @var{direction})
+## Same as above except the derivate only is approximated in @var{direction},
+## where @var{direction} can be either "horizontal", "vertical", or "both"
+## (default).
+## @deftypefnx {Function File} [@var{bw}, @var{thresh} ] = edge (@var{im}, "sobel", ...)
+## Same as any of the above except the used threshold is alose returned.
 ##
-## The output is
-## @table @code
-## @item @var{imout}
-## Output image
-## @item @var{thresh}
-## Output thresholds
-## @end table
+## @deftypefnx {Function File} @var{bw} = edge (@var{im}, "prewitt")
+## Finds the edges in @var{im} using the Prewitt approximation to the
+## derivatives. Edge points are defined as points where the length of
+## the gradient exceeds a threshold and is larger than it's neighbours
+## in either the horizontal or vertical direction.
+## @deftypefnx {Function File} @var{bw} = edge (@var{im}, "prewitt", @var{thresh})
+## Same as above except @var{thresh} is used as a threshold.
+## @deftypefnx {Function File} @var{bw} = edge (@var{im}, "prewitt", @var{thresh}, @var{direction})
+## Same as above except the derivate only is approximated in @var{direction},
+## where @var{direction} can be either "horizontal", "vertical", or "both"
+## (default).
+## @deftypefnx {Function File} [@var{bw}, @var{thresh} ] = edge (@var{im}, "prewitt", ...)
+## Same as any of the above except the used threshold is alose returned.
 ##
-## The input is
-## @table @code
-## @item @var{im}
-## Input image (greyscale)
-## @item @var{thresh}
-## Threshold value (value is estimated if not given)
-## @end table
+## @deftypefnx {Function File} @var{bw} = edge (@var{im}, "roberts")
+## Finds the edges in @var{im} using the Roberts approximation to the
+## derivatives. Edge points are defined as points where the length of
+## the gradient exceeds a threshold and is larger than it's neighbours
+## in either the horizontal or vertical direction.
+## @deftypefnx {Function File} @var{bw} = edge (@var{im}, "roberts", @var{thresh})
+## Same as above except @var{thresh} is used as a threshold.
+## @deftypefnx {Function File} @var{bw} = edge (@var{im}, "roberts", @var{thresh}, @var{option})
+## Same as above except the thinning step can be turned off by setting
+## @var{option} to "nothinning". The default value for @var{option} is
+## "thinning".
+## @deftypefnx {Function File} [@var{bw}, @var{thresh} ] = edge (@var{im}, "roberts", ...)
+## Same as any of the above except the used threshold is alose returned.
+## 
+## @deftypefnx {Function File} @var{bw} = edge (@var{im}, "kirsch")
+## Finds the edges in @var{im} using the Kirsch approximation to the
+## derivatives. Edge points are defined as points where the length of
+## the gradient exceeds a threshold and is larger than it's neighbours
+## in either the horizontal or vertical direction.
+## @deftypefnx {Function File} @var{bw} = edge (@var{im}, "kirsch", @var{thresh})
+## Same as above except @var{thresh} is used as a threshold.
+## @deftypefnx {Function File} @var{bw} = edge (@var{im}, "kirsch", @var{thresh}, @var{direction})
+## Same as above except the derivate only is approximated in @var{direction},
+## where @var{direction} can be either "horizontal", "vertical", or "both"
+## (default).
+## @deftypefnx {Function File} [@var{bw}, @var{thresh} ] = edge (@var{im}, "kirsch", ...)
+## Same as any of the above except the used threshold is alose returned.
 ##
-## The following methods are based on high pass filtering the image in
-## two directions, calculating a combined edge weight from and then thresholding
+## @deftypefnx{Function File} @var{bw} = edge(@var{im}, "log")
+## Finds edges in @var{im} by convolving with the Laplacian of Gaussian 
+## filter, and finding zero crossings. Only zero crossings where the 
+## filter response is larger than an automaticly computed threshold.
+## @deftypefnx{Function File} @var{bw} = edge(@var{im}, "log", @var{thresh})
+## Same as above except @var{thresh} is used as threshold instead of the
+## automaticly computed threshold.
+## @deftypefnx{Function File} @var{bw} = edge(@var{im}, "log", @var{thresh}, @var{sigma})
+## Same as above, except the spread of the Laplacian of Gaussian is given
+## by @var{sigma}. The default value is 2.
+## @deftypefnx{Function File} [@var{bw}, @var{thresh}] = edge(@var{im}, "log", ...)
+## Same as any of the above, except the used threshold is also returned.
+## 
+## @deftypefnx{Function File} @var{bw} = edge(@var{im}, "zerocross", @var{thresh}, @var{filter})
+## Finds edges in the image @var{im} by convolving it with the user-supplied filter
+## @var{filter} and finding zero crossings larger than @var{thresh}. If @var{thresh} is
+## [] a threshold will be chosen automaticly.
+## @deftypefnx{Function File} [@var{bw}, @var{thresh}] = edge(@var{im}, "zerocross", ...)
+## Same as above, except the used threshold is returned.
 ##
-## @table @code
-## @item method = 'roberts'
-## @example
-## filt1= [1 0 ; 0 -1];   filt2= rot90( filt1 )
-## combine= sqrt( filt1^2 + filt2^2 )  
-## @end example
-## @item method = 'sobel'
-## @example
-## filt1= [1 2 1;0 0 0;-1 -2 -1];      filt2= rot90( filt1 ) 
-## combine= sqrt( filt1^2 + filt2^2 )  
-## @end example
-## @item method = 'prewitt'
-## @example
-## filt1= [1 1 1;0 0 0;-1 -1 -1];      filt2= rot90( filt1 ) 
-## combine= sqrt( filt1^2 + filt2^2 )
-## @end example
-## @item method = 'kirsh'
-## @example
-## filt1= [1 2 1;0 0 0;-1 -2 -1];  filt2 .. filt8 are 45 degree rotations of filt1
-## combine= max( filt1 ... filt8 )
-## @end example
-## @end table
+## @deftypefnx{Function File} @var{bw} = edge(@var{im}, "canny")
+## Finds edges using the Canny edge detector.
+## @deftypefnx{Function File} @var{bw} = edge(@var{im}, "canny", @var{thresh})
+## Finds edges using the Canny edge detector, where the thresholds used in the
+## hysteresis are user-defined. If @var{thresh} is a two dimensional vector it's first
+## element is used as the lower threshold, while the second element is used as the
+## high threshold. If, on the other hand, @var{thresh} is a single scalar it is used as
+## the high threshold, while the lower threshold is 0.4*@var{thresh}.
+## @deftypefnx{Function File} @var{bw} = edge(@var{im}, "canny", @var{thresh}, @var{sigma})
+## Same as above except the spread of the low-pass filtering Gaussian is given by
+## @var{sigma} (defaults to 2).
+## @deftypefnx{Function File} [@var{bw}, @var{threshold}] = edge(@var{im}, "canny", ...)
+## Same as any of the above except except the two used thresholds are returned as a
+## vector in @var{threshold}.
 ##
-## Methods based on filtering the image and finding zero crossings
+## @deftypefnx{Function File} @var{bw} = edge(@var{im}, "lindeberg")
+## Finds edges using in @var{im} using the differential geomtric single-scale edge
+## detector given by Tony Lindeberg.
+## @deftypefnx{Function File} @var{bw} = edge(@var{im}, "lindeberg", @var{sigma})
+## Same as above except the scale can be controlled with the parameter @var{sigma}
+## (defaults to 2).
 ##
-## @table @code
-## @item method = 'log'
-## Laplacian of Gaussian.
-## @var{param2} is the standard deviation of the filter, default is 2.
-## @item method = 'zerocross'
-## generic zero-crossing filter.
-## @var{param2} is the user supplied filter.
-## @item method = 'andy'
-## A.Adler's idea (c) 1999. somewhat based on the canny method. The steps are
+## @deftypefnx{Function File} @var{bw} = edge(@var{im}, "andy")
+## A.Adler's idea (c) 1999. Somewhat based on the canny method. The steps are
 ## @enumerate
 ## @item
 ## Do a sobel edge detection and to generate an image at
@@ -70,124 +138,364 @@
 ## the HT image.
 ## @end enumerate
 ## 
-## The parameters for the method are:
-## @table @code
-## @item param2(1)==0 or 4 or 8
+## The parameters for the method is given in a vector:
+## @table @asis
+## @item params(1)==0 or 4 or 8
 ## Perform x connected dilatation (step 3).
-## @item param2(2)
+## @item params(2)
 ## Dilatation coeficient (threshold) in step 3.
-## @item param2(3)
+## @item params(3)
 ## Length of edge extention convolution (step 2).
-## @item param2(4)
+## @item params(4)
 ## Coeficient of extention convolution in step 2.
 ## @end table
-## defaults = [8 1 3 3]
-## @end table
+## defaults = [8, 1, 3, 3]
+##
+## @seealso{fspecial, nonmax_supress}
 ## @end deftypefn
 
-# Copyright (C) 1999 Andy Adler
-# This code has no warrany whatsoever.
-# Do what you like with this code as long as you
-#     leave this copyright in place.
-#
-# $Id$
+function [bw, out_threshold, g45_out, g135_out] = edge (im, method, varargin)
+  ## Get the image
+  if (nargin == 0)
+    error("edge: not enough input arguments");
+  endif
+  if ( !isgray(im) )
+    error("edge: first input must be a gray-scale image");
+  endif
 
-function [imout, thresh] = edge( im, method, thresh, param2 )
+  ## Get the method
+  if (nargin == 1)
+    method = "Sobel";
+  endif
+  if (!ischar(method))
+    error("edge: second argument must be a string");
+  endif
+  method = lower(method);
 
-[n,m]= size(im);
-xx= 2:m-1;
-yy= 2:n-1;
+  ## Perform the actual edge detection
+  switch (method)
+    #####################################
+    ## S O B E L
+    #####################################
+    case "sobel"
+      ## Get the direction argument
+      direction = get_direction(varargin{:});
+      ## Create filters;
+      h1 = fspecial("sobel"); # horizontal
+      h3 = h1'; # vertical
+      ## Compute edge strength
+      switch(direction)
+        case "horizontal"
+          strength = abs( conv2(im, h1, "same") );
+        case "vertical"
+          strength = abs( conv2(im, h3, "same") );
+        case "both"
+          strength = sqrt( conv2(im, h1, "same").^2 + ...
+                           conv2(im, h3, "same").^2 );
+      endswitch
+      ## Get threshold
+      if (nargin > 2 && isscalar(varargin{1}))
+        thresh = varargin{1};
+      else
+        thresh = mean(abs(strength(:)));
+      endif
+      ## Perform thresholding and simple thinning
+      strength(strength<=thresh) = 0;
+      bw = simple_thinning(strength);
 
-if   strcmp(method,'roberts') || strcmp(method,'sobel') || ...
-     strcmp(method,'prewitt') 
-     
+    #####################################
+    ## P R E W I T T
+    #####################################
+    case "prewitt"
+      ## Get the direction argument
+      direction = get_direction(varargin{:});
+      ## Create filters;
+      h1 = fspecial("prewitt"); # vertical
+      h3 = h1'; # horizontal
+      ## Compute edge strength
+      switch(direction)
+        case "vertical"
+          strength = abs( conv2(im, h1, "same") );
+        case "horizontal"
+          strength = abs( conv2(im, h3, "same") );
+        case "both"
+          strength = sqrt( conv2(im, h1, "same").^2 + ...
+                           conv2(im, h3, "same").^2 );
+      endswitch
+      ## Get threshold
+      if (nargin > 2 && isscalar(varargin{1}))
+        thresh = varargin{1};
+      else
+        thresh = mean(abs(strength(:)));
+      endif
+      ## Perform thresholding and simple thinning
+      strength(strength<=thresh) = 0;
+      bw = simple_thinning(strength);
+    
+    #####################################
+    ## K I R S C H
+    #####################################
+    case "kirsch"
+      ## Get the direction argument
+      direction = get_direction(varargin{:});
+      ## Create filters;
+      h1 = fspecial("kirsch"); # vertical
+      h3 = h1'; # horizontal
+      ## Compute edge strength
+      switch(direction)
+        case "vertical"
+          strength = abs( conv2(im, h1, "same") );
+        case "horizontal"
+          strength = abs( conv2(im, h3, "same") );
+        case "both"
+          strength = sqrt( conv2(im, h1, "same").^2 + ...
+                           conv2(im, h3, "same").^2 );
+      endswitch
+      ## Get threshold
+      if nargin > 2 && isscalar(varargin{1})
+        thresh = varargin{1};
+      else
+        thresh = mean(abs(strength(:)));
+      endif
+      ## Perform thresholding and simple thinning
+      strength(strength<=thresh) = 0;
+      bw = simple_thinning(strength);
 
-   if strcmp(method,'roberts') 
-      filt= [1 0;0 -1]/4;               tv= 6;
-   elseif strcmp(method,'sobel') 
-      filt= [1 2 1;0 0 0; -1 -2 -1]/8;  tv= 2;
-   elseif strcmp(method,'prewitt') 
-      filt= [1 1 1;0 0 0; -1 -1 -1]/6;  tv= 4;
-   end
+    #####################################
+    ## R O B E R T S
+    #####################################
+    case "roberts"
+      ## Get the thinning argument (option)
+      if (nargin == 4)
+        option = varargin{2};
+        if (!ischar(option))
+          error("edge: 'option' must be a string");
+        endif
+        option = lower(option);
+        if (!any(strcmp(option, {"thinning", "nothinning"})))
+          error("edge: 'option' must be either 'thinning', or 'nothinning'");
+        endif
+      else
+        option = "thinning";
+      endif
+      ## Create filters;
+      h1 = [1 0; 0 -1]; 
+      h2 = [0 1; -1 0]; 
+      ## Compute edge strength
+      g45  = conv2(im, h1, "same");
+      g135 = conv2(im, h2, "same");
+      strength = abs( g45 ) + abs( g135 );
+      ## Get threshold
+      if (nargin > 2 && isscalar(varargin{1}))
+        thresh = varargin{1};
+      else
+        thresh = mean(abs(strength(:)));
+      endif
+      ## Perform thresholding and simple thinning
+      strength(strength<=thresh) = 0;
+      if strcmp(option, "thinning")
+        bw = simple_thinning(strength);
+      else
+        bw = (strength > 0);
+      endif
+      ## Check if g45 and g135 should be returned
+      if (nargout == 4)
+        g45_out  = g45;
+        g135_out = g135;
+      endif
+    
+    #####################################
+    ## L A P L A C I A N   O F   G A U S S I A N
+    #####################################
+    case "log"
+      ## Get sigma
+      if (nargin == 4 && isscalar(varargin{2}))
+        sigma = varargin{2};
+      else
+        sigma = 2;
+      endif
+      ## Create the filter
+      s = ceil(3*sigma);
+      %[x y] = meshgrid(-s:s);
+      %f = (x.^2 + y.^2 - sigma^2) .* exp(-(x.^2 + y.^2)/(2*sigma^2));
+      %f = f/sum(f(:));
+      f = fspecial("log", 2*s+1, sigma);
+      ## Perform convolution with the filter f
+      g = conv2(im, f, "same");
+      ## Get threshold
+      if (nargin > 2 && isscalar(varargin{1}))
+        thresh = varargin{1};
+      else
+        thresh = mean(abs(g(:)));
+      endif
+      ## Find zero crossings
+      zc = zerocrossings(g);
+      bw = (abs(g) >= thresh) & zc;
+    
+    #####################################
+    ## Z E R O   C R O S S I N G 
+    #####################################
+    case "zerocross"
+      ## Get the filter
+      if (nargin == 4 && ismatrix(varargin{2}))
+        f = varargin{2};
+      else
+        error("edge: a filter must be given as the fourth argument when 'zerocross' is used");
+      endif
+      ## Perform convolution with the filter f
+      g = conv2(im, f, "same");
+      ## Get threshold
+      if (nargin > 2 && isscalar(varargin{1}))
+        thresh = varargin{1};
+      else
+        thresh = mean(abs(g(:)));
+      endif
+      ## Find zero crossings
+      zc = zerocrossings(g);
+      bw = (abs(g) >= thresh) & zc;
 
-   imo= conv2(im, rot90(filt), 'same').^2 + conv2(im, filt, 'same').^2;
-   
-# check to see if the user supplied a threshold
-# if not, calculate one in the same way as Matlab
+    #####################################
+    ## C A N N Y 
+    #####################################
+    case "canny"
+      ## Get sigma
+      if (nargin == 4 && isscalar(varargin{2}))
+        sigma = varargin{2};
+      else
+        sigma = 2;
+      endif
+      ## Change scale
+      gauss = fspecial("gaussian", 2*ceil(3*sigma)+1, sigma);
+      J = conv2(im, gauss, "same");
+      ## Canny enhancer
+      p = [1 0 -1]/2;
+      Jx = conv2(J, p,  "same");
+      Jy = conv2(J, p', "same");
+      Es = sqrt( Jx.^2 + Jy.^2 );
+      Eo = atan2(Jy,Jx);
+      ## Get thresholds
+      if (nargin > 2 && isscalar(varargin{1}))
+        thresh = [0.4*varargin{1}, varargin{1}];
+      elseif (nargin > 2 && ismatrix(varargin{1}) && len(varargin{1}(:)) == 2)
+        thresh = varargin{1}(:);
+      else
+        tmp = mean(abs(Es(:)));
+        thresh = [0.4*tmp, tmp];
+      endif
+      bw = nonmax_supress(Es, Eo, thresh(1), thresh(2));
 
-   if nargin<3
-      thresh= sqrt( tv* mean(mean( imo(yy,xx) ))  );
-   end
+    #####################################
+    ## L I N D E B E R G 
+    #####################################
+    case "lindeberg"
+      ## In case the user asks for more then 1 output argument
+      ## we define thresh to be -1.
+      thresh = -1;
+      ## Get sigma
+      if (nargin > 2 && isscalar(varargin{1}))
+        sigma = varargin{1};
+      else
+        sigma = 2;
+      endif
+      ## Filters for computing the derivatives
+      Px   = [-1 0 1; -1 0 1; -1 0 1];
+      Py   = [1 1 1; 0 0 0; -1 -1 -1];
+      Pxx  = conv2(Px,  Px, "full");
+      Pyy  = conv2(Py,  Py, "full");
+      Pxy  = conv2(Px,  Py, "full");
+      Pxxx = conv2(Pxx, Px, "full");
+      Pyyy = conv2(Pyy, Py, "full");
+      Pxxy = conv2(Pxx, Py, "full");
+      Pxyy = conv2(Pyy, Px, "full");
+      ## Change scale
+      gauss = fspecial("gaussian", 2*ceil(3*sigma)+1, sigma);
+      L = conv2(im, gauss, "same");
+      ## Compute derivatives
+      Lx   = conv2(L, Px,   "same");
+      Ly   = conv2(L, Py,   "same");
+      Lxx  = conv2(L, Pxx,  "same");
+      Lyy  = conv2(L, Pyy,  "same");
+      Lxy  = conv2(L, Pxy,  "same");
+      Lxxx = conv2(L, Pxxx, "same");
+      Lyyy = conv2(L, Pyyy, "same");
+      Lxxy = conv2(L, Pxxy, "same");
+      Lxyy = conv2(L, Pxyy, "same");
+      ## Compute directional derivatives
+      Lvv  = Lx.^2.*Lxx + 2.*Lx.*Ly.*Lxy + Ly.^2.*Lyy;
+      Lvvv = Lx.^3.*Lxxx + 3.*Lx.^2.*Ly.*Lxxy ...
+           + 3.*Lx.*Ly.^2.*Lxyy + 3.*Ly.^3.*Lyyy;
+      ## Perform edge detection
+      bw = zerocrossings(Lvv) & Lvvv < 0;
 
-# The filters are defined for sqrt(imo), but since we calculated imo, compare
-#  to thresh ^2
+    #####################################
+    ## A N D Y
+    #####################################
+    case "andy"
+      [bw, out_threshold] = andy (im, method, varargin{:});
+    
+    otherwise
+      error("edge: unsupported edge detector: %s", method);
+  endswitch
+  
+  if (nargout > 1)
+    out_threshold = thresh;
+  endif
+endfunction
 
-   imout= ( imo >= thresh^2 );   
+## An auxilary function that parses the 'direction' argument from 'varargin'
+function direction = get_direction(varargin)
+  if (nargin >= 2)
+    direction = varargin{2};
+    if (!ischar(direction))
+      error("edge: direction must be a string");
+    endif
+    direction = lower(direction);
+    if (!any(strcmp(direction, {"horizontal", "vertical", "both"})))
+      error("edge :direction must be either 'horizontal', 'vertical', or 'both'");
+    endif
+  else
+    direction = "both";
+  endif
+endfunction
 
-# Thin the wide edges
-   xpeak= imo(yy,xx-1) <= imo(yy,xx) & imo(yy,xx) > imo(yy,xx+1) ;
-   ypeak= imo(yy-1,xx) <= imo(yy,xx) & imo(yy,xx) > imo(yy+1,xx) ;
-   imout(yy,xx)= imout(yy,xx) & ( xpeak | ypeak );
+## An auxilary function that performs a very simple thinning.
+## Strength is an image containing the edge strength.
+## bw contains a 1 in (r,c) if
+##  1) strength(r,c) is greater than both neighbours in the
+##     vertical direction, OR
+##  2) strength(r,c) is greater than both neighbours in the
+##     horizontal direction.
+## Note the use of OR.
+function bw = simple_thinning(strength)
+  [r c] = size(strength);
+  x = ( strength > [ zeros(r,1) strength(:,1:end-1) ] & ...
+        strength > [ strength(:,2:end) zeros(r,1) ] );
+  y = ( strength > [ zeros(1,c); strength(1:end-1,:) ] & ...
+        strength > [ strength(2:end,:); zeros(1,c) ] );
+  bw = x | y;
+endfunction
 
-elseif strcmp(method,'kirsch')   
+## Auxilary function. Finds the zero crossings of the 
+## 2-dimensional function f. (By Etienne Grossmann)
+function z = zerocrossings(f)
+  z0 = f<0;                 ## Negative
+  [R,C] = size(f);
+  z = zeros(R,C);
+  z(1:R-1,:) |= z0(2:R,:);  ## Grow
+  z(2:R,:) |= z0(1:R-1,:);
+  z(:,1:C-1) |= z0(:,2:C);
+  z(:,2:C) |= z0(:,1:C-1);
 
-   filt1= [1 2 1;0 0 0;-1 -2 -1];   fim1= conv2(im,filt1,'same');
-   filt2= [2 1 0;1 0 -1;0 -1 -2];   fim2= conv2(im,filt2,'same');
-   filt3= [1 0 -1;2 0 -2;1 0 -1];   fim3= conv2(im,filt3,'same');
-   filt4= [0 1 2;-1 0 1;-2 -1 0];   fim4= conv2(im,filt4,'same');
+  z &= !z0;                  ## "Positive zero-crossings"?
+endfunction
 
-   imo= reshape(max([abs(fim1(:)) abs(fim2(:)) abs(fim3(:)) abs(fim4(:))]'),n,m);
-
-   if nargin<3
-      thresh=  2* mean(mean( imo(yy,xx) )) ;
-   end
-
-   imout=  imo >= thresh ;   
-
-# Thin the wide edges
-   xpeak= imo(yy,xx-1) <= imo(yy,xx) & imo(yy,xx) > imo(yy,xx+1) ;
-   ypeak= imo(yy-1,xx) <= imo(yy,xx) & imo(yy,xx) > imo(yy+1,xx) ;
-   imout(yy,xx)= imout(yy,xx) & ( xpeak | ypeak );
-
-elseif  strcmp(method,'log') || strcmp(method,'zerocross') 
-
-   if strcmp(method,'log') 
-      if nargin >= 4;    sd= param2;
-      else               sd= 2;
-      end
-
-      sz= ceil(sd*3);
-      [x,y]= meshgrid( -sz:sz, -sz:sz );
-      filt = exp( -( x.^2 + y.^2 )/2/sd^2 ) .* ...
-                   ( x.^2 + y.^2 - 2*sd^2 ) / 2 / pi / sd^6 ;
-   else
-      filt = param2;
-   end
-   filt = filt - mean(filt(:));
-
-   imo= conv2(im, filt, 'same');
-
-   if nargin<3 || isempty( thresh )
-      thresh=  0.75* mean(mean( abs(imo(yy,xx)) )) ;
-   end
-
-   zcross= imo > 0;
-   yd_zc=  diff( zcross );
-   xd_zc=  diff( zcross' )';
-   yd_io=  abs(diff( imo ) ) > thresh;
-   xd_io=  abs(diff( imo')') > thresh;
-
-# doing it this way puts the transition at the <=0 point
-   xl= zeros(1,m);  yl= zeros(n,1);
-   imout= [    ( yd_zc ==  1 ) & yd_io ; xl] | ...
-          [xl; ( yd_zc == -1 ) & yd_io     ] | ...
-          [    ( xd_zc ==  1 ) & xd_io , yl] | ... 
-          [yl, ( xd_zc == -1 ) & xd_io     ];
-
-elseif  strcmp(method,'canny')  
-    error("method canny not implemented");
-
-elseif  strcmp(method,'andy')  
+## The 'andy' edge detector that was present in older versions of 'edge'.
+## The function body has simply been copied from the old implementation.
+##   -- Soren Hauberg, march 11th, 2008
+function [imout, thresh] = andy(im, method, thresh, param2)
+   [n,m]= size(im);
+   xx= 2:m-1;
+   yy= 2:n-1;
 
    filt= [1 2 1;0 0 0; -1 -2 -1]/8;  tv= 2;
    imo= conv2(im, rot90(filt), 'same').^2 + conv2(im, filt, 'same').^2;
@@ -244,42 +552,4 @@ elseif  strcmp(method,'andy')
 %  imout = bwselect( imee, rem(ff-1, n)+1, ceil(ff/n), 8);  
    imout = imee;
 
-
-else
-
-   error (['Method ' method ' is not recognized']);
-
-end
-
-
-
-
-# 
-# $Log$
-# Revision 1.3  2007/01/04 23:41:47  hauberg
-# Minor changes in help text
-#
-# Revision 1.2  2007/01/02 21:58:38  hauberg
-# Documentation is now in Texinfo (looks better on the website)
-#
-# Revision 1.1  2006/08/20 12:59:32  hauberg
-# Changed the structure to match the package system
-#
-# Revision 1.1  2002/03/17 02:38:52  aadler
-# fill and edge detection operators
-#
-# Revision 1.4  2000/11/20 17:13:07  aadler
-# works?
-#
-# Revision 1.3  1999/06/09 17:29:36  aadler
-# implemented 'andy' mode edge detection
-#
-# Revision 1.2  1999/06/08 14:26:50  aadler
-# zero-cross and LoG filters work
-#
-# Revision 1.1  1999/06/07 21:01:38  aadler
-# Initial revision
-#
-#
-
-#  
+endfunction

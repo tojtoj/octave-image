@@ -48,6 +48,7 @@ Filtering
  makelut applylut
  deriche
  radon
+ nonmax_supress
 Black and white image functions
  bwarea
  bwdist 
