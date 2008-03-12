@@ -365,8 +365,7 @@ function [bw, out_threshold, g45_out, g135_out] = edge (im, method, varargin)
         sigma = 2;
       endif
       ## Change scale
-      gauss = fspecial("gaussian", 2*ceil(3*sigma)+1, sigma);
-      J = conv2(im, gauss, "same");
+      J = imsmooth(double(im), "Gaussian", sigma);
       ## Canny enhancer
       p = [1 0 -1]/2;
       Jx = conv2(J, p,  "same");
@@ -408,8 +407,7 @@ function [bw, out_threshold, g45_out, g135_out] = edge (im, method, varargin)
       Pxxy = conv2(Pxx, Py, "full");
       Pxyy = conv2(Pyy, Px, "full");
       ## Change scale
-      gauss = fspecial("gaussian", 2*ceil(3*sigma)+1, sigma);
-      L = conv2(im, gauss, "same");
+      L = imsmooth(double(im), "Gaussian", sigma);
       ## Compute derivatives
       Lx   = conv2(L, Px,   "same");
       Ly   = conv2(L, Py,   "same");
