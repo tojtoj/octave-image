@@ -197,7 +197,7 @@ function [bw, out_threshold, g45_out, g135_out] = edge (im, method, varargin)
       if (nargin > 2 && isscalar(varargin{1}))
         thresh = varargin{1};
       else
-        thresh = mean(abs(strength(:)));
+        thresh = 2*mean(strength(:));
       endif
       ## Perform thresholding and simple thinning
       strength(strength<=thresh) = 0;
@@ -226,7 +226,7 @@ function [bw, out_threshold, g45_out, g135_out] = edge (im, method, varargin)
       if (nargin > 2 && isscalar(varargin{1}))
         thresh = varargin{1};
       else
-        thresh = mean(abs(strength(:)));
+        thresh = 4*mean(strength(:));
       endif
       ## Perform thresholding and simple thinning
       strength(strength<=thresh) = 0;
@@ -255,7 +255,7 @@ function [bw, out_threshold, g45_out, g135_out] = edge (im, method, varargin)
       if nargin > 2 && isscalar(varargin{1})
         thresh = varargin{1};
       else
-        thresh = mean(abs(strength(:)));
+        thresh = mean(strength(:));
       endif
       ## Perform thresholding and simple thinning
       strength(strength<=thresh) = 0;
@@ -289,11 +289,11 @@ function [bw, out_threshold, g45_out, g135_out] = edge (im, method, varargin)
       if (nargin > 2 && isscalar(varargin{1}))
         thresh = varargin{1};
       else
-        thresh = mean(abs(strength(:)));
+        thresh = 6*mean(strength(:));
       endif
       ## Perform thresholding and simple thinning
       strength(strength<=thresh) = 0;
-      if strcmp(option, "thinning")
+      if (strcmp(option, "thinning"))
         bw = simple_thinning(strength);
       else
         bw = (strength > 0);
@@ -326,7 +326,7 @@ function [bw, out_threshold, g45_out, g135_out] = edge (im, method, varargin)
       if (nargin > 2 && isscalar(varargin{1}))
         thresh = varargin{1};
       else
-        thresh = mean(abs(g(:)));
+        thresh = 0.75*mean(abs(g(:)));
       endif
       ## Find zero crossings
       zc = zerocrossings(g);
