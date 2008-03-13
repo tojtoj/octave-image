@@ -26,7 +26,7 @@
 
 DEFUN_DLD(hough_line, args, , "\
 -*- texinfo -*-\n\
-@deftypefn {Function File} {[@var{H}, @var{R}] =} hough_line(@var{I}, @var{angles})\n\
+@deftypefn {Loadable Function} {[@var{H}, @var{R}] =} hough_line(@var{I}, @var{angles})\n\
 Calculate the straight line Hough transform of a binary image @var{I}.\n\
 \n\
 The angles are given in degrees and defaults to -90:90.\n\
