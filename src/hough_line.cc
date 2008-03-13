@@ -39,33 +39,25 @@ Digital Image Processing by Gonzales & Woods (2nd ed., p. 587)\n\
 ") {
 
     octave_value_list retval;
-    bool DEF_THETA = false;
+    const int nargin = args.length();
+    const bool DEF_THETA = (nargin==1);
 
-    if (args.length() == 1) {
-	DEF_THETA = true;
-    } else if (args.length() != 2) {
+    if (1 > nargin || nargin > 2) {
 	print_usage ();
 	return retval;
     } 
 
-    Matrix I = args(0).matrix_value();
-
-    ColumnVector thetas = ColumnVector();
-    if (!DEF_THETA) {
-    	thetas = ColumnVector(args(1).vector_value());
-    } else {
-        thetas = ColumnVector(Range(-90,90).matrix_value());
-    }
-
+    const Matrix I = args(0).matrix_value();
+    const ColumnVector thetas = (DEF_THETA) ? ColumnVector(Range(-M_PI/2.0,M_PI/2.0, M_PI/180.0).matrix_value()) 
+                                            : ColumnVector(args(1).vector_value());
     if (error_state) {
 	print_usage ();
 	return retval;
     }
 
-    thetas = thetas / 180 * M_PI;
-
-    int r = I.rows();
-    int c = I.columns();
+    const int r = I.rows();
+    const int c = I.columns();
+    const int thetas_length = thetas.length();
 
     Matrix xMesh = Matrix(r, c);
     Matrix yMesh = Matrix(r, c);
@@ -78,30 +70,29 @@ Digital Image Processing by Gonzales & Woods (2nd ed., p. 587)\n\
 
     Matrix size = Matrix(1, 2);
     size(0) = r; size(1) = c;
-    double diag_length = sqrt( size.sumsq()(0) );
-    int nr_bins = 2 * (int)ceil(diag_length) - 1;
+    const double diag_length = sqrt( size.sumsq()(0) );
+    const int nr_bins = 2 * (int)ceil(diag_length) - 1;
     RowVector bins = RowVector( Range(1, nr_bins).matrix_value() ) - ceil(nr_bins/2.);
+    const int bins_length = bins.length();
 
-    Matrix J = Matrix(bins.length(), 0);
+    Matrix J = Matrix(bins_length, thetas_length);
 
-    for (int i = 0; i < thetas.length(); i++) {
-	double theta = thetas(i);
-	ColumnVector rho_count = ColumnVector(bins.length(), 0);
+    for (int i = 0; i < thetas_length; i++) {
+	const double theta = thetas(i);
 
-	double cT = cos(theta); double sT = sin(theta);
+	const double cT = cos(theta);
+	const double sT = sin(theta);
 	for (int x = 0; x < r; x++) {
 	    for (int y = 0; y < c; y++) {
 		if ( I(x, y) == 1 ) {
-		    int rho = (int)floor( cT*x + sT*y + 0.5 );
-		    int bin = (int)(rho - bins(0));
-		    if ( (bin > 0) && (bin < bins.length()) ) {
-			rho_count( bin )++;
+		    const int rho = (int)floor( cT*x + sT*y + 0.5 );
+		    const int bin = (int)(rho - bins(0));
+		    if ( (bin > 0) && (bin < bins_length) ) {
+			J(bin, i)++;
 		    }
 		}
 	    }
 	}
-
-	J = J.append( rho_count );
     }
 
     retval.append(J);
