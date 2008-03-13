@@ -29,6 +29,8 @@
 ## Smoothing using a rectangular averaging linear filter.
 ## @item  "Disk"
 ## Smoothing using a circular averaging linear filter.
+## @item  "Median"
+## Median filtering.
 ## @item  "Perona & Malik"
 ## @itemx "Perona and Malik"
 ## @itemx "P&M"
@@ -64,6 +66,15 @@
 ## scalar @var{r} the radius will be @var{r}.
 ##
 ## The image is extrapolated symmetrically before the convolution operation.
+##
+## @strong{Median filtering}
+##
+## Each pixel is replaced with the median of the pixels in the local area. By
+## default, this area is 3 by 3, but this can be changed. If the third input
+## argument is a scalar @var{N} the area will be @var{N} by @var{N}, and if it's
+## a two-vector [@var{N}, @var{M}] the area will be @var{N} by @var{M}.
+## 
+## The image is extrapolated symmetrically before the filtering is performed.
 ##
 ## @strong{Perona and Malik}
 ##
@@ -204,6 +215,28 @@ function J = imsmooth(I, name = "gaussian", varargin)
       ## Perform the filtering
       for i = imchannels:-1:1
         J(:,:,i) = conv2(I(:,:,i), f, "valid");
+      endfor
+    
+    ############################
+    ###   Median Filtering   ###
+    ############################
+    case "median"
+      ## Check input
+      s = [3, 3];
+      if (len > 0)
+        opt = varargin{1};
+        if (isscalar(opt) && opt > 0)
+          s = [opt, opt];
+        elseif (isvector(opt) && numel(opt) == 2 && all(opt>0))
+          s = opt;
+        else
+          error("imsmooth: third input argument must be a positive scalar or two-vector");
+        endif
+        s = round(s); # just in case the use supplies non-integers.
+      endif
+      ## Perform the filtering
+      for i = imchannels:-1:1
+        J(:,:,i) = medfilt2(I(:,:,i), s, "symmetric");
       endfor
     
     ############################
