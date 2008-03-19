@@ -11,9 +11,6 @@
 ##   placed back into the subblock from whence it came. @var{A} is processed
 ##   in chunks of size @var{m} x @var{n}.
 ##
-## The present version requires [@var{m}, @var{n}], but for compatibility it should
-## be optional.  Use colfilt(@var{A},[@var{r}, @var{c}], size(@var{A}),...)
-##
 ## The present version requires that [@var{m}, @var{n}] divide size(@var{A}), but for
 ## compatibility it should work even if [@var{m}, @var{n}] does not divide @var{A}. Use
 ## the following instead:
@@ -32,8 +29,28 @@
 ## Author: Paul Kienzle <pkienzle@users.sf.net>
 
 function B = colfilt(A,filtsize,blksize,blktype,f,varargin)
-
-   [m,n]=size(A);
+   ## Input checking
+   real_nargin = nargin - length(varargin);
+   if (real_nargin < 4)
+     error("colfilt: not enough input arguments");
+   endif
+   if (ischar(blksize))
+     varargin = {f, varargin{:}};
+     f = blktype;
+     blktype = blksize;
+     blksize = size(A);
+   elseif (real_nargin < 5)
+     error("colfilt: not enough input arguments");
+   endif
+   if (!ismatrix(A) || ndims(A) != 2)
+     error("colfilt: first input argument must be a matrix");
+   endif
+   if (!isvector(filtsize) || numel(filtsize) != 2)
+     error("colfilt: second input argument must be a 2-vector");
+   endif
+ 
+   ## Compute!
+   [m,n] = size(A);
    r = filtsize(1);
    c = filtsize(2);
    mblock = blksize(1);
