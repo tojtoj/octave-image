@@ -33,6 +33,7 @@ Analysis and Statistics
  graycomatrix
  houghtf
  graythresh
+ immaximas
 Filtering
  imfilter
  colfilt
