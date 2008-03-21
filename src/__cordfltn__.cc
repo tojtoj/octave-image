@@ -103,7 +103,7 @@ ET selnth(ET *vals, int len, int nth)
 template <class MT, class ET> 
 octave_value_list do_filtering(MT A, int nth, const boolNDArray dom, MT S)
 {
-    const octave_idx_type ndims = dom.ndims();
+    const int ndims = dom.ndims();
     const octave_idx_type dom_numel = dom.numel();
     const dim_vector dom_size = dom.dims();
     const dim_vector A_size = A.dims();
@@ -121,12 +121,12 @@ octave_value_list do_filtering(MT A, int nth, const boolNDArray dom, MT S)
     }
 
     dim_vector dim_offset(dom_size);
-    for (octave_idx_type i = 0; i < ndims; i++) { dim_offset(i) = (dom_size(i)+1)/2 -1; }
+    for (int i = 0; i < ndims; i++) dim_offset(i) = (dom_size(i)+1)/2 -1;
 
     // Allocate output
     octave_value_list retval;
     dim_vector out_size(dom_size);
-    for (octave_idx_type i = 0; i < ndims; i++) { out_size(i) = A_size(i) - dom_size(i) + 1; }
+    for (int i = 0; i < ndims; i++) out_size(i) = A_size(i) - dom_size(i) + 1;
     MT out = MT(out_size);
     const octave_idx_type out_numel = out.numel();
 
@@ -140,7 +140,7 @@ octave_value_list do_filtering(MT A, int nth, const boolNDArray dom, MT S)
         ET values[len];
         int l = 0;
         for (int n = 0; n < ndims; n++) dom_idx(n) = 0;
-        for (int j = 0; j < dom_numel; j++) {
+        for (octave_idx_type j = 0; j < dom_numel; j++) {
             for (int n = 0; n < ndims; n++) A_idx(n) = out_idx(n) + dom_idx(n);
             if (dom(dom_idx)) values[l++] = A(A_idx) + S(dom_idx);
             dom.increment_index(dom_idx, dom_size);
