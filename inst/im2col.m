@@ -55,24 +55,6 @@
 ## Any padding needed in 'distinct' processing will be added at right
 ## and bottom edges of the image.
 ##
-## @strong{Compatibility notes:}
-## 
-## @itemize @bullet
-## @item
-## 'sliding' blocks are arranged into @var{B} in a top-down and
-## left-right order. Since this isn't explicity described in MATLAB
-## documentation, we ignore if it does it this way. It has been
-## deduced because im2col implements inverse operation as a simple
-## reshape (if we chose left to right and then up to down order we would
-## had to transpose result). If you have MATLAB please check this
-## issue.
-## @item
-## MATLAB docs say that when using @code{'indexed'}, padding with 0 is
-## done for uint8 type. Since most functions do that too for uint16, we
-## have chosen to use 0 also for uint16, even if documentation doesn't
-## say it explicity, since it looks as an omission.
-## @end itemize
-##
 ## @seealso{col2im}
 ## @end deftypefn
 
