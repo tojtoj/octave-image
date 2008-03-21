@@ -291,8 +291,9 @@ function J = imsmooth(I, name = "gaussian", varargin)
     ######################################
     ###   Mean Shift Based Smoothing   ###
     ######################################  
-    case "mean shift"
-      J = mean_shift(I, varargin{:});
+    # NOT YET IMPLEMENTED
+    #case "mean shift"
+    #  J = mean_shift(I, varargin{:});
 
     #############################
     ###   Unknown filtering   ###
@@ -332,6 +333,7 @@ function J = pm(I, iter, lambda, g)
 endfunction
 
 ## Mean Shift smoothing for gray-scale images
+## XXX: This function doesn't work!!
 function J = mean_shift(I, s1, s2)
   sz = [size(I,2), size(I,1)];
   ## Mean Shift
