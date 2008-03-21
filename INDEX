@@ -43,7 +43,8 @@ Filtering
  imadjust 
  imnoise 
  medfilt2 
- ordfilt2 cordflt2 
+ ordfilt2
+ ordfiltn 
  uintlut
  stretchlim
  makelut applylut
