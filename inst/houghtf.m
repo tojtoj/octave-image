@@ -60,9 +60,10 @@
 ## Hough transform for circles with radius 3, and @var{H}(:,:,2) for radius 7.
 ## To find good circles you now need to find local maximas in @var{H}. If you
 ## find a local maxima in @var{H}(row, col, 1) it means that a good circle exists
-## with center (row,col) and radius 3.
+## with center (row,col) and radius 3. One way to locate maximas is to use the
+## @code{immaximas} function.
 ##
-## @seealso{hough_line, hough_circle}
+## @seealso{hough_line, hough_circle, immaximas}
 ## @end deftypefn
 
 function [accum, R] = houghtf(bw, varargin)
