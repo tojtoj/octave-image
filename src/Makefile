@@ -12,7 +12,7 @@ ifdef HAVE_MAGICKXX
 	IMAGEMAGICK=__magick_read__.oct
 endif
 
-all: cordflt2.oct bwlabel.oct bwfill.oct rotate_scale.oct \
+all: cordflt2.oct __cordfltn__.oct bwlabel.oct bwfill.oct rotate_scale.oct \
 	hough_line.oct graycomatrix.oct deriche.oct __bwdist.oct nonmax_supress.oct \
 	$(JPEG) $(PNG) $(IMAGEMAGICK)
 
