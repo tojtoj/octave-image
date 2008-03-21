@@ -51,10 +51,7 @@ for i=1:length(varargin)
   endif
 endfor
 
-if(!islogical(domain))
-  %  warning("domain should be a boolean matrix, converting");
-  domain = logical(domain);
-endif;
+domain = logical(domain);
 
 xpad(1) = floor((size(domain, 2)+1)/2) - 1;
 xpad(2) = size(domain,2) - xpad(1) - 1;
@@ -66,6 +63,6 @@ if(ypad(1) >= size(A,1) || xpad(1) >= size(A,2))
 endif;
 
 A = impad(A, xpad, ypad, padding);
-retval = cordflt2(A, nth, domain, S);
+retval = __cordfltn__(A, nth, domain, S);
 
 endfunction

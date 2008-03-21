@@ -287,6 +287,12 @@ function J = imsmooth(I, name = "gaussian", varargin)
       for i = imchannels:-1:1
         J(:,:,i) = pm(I(:,:,i), iter, lambda, method);
       endfor
+    
+    ######################################
+    ###   Mean Shift Based Smoothing   ###
+    ######################################  
+    case "mean shift"
+      J = mean_shift(I, varargin{:});
 
     #############################
     ###   Unknown filtering   ###
@@ -323,4 +329,39 @@ function J = pm(I, iter, lambda, g)
     ## Update
     J += lambda*(gN.*dN + gS.*dS + gE.*dE + gW.*dW);
   endfor
+endfunction
+
+## Mean Shift smoothing for gray-scale images
+function J = mean_shift(I, s1, s2)
+  sz = [size(I,2), size(I,1)];
+  ## Mean Shift
+  [x, y] = meshgrid(1:sz(1), 1:sz(2));
+  f = ones(s1);
+  tmp = conv2(ones(sz(2), sz(1)), f, "same"); # We use normalised convolution to handle the border
+  m00 = conv2(I, f, "same")./tmp;
+  m10 = conv2(I.*x, f, "same")./tmp;
+  m01 = conv2(I.*y, f, "same")./tmp;
+  ms_x = round( m10./m00 ); # konverter ms_x og ms_y til linære indices og arbejd med dem!
+  ms_y = round( m01./m00 );
+  
+  ms = sub2ind(sz, ms_y, ms_x);
+  %for i = 1:10
+  i = 0;
+  while (true)
+    disp(++i)
+    ms(ms) = ms;
+    #new_ms = ms(ms);
+    if (i >200), break; endif
+    #idx = ( abs(I(ms)-I(new_ms)) < s2 );
+    #ms(idx) = new_ms(idx);
+    %for j = 1:length(ms)
+    %  if (abs(I(ms(j))-I(ms(ms(j)))) < s2)
+    %    ms(j) = ms(ms(j));
+    %  endif
+    %endfor
+  endwhile
+  %endfor
+  
+  ## Compute result
+  J = I(ms);
 endfunction
