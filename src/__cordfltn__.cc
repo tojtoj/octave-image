@@ -151,6 +151,8 @@ octave_value_list do_filtering(MT A, int nth, const boolNDArray dom, MT S)
 
         // Prepare for next iteration
         out.increment_index(out_idx, out_size);
+        
+        OCTAVE_QUIT;
     }
     
     retval(0) = octave_value(out);
