@@ -85,7 +85,7 @@ function retval = ordfiltn(A, nth, domain, varargin)
   domain = logical(domain);
 
   ## Pad array
-  pad = floor((size(domain)+1)/2);
+  pad = floor(size(domain)/2);
   A = padarray(A, pad, padding);
   even = ( round(size(domain)/2) == size(domain)/2 );
   idx = cell(1, ndims(A));
