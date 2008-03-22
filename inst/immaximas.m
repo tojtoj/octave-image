@@ -20,6 +20,8 @@
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {[@var{r}, @var{c}] =} immaximas (@var{im}, @var{radius})
 ## @deftypefnx{Function File} {[@var{r}, @var{c}] =} immaximas (@var{im}, @var{radius}, @var{thresh})
+## @deftypefnx{Function File} {[@var{r}, @var{c}, ...] =} immaximas (...)
+## @deftypefnx{Function File} {[..., @var{val}] =} immaximas (...)
 ## Finds local spatial maximas of the given image. A local spatial maxima is
 ## defined as an image point with a value that is larger than all neighbouring
 ## values in a square region of width 2*@var{radius}+1. By default @var{radius}
@@ -29,10 +31,17 @@
 ## 
 ## The output vectors @var{r} and @var{c} contain the row-column coordinates
 ## of the local maximas. The actual values are computed to sub-pixel precision
-## by fitting a parabola to the data around the pixel.
+## by fitting a parabola to the data around the pixel. If @var{im} is 
+## @math{N}-dimensional, then @math{N} vectors will be returned.
+##
+## If @var{im} is @math{N}-dimensional, and @math{N}+1 outputs are requested,
+## then the last output will contain the image values at the maximas. Currently
+## this value is not interpolated.
+##
+## @seealso{ordfilt2, ordfiltn}
 ## @end deftypefn
 
-function [r, c] = immaximas(im, radius, thresh)
+function varargout = immaximas(im, radius, thresh)
   ## Check input
   if (nargin == 0)
     error("immaximas: not enough input arguments");
@@ -43,10 +52,10 @@ function [r, c] = immaximas(im, radius, thresh)
   if (nargin <= 2)
     thresh = [];
   endif
-  if (!ismatrix(im) || ndims(im) != 2)
-    error("immaximas: first input argument must be an M by N matrix");
+  if (!ismatrix(im))
+    error("immaximas: first input argument must be an array");
   endif
-  if (!isscalar(radius) && !isempty(radius))
+  if (!isscalar(radius))
     error("immaximas: second input argument must be a scalar or an empty matrix");
   endif
   if (!isscalar(thresh) && !isempty(thresh))
@@ -54,48 +63,45 @@ function [r, c] = immaximas(im, radius, thresh)
   endif
   
   ## Find local maximas
+  nd = ndims(im);
   s = size(im);
   sze = 2*radius+1;
-  mx = ordfilt2(im, sze^2, ones(sze, "logical"));
-  mx2 = ordfilt2(im, sze^2-1, ones(sze, "logical"));
+  mx  = ordfiltn(im, sze^nd,   ones(repmat(sze,1, nd), "logical"), "reflect");
+  mx2 = ordfiltn(im, sze^nd-1, ones(repmat(sze,1, nd), "logical"), "reflect");
 
-  ## Make mask to exclude points within radius of the image boundary. 
-  bordermask = zeros(s, "logical");
-  bordermask(radius+1:end-radius, radius+1:end-radius) = 1;
-    
-  # Find maxima, threshold, and apply bordermask
-  immx = (im == mx) & (im != mx) & bordermask;
+  # Find maxima, threshold
+  immx = (im == mx) & (im != mx2);
   if (!isempty(thresh))
     immx &= (im>thresh);
   endif
     
   ## Find local maximas and fit parabolas locally
-  [r, c] = find(immx);
-  if (!isempty(r))
-    ind = sub2ind(s,r,c); # 1D indices of feature points
+  ind = find(immx);
+  [sub{1:nd}] = ind2sub(s, ind);
+  if (!isempty(ind))
     w = 1; # Width that we look out on each side of the feature point to fit a local parabola
 
-    ## Indices of points above, below, left and right of feature point
-    indrminus1 = max(ind-w,1);
-    indrplus1  = min(ind+w,s(1)*s(2));
-    indcminus1 = max(ind-w*s(1),1);
-    indcplus1  = min(ind+w*s(1),s(1)*s(2));
+    ## We fit a parabola to the points in each dimension
+    for d = 1:nd
+      ## Indices of points above, below, left and right of feature point
+      indminus1 = max(ind-w,1);
+      indplus1  = min(ind+w,numel(immx));
 
-    ## Solve for quadratic down rows
-    cy = im(ind);
-    ay = (im(indrminus1) + im(indrplus1))/2 - cy;
-    by = ay + cy - im(indrminus1);
-    rowshift = -w*by./(2*ay); # Maxima of quadradic
-
-    ## Solve for quadratic across columns
-    cx = im(ind);
-    ax = (im(indcminus1) + im(indcplus1))/2 - cx;
-    bx = ax + cx - im(indcminus1);
-    colshift = -w*bx./(2*ax); # Maxima of quadradic
-
-    ## Add subpixel corrections to original row and column coords.
-    r += rowshift;
-    c += colshift;
+      ## Solve quadratic
+      c = im(ind);
+      a = (im(indminus1) + im(indplus1))/2 - c;
+      b = a + c - im(indminus1);
+      shift = -w*b./(2*a); # Maxima of quadradic 
+      
+      ## Move point   
+      sub{d} += shift;
+    endfor
+  endif
+  
+  ## Output
+  varargout(1:nd) = sub(1:nd);
+  if (nargout > nd)
+    varargout{nd+1} = im(ind);
   endif
 endfunction
 
