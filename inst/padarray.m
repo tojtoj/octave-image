@@ -31,32 +31,36 @@
 ## B = padarray(A,padsize,padval) pads @var{A} using the value specified
 ## by @var{padval}. @var{padval} can be a scalar or a string. Possible
 ## values are:
-## @table @code
+##
+## @table @asis
 ## @item 0
 ## Pads with 0 as described above. This is the default behaviour.
-## @item scalar
+## @item Scalar
 ## Pads using @var{padval} as a padding value.
-## @item 'circular'
+## @item "Circular"
 ## Pads with a circular repetition of elements in @var{A} (similar to
 ## tiling @var{A}).
-## @item 'replicate'
-## Pads 'replicating' values of @var{A} which are at the border of the
+## @item "Replicate"
+## Pads replicating values of @var{A} which are at the border of the
 ## array.
-## @item 'symmetric'
+## @item "Symmetric"
 ## Pads with a mirror reflection of @var{A}.
+## @item "Reflect"
+## Same as "symmetric", but the borders are not used in the padding.
 ## @end table
 ##
 ## B = padarray(A,padsize,padval,direction) pads @var{A} defining the
 ## direction of the pad. Possible values are:
-## @table @code
-## @item 'both'
+##
+## @table @asis
+## @item "Both"
 ## For each dimension it pads before the first element the number
 ## of elements defined by @var{padsize} and the same number again after
 ## the last element. This is the default value.
-## @item 'pre'
+## @item "Pre"
 ## For each dimension it pads before the first element the number of
 ## elements defined by @var{padsize}.
-## @item 'post'
+## @item "Post"
 ## For each dimension it pads after the last element the number of
 ## elements defined by @var{padsize}.
 ## @end table
@@ -64,120 +68,125 @@
 
 ## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 
-function B = padarray(A, padsize, padval, direction)
+function B = padarray(A, padsize, padval = 0, direction = "both")
   # Check parameters
-  if (nargin<2 || nargin>4)
-    usage ("B = padarray(A, padsize [, padval] [, direction])");
-  endif
-  if (nargin<3)
-    padval=0;
-  endif
-  if (nargin<4)
-    direction='both';
+  if (nargin < 2 || nargin > 4)
+    print_usage();
   endif
 
-  if (!isvector(padsize) || any(padsize<0))
+  if (!isvector(padsize) || !isnumeric(padsize) || any(padsize < 0) || any(padsize != round(padsize)))
     error("padarray: padsize must be a vector of positive integers.");
+  endif
+  if (!isscalar(padval) && !ischar(padval))
+    error("padarray: third input argument must be a string or a scalar");
+  endif
+  if (!ischar(direction) || strcmpi(direction, {"pre", "post", "both"}))
+    error("padarray: fourth input argument must be 'pre', 'post', or 'both'");
   endif
 
   ## Assure padsize is a row vector
-  padsize=padsize(:).';
+  padsize = padsize(:).';
 
   # Check direction
-  pre=false;
-  post=false;
-  switch(direction)
-    case('pre')
-      pre=true;
-    case('post')
-      post=true;
-    case('both')
-      post=true;
-      pre=true;
-    otherwise
-      error ("padarray: direction possible values are: 'pre', 'post' and 'both'");
-  endswitch
+  pre  = any(strcmpi(direction, {"pre", "both"}));
+  post = any(strcmpi(direction, {"post", "both"}));
   
-  
-  B=A;
-  dim=1;
-  for s=padsize
-    if (s>0)
+  B = A;
+  dim = 1;
+  for s = padsize
+    if (s > 0)
       # padding in this dimension was requested
-      ds=size(B);
-      ds=[ds, ones(1,dim-length(ds))]; # data size
-      ps=ds;
-      ps(dim)=s;		       # padding size
+      ds = size(B);
+      ds = [ds, ones(1,dim-length(ds))]; # data size
+      ps = ds;
+      ps(dim) = s;		       # padding size
 
       if (ischar(padval))
 	# Init a "index all" cell array. All cases need it.
-	idx=cell();
-	for i=1:length(ds)
-	  idx{i}=1:ds(i);
+	idx = cell(1, length(ds));
+	for i = 1:length(ds)
+	  idx{i} = 1:ds(i);
 	endfor
 
-	switch(padval)
-	  case('circular')
-	    complete=0;
-	    D=B;
-	    if (ps(dim)>ds(dim))
-	      complete=floor(ps(dim)/ds(dim));
-	      ps(dim)=rem(ps(dim),ds(dim));
+	switch (padval)
+	  case ("circular")
+	    complete = 0;
+	    D = B;
+	    if (ps(dim) > ds(dim))
+	      complete = floor(ps(dim)/ds(dim));
+	      ps(dim) = rem(ps(dim), ds(dim));
 	    endif
 	    if (pre)
-	      for i=1:complete
-		B=cat(dim,D,B);
+	      for i = 1:complete
+		B = cat(dim, D, B);
 	      endfor
-	      idxt=idx;
-	      idxt{dim}=ds(dim)-ps(dim)+1:ds(dim);
-	      B=cat(dim,D(idxt{:}),B);
+	      idxt = idx;
+	      idxt{dim} = ds(dim)-ps(dim)+1:ds(dim);
+	      B = cat(dim, D(idxt{:}), B);
 	    endif
 	    if (post)
-	      for i=1:complete
-		B=cat(dim,B,D);
+	      for i = 1:complete
+		B = cat(dim, B, D);
 	      endfor
-	      idxt=idx;
-	      idxt{dim}=1:ps(dim);
-	      B=cat(dim,B,D(idxt{:}));
+	      idxt = idx;
+	      idxt{dim} = 1:ps(dim);
+	      B = cat(dim, B, D(idxt{:}));
 	    endif
 	    # end circular case
 
-	  case('replicate')
+	  case ("replicate")
 	    if (pre)
-	      idxt=idx;
-	      idxt{dim}=1;
-	      pad=B(idxt{:});
+	      idxt = idx;
+	      idxt{dim} = 1;
+	      pad = B(idxt{:});
 	      # can we do this without the loop?	
-	      for i=1:s
-		B=cat(dim,pad,B);
+	      for i = 1:s
+		B = cat(dim, pad, B);
 	      endfor
 	    endif
 	    if (post)
-	      idxt=idx;
-	      idxt{dim}=size(B,dim);
-	      pad=B(idxt{:});
-	      for i=1:s
-		B=cat(dim,B,pad);
+	      idxt = idx;
+	      idxt{dim} = size(B, dim);
+	      pad = B(idxt{:});
+	      for i = 1:s
+		B = cat(dim, B, pad);
 	      endfor
 	    endif
 	    # end replicate case
 	
-	  case('symmetric')
-	    if (ps(dim)>ds(dim))
+	  case ("symmetric")
+	    if (ps(dim) > ds(dim))
 	      error("padarray: padding is longer than data using symmetric padding");
 	    endif
 	    if (pre)
-	      idxt=idx;
-	      idxt{dim}=ps(dim):-1:1;
-	      B=cat(dim,B(idxt{:}),B);
+	      idxt = idx;
+	      idxt{dim} = ps(dim):-1:1;
+	      B = cat(dim, B(idxt{:}), B);
 	    endif
 	    if (post)
-	      idxt=idx;
-	      sbd=size(B,dim);
-	      idxt{dim}=sbd:-1:sbd-ps(dim)+1;
-	      B=cat(dim,B,B(idxt{:}));
+	      idxt = idx;
+	      sbd = size(B, dim);
+	      idxt{dim} = sbd:-1:sbd-ps(dim)+1;
+	      B = cat(dim, B, B(idxt{:}));
 	    endif
 	    # end symmetric case
+
+	  case ("reflect")
+	    if (ps(dim) > ds(dim)-1)
+	      error("padarray: padding is longer than data using 'reflect' padding");
+	    endif
+	    if (pre)
+	      idxt = idx;
+	      idxt{dim} = (ps(dim):-1:1) + 1;
+	      B = cat(dim, B(idxt{:}), B);
+	    endif
+	    if (post)
+	      idxt = idx;
+	      sbd = size(B, dim)-1;
+	      idxt{dim} = sbd:-1:sbd-ps(dim)+1;
+	      B = cat(dim,B,B(idxt{:}));
+	    endif
+	    # end reflect case
 
 	  otherwise
 	    error("padarray: invalid string in padval parameter.");
@@ -187,21 +196,19 @@ function B = padarray(A, padsize, padval, direction)
 
       elseif (isscalar(padval))
 	# Handle fixed value padding
-	if (padval==0)
-	  pad=zeros(ps,class(A));       ## class(pad) = class(A)
+	if (padval == 0)
+	  pad = zeros(ps, class(A));       ## class(pad) = class(A)
 	else
-	  pad=padval*ones(ps,class(A)); ## class(pad) = class(A)
+	  pad = padval*ones(ps, class(A)); ## class(pad) = class(A)
 	endif
-	if(pre&&post)
+	if (pre && post)
 	  # check if this is not quicker than just 2 calls (one for each)
-	  B=cat(dim,pad,B,pad);
-	elseif(pre)
-	  B=cat(dim,pad,B);
-	elseif(post)
-	  B=cat(dim,B,pad);
+	  B = cat(dim, pad, B, pad);
+	elseif (pre)
+	  B = cat(dim, pad, B);
+	elseif (post)
+	  B = cat(dim, B, pad);
 	endif
-      else
-	error ("padarray: padval can only be a scalar or a string.");
       endif
     endif
     dim+=1;
