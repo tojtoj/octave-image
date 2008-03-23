@@ -22,114 +22,101 @@
 ##   leave this copyright in place.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} @var{bw} = edge (@var{im})
-## @deftypefnx {Function File} @var{bw} = edge (@var{im}, "sobel")
+## @deftypefn {Function File} {@var{bw} =} edge (@var{im}, @var{method})
+## @deftypefnx{Function File} {@var{bw} =} edge (@var{im}, @var{method}, @var{arg1}, @var{arg2})
+## @deftypefnx{Function File} {[@var{bw}, @var{thresh}] =} edge (...)
+## Detect edges in the given image using various methods. The first input @var{im}
+## is the gray scale image in which edges are to be detected. The second argument
+## controls which method is used for detecting the edges. The rest of the input
+## arguments depend on the selected method. The first output @var{bw} is a 
+## @code{logical} image containing the edges. Most methods also returns an automatically
+## computed threshold as the second output.
+##
+## The @var{method} input argument can any of the following strings (the default
+## value is "Sobel")
+##
+## @table @asis
+## @item "Sobel"
 ## Finds the edges in @var{im} using the Sobel approximation to the
 ## derivatives. Edge points are defined as points where the length of
 ## the gradient exceeds a threshold and is larger than it's neighbours
-## in either the horizontal or vertical direction.
-## @deftypefnx {Function File} @var{bw} = edge (@var{im}, "sobel", @var{thresh})
-## Same as above except @var{thresh} is used as a threshold.
-## @deftypefnx {Function File} @var{bw} = edge (@var{im}, "sobel", @var{thresh}, @var{direction})
-## Same as above except the derivate only is approximated in @var{direction},
-## where @var{direction} can be either "horizontal", "vertical", or "both"
-## (default).
-## @deftypefnx {Function File} [@var{bw}, @var{thresh} ] = edge (@var{im}, "sobel", ...)
-## Same as any of the above except the used threshold is alose returned.
+## in either the horizontal or vertical direction. The threshold is passed to
+## the method in the third input argument @var{arg1}. If one is not given, a
+## threshold is automatically computed as 4*@math{M}, where @math{M} is the mean
+## of the gradient of the entire image. The optional 4th input argument controls
+## the direction in which the gradient is approximated. It can be either
+## "horizontal", "vertical", or "both" (default).
 ##
-## @deftypefnx {Function File} @var{bw} = edge (@var{im}, "prewitt")
+## @item "Prewitt"
 ## Finds the edges in @var{im} using the Prewitt approximation to the
-## derivatives. Edge points are defined as points where the length of
-## the gradient exceeds a threshold and is larger than it's neighbours
-## in either the horizontal or vertical direction.
-## @deftypefnx {Function File} @var{bw} = edge (@var{im}, "prewitt", @var{thresh})
-## Same as above except @var{thresh} is used as a threshold.
-## @deftypefnx {Function File} @var{bw} = edge (@var{im}, "prewitt", @var{thresh}, @var{direction})
-## Same as above except the derivate only is approximated in @var{direction},
-## where @var{direction} can be either "horizontal", "vertical", or "both"
-## (default).
-## @deftypefnx {Function File} [@var{bw}, @var{thresh} ] = edge (@var{im}, "prewitt", ...)
-## Same as any of the above except the used threshold is alose returned.
+## derivatives. This method works just like "Sobel" except a different aproximation
+## the gradient is used.
 ##
-## @deftypefnx {Function File} @var{bw} = edge (@var{im}, "roberts")
+## @item "Roberts"
 ## Finds the edges in @var{im} using the Roberts approximation to the
 ## derivatives. Edge points are defined as points where the length of
 ## the gradient exceeds a threshold and is larger than it's neighbours
-## in either the horizontal or vertical direction.
-## @deftypefnx {Function File} @var{bw} = edge (@var{im}, "roberts", @var{thresh})
-## Same as above except @var{thresh} is used as a threshold.
-## @deftypefnx {Function File} @var{bw} = edge (@var{im}, "roberts", @var{thresh}, @var{option})
-## Same as above except the thinning step can be turned off by setting
-## @var{option} to "nothinning". The default value for @var{option} is
-## "thinning".
-## @deftypefnx {Function File} [@var{bw}, @var{thresh} ] = edge (@var{im}, "roberts", ...)
-## Same as any of the above except the used threshold is alose returned.
-## 
-## @deftypefnx {Function File} @var{bw} = edge (@var{im}, "kirsch")
+## in either the horizontal or vertical direction. The threshold is passed to
+## the method in the third input argument @var{arg1}. If one is not given, a
+## threshold is automatically computed as 6*@math{M}, where @math{M} is the mean
+## of the gradient of the entire image. The optional 4th input argument can be
+## either "thinning" (default) or "nothinning". If it is "thinning" a simple
+## thinning procedure is applied to the edge image such that the edges are only
+## one pixel wide. If @var{arg2} is "nothinning", this procedure is not applied.
+##
+## @item "Kirsch"
 ## Finds the edges in @var{im} using the Kirsch approximation to the
 ## derivatives. Edge points are defined as points where the length of
 ## the gradient exceeds a threshold and is larger than it's neighbours
-## in either the horizontal or vertical direction.
-## @deftypefnx {Function File} @var{bw} = edge (@var{im}, "kirsch", @var{thresh})
-## Same as above except @var{thresh} is used as a threshold.
-## @deftypefnx {Function File} @var{bw} = edge (@var{im}, "kirsch", @var{thresh}, @var{direction})
-## Same as above except the derivate only is approximated in @var{direction},
-## where @var{direction} can be either "horizontal", "vertical", or "both"
-## (default).
-## @deftypefnx {Function File} [@var{bw}, @var{thresh} ] = edge (@var{im}, "kirsch", ...)
-## Same as any of the above except the used threshold is alose returned.
+## in either the horizontal or vertical direction. The threshold is passed to
+## the method in the third input argument @var{arg1}. If one is not given, a
+## threshold is automatically computed as @math{M}, where @math{M} is the mean
+## of the gradient of the entire image. The optional 4th input argument controls
+## the direction in which the gradient is approximated. It can be either
+## "horizontal", "vertical", or "both" (default).
 ##
-## @deftypefnx{Function File} @var{bw} = edge(@var{im}, "log")
-## Finds edges in @var{im} by convolving with the Laplacian of Gaussian 
+## @item "LoG"
+## Finds edges in @var{im} by convolving with the Laplacian of Gaussian (LoG)
 ## filter, and finding zero crossings. Only zero crossings where the 
-## filter response is larger than an automaticly computed threshold.
-## @deftypefnx{Function File} @var{bw} = edge(@var{im}, "log", @var{thresh})
-## Same as above except @var{thresh} is used as threshold instead of the
-## automaticly computed threshold.
-## @deftypefnx{Function File} @var{bw} = edge(@var{im}, "log", @var{thresh}, @var{sigma})
-## Same as above, except the spread of the Laplacian of Gaussian is given
-## by @var{sigma}. The default value is 2.
-## @deftypefnx{Function File} [@var{bw}, @var{thresh}] = edge(@var{im}, "log", ...)
-## Same as any of the above, except the used threshold is also returned.
-## 
-## @deftypefnx{Function File} @var{bw} = edge(@var{im}, "zerocross", @var{thresh}, @var{filter})
+## filter response is larger than an automatically computed threshold are retained.
+## The threshold is passed to the method in the third input argument @var{arg1}.
+## If one is not given, a threshold is automatically computed as 0.75*@math{M},
+## where @math{M} is the mean of absolute value of LoG filter response. The
+## optional 4th input argument sets the spread of the LoG filter. By default
+## this value is 2.
+##
+## @item "Zerocross"
 ## Finds edges in the image @var{im} by convolving it with the user-supplied filter
-## @var{filter} and finding zero crossings larger than @var{thresh}. If @var{thresh} is
-## [] a threshold will be chosen automaticly.
-## @deftypefnx{Function File} [@var{bw}, @var{thresh}] = edge(@var{im}, "zerocross", ...)
-## Same as above, except the used threshold is returned.
+## @var{arg2} and finding zero crossings larger than the threshold @var{arg1}. If
+## @var{arg1} is [] a threshold is computed as the mean value of the absolute
+## filter response.
 ##
-## @deftypefnx{Function File} @var{bw} = edge(@var{im}, "canny")
-## Finds edges using the Canny edge detector.
-## @deftypefnx{Function File} @var{bw} = edge(@var{im}, "canny", @var{thresh})
-## Finds edges using the Canny edge detector, where the thresholds used in the
-## hysteresis are user-defined. If @var{thresh} is a two dimensional vector it's first
-## element is used as the lower threshold, while the second element is used as the
-## high threshold. If, on the other hand, @var{thresh} is a single scalar it is used as
-## the high threshold, while the lower threshold is 0.4*@var{thresh}.
-## @deftypefnx{Function File} @var{bw} = edge(@var{im}, "canny", @var{thresh}, @var{sigma})
-## Same as above except the spread of the low-pass filtering Gaussian is given by
-## @var{sigma} (defaults to 2).
-## @deftypefnx{Function File} [@var{bw}, @var{threshold}] = edge(@var{im}, "canny", ...)
-## Same as any of the above except except the two used thresholds are returned as a
-## vector in @var{threshold}.
+## @item "Canny"
+## Finds edges using the Canny edge detector. The optional third input argument
+## @var{arg1} sets the thresholds used in the hysteresis thresholding. If 
+## @var{arg1} is a two dimensional vector it's first element is used as the lower
+## threshold, while the second element is used as the high threshold. If, on the
+## other hand, @var{arg1} is a single scalar it is used as the high threshold,
+## while the lower threshold is 0.4*@var{arg1}. The optional 4th input argument
+## @var{arg2} is the spread of the low-pass Gaussian filter that is used to smooth
+## the input image prior to estimating gradients. By default this scale parameter
+## is 2.
 ##
-## @deftypefnx{Function File} @var{bw} = edge(@var{im}, "lindeberg")
-## Finds edges using in @var{im} using the differential geomtric single-scale edge
-## detector given by Tony Lindeberg.
-## @deftypefnx{Function File} @var{bw} = edge(@var{im}, "lindeberg", @var{sigma})
-## Same as above except the scale can be controlled with the parameter @var{sigma}
-## (defaults to 2).
+## @item "Lindeberg"
+## Finds edges using in @var{im} using the differential geometric single-scale edge
+## detector given by Tony Lindeberg. The optional third input argument @var{arg1}
+## is the scale (spread of Gaussian filter) at which the edges are computed. By
+## default this 2.
 ##
-## @deftypefnx{Function File} @var{bw} = edge(@var{im}, "andy")
+## @item "Andy"
 ## A.Adler's idea (c) 1999. Somewhat based on the canny method. The steps are
 ## @enumerate
 ## @item
-## Do a sobel edge detection and to generate an image at
+## Do a Sobel edge detection and to generate an image at
 ## a high and low threshold.
 ## @item
 ## Edge extend all edges in the LT image by several pixels,
-## in the vertical, horizontal, and 45degree directions.
+## in the vertical, horizontal, and 45 degree directions.
 ## Combine these into edge extended (EE) image.
 ## @item
 ## Dilate the EE image by 1 step.
@@ -150,6 +137,8 @@
 ## Coeficient of extention convolution in step 2.
 ## @end table
 ## defaults = [8, 1, 3, 3]
+##
+## @end table
 ##
 ## @seealso{fspecial, nonmax_supress}
 ## @end deftypefn
