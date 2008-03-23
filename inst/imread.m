@@ -81,7 +81,8 @@ function varargout = imread(filename, varargin)
     endif
 
     if !( strcmp(imtype, "Bilevel")   || strcmp(imtype, "Grayscale") ||
-          strcmp(imtype, "TrueColor") || strcmp(imtype, "TrueColorMatte") )
+          strcmp(imtype, "TrueColor") || strcmp(imtype, "TrueColorMatte") ||
+          strcmp(imtype, "Palette") )
       error("imread: unknown image type '%s'", imtype);
     endif
 
@@ -90,7 +91,7 @@ function varargout = imread(filename, varargin)
       fmt = "pgm";
     case {"Grayscale"}
       fmt = "pgm";
-    case {"TrueColor", "TrueColorMatte"}
+    case {"TrueColor", "TrueColorMatte", "Palette"}
       fmt = "ppm";
     endswitch
     
@@ -128,7 +129,7 @@ function varargout = imread(filename, varargin)
     fclose(fid);
     unlink(tmpf);
 
-    if (any(strcmp(imtype, {"TrueColor", "TrueColorMatte"})))
+    if (any(strcmp(imtype, {"TrueColor", "TrueColorMatte", "Palette"})))
       channels = 3;
     else
       channels = 1;
@@ -144,7 +145,7 @@ function varargout = imread(filename, varargin)
       varargout{1} = logical(reshape(data, width, height)');
  	case {"Grayscale"}
       varargout{1} = uint8(reshape(data, width, height)');
- 	case {"TrueColor", "TrueColorMatte"}
+ 	case {"TrueColor", "TrueColorMatte", "Palette"}
       varargout{1} = cat(3, reshape(data(1:3:end), width, height)',
                             reshape(data(2:3:end), width, height)',
                             reshape(data(3:3:end), width, height)');
