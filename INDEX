@@ -3,6 +3,7 @@ Display
  image 
  imagesc 
  imshow 
+ rgbplot
 Read/write
  imread 
  imwrite 
