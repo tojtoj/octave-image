@@ -79,7 +79,7 @@
 ## @strong{Perona and Malik}
 ##
 ## The image is smoothed using anisotropic diffusion as described by Perona and
-## Malik. The algorithm iteratively updates the image using
+## Malik [1]. The algorithm iteratively updates the image using
 ##
 ## @example
 ## I += lambda * (g(dN).*dN + g(dS).*dS + g(dE).*dE + g(dW).*dW)
@@ -118,6 +118,13 @@
 ## @var{g} = @@(@var{d}) exp(-(@var{d}./50).^2);
 ## @var{J} = imsmooth(@var{I}, "p&m", 25, 0.25, @var{g});
 ## @end example
+##
+## @strong{References}
+##
+## [1] P. Perona and J. Malik,
+## "Scale-space and edge detection using anisotropic diffusion",
+## IEEE Transactions on Pattern Analysis and Machine Intelligence,
+## 12(7):629-639, 1990.
 ##
 ## @seealso{imfilter, fspecial}
 ## @end deftypefn
