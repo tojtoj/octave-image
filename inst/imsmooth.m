@@ -31,6 +31,8 @@
 ## Smoothing using a circular averaging linear filter.
 ## @item  "Median"
 ## Median filtering.
+## @item  "Bilateral"
+## Gaussian bilateral filtering.
 ## @item  "Perona & Malik"
 ## @itemx "Perona and Malik"
 ## @itemx "P&M"
@@ -73,6 +75,31 @@
 ## default, this area is 3 by 3, but this can be changed. If the third input
 ## argument is a scalar @var{N} the area will be @var{N} by @var{N}, and if it's
 ## a two-vector [@var{N}, @var{M}] the area will be @var{N} by @var{M}.
+## 
+## The image is extrapolated symmetrically before the filtering is performed.
+##
+## @strong{Gaussian bilateral filtering}
+##
+## The image is smoothed using Gaussian bilateral filtering as described by
+## Tomasi and Manduchi [2]. The filtering result is computed as
+## @example
+## @var{J(x0, y0) = k * SUM SUM @var{I}(x,y) * w(x, y, x0, y0, @var{I}(x0,y0), @var{I}(x,y))
+##                  x   y        
+## @end example
+## where @code{k} a normalisation variable, and
+## @example
+## w(x, y, x0, y0, @var{I}(x0,y0), @var{I}(x,y))
+##   = exp(-0.5*d([x0,y0],[x,y])^2/@var{sigma_d}^2)
+##     * exp(-0.5*d(@var{I}(x0,y0),@var{I}(x,y))^2/@var{sigma_r}^2),
+## @end example
+## with @code{d} being the Euclidian distance function. The two paramteres
+## @var{sigma_d} and @var{sigma_r} control the amount of smoothing. @var{sigma_d}
+## is the size of the spatial smoothing filter, while @var{sigma_r} is the size
+## of the range filter. When @var{sigma_r} is large the filter behaves almost
+## like the isotropic Gaussian filter with spread @var{sigma_d}, and when it is
+## small edges are preserved better. By default @var{sigma_d} is 2, and @var{sigma_r}
+## is @math{10/255} for floating points images (with integer images this is
+## multiplied with the maximal possible value representable by the integer class).
 ## 
 ## The image is extrapolated symmetrically before the filtering is performed.
 ##
@@ -126,6 +153,10 @@
 ## IEEE Transactions on Pattern Analysis and Machine Intelligence,
 ## 12(7):629-639, 1990.
 ##
+## [2] C. Tomasi and R. Manduchi,
+## "Bilateral Filtering for Gray and Color Images",
+## Proceedings of the 1998 IEEE International Conference on Computer Vision, Bombay, India.
+##
 ## @seealso{imfilter, fspecial}
 ## @end deftypefn
 
@@ -150,7 +181,6 @@ function J = imsmooth(I, name = "gaussian", varargin)
   
   ## Save information for later
   C = class(I);
-  I = double(I);
   
   ## Take action depending on 'name'
   switch (lower(name))
@@ -171,7 +201,7 @@ function J = imsmooth(I, name = "gaussian", varargin)
       h = ceil(3*s);
       f = exp( (-(-h:h).^2)./(2*s^2) ); f /= sum(f);
       ## Pad image
-      I = impad(I, h, h, "symmetric");
+      I = double(impad(I, h, h, "symmetric"));
       ## Perform the filtering
       for i = imchannels:-1:1
         J(:,:,i) = conv2(f, f, I(:,:,i), "valid");
@@ -196,7 +226,7 @@ function J = imsmooth(I, name = "gaussian", varargin)
       f2 = ones(1,s(1))/s(1);
       f1 = ones(1,s(2))/s(2);
       ## Pad image
-      I = impad(I, floor([s(2), s(2)-1]/2), floor([s(1), s(1)-1]/2), "symmetric");
+      I = impad(double(I), floor([s(2), s(2)-1]/2), floor([s(1), s(1)-1]/2), "symmetric");
       ## Perform the filtering
       for i = imchannels:-1:1
         J(:,:,i) = conv2(f1, f2, I(:,:,i), "valid");
@@ -218,7 +248,7 @@ function J = imsmooth(I, name = "gaussian", varargin)
       ## Compute filter
       f = fspecial("disk", r);
       ## Pad image
-      I = impad(I, r, r, "symmetric");
+      I = impad(double(I), r, r, "symmetric");
       ## Perform the filtering
       for i = imchannels:-1:1
         J(:,:,i) = conv2(I(:,:,i), f, "valid");
@@ -245,6 +275,36 @@ function J = imsmooth(I, name = "gaussian", varargin)
       for i = imchannels:-1:1
         J(:,:,i) = medfilt2(I(:,:,i), s, "symmetric");
       endfor
+    
+    ###############################
+    ###   Bilateral Filtering   ###
+    ###############################
+    case "bilateral"
+      ## Check input
+      if (len > 0 && !isempty(varargin{1}))
+        if (isscalar(varargin{1}) && varargin{1} > 0)
+          sigma_d = varargin{1};
+        else
+          error("imsmooth: spread of closeness function must be a positive scalar");
+        endif
+      else
+        sigma_d = 2;
+      endif
+      if (len > 1 && !isempty(varargin{2}))
+        if (isscalar(varargin{2}) && varargin{2} > 0)
+          sigma_r = varargin{2};
+        else
+          error("imsmooth: spread of similarity function must be a positive scalar");
+        endif
+      else
+        sigma_r = 10/255;
+        if (isinteger(I)), sigma_r *= intmax(C); endif
+      endif
+      ## Pad image
+      s = max([round(3*sigma_d),1]);
+      I = impad(I, s, s, "symmetric");
+      ## Perform the filtering
+      J = __bilateral__(I, sigma_d, sigma_r);
     
     ############################
     ###   Perona and Malik   ###
@@ -291,6 +351,7 @@ function J = imsmooth(I, name = "gaussian", varargin)
         endif
       endif
       ## Perform the filtering
+      I = double(I);
       for i = imchannels:-1:1
         J(:,:,i) = pm(I(:,:,i), iter, lambda, method);
       endfor
