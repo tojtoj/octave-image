@@ -96,6 +96,7 @@ Representation
  rgb2gray 
  rgb2ind 
  label2rgb
+ imcomplement
 Colour maps
  flag 
  lines 
