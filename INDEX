@@ -33,6 +33,8 @@ Analysis and Statistics
  qtsetblk
  graycomatrix
  houghtf
+ hough_line
+ hough_circle
  graythresh
  immaximas
 Filtering
@@ -46,6 +48,7 @@ Filtering
  medfilt2 
  ordfilt2
  ordfiltn 
+ cordflt2
  uintlut
  stretchlim
  makelut applylut
