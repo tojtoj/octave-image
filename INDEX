@@ -64,6 +64,13 @@ Black and white image functions
  erode 
  bwborder edge
  conndef
+ bwhitmiss
+Morhophological Operations
+ imerode
+ imdilate
+ imopen
+ imclose
+ imtophat
 Colour controls
  cmpermute 
  cmunique 
