@@ -31,6 +31,12 @@
 ## Date: 20 December 2006
 ## Change parsing of imagemagick's output to get the 'color' depth for grayscale
 ## images
+##
+## Modified Kristian Rumberg <kristianrumberg@gmail.com>
+## Date 2 April 2008
+## Imread now works with BMP's created with "convert inputimage out.bmp"
+## (tested with stable release Octave 3.0 in GNU/Linux and Windows XP),
+## modified the calling parameters to identify and convert
 
 function varargout = imread(filename, varargin)
     if (nargin != 1)
@@ -68,11 +74,11 @@ function varargout = imread(filename, varargin)
       break
     endif
     
-    [sys, ident] = system(sprintf('identify -verbose %s | grep -e "bits" -e Type', fn));
+    [sys, ident] = system(sprintf('identify -verbose \"%s\" | grep -e "bit" -e Type', fn));
     if (sys != 0)
       error("imread: error running ImageMagick's 'identify' on %s", fn);
     endif
-    depth = re_grab("([[:digit:]]{1,2})-bits", ident);
+    depth = re_grab("([[:digit:]]{1,2})-bit", ident);
     imtype = re_grab("Type: ([[:alpha:]]*)", ident);
 
     depth = str2num(depth);
@@ -99,8 +105,9 @@ function varargout = imread(filename, varargin)
     ##    cmd = sprintf("convert -flatten -strip %s %s:-", fn, fmt);
     
     tmpf = [tmpnam(), ".", fmt];
-    cmd = sprintf("convert -flatten -strip +compress '%s' '%s' 2>/dev/null",
-		  fn, tmpf);
+    ##cmd = sprintf("convert -flatten -strip +compress '%s' '%s' 2>/dev/null",
+    ##		  fn, tmpf);
+    cmd = sprintf("convert \"%s\" \"%s\"", fn, tmpf);
 
     sys = system(cmd);    
     if (sys != 0)
