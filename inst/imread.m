@@ -107,7 +107,7 @@ function varargout = imread(filename, varargin)
     tmpf = [tmpnam(), ".", fmt];
     ##cmd = sprintf("convert -flatten -strip +compress '%s' '%s' 2>/dev/null",
     ##		  fn, tmpf);
-    cmd = sprintf("convert \"%s\" \"%s\"", fn, tmpf);
+    cmd = sprintf("convert -strip \"%s\" \"%s\"", fn, tmpf);
 
     sys = system(cmd);    
     if (sys != 0)
