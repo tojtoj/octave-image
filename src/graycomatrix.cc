@@ -76,6 +76,8 @@ the different distances and angles to use.\n\
 
     for (int r = 0; r < I.rows(); r++) {
 	for (int c = 0; c < I.columns(); c++) {
+	    OCTAVE_QUIT;
+	    
 	    int i = (int)I(r,c);
 
 	    for (int d_idx = 0; d_idx < d.length(); d_idx++) {
