@@ -301,9 +301,17 @@ otherwise
   error("imwrite: unsupported data type %s", class(data));
 endswitch
 
+if strcmp([computer](9:13), "msdos")
+  _null = "null:";
+  _apostroph = "\"";
+else
+  _null = "/dev/null";
+  _apostroph = "\"";
+endif
+
 if usepipe
-   pname= sprintf("convert %s %s:- '%s' 2>/dev/null",
-                  option_str, outputtype, fname);
+   pname= sprintf("convert %s %s:- %c%s%c 2> %s",
+                  option_str, outputtype, _apostroph, fname, _apostroph, _null);
    fid= popen(pname ,'w');
 
    if fid<0;
@@ -311,8 +319,8 @@ if usepipe
    end
 else
    tnam= tmpnam();
-   cmd= sprintf("convert %s '%s:%s' '%s' 2>/dev/null",
-                 option_str, outputtype, tnam, fname);
+   cmd= sprintf("convert %s %c%s:%s%c %c%s%c 2> %s",
+                 option_str, _apostroph, outputtype, tnam, _apostroph, _apostroph, fname, _apostroph, _null);
    fid= fopen(tnam, "wb");
 end   
 
@@ -342,6 +350,10 @@ end_unwind_protect
 
 #
 # $Log$
+# 
+# Patch 2008/03/25 20:42:00 Michal Fita
+# Compability with ImageMagick on Windows
+# 
 # Revision 1.3  2007/01/02 21:58:38  hauberg
 # Documentation is now in Texinfo (looks better on the website)
 #
