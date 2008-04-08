@@ -37,31 +37,34 @@ function out = bwperim(bw, n=4)
     error("bwperim: second argument must be 4 or 8");
   endif
   
+  ## Make sure bw is logical;
+  bw = logical (bw);
+  
   ## Translate image by one pixel in all directions
   [rows, cols] = size(bw);
-  north = [bw(2:end,:); zeros(1,cols)];
-  south = [zeros(1,cols); bw(1:end-1,:)];
-  west  = [bw(:,2:end), zeros(rows,1)];
-  east  = [zeros(rows,1), bw(:,1:end-1)];
+  north = [bw(2:end, :); zeros(1, cols, "logical")];
+  south = [zeros(1, cols, "logical"); bw(1:end-1, :)];
+  west  = [bw(:, 2:end), zeros(rows, 1, "logical")];
+  east  = [zeros(rows, 1, "logical"), bw(:, 1:end-1)];
   if (n == 8)
-    north_east = north_west = south_east = south_west = zeros(rows, cols, 'logical'); 
-    north_east(1:end-1, 2:end)   = bw(2:end, 1:end-1);
-    north_west(1:end-1, 1:end-1) = bw(2:end, 2:end);
-    south_east(2:end, 2:end)     = bw(1:end-1, 1:end-1);
-    south_west(2:end, 1:end-1)   = bw(1:end-1, 2:end);
+    north_east = north_west = south_east = south_west = zeros (rows, cols, "logical");
+    north_east (1:end-1, 2:end)   = bw (2:end, 1:end-1);
+    north_west (1:end-1, 1:end-1) = bw (2:end, 2:end);
+    south_east (2:end, 2:end)     = bw (1:end-1, 1:end-1);
+    south_west (2:end, 1:end-1)   = bw (1:end-1, 2:end);
   endif
   
   ## Do the comparing
   if (n == 4)
     out = bw;
     idx = (north == bw) & (south == bw) & (west == bw) & (east == bw);
-    out(idx) = 0;
+    out(idx) = false;
   else # n == 8
     out = bw;
     idx = (north == bw) & (north_east == bw) & ...
           (east  == bw) & (south_east == bw) & ...
           (south == bw) & (south_west == bw) & ...
           (west  == bw) & (north_west == bw);
-    out(idx) = 0;
+    out (idx) = false;
   endif
 endfunction
