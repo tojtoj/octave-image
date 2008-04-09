@@ -7,6 +7,7 @@
 @DEFHAVE_JPEG@
 @DEFHAVE_PNG@
 @DEFHAVE_MAGICKXX@
+MKOCTFILE=@MKOCTFILE@
 
 %.o: %.c ; $(MKOCTFILE) -c $<
 %.o: %.f ; $(MKOCTFILE) -c $<

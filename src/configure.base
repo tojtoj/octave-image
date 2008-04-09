@@ -8,6 +8,7 @@ AC_PREREQ(2.2)
 AC_INIT(configure.base)
 
 MKOCTFILE=mkoctfile
+AC_SUBST(MKOCTFILE)
 
 dnl Strip on windows, don't strip on Mac OS/X or IRIX
 dnl For the rest, you can force strip using MKOCTFILE="mkoctfile -s"
@@ -69,3 +70,4 @@ else
     IMAGESTATUS="$IMAGESTATUS, ImageMagick++ not found"
 fi
 
+CONFIGURE_OUTPUTS="Makeconf"
