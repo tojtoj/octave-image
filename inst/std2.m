@@ -29,7 +29,7 @@ function s = std2 (I)
     print_usage ();
   endif
 
-  if !(is_matrix(I) && isreal(I))
+  if !(ismatrix(I) && isreal(I))
 	error("std2: argument must be a real type matrix");
   endif
 

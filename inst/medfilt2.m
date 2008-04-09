@@ -48,7 +48,7 @@ for i=1:length(varargin)
     padding = a;
   elseif(isvector(a) && size(a) == [1, 2])
     domain = logical(ones(a(2), a(1)));
-  elseif(is_matrix(a))
+  elseif(ismatrix(a))
     domain = logical(a);
   endif
 endfor

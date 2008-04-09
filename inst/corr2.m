@@ -30,7 +30,7 @@ function r = corr2 (I, J)
     print_usage ();
   endif
 
-  if !(is_matrix(I) && isreal(I) && is_matrix(J) && isreal(J))
+  if !(ismatrix(I) && isreal(I) && is_matrix(J) && isreal(J))
 	error("corr2: argument must be a real type matrix");
   endif
 

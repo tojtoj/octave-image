@@ -29,7 +29,7 @@ function bool = isbw (BW)
     usage ("isbw(BW)");
   endif
 
-  if !(is_matrix(BW))
+  if !(ismatrix(BW))
     return;
   endif
 

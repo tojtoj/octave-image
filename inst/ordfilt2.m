@@ -46,7 +46,7 @@ for i=1:length(varargin)
   a = varargin{:};
   if(ischar(a))
     padding = a;
-  elseif(is_matrix(a) && size(a) == size(domain))
+  elseif(ismatrix(a) && size(a) == size(domain))
     S = a;
   endif
 endfor

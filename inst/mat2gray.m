@@ -27,7 +27,7 @@ function I = mat2gray (M, scale)
     usage ("mat2gray(...) number of arguments must be 1 or 2");
   endif
 
-  if (!is_matrix (M))
+  if (!ismatrix (M))
     usage ("mat2gray(M,...) M must be a matrix");
   endif
 

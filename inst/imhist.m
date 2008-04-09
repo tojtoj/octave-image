@@ -34,7 +34,7 @@ function [varargout] = imhist (I, b)
   b_is_colormap = 0;
 
   if (nargin == 2)
-    if (is_matrix (b))
+    if (ismatrix (b))
       b_is_colormap = (columns (b) == 3);
     endif
   endif
