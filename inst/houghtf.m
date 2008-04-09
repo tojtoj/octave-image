@@ -83,18 +83,18 @@ function [accum, R] = houghtf(bw, varargin)
   if (nargin > 1)
     if (ischar(varargin{1}))
       method = varargin{1};
-      arg = varargin(2:end);
+      args = varargin(2:end);
     else
-      arg = varargin;
+      args = varargin;
     endif
   endif
   
   ## Choose method
   switch (lower(method))
     case "line"
-      [accum, R] = hough_line(bw, arg{:});
+      [accum, R] = hough_line(bw, args{:});
     case "circle"
-      accum = hough_circle(bw, arg{:});
+      accum = hough_circle(bw, args{:});
     otherwise
       error("houghtf: unsupported method '%s'", method);
   endswitch
