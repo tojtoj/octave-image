@@ -150,11 +150,10 @@ function fs = imrotate_Fourier(f, theta, method="fourier", bbox="loose")
 
 	if ( strcmp(bbox, "crop") == 1 )
 
-		# Translate the current centre to centre_orig
-		fs = imtranslate(fs, xcentre_orig-xcentre_new, -ycentre_orig+ycentre_new, "wrap");
-
 		# Crop to original dimensions
-		fs = fs(1:ydim_orig, 1:xdim_orig);
+		x1 = ceil (xcentre_new - xdim_orig/2);
+		y1 = ceil (ycentre_new - ydim_orig/2);
+		fs = fs (y1:(y1+ydim_orig-1), x1:(x1+xdim_orig-1));
 
 	elseif ( strcmp(bbox, "loose") == 1 )
 

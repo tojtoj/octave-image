@@ -189,6 +189,8 @@ endfunction
 %!     y = imrotate(y, 60, methods{m}, "crop", 0);
 %!   end
 %!   for a = 1:(length(angles))
+%!    norm((x - imrotate(y, angles(a), methods{m}, "crop", 0))
+%!                 (10:40, 10:40))
 %!     assert(norm((x - imrotate(y, angles(a), methods{m}, "crop", 0))
 %!                 (10:40, 10:40)) < tolerances(m,a));
 %!   end
