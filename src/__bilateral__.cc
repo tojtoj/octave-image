@@ -53,7 +53,7 @@ bilateral(const MatrixType &im, const double sigma_d, const double sigma_r)
   const octave_idx_type num_planes = (ndims == 2) ? 1 : size(2);
   
   // Build spatial kernel
-  const int s = MAX(round(3*sigma_d), 1);
+  const int s = MAX(xround(3*sigma_d), 1);
   Matrix kernel(2*s+1, 2*s+1);
   for (octave_idx_type r = 0; r < 2*s+1; r++)
     {
@@ -77,8 +77,8 @@ bilateral(const MatrixType &im, const double sigma_d, const double sigma_r)
       for (octave_idx_type c = 0; c < out_size(1); c++)
         {
           // For each neighbour
-          double val[num_planes];
-          double sum[num_planes];
+          OCTAVE_LOCAL_BUFFER (double, val, num_planes);
+          OCTAVE_LOCAL_BUFFER (double, sum, num_planes);
           double k = 0;
           for (octave_idx_type i = 0; i < num_planes; i++)
             {
@@ -89,7 +89,7 @@ bilateral(const MatrixType &im, const double sigma_d, const double sigma_r)
             {
               for (octave_idx_type kc = 0; kc < 2*s+1; kc++)
                 {
-                  double lval[num_planes];
+                  OCTAVE_LOCAL_BUFFER (double, lval, num_planes);
                   for (octave_idx_type i = 0; i < num_planes; i++) lval[i] = im(r+kr,c+kc,i);
                   const double w = kernel(kr,kc)*gauss(val, lval, sigma_r, ndims);
                   for (octave_idx_type i = 0; i < num_planes; i++) sum[i] += w*lval[i];

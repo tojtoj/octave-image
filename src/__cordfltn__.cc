@@ -137,7 +137,7 @@ octave_value_list do_filtering(MT A, int nth, const boolNDArray dom, MT S)
     Array<octave_idx_type> out_idx(idx_dim, 0);
     for (octave_idx_type i = 0; i < out_numel; i++) {
         // For each neighbour
-        ET values[len];
+	OCTAVE_LOCAL_BUFFER (ET, values, len);
         int l = 0;
         for (int n = 0; n < ndims; n++) dom_idx(n) = 0;
         for (octave_idx_type j = 0; j < dom_numel; j++) {
