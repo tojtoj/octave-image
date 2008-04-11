@@ -159,6 +159,5 @@ You should not call this function directly, instead call 'bwdist'.\n\
   dt (bw, out);
   
   retval.append (out);
-printf("146\n"); fflush(stdout);
   return retval;
 }
