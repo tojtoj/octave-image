@@ -37,6 +37,8 @@
 ## @itemx "Perona and Malik"
 ## @itemx "P&M"
 ## Smoothing using anisotropic diffusion as described by Perona and Malik.
+## @item "Custom Gaussian"
+## Gaussian smoothing with a spatially varying covariance matrix.
 ## @end table
 ##
 ## In all algorithms the computation is done in double precision floating point
@@ -146,6 +148,29 @@
 ## @var{J} = imsmooth(@var{I}, "p&m", 25, 0.25, @var{g});
 ## @end example
 ##
+## @strong{Custom Gaussian Smoothing}
+##
+## The image is smoothed using a Gaussian filter with a spatially varying covariance
+## matrix. The third and fourth input arguments contain the Eigenvalues of the
+## covariance matrix, while the fifth contains the rotation of the Gaussian.
+## These arguments can be matrices of the same size as the input image, or scalars.
+## In the last case the scalar is used in all pixels. If the rotation is not given
+## it defaults to zero.
+##
+## The following example shows how to increase the size of an Gaussian
+## filter, such that it is small near the upper right corner of the image, and
+## large near the lower left corner.
+##
+## @example
+## [@var{lambda1}, @var{lambda2}] = meshgrid (linspace (0, 25, columns (@var{I})), linspace (0, 25, rows (@var{I})));
+## @var{J} = imsmooth (@var{I}, "Custom Gaussian", @var{lambda1}, @var{lambda2});
+## @end example
+##
+## The implementation uses an elliptic filter, where only neighbouring pixels
+## with a Mahalanobis' distance to the current pixel that is less than 3 are
+## used to compute the response. The response is computed using double precision
+## floating points, but the result is of the same class as the input image.
+##
 ## @strong{References}
 ##
 ## [1] P. Perona and J. Malik,
@@ -162,7 +187,7 @@
 
 ## TODO: Implement Joachim Weickert's anisotropic diffusion (it's soo cool)
 
-function J = imsmooth(I, name = "gaussian", varargin)
+function J = imsmooth(I, name = "Gaussian", varargin)
   ## Check inputs
   if (nargin == 0)
     print_usage();
@@ -173,6 +198,10 @@ function J = imsmooth(I, name = "gaussian", varargin)
   [imrows, imcols, imchannels, tmp] = size(I);
   if ((imchannels != 1 && imchannels != 3) || tmp != 1)
     error("imsmooth: first input argument must be an image");
+  endif
+  if (nargin == 2 && isscalar (name))
+    varargin {1} = name;
+    name = "Gaussian";
   endif
   if (!ischar(name))
     error("imsmooth: second input must be a string");
@@ -354,6 +383,38 @@ function J = imsmooth(I, name = "gaussian", varargin)
       I = double(I);
       for i = imchannels:-1:1
         J(:,:,i) = pm(I(:,:,i), iter, lambda, method);
+      endfor
+    
+    #####################################
+    ###   Custom Gaussian Smoothing   ###
+    #####################################
+    case "custom gaussian"
+      ## Check input
+      if (length (varargin) < 2)
+        error ("imsmooth: not enough input arguments");
+      elseif (length (varargin) == 2)
+        varargin {3} = 0; # default theta value
+      endif
+      arg_names = {"third", "fourth", "fifth"};
+      for k = 1:3
+        if (isscalar (varargin {k}))
+          varargin {k} = repmat (varargin {k}, imrows, imcols);
+        elseif (ismatrix (varargin {k}) && ndims (varargin {k}) == 2)
+          if (rows (varargin {k}) != imrows || columns (varargin {k}) != imcols)
+            error (["imsmooth: %s input argument must have same number of rows "
+                    "and columns as the input image"], arg_names {k});
+          endif
+        else
+          error ("imsmooth: %s input argument must be a scalar or a matrix", arg_names {k});
+        endif
+        if (!strcmp (class (varargin {k}), "double"))
+          error ("imsmooth: %s input argument must be of class 'double'", arg_names {k});
+        endif
+      endfor
+      
+      ## Perform the smoothing
+      for i = imchannels:-1:1
+        J(:,:,i) = __custom_gaussian_smoothing__ (I(:,:,i), varargin {:});
       endfor
     
     ######################################
