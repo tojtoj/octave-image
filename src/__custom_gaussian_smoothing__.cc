@@ -52,9 +52,9 @@ custom_gaussian_smoothing (const MT &I, const Matrix &lambda1, const Matrix &lam
               const octave_idx_type c_delta = std::max (std::max (cur, clr), std::max (cul, cll));;
               // The bounding box is now (row-r_delta):(row+r_delta)x(col-c_delta):(col+c_delta).
               // We, however, represent the bounding box in a local coordinate system around (row, col).
-              const octave_idx_type r1 = std::max (row-r_delta, 0) - row;
+              const octave_idx_type r1 = std::max (row-r_delta, octave_idx_type (0)) - row;
               const octave_idx_type r2 = std::min (row+r_delta, rows-1) - row;
-              const octave_idx_type c1 = std::max (col-c_delta, 0) - col;
+              const octave_idx_type c1 = std::max (col-c_delta, octave_idx_type (0)) - col;
               const octave_idx_type c2 = std::min (col+c_delta, cols-1) - col;
               
               // Perform the actual filtering
