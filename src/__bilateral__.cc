@@ -16,23 +16,7 @@
 #include <octave/oct.h>
 
 inline
-int MAX(const int a, const int b)
-{
-  if (a > b)
-    return  a;
-  else
-    return b;
-}
-
-inline
-double gauss1(const double x, const double mu, const double sigma)
-{
-  const double d = x-mu;
-  return exp( -0.5*(d*d)/(sigma*sigma) );
-}
-
-inline
-double gauss(const double *x, const double *mu, const double sigma, const octave_idx_type ndims)
+double gauss (const double *x, const double *mu, const double sigma, const octave_idx_type ndims)
 {
   double s = 0;
   for (octave_idx_type i = 0; i < ndims; i++)
@@ -40,49 +24,51 @@ double gauss(const double *x, const double *mu, const double sigma, const octave
       const double d = x[i] - mu[i];
       s += d*d;
     }
-  return exp( -0.5*s/(sigma*sigma) );
+  return exp (-0.5*s/(sigma*sigma));
 }
 
 template <class MatrixType> 
 octave_value
-bilateral(const MatrixType &im, const double sigma_d, const double sigma_r)
+bilateral (const MatrixType &im, const double sigma_d, const double sigma_r)
 {
   // Get sizes
-  const octave_idx_type ndims = im.ndims();
-  const dim_vector size = im.dims();
-  const octave_idx_type num_planes = (ndims == 2) ? 1 : size(2);
+  const octave_idx_type ndims = im.ndims ();
+  const dim_vector size = im.dims ();
+  const octave_idx_type num_planes = (ndims == 2) ? 1 : size (2);
   
   // Build spatial kernel
-  const int s = MAX(xround(3*sigma_d), 1);
-  Matrix kernel(2*s+1, 2*s+1);
+  const int s = std::max ((int)xround (3*sigma_d), 1);
+  Matrix kernel (2*s+1, 2*s+1);
   for (octave_idx_type r = 0; r < 2*s+1; r++)
     {
       for (octave_idx_type c = 0; c < 2*s+1; c++)
         {
           const int dr = r-s;
           const int dc = c-s;
-          kernel(r,c) = exp( -0.5*( dr*dr + dc*dc )/(sigma_d*sigma_d) );
+          kernel (r,c) = exp (-0.5 * (dr*dr + dc*dc)/(sigma_d*sigma_d));
         }
     }
   
   // Allocate output
-  dim_vector out_size(size);
-  out_size(0) = MAX(size(0) - 2*s, 0);
-  out_size(1) = MAX(size(1) - 2*s, 0);
-  MatrixType out = MatrixType(out_size);
+  dim_vector out_size (size);
+  out_size (0) = std::max (size (0) - 2*s, 0);
+  out_size (1) = std::max (size (1) - 2*s, 0);
+  MatrixType out = MatrixType (out_size);
 
   // Iterate over every element of 'out'.
-  for (octave_idx_type r = 0; r < out_size(0); r++)
+  for (octave_idx_type r = 0; r < out_size (0); r++)
     {
-      for (octave_idx_type c = 0; c < out_size(1); c++)
+      for (octave_idx_type c = 0; c < out_size (1); c++)
         {
+          OCTAVE_QUIT;
+
           // For each neighbour
           OCTAVE_LOCAL_BUFFER (double, val, num_planes);
           OCTAVE_LOCAL_BUFFER (double, sum, num_planes);
           double k = 0;
           for (octave_idx_type i = 0; i < num_planes; i++)
             {
-              val[i] = im(r,c,i);
+              val[i] = im (r,c,i);
               sum[i] = 0;
             }
           for (octave_idx_type kr = 0; kr < 2*s+1; kr++)
@@ -90,21 +76,23 @@ bilateral(const MatrixType &im, const double sigma_d, const double sigma_r)
               for (octave_idx_type kc = 0; kc < 2*s+1; kc++)
                 {
                   OCTAVE_LOCAL_BUFFER (double, lval, num_planes);
-                  for (octave_idx_type i = 0; i < num_planes; i++) lval[i] = im(r+kr,c+kc,i);
-                  const double w = kernel(kr,kc)*gauss(val, lval, sigma_r, ndims);
-                  for (octave_idx_type i = 0; i < num_planes; i++) sum[i] += w*lval[i];
+                  for (octave_idx_type i = 0; i < num_planes; i++)
+                    lval[i] = im (r+kr, c+kc, i);
+                  const double w = kernel (kr, kc) * gauss (val, lval, sigma_r, num_planes);
+                  for (octave_idx_type i = 0; i < num_planes; i++)
+                    sum[i] += w * lval[i];
                   k += w;
                 }
             }
-          for (octave_idx_type i = 0; i < num_planes; i++) out(r,c,i) = sum[i]/k;
-          OCTAVE_QUIT;
+          for (octave_idx_type i = 0; i < num_planes; i++)
+            out (r, c, i) = sum[i]/k;
         }
     }
     
-  return octave_value(out);
+  return octave_value (out);
 }
 
-DEFUN_DLD(__bilateral__, args, , "\
+DEFUN_DLD (__bilateral__, args, , "\
 -*- texinfo -*-\n\
 @deftypefn {Loadable Function} __bilateral__(@var{im}, @var{sigma_d}, @var{sigma_r})\n\
 Performs Gaussian bilateral filtering in the image @var{im}. @var{sigma_d} is the\n\
@@ -115,20 +103,20 @@ be called directly. Instead use @code{imsmooth}.\n\
 ")
 {
   octave_value_list retval;
-  if (args.length() != 3)
+  if (args.length () != 3)
     {
       print_usage ();
       return retval;
     }
   
-  const octave_idx_type ndims = args(0).ndims();
+  const octave_idx_type ndims = args (0).ndims ();
   if (ndims != 2 && ndims != 3)
     {
-      error("__bilateral__: only 2 and 3 dimensional is supported");
+      error ("__bilateral__: only 2 and 3 dimensional is supported");
       return retval;
     }
-  const double sigma_d = args(1).scalar_value();
-  const double sigma_r = args(2).scalar_value();
+  const double sigma_d = args (1).scalar_value ();
+  const double sigma_r = args (2).scalar_value ();
   if (error_state)
     {
       error("__bilateral__: invalid input");
@@ -136,54 +124,54 @@ be called directly. Instead use @code{imsmooth}.\n\
     }
     
   // Take action depending on input type
-  if (args(0).is_real_matrix())
+  if (args (0).is_real_matrix ())
     {
-      const NDArray im = args(0).array_value();
-      retval = bilateral<NDArray>(im, sigma_d, sigma_r);
+      const NDArray im = args(0).array_value ();
+      retval = bilateral<NDArray> (im, sigma_d, sigma_r);
     } 
-  else if (args(0).is_int8_type())
+  else if (args (0).is_int8_type ())
     {
-      const int8NDArray im = args(0).int8_array_value();
-      retval = bilateral<int8NDArray>(im, sigma_d, sigma_r);
+      const int8NDArray im = args (0).int8_array_value ();
+      retval = bilateral<int8NDArray> (im, sigma_d, sigma_r);
     } 
-  else if (args(0).is_int16_type())
+  else if (args (0).is_int16_type ())
     {
-      const int16NDArray im = args(0).int16_array_value();
-      retval = bilateral<int16NDArray>(im, sigma_d, sigma_r);
+      const int16NDArray im = args (0).int16_array_value ();
+      retval = bilateral<int16NDArray> (im, sigma_d, sigma_r);
     } 
-  else if (args(0).is_int32_type())
+  else if (args (0).is_int32_type ())
     {
-      const int32NDArray im = args(0).int32_array_value();
-      retval = bilateral<int32NDArray>(im, sigma_d, sigma_r);
+      const int32NDArray im = args (0).int32_array_value ();
+      retval = bilateral<int32NDArray> (im, sigma_d, sigma_r);
     } 
-  else if (args(0).is_int64_type())
+  else if (args (0).is_int64_type ())
     {
-      const int64NDArray im = args(0).int64_array_value();
-      retval = bilateral<int64NDArray>(im, sigma_d, sigma_r);
+      const int64NDArray im = args (0).int64_array_value ();
+      retval = bilateral<int64NDArray> (im, sigma_d, sigma_r);
     } 
-  else if (args(0).is_uint8_type())
+  else if (args (0).is_uint8_type ())
     {
-      const uint8NDArray im = args(0).uint8_array_value();
-      retval = bilateral<uint8NDArray>(im, sigma_d, sigma_r);
+      const uint8NDArray im = args (0).uint8_array_value ();
+      retval = bilateral<uint8NDArray> (im, sigma_d, sigma_r);
     } 
   else if (args(0).is_uint16_type())
     {
-      const uint16NDArray im = args(0).uint16_array_value();
-      retval = bilateral<uint16NDArray>(im, sigma_d, sigma_r);
+      const uint16NDArray im = args (0).uint16_array_value ();
+      retval = bilateral<uint16NDArray> (im, sigma_d, sigma_r);
     } 
-  else if (args(0).is_uint32_type())
+  else if (args (0).is_uint32_type ())
     {
-      const uint32NDArray im = args(0).uint32_array_value();
-      retval = bilateral<uint32NDArray>(im, sigma_d, sigma_r);
+      const uint32NDArray im = args (0).uint32_array_value ();
+      retval = bilateral<uint32NDArray> (im, sigma_d, sigma_r);
     } 
-  else if (args(0).is_uint64_type())
+  else if (args (0).is_uint64_type ())
     {
-      const uint64NDArray im = args(0).uint64_array_value();
-      retval = bilateral<uint64NDArray>(im, sigma_d, sigma_r);
+      const uint64NDArray im = args (0).uint64_array_value ();
+      retval = bilateral<uint64NDArray> (im, sigma_d, sigma_r);
     } 
   else
     {
-      error("__bilateral__: first input should be a real or integer array");
+      error ("__bilateral__: first input should be a real or integer array");
       return retval;
     }
     
