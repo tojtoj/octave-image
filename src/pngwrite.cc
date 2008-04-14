@@ -153,8 +153,8 @@ void save_canvas(canvas *can,char *filename)
   time(&gmt);
   png_convert_from_time_t(&mod_time, gmt);
   png_set_tIME(png_ptr, info_ptr, &mod_time);
-  text_ptr[0].key = "Created by";
-  text_ptr[0].text = "Octave";
+  text_ptr[0].key = png_charp ("Created by");
+  text_ptr[0].text = png_charp ("Octave");
   text_ptr[0].compression = PNG_TEXT_COMPRESSION_NONE;
   
   png_set_text(png_ptr, info_ptr, text_ptr, 1);
