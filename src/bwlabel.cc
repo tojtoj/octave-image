@@ -54,7 +54,7 @@ belong to object number 2, etc.\n\
 The total number of objects is @var{num}.\n\
 \n\
 To pixels belong to the same object if the are neighbors. By default\n\
-the algorithm uses 6-connectivity to define a neighborhood, but this\n\
+the algorithm uses 8-connectivity to define a neighborhood, but this\n\
 can be changed through the argument @var{n} that can be either 4, 6, or 8.\n\
 \n\
 The algorithm is derived from  BKP Horn, Robot Vision, MIT Press,\n\
@@ -68,7 +68,7 @@ The algorithm is derived from  BKP Horn, Robot Vision, MIT Press,\n\
     // input arguments
     Matrix BW = args(0).matrix_value();     // the input binary image
     int n;
-    if ( args.length() < 2 ) n = 6;         // n-hood connectivity
+    if ( args.length() < 2 ) n = 8;         // n-hood connectivity
     else n = args(1).int_value(); 
     int nr = args(0).rows();
     int nc = args(0).columns();
