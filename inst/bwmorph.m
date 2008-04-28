@@ -556,7 +556,7 @@ function BW2 = bwmorph(BW, operation, n)
   endwhile
 
   ## process post processing commands if needed
-  if(postcmd!="")
+  if (isempty (postcmd))
     eval(postcmd);
   endif
 
