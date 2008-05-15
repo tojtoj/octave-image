@@ -52,7 +52,7 @@ bilateral (const MatrixType &im, const double sigma_d, const double sigma_r)
   // Allocate output
   dim_vector out_size (size);
   out_size (0) = std::max (size (0) - 2*s, (octave_idx_type)0);
-  out_size (1) = std::max (size (1) - 2*s, (octave_idx-type)0);
+  out_size (1) = std::max (size (1) - 2*s, (octave_idx_type)0);
   MatrixType out = MatrixType (out_size);
 
   // Iterate over every element of 'out'.
