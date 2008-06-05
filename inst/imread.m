@@ -43,7 +43,7 @@ function varargout = imread(filename, varargin)
       usage("I = imread(filename)")
     endif
 
-    if !isstr(filename)
+    if !ischar (filename)
       error("imread: filename must be a string")
     endif
 
