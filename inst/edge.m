@@ -364,7 +364,7 @@ function [bw, out_threshold, g45_out, g135_out] = edge (im, method, varargin)
       ## Get thresholds
       if (nargin > 2 && isscalar(varargin{1}))
         thresh = [0.4*varargin{1}, varargin{1}];
-      elseif (nargin > 2 && ismatrix(varargin{1}) && len(varargin{1}(:)) == 2)
+      elseif (nargin > 2 && ismatrix (varargin{1}) && length (varargin{1}(:)) == 2)
         thresh = varargin{1}(:);
       else
         tmp = mean(abs(Es(:)));
