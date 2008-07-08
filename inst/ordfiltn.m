@@ -12,7 +12,7 @@
 ##
 ## You should have received a copy of the GNU General Public License
 ## along with this program; If not, see <http://www.gnu.org/licenses/>.
-
+##
 ## This function is based on 'ordfilt2' by Teemu Ikonen which is released under
 ## GPLv2 or later.
 
