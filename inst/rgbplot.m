@@ -27,7 +27,7 @@ function h_out = rgbplot(map)
   endif
 
   ## Plot
-  h = plot(map(i,1), "-r", map(i,2), "g-", map(i,3), "b-");
+  h = plot(map(:,1), "-r", map(:,2), "g-", map(:,3), "b-");
   if (nargout > 0)
     h_out = h;
   endif
