@@ -293,23 +293,15 @@ Instead you should use @code{imread}.\n\
 	while(depth >>= 1) i++;
 	depth = 1 << i;
 	
-	switch(depth) {
-	    case 1:
-		output = read_images<boolNDArray>(imvec, frameidx, depth);
-	    break;
-	    case 2:
-	    case 4:
-	    case 8:
-		output = read_images<uint8NDArray>(imvec, frameidx, depth);		
-	    break;
-	    case 16:
-		output = read_images<uint16NDArray>(imvec, frameidx, depth);		
-	    break;
-	    case 32:
-	    case 64:
-	    default:
-		error("Image depths bigger than 16-bit not supported");
-	}
+	if (depth == 1)
+	  output = read_images<boolNDArray>(imvec, frameidx, depth);
+	else if (depth > 1 && depth <= 8)
+	  output = read_images<uint8NDArray>(imvec, frameidx, depth);		
+	else if (depth > 8 && depth <= 16)
+	  output = read_images<uint16NDArray>(imvec, frameidx, depth);		
+	else
+	  error("Image depths bigger than 16-bit not supported");
+
 	if(nargout > 1) {
 	    output(1) = Matrix(0,0);
 	    if(nargout > 2)
