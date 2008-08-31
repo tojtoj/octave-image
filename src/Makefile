@@ -30,6 +30,6 @@ pngwrite.oct: pngwrite.cc
 	$(MKOCTFILE) $< -lpng
 
 __magick_read__.oct: __magick_read__.cc
-	$(MKOCTFILE) $< `Magick++-config --cppflags` -lMagick++ -lMagick
+	$(MKOCTFILE) $< `Magick++-config --cppflags` `Magick++-config --ldflags`
 
 clean: ; -$(RM) *.o octave-core core *.oct *~
