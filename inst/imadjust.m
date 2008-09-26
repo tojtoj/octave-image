@@ -25,7 +25,7 @@
 ## @deftypefnx {Function File} @var{J}= imadjust (..., @var{gamma})
 ## @deftypefnx {Function File} @var{newmap}= imadjust (@var{map}, ...)
 ## @deftypefnx {Function File} @var{RGB_out}= imadjust (@var{RGB}, ...)
-## Adjust image or colormap values to a specified range
+## Adjust image or colormap values to a specified range.
 ##
 ## @code{J=imadjust(I)} adjusts intensity image @var{I} values so that
 ## 1% of data on lower and higher values (2% in total) of the image is
