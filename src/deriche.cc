@@ -68,7 +68,7 @@
      enum Method { absgrad, vecgrad, polargrad };
      const int nargin = args.length();
      
-     if (nargin < 2 || nargin > 3){
+     if (nargin < 1 || nargin > 2){
         error("call to deriche needs 1 or 2 arguments supplied.");
         return octave_value_list ();
      }       
