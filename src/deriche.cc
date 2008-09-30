@@ -70,6 +70,7 @@
      
      if (nargin < 2 || nargin > 3){
         error("call to deriche needs 1 or 2 arguments supplied.");
+        return octave_value_list ();
      }       
      
      const double alpha = (nargin <  2) ? 1.0: args(1).double_value();  
@@ -80,9 +81,11 @@
 	case 0: break;
 	case 1: method = vecgrad; break;
         case 2: method = polargrad;		
-            error("not yet implemented. Use builtin 'card2pol' after method 2 (cartesian vector grad).");		
-	   break;
-        default: error("unknown method parameter.");		
+          error("not yet implemented. Use builtin 'card2pol' after method 2 (cartesian vector grad).");
+          return octave_value_list ();		
+        default:
+          error("unknown method parameter.");		
+          return octave_value_list ();		
 	}	     
      }
   
@@ -120,7 +123,10 @@
   //const int sz = h*w;	// unused 
   try {
     tmp = new double[2*h*w + 2*w];
-	  if (!tmp) error("alloc error");
+    if (!tmp) {
+        error("alloc error");
+        return;
+    }
     memset(tmp, 0, 2*h*w+2*linLen * sizeof(double));
     double* B1 = tmp;
     double* B2 = B1 + h *w;
@@ -223,7 +229,10 @@
   //const int sz = h*w;	 // unused
   try {
     tmp = new double[2*h*w + 2*w];
-	  if (!tmp) error("alloc error");
+    if (!tmp) {
+        error("alloc error");
+        return;
+    }
     memset(tmp, 0, 2*h*w+2*linLen * sizeof(double));
     double* B1 = tmp;
     double* B2 = B1 + h *w;
