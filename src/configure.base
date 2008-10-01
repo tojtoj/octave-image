@@ -61,13 +61,4 @@ else
     IMAGESTATUS="$IMAGESTATUS, png.h not found"
 fi
 
-AC_CHECK_PROG(HAVE_MAGICKXX, Magick++-config, yes)
-if test $HAVE_MAGICKXX ; then
-	IMAGESTATUS="$IMAGESTATUS, ImageMagick++"
-	AC_SUBST(DEFHAVE_MAGICKXX)		
-	DEFHAVE_MAGICKXX="HAVE_MAGICKXX=1"	
-else
-    IMAGESTATUS="$IMAGESTATUS, ImageMagick++ not found"
-fi
-
 CONFIGURE_OUTPUTS="Makeconf"

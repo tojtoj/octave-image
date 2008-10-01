@@ -5,15 +5,13 @@ Author: Various Authors
 Maintainer: The Octave Community
 Title: Image Processing
 Description: The Octave-forge Image package provides functions for
- reading, writing, and processing images. The package supports
- almost all image formats through the use of ImageMagick.
+ processing images.
  The package also provides functions for feature extraction, image
  statistics, spatial and geometric transformations, morphological
  operations, linear filtering, and much more.
-Depends: octave (>= 2.9.10)
+Depends: octave (>= 3.1.51)
 Autoload: yes
 BuildRequires: png-devel
 BuildRequires: jpeg-devel
-SystemRequirements: ImageMagick
 License: GPL version 2 or later
 Url: http://octave.sf.net
