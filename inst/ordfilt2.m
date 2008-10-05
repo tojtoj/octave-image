@@ -63,6 +63,6 @@ if(ypad(1) >= size(A,1) || xpad(1) >= size(A,2))
 endif;
 
 A = impad(A, xpad, ypad, padding);
-retval = __cordfltn__(A, nth, domain, S);
+retval = __spatial_filtering__ (A, domain, "ordered", S, nth);
 
 endfunction

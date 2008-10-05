@@ -20,8 +20,9 @@
 ## @seealso{ordfilt2}
 ## @end deftypefn
 
-function varargout = cordflt2(varargin)
+function retval = cordflt2(A, nth, domain, S)
   warning(["cordflt2: this function is deprecated and will be removed in upcoming "
            "releases. Use 'ordfilt2' instead."]);
-  [varargout{1:nargout}] = __cordfltn__(varargin{:});
+
+  retval = __spatial_filtering__ (A, domain, "ordered", S, nth);
 endfunction

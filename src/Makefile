@@ -8,14 +8,10 @@ ifdef HAVE_PNG
 	PNG=pngread.oct pngwrite.oct
 endif
 
-ifdef HAVE_MAGICKXX
-	IMAGEMAGICK=__magick_read__.oct
-endif
-
-all: __cordfltn__.oct __bilateral__.oct __custom_gaussian_smoothing__.oct \
+all: __spatial_filtering__.oct __bilateral__.oct __custom_gaussian_smoothing__.oct \
 	bwlabel.oct bwfill.oct rotate_scale.oct hough_line.oct \
 	graycomatrix.oct deriche.oct __bwdist.oct nonmax_supress.oct \
-	$(JPEG) $(PNG) $(IMAGEMAGICK)
+	$(JPEG) $(PNG)
 
 jpgread.oct: jpgread.cc
 	$(MKOCTFILE) $< -ljpeg
@@ -28,8 +24,5 @@ pngread.oct: pngread.cc
 
 pngwrite.oct: pngwrite.cc
 	$(MKOCTFILE) $< -lpng
-
-__magick_read__.oct: __magick_read__.cc
-	$(MKOCTFILE) $< `Magick++-config --cppflags` `Magick++-config --ldflags`
 
 clean: ; -$(RM) *.o octave-core core *.oct *~

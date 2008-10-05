@@ -28,6 +28,7 @@ Analysis and Statistics
  imhist 
  mean2 
  std2 
+ entropy
  qtdecomp
  qtgetblk
  qtsetblk
@@ -118,3 +119,6 @@ Region-based and block processing
  nlfilter
  im2col
  col2im
+ rangefilt
+ stdfilt
+ entropyfilt

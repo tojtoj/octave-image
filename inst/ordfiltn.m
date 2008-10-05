@@ -95,5 +95,5 @@ function retval = ordfiltn(A, nth, domain, varargin)
   A = A(idx{:});
   
   ## Perform the filtering
-  retval = __cordfltn__(A, nth, domain, S);
+  retval = __spatial_filtering__ (A, domain, "ordered", S, nth);
 endfunction
