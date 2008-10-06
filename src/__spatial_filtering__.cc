@@ -197,7 +197,7 @@ ET_OUT entropy_filt (MT &vals, octave_idx_type len, int nbins)
     {
       const double p = hist (i);
       if (p > 0)
-        entropy -= p * log2 (p);
+        entropy -= p * xlog2 (p);
     }
 
   return entropy;
