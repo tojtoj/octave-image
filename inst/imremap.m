@@ -212,22 +212,22 @@ endfunction
 %! I = tril(ones(100)) + abs(rand(100)); I(I>1) = 1;
 %! I(20:30, 20:30) = !I(20:30, 20:30);
 %! I(70:80, 70:80) = !I(70:80, 70:80);
-%! imshow(I);
+%! figure, imshow(I);
 %! ## Resize the image to the double size and show it
 %! [XI, YI] = meshgrid(linspace(1, 100, 200));
 %! warped = imremap(I, XI, YI);
-%! imshow(warped);
+%! figure, imshow(warped);
 
 %!demo
 %! ## Generate a synthetic image and show it
 %! I = tril(ones(100)) + abs(rand(100)); I(I>1) = 1;
 %! I(20:30, 20:30) = !I(20:30, 20:30);
 %! I(70:80, 70:80) = !I(70:80, 70:80);
-%! imshow(I);
+%! figure, imshow(I);
 %! ## Rotate the image around (0, 0) by -0.4 radians and show it
 %! [XI, YI] = meshgrid(1:100);
 %! R = [cos(-0.4) sin(-0.4); -sin(-0.4) cos(-0.4)];
 %! RXY = [XI(:), YI(:)] * R;
 %! XI = reshape(RXY(:,1), [100, 100]); YI = reshape(RXY(:,2), [100, 100]);
 %! warped = imremap(I, XI, YI);
-%! imshow(warped);
+%! figure, imshow(warped);
