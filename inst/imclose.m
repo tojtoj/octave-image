@@ -12,11 +12,11 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{B} = imclose (@var{A}, @var{se})
-## Perform morphological closening on a given image.
+## Perform morphological closing on a given image.
 ## The image @var{A} must be a grayscale or binary image, and @var{se} must be a
 ## structuring element.
 ##
-## The closening corresponds to a dilation followed by an erosion of the image, i.e.
+## The closing corresponds to a dilation followed by an erosion of the image, i.e.
 ## @example
 ## B = imerode(imdilate(A, se), se);
 ## @end example
