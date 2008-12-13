@@ -80,12 +80,13 @@ function varargout = immaximas(im, radius, thresh)
   [sub{1:nd}] = ind2sub(s, ind);
   if (!isempty(ind))
     w = 1; # Width that we look out on each side of the feature point to fit a local parabola
-
+    ws = w*cumprod([1; s(:)]);
+    
     ## We fit a parabola to the points in each dimension
     for d = 1:nd
       ## Indices of points above, below, left and right of feature point
-      indminus1 = max(ind-w,1);
-      indplus1  = min(ind+w,numel(immx));
+      indminus1 = max(ind-ws(d), 1);
+      indplus1  = min(ind+ws(d), numel(immx));
 
       ## Solve quadratic
       c = im(ind);
