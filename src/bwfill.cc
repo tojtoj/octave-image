@@ -35,7 +35,7 @@ void checkpoint( int pt,
 
 DEFUN_DLD (bwfill, args, ,"\
 -*- texinfo -*-\n\
-@deftypefn {Function File} {[@var{bw2}, @var{idx}] =} bwfill(@var{bw1}, @var{r}, @var{c}, @var{n})\n\
+@deftypefn {Function File} {[@var{bw2}, @var{idx}] =} bwfill(@var{bw1}, @var{c}, @var{r}, @var{n})\n\
 Perform a flood-fill operation on the binary image @var{bw1}.\n\
 The flood-filling starts in the pixel (@var{r}, @var{c}). If @var{r} and @var{c}\n\
 are vectors of the same length, each pixel pair (@var{r}(i), @var{c}(i)) will\n\
@@ -51,136 +51,166 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
 @end deftypefn\n\
 ")
 {
-   octave_value_list retval;
-   octave_value tmp;
-   ColumnVector xseed, yseed ;
-   int nargin = args.length ();
+  octave_value_list retval;
+  octave_value tmp;
+  ColumnVector xseed, yseed ;
+  const int nargin = args.length ();
 
-   if (nargin < 2 ) {
+  if (nargin < 2 )
+    {
       print_usage ();
       return retval;
-   }
+    }
 
-   Matrix       im=    args(0).matrix_value();
-   int          imM=   im.rows();
-   int          imN=   im.columns();
+   Matrix im=    args (0).matrix_value ();
+   if (error_state)
+     {
+       error ("bwfill: first input argument must be a matrix");
+       return retval;
+     }
+     
+  const int imM = im.rows ();
+  const int imN = im.columns ();
 
-   int          nb=    8;
-   int          npoints= 0;
-   bool         fillmode= false;
-   if (args(1).is_string() && args(1).string_value() == "holes" ) {
+  int nb = 8;
+  int npoints = 0;
+  bool fillmode= false;
+  if (args (1).is_string () && args (1).string_value () == "holes")
+    {
       fillmode= true;
 
-      npoints= 2*( imM + imN - 4 ); // don't start fill from corners
+      npoints= 2 * (imM + imN - 4); // don't start fill from corners
 
-      xseed= ColumnVector( npoints );
-      yseed= ColumnVector( npoints );
+      xseed = ColumnVector (npoints);
+      yseed = ColumnVector (npoints);
       int idx= 0;
-      for (int j=2; j<= imN-1; j++) {
-         xseed( idx )= j;   yseed( idx++)= 1;   
-         xseed( idx )= j;   yseed( idx++)= imM;   
-      }
+      for (int j=2; j<= imN-1; j++)
+        {
+          xseed (idx)   = j;
+          yseed (idx++) = 1;   
+          xseed (idx)   = j;
+          yseed (idx++) = imM;   
+        }
 
-      for (int i=2; i<= imM-1; i++) {
-         yseed( idx )= i;   xseed( idx++)= 1;   
-         yseed( idx )= i;   xseed( idx++)= imN;   
-      }
+      for (int i=2; i<= imM-1; i++)
+        {
+          yseed (idx)   = i;
+          xseed (idx++) = 1;   
+          yseed (idx)   = i;
+          xseed (idx++) = imN;   
+        }
 
-      if (nargin >= 4 ) 
-         nb= (int) args(2).double_value();
-   } // holes mode? 
-   else {
+      if (nargin >= 4)
+         nb = (int)args (2).double_value ();
+     }
+  else // holes mode?
+    {
       {
-         ColumnVector tmp( args(2).vector_value() );
-         xseed= tmp;
+        ColumnVector tmp (args (1).vector_value ());
+        if (error_state)
+          {
+            error ("bwfill: second input argument must be a string");
+            return retval;
+          }
+        xseed = tmp;
       }
       {
-         ColumnVector tmp( args(1).vector_value() );
-         yseed= tmp;
+        ColumnVector tmp (args (2).vector_value ());
+        if (error_state)
+          {
+            error ("bwfill: third input argument must be a string");
+            return retval;
+          }
+       yseed = tmp;
       }
-      npoints= xseed.length();
-      if (nargin >= 4 ) 
-         nb= (int) args(3).double_value();
-   } // holes mode? 
+      npoints= xseed.length ();
+      if (nargin >= 4) 
+        nb = (int)args (3).double_value ();
+  } // holes mode? 
 
 /*
  * put a one pixel thick boundary around the image
  *  so that we can be more efficient in the main loop
  */
-   int           ioM=   imM+2;
-   OCTAVE_LOCAL_BUFFER(unsigned char, imo, (imM+2) * (imN+2));
+  int ioM = imM + 2;
+  OCTAVE_LOCAL_BUFFER (unsigned char, imo, (imM+2) * (imN+2));
 
-   for (int i=0; i<imM; i++) 
-      for (int j=0; j<imN; j++)
-         imo[(i+1) + ioM*(j+1)]= ( im(i,j) > 0 ) ;
+  for (int i = 0; i < imM; i++) 
+    for (int j = 0; j < imN; j++)
+      imo [(i+1) + ioM*(j+1)] = (im (i, j) > 0);
 
-   for (int i=0; i<ioM; i++) 
-      imo[i]= imo[i + ioM*(imN+1)] = 3;
+  for (int i = 0; i < ioM; i++)
+    imo [i]= imo [i + ioM*(imN+1)] = 3;
 
-   for (int j=1; j<imN+1; j++)
-      imo[ioM*j]= imo[imM+1 + ioM*j] = 3;
+  for (int j = 1; j < imN+1; j++)
+    imo [ioM*j]= imo[imM+1 + ioM*j] = 3;
 
-// This is obviously big enough for the point stack, but I'm
-// sure it can be smaller. 
-   OCTAVE_LOCAL_BUFFER(int, ptstack, ioM*imN );
+  // This is obviously big enough for the point stack, but I'm
+  // sure it can be smaller. 
+  OCTAVE_LOCAL_BUFFER (int, ptstack, ioM*imN);
 
-   int seedidx= npoints; 
-   npoints= 0;
-   while ( (--seedidx) >= 0 ) {
-// no need to add 1 to convert indexing style because we're adding a boundary
-      int pt= (int) xseed( seedidx )*ioM + (int) yseed( seedidx ); 
-      checkpoint( pt , imo, ptstack, &npoints );
-   }
+  int seedidx = npoints; 
+  npoints= 0;
+  while ( (--seedidx) >= 0 )
+    {
+      // no need to add 1 to convert indexing style because we're adding a boundary
+      int pt = (int)xseed (seedidx) * ioM + (int)yseed (seedidx); 
+      checkpoint (pt , imo, ptstack, &npoints);
+    }
 
-   while ( npoints > 0 ) {
+  while (npoints > 0)
+    {
       npoints--;
-      int pt= ptstack[ npoints ];
+      int pt = ptstack [npoints];
       
-      checkpoint( pt + ptLF, imo, ptstack, &npoints );
-      checkpoint( pt + ptRT, imo, ptstack, &npoints );
-      checkpoint( pt + ptUP, imo, ptstack, &npoints );
-      checkpoint( pt + ptDN, imo, ptstack, &npoints );
+      checkpoint (pt + ptLF, imo, ptstack, &npoints);
+      checkpoint (pt + ptRT, imo, ptstack, &npoints);
+      checkpoint (pt + ptUP, imo, ptstack, &npoints);
+      checkpoint (pt + ptDN, imo, ptstack, &npoints);
       
-      if (nb==8) {
-         checkpoint( pt + ptLF + ptUP, imo, ptstack, &npoints );
-         checkpoint( pt + ptRT + ptUP, imo, ptstack, &npoints );
-         checkpoint( pt + ptLF + ptDN, imo, ptstack, &npoints );
-         checkpoint( pt + ptRT + ptDN, imo, ptstack, &npoints );
+      if (nb==8)
+        {
+          checkpoint (pt + ptLF + ptUP, imo, ptstack, &npoints);
+          checkpoint (pt + ptRT + ptUP, imo, ptstack, &npoints);
+          checkpoint (pt + ptLF + ptDN, imo, ptstack, &npoints);
+          checkpoint (pt + ptRT + ptDN, imo, ptstack, &npoints);
+        }
+    } // while ( npoints > 0)
+
+  Matrix imout (imM, imN);
+  ColumnVector idxout (imM*imN);
+  int idx = 0;
+
+  int notvalidpt = 0;
+  int idxpoint = 2;
+  if (fillmode)
+    {
+      notvalidpt = 2;
+      idxpoint   = 0;
+    }
+
+  for (int i = 0; i < imM; i++) 
+    for (int j = 0; j < imN; j++)
+      {
+        imout (i, j) = (double) (imo [(i+1) + ioM*(j+1)] != notvalidpt);
+        if (imo [(i+1) + ioM*(j+1)] == idxpoint)
+          idxout (idx++) = (double) (i + j*imM + 1);
       }
-   } // while ( npoints
 
-   Matrix       imout( imM, imN );
-   ColumnVector idxout (imM*imN );
-   int idx=0;
+  /*
+  Matrix imout( imM+2, imN+2 );
+  for (int i=0; i<imM+2; i++) 
+    for (int j=0; j<imN+2; j++)
+      imout(i,j) = (double) imo[i + ioM*j];
+  */
 
-   int notvalidpt= 0;
-   int idxpoint=   2;
-   if ( fillmode ) {
-      notvalidpt= 2;
-      idxpoint=   0;
-   }
-
-   for (int i=0; i<imM; i++) 
-      for (int j=0; j<imN; j++) {
-         imout(i,j) =    (double) ( imo[(i+1) + ioM*(j+1)] != notvalidpt );
-         if ( imo[(i+1) + ioM*(j+1)] == idxpoint )
-            idxout(idx++) = (double) (i + j*imM + 1);
-      }
-
-   /*
-   Matrix imout( imM+2, imN+2 );
-   for (int i=0; i<imM+2; i++) 
-      for (int j=0; j<imN+2; j++)
-         imout(i,j) = (double) imo[i + ioM*j];
-    */
-
-   retval(0)= imout;
-// we need to do this to be able to return a proper empty vector
-   if (idx > 0) 
-      retval(1)= idxout.extract(0, idx-1);
-   else
-      retval(1)= ColumnVector ( 0 );
-   return retval;
+  retval (0)= imout;
+  // we need to do this to be able to return a proper empty vector
+  if (idx > 0) 
+    retval (1)= idxout.extract (0, idx-1);
+  else
+    retval (1)= ColumnVector (0);
+  return retval;
 }
 
 
