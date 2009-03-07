@@ -21,16 +21,14 @@
  * check if the point needs to be filled, if so
  * fill it and change the appropriate variables
  */
-void checkpoint( int pt,
-      unsigned char* imo,
-               int * ptstack,
-               int * npoints ) {
+void checkpoint (int pt, unsigned char *imo, int *ptstack, int *npoints)
+{
 // printf("filling %d np=%d fill=%d\n",pt,*npoints, *(imo+pt)==0 );
-   if( *(imo+pt) != 0 ) return;
+  if (*(imo+pt) != 0) return;
 
-   *(imo+pt) = 2;
-   *(ptstack + (*npoints))= pt;
-   (*npoints)++;
+  *(imo+pt) = 2;
+  *(ptstack + (*npoints))= pt;
+  (*npoints)++;
 }
 
 DEFUN_DLD (bwfill, args, ,"\
@@ -62,7 +60,7 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
       return retval;
     }
 
-   Matrix im=    args (0).matrix_value ();
+   const Matrix im = args (0).matrix_value ();
    if (error_state)
      {
        error ("bwfill: first input argument must be a matrix");
@@ -103,7 +101,7 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
       if (nargin >= 4)
          nb = (int)args (2).double_value ();
      }
-  else // holes mode?
+  else // end: holes mode?
     {
       {
         ColumnVector tmp (args (1).vector_value ());
@@ -154,7 +152,14 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
   while ( (--seedidx) >= 0 )
     {
       // no need to add 1 to convert indexing style because we're adding a boundary
-      int pt = (int)xseed (seedidx) * ioM + (int)yseed (seedidx); 
+      const int x = xseed (seedidx);
+      const int y = yseed (seedidx);
+      if (x < 1 || y < 1 || x > imN || y > imM)
+        {
+          warning ("bwfill: (%d, %d) out of bounds", x, y);
+          continue;
+        }
+      const int pt = x * ioM + y; 
       checkpoint (pt , imo, ptstack, &npoints);
     }
 
