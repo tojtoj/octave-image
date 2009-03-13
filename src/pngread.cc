@@ -87,6 +87,10 @@ black-and-white images.\n\
   if (pic->bit_depth > 1 && pic->bit_depth < 8)
       pic->bit_depth = 8;
 
+  int isAlfaChannelPresent = 0;
+  if ( pic->color_type & PNG_COLOR_MASK_ALPHA) 
+ 	isAlfaChannelPresent=1; 
+
   NDArray out(dim);
   
   dim.resize(2);
@@ -94,6 +98,7 @@ black-and-white images.\n\
    
   Array<int> coord = Array<int> (3);
   
+  int ElementsPerPixel=out.dims()(2)+isAlfaChannelPresent;
   for (unsigned long j=0; j < pic->height; j++) {
       coord(0) = j;
       for (unsigned long i=0; i < pic->width; i++) {
@@ -101,9 +106,12 @@ black-and-white images.\n\
 
 	  for (int c = 0; c < out.dims()(2); c++) {
 	      coord(2) = c;
-	      out(coord) = pic->row_pointers[j][i*4+c];
+	      out(coord) = pic->row_pointers[j][i*ElementsPerPixel+c];
 	  }
-	  alpha(j,i) = pic->row_pointers[j][i*4+3];
+	  if (isAlfaChannelPresent)
+	      alpha(j,i) = pic->row_pointers[j][i*ElementsPerPixel+(ElementsPerPixel-1)];
+	  else
+	      alpha(j,i) = 1;
       }
   }
   out = out.squeeze();
