@@ -51,17 +51,17 @@ function BW = im2bw (img, a, b)
   endif
 
   ## Do the thresholding
-  if (isscalar (a))
-    if (a < 0 || a > 1)
+  if (isscalar (t))
+    if (t < 0 || t > 1)
       error("im2bw: threshold must be in the interval [0, 1]");
     endif
     switch (class(img))
-      case {"double", "single"} % octave doesn't support single yet, but it shouldn't hurt...
-        BW = (img >= a);
+      case {"double", "single"}
+        BW = (img >= t);
       case {"uint8"}
-        BW = (img >= 255*a);
+        BW = (img >= 255*t);
       case {"uint16"}
-        BW = (img >= 65535*a);
+        BW = (img >= 65535*t);
       otherwise
         error("im2bw: unsupport image class");
     endswitch
