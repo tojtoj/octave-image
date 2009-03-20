@@ -84,12 +84,13 @@ black-and-white images.\n\
        ((pic->color_type == PNG_COLOR_TYPE_PALETTE) && (pic->bit_depth == 1)) )
       dim(2) = 1;
 
-  if (pic->bit_depth > 1 && pic->bit_depth < 8)
-      pic->bit_depth = 8;
+  if (pic->bit_depth > 1 && pic->bit_depth < 8) 
+      pic->bit_depth = 8; //this should never happen according to load_canvas code
 
   int isAlfaChannelPresent = 0;
   if ( pic->color_type & PNG_COLOR_MASK_ALPHA) 
  	isAlfaChannelPresent=1; 
+
 
   NDArray out(dim);
   
@@ -98,6 +99,8 @@ black-and-white images.\n\
    
   Array<int> coord = Array<int> (3);
   
+  int major_byte, minor_byte,row_pxl_position;
+  /* calculate the number of color channels (including alpha) per pixel */
   int ElementsPerPixel=out.dims()(2)+isAlfaChannelPresent;
   for (unsigned long j=0; j < pic->height; j++) {
       coord(0) = j;
@@ -106,13 +109,42 @@ black-and-white images.\n\
 
 	  for (int c = 0; c < out.dims()(2); c++) {
 	      coord(2) = c;
-	      out(coord) = pic->row_pointers[j][i*ElementsPerPixel+c];
+	      switch(pic->bit_depth) {
+		      case 8:
+				  row_pxl_position=(i*ElementsPerPixel+c);
+			      out(coord) = pic->row_pointers[j][row_pxl_position];
+			      break;
+		      case 16:
+			      // converting big endian
+				  row_pxl_position=2*(i*ElementsPerPixel+c);
+			      major_byte=pic->row_pointers[j][row_pxl_position];
+			      minor_byte=pic->row_pointers[j][row_pxl_position+1] ;
+			      out(coord) = major_byte*256+minor_byte;
+			      break;      
+		      default:
+			      printf("do not know how to handle bit depth of %d\n",pic->bit_depth);
+	      }
 	  }
-	  if (isAlfaChannelPresent)
-	      alpha(j,i) = pic->row_pointers[j][i*ElementsPerPixel+(ElementsPerPixel-1)];
-	  else
-	      alpha(j,i) = 1;
-      }
+	  if (isAlfaChannelPresent) { // it always should according to load canvas code
+		  switch(pic->bit_depth) {
+			  case 8:
+				  row_pxl_position=(i*ElementsPerPixel+ElementsPerPixel-1);
+				  alpha(j,i) = pic->row_pointers[j][row_pxl_position];
+				  break;
+			  case 16:
+				  // converting big endian
+				  row_pxl_position=2*(i*ElementsPerPixel+ElementsPerPixel-1);
+				  major_byte = pic->row_pointers[j][row_pxl_position];
+				  minor_byte = pic->row_pointers[j][row_pxl_position+1];
+				  alpha(j,i) = major_byte*256+minor_byte;
+				  break;      
+			  default:
+				  printf("do not know how to handle bit depth of %d\n",pic->bit_depth);
+		  }
+	  } else {
+		  alpha(j,i) = 255;
+	  }
+	  }
   }
   out = out.squeeze();
 
@@ -197,7 +229,9 @@ canvas *load_canvas(char *filename)
       png_set_palette_to_rgb(png_ptr);
   }
   if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8) {
-      png_set_gray_1_2_4_to_8(png_ptr);
+      png_set_gray_1_2_4_to_8(png_ptr); // this function deprecated need to be redone
+      bit_depth=8;
+      info_ptr->bit_depth=bit_depth;
   }
   if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS)) { //add alpha
       png_set_tRNS_to_alpha(png_ptr);
@@ -206,21 +240,35 @@ canvas *load_canvas(char *filename)
   // Always transform image to RGB
   if (color_type == PNG_COLOR_TYPE_GRAY 
       || color_type == PNG_COLOR_TYPE_GRAY_ALPHA) 
+  {
       png_set_gray_to_rgb(png_ptr);
+      color_type= (color_type | PNG_COLOR_MASK_COLOR);
+      info_ptr->color_type=color_type;
+  }
    
   // If no alpha layer is present, create one
-  if (color_type == PNG_COLOR_TYPE_GRAY
-      || color_type == PNG_COLOR_TYPE_RGB)
-     png_set_add_alpha(png_ptr, 0xff, PNG_FILLER_AFTER);
+  if (!(color_type & PNG_COLOR_MASK_ALPHA)) 
+  {
+      png_set_add_alpha(png_ptr, 0xff, PNG_FILLER_AFTER);
+      color_type= (color_type | PNG_COLOR_MASK_ALPHA);
+      info_ptr->color_type=color_type;
+  }
 
   if (bit_depth < 8) {
       png_set_packing(png_ptr);
+      bit_depth=8;
+      info_ptr->bit_depth=bit_depth;
   }
-  
+ 
+  // Hey! Our signal could be small and in the lower bits, 
+  // leave our data alone and do not decrease accuracy
+  // 16 -> 8 bits commented out
   // For now, use 8-bit only
-  if (bit_depth == 16) {
-      png_set_strip_16(png_ptr);
-  }
+  //if (bit_depth == 16) {
+      //png_set_strip_16(png_ptr);
+      //bit_depth=8;
+      //info_ptr->bit_depth=bit_depth;
+  //}
    
   png_read_update_info(png_ptr,info_ptr);
 
