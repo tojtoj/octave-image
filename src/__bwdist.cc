@@ -1,4 +1,4 @@
-// bwdist.cc - OCT file, implements the BWDIST function
+// __bwdist.cc - OCT file, implements the BWDIST function
 // Depends on "edtfunc.c" for the actual computations
 /*
 
@@ -15,8 +15,7 @@ FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 for more details.
 
 You should have received a copy of the GNU General Public License
-along with Octave; see the file COPYING.  If not, see
-<http://www.gnu.org/licenses/>.
+along with this file.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -63,9 +62,9 @@ extern "C"
 }  /* end extern "C" */
 #endif
 
-DEFUN_DLD (bwdist, args, nargout,
+DEFUN_DLD ( __bwdist, args, nargout,
 "-*- texinfo -*-\n\
-@deftypefn {Function File} {@var{D} =} bwdist(@var{bw})\n\
+@deftypefn {Function File} {@var{D} =} __bwdist(@var{bw})\n\
 Computes the distance transform of the image @var{bw}.\n\
 @var{bw} should be a binary 2D array, either a Boolean array or a\n\
 numeric array containing only the values 0 and 1.\n\
@@ -76,7 +75,7 @@ for each background pixel is the distance (according to the chosen\n\
 metric) to the closest object pixel. For each object pixel the\n\
 return value is 0.\n\
 \n\
-@deftypefnx{Function File} {@var{D} =} bwdist(@var{bw}, @var{method})\n\
+@deftypefnx{Function File} {@var{D} =} __bwdist(@var{bw}, @var{method})\n\
 \n\
 @var{method} is a string to choose the distance metric. Currently\n\
 available metrics are 'euclidean', 'chessboard', 'cityblock' and\n\
@@ -84,7 +83,7 @@ available metrics are 'euclidean', 'chessboard', 'cityblock' and\n\
 to any string starting with 'e', 'ch', 'ci' and 'q', respectively.\n\
 If @var{method} is not specified, 'euclidean' is the default.\n\
 \n\
-@deftypefnx {Function File} {[@var{D},@var{C}] =} bwdist(@var{bw}, @var{method})\n\
+@deftypefnx {Function File} {[@var{D},@var{C}] =} __bwdist(@var{bw}, @var{method})\n\
 \n\
 If a second output argument is given, the linear index for the\n\
 closest object pixel is returned for each pixel. (For object\n\
