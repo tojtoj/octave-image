@@ -88,8 +88,8 @@ If @var{method} is not specified, 'euclidean' is the default.\n\
 \n\
 If a second output argument is given, the linear index for the\n\
 closest object pixel is returned for each pixel. (For object\n\
-pixels, the index points to the pixel itself.) The return value C\n\
-is a matrix the same size as @var{bw}.\n\n\
+pixels, the index points to the pixel itself.) The return value\n\
+@var{C} is a matrix the same size as @var{bw}.\n\n\
 @end deftypefn")
 {
   const int nargin = args.length();
