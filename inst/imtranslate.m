@@ -25,6 +25,7 @@
 ## @end deftypefn
 
 ## Author: Jeff Orchard <jjo@cs.sfu.ca>
+## bug fix: Eugeniy Mikhailov in 2009 (removing fftshift and ifftshift they do no good)
 
 function Y = imtranslate(X, a, b, bbox_in)
 
@@ -54,13 +55,17 @@ function Y = imtranslate(X, a, b, bbox_in)
 
 
 	[dimy, dimx] = size(X);
-	x = ifftshift(fft2(fftshift(X)));
+	x = fft2(X);
 	px = exp(-2*pi*i*a*(0:dimx-1)/dimx);
-	py = exp(-2*pi*i*b*(0:dimy-1)/dimy)';
+	py = exp(-2*pi*i*b*(0:dimy-1)/dimy)'; 	% actually to correspond to index notation 'b' should be
+						% replaced with '-b'
+						% but I do not want to brake previous version compatibility
+						% note: it also must be done in the cropping iand padding code
 	P = py * px;
 	y = x .* P;
-	Y = real( ifftshift(ifft2(fftshift(y))) );
-	#Y = ifftshift(ifft2(fftshift(y)));
+	Y = real(ifft2(y)); 	% fft return complex number
+				% for integer shifts imaginary part  is 0 
+				% so real takes care of transfer from complex number to real
 
 	if ( strcmp(bbox, "crop")==1 )
 		Y = Y(  ypad(1)+1:dimy-ypad(2) , xpad(1)+1:dimx-xpad(2));
