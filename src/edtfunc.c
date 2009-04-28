@@ -120,7 +120,7 @@ void FUNCNAME(const Matrix &img, int w, int h, short *distx, short *disty)
           i++;
 
           /* Middle pixels have all neighbors */
-          for(x=2; x<w-1; x++, i++)
+          for(x=1; x<w-1; x++, i++)
             {
               olddist2 = DIST(distx[i], disty[i]);
               if(olddist2 == 0) continue; // Already zero distance
@@ -170,7 +170,6 @@ void FUNCNAME(const Matrix &img, int w, int h, short *distx, short *disty)
             }
 
           /* Rightmost pixel of row is special, has no right neighbors */
-          i++;
           olddist2 = DIST(distx[i], disty[i]);
           if(olddist2 > 0) // If not already zero distance
             {
