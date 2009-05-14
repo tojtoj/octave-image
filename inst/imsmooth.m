@@ -85,7 +85,7 @@
 ## The image is smoothed using Gaussian bilateral filtering as described by
 ## Tomasi and Manduchi [2]. The filtering result is computed as
 ## @example
-## @var{J(x0, y0) = k * SUM SUM @var{I}(x,y) * w(x, y, x0, y0, @var{I}(x0,y0), @var{I}(x,y))
+## @var{J}(x0, y0) = k * SUM SUM @var{I}(x,y) * w(x, y, x0, y0, @var{I}(x0,y0), @var{I}(x,y))
 ##                  x   y        
 ## @end example
 ## where @code{k} a normalisation variable, and
