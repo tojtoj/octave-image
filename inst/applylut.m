@@ -45,10 +45,11 @@ function A = applylut(BW, LUT)
 endfunction
 
 %!demo
-%! lut=makelut(inline('sum(x(:))>=3','x'), 3);
-%! applylut(eye(5),lut)
-%! % everything should be 0 despite a diagonal which
-%! % doesn't reach borders.
+%! lut = makelut (inline ('sum (x (:)) >= 3', 'x'), 3);
+%! S = applylut (eye (5), lut);
+%! disp (S)
+%! ## Everything should be 0 despite a diagonal which
+%! ## doesn't reach borders.
 
 
 %!assert(prod(applylut(eye(3),makelut(inline('x(1,1)==1','x'),2))==eye(3))==1); % 2-by-2 test

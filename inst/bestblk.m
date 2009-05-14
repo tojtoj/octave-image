@@ -95,8 +95,8 @@ function [varargout] = bestblk(ims,k)
 endfunction
 
 %!demo
-%! siz=bestblk([200;10],50)
-%! # Best block is [20,10]
+%! siz = bestblk ([200; 10], 50);
+%! disp (siz)
 
 %!assert(bestblk([300;100],150),[30;100]);
 %!assert(bestblk([256,128],17),[16;16]);
