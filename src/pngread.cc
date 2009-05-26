@@ -182,10 +182,10 @@ canvas *load_canvas(char *filename)
   }
   
   unsigned char sig[8];
-  fread(sig,1,8,infile);
-  if (!png_check_sig(sig,8)) {
-    error("pngread invalid signature in %s", filename); 
-    fclose(infile);
+  const size_t bytes_read = fread (sig, 1, 8, infile);
+  if (!png_check_sig (sig, 8) || bytes_read != 8) {
+    error ("pngread invalid signature in %s", filename); 
+    fclose (infile);
     return NULL;
   }
   
