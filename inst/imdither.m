@@ -9,15 +9,20 @@
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
+
 ## -*- texinfo -*-
-## @deftypefn {Function File} {[@var{Y}, @var{newmap}] = } imdither(@var{img})
-## reduce the number a colors of rgb or indexed image.
-## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] = } imdither(@var{img},@var{colors})
-## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] = } imdither(@var{img},@var{colors},@var{dithtype})
-##
-## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] = } imdither(@var{img},@var{map})
-## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] = } imdither(@var{img},@var{map},@var{colors})
-## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] = } imdither(@var{img},@var{map},@var{colors},@var{dithtype})
+## @deftypefn {Function File} {[@var{Y}, @var{newmap}] = } imdither (@var{img})
+## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] = } imdither (@var{img}, @
+## @var{colors})
+## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] = } imdither (@var{img}, @
+## @var{colors}, @var{dithtype})
+## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] = } imdither (@var{img}, @
+## @var{map})
+## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] = } imdither (@var{img}, @
+## @var{map}, @var{colors})
+## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] = } imdither(@var{img}, @
+## @var{map}, @var{colors}, @var{dithtype})
+## Reduce the number a colors of rgb or indexed image.
 ##
 ## Note: this requires the ImageMagick "convert" utility.
 ## get this from www.imagemagick.org if required
@@ -35,9 +40,9 @@
 ##
 ## @var{colors} is a maximum number of colors in result map
 ##
-## TODO: add facility to use already created colormap over "-remap" option
+## TODO: Add facility to use already created colormap over "-remap" option
 ##
-## BUGS: this function return a 0-based indexed images 
+## BUGS: This function return a 0-based indexed images 
 ## when colormap size is lower or equals to 256 like at cmunique code
 ## @seealso{cmunique}
 ##
