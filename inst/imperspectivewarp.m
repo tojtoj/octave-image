@@ -162,5 +162,5 @@ endfunction
 %! figure(), imshow(I);
 %! ## Rotate the image around (0, 0) by -0.4 radians and show it
 %! R = [cos(-0.4) sin(-0.4); -sin(-0.4) cos(-0.4)];
-%! warped = imperspectivewarp(I, R);
+%! warped = imperspectivewarp(I, R, :, :, 0);
 %! figure(), imshow(warped);
