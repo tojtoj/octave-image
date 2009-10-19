@@ -56,6 +56,7 @@ black-and-white images.\n\
 @end deftypefn\n\
 @seealso{imread}")
 {
+  warning ("'pngread' has been deprecated in favor of 'imread'. This function will be removed from future versions of the 'image' package.");
   octave_value_list retval;
   int nargin  = args.length();
   

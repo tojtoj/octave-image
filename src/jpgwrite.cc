@@ -62,6 +62,7 @@ If specified, @var{quality} should be in the range 1-100 and will default to\n\
 @seealso{jpgread, imwrite}\n\
 @end deftypefn\n\
 ") {
+   warning ("'jpgwrite' has been deprecated in favor of 'imwrite'. This function will be removed from future versions of the 'image' package.");
    octave_value_list retval;
    int nargin  = args.length();
 

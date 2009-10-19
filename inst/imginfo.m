@@ -34,6 +34,8 @@
 
 function [h,w] = imginfo (fn)
 
+warning ("'imginfo' has been deprecated in favor of 'imfinfo'. This function will be removed from future versions of the 'image' package");
+       
 [status, res] = system(sprintf("convert -verbose '%s' /dev/null",fn),1);
 
 if status,

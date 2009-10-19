@@ -51,6 +51,7 @@ Data must be [0 255] or the high bytes will be lost.\n\
 @seealso{imwrite}\n\
 @end deftypefn\n\
 ") {
+   warning ("'pngwrite' has been deprecated in favor of 'imwrite'. This function will be removed from future versions of the 'image' package.");
    octave_value_list retval;
    int nargin  = args.length();
    

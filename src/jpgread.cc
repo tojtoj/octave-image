@@ -87,6 +87,7 @@ is of class 'uint8'.\n\
 @seealso{imread, im2double, im2gray, im2rgb}\n\
 @end deftypefn\n\
 ") { 
+    warning ("'jpgread' has been deprecated in favor of 'imread'. This function will be removed from future versions of the 'image' package.");
     octave_value_list retval;
     int nargin  = args.length();
     
