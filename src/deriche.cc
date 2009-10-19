@@ -99,7 +99,7 @@
         return octave_value(b);     
      }
      case vecgrad:{
-        ArrayN<double> b(dim_vector(h,w,2));
+        Array<double> b(dim_vector(h,w,2));
         dericheVec(p.fortran_vec(), b.fortran_vec(), h, w, h, alpha);
         return octave_value(b);
      }
