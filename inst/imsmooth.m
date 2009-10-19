@@ -36,7 +36,7 @@
 ## @item  "Perona & Malik"
 ## @itemx "Perona and Malik"
 ## @itemx "P&M"
-## Smoothing using anisotropic diffusion as described by Perona and Malik.
+## Smoothing using nonlinear isotropic diffusion as described by Perona and Malik.
 ## @item "Custom Gaussian"
 ## Gaussian smoothing with a spatially varying covariance matrix.
 ## @end table
@@ -107,7 +107,7 @@
 ##
 ## @strong{Perona and Malik}
 ##
-## The image is smoothed using anisotropic diffusion as described by Perona and
+## The image is smoothed using nonlinear isotropic diffusion as described by Perona and
 ## Malik [1]. The algorithm iteratively updates the image using
 ##
 ## @example
