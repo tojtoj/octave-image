@@ -562,6 +562,8 @@ function BW2 = bwmorph(BW, operation, n)
 
 endfunction
 
+function [b, a] = swap (a, b)
+endfunction
 
 %!demo
 %! bwmorph(ones(11),'shrink', Inf)
