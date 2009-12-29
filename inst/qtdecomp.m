@@ -269,37 +269,28 @@ endfunction
 %!test
 %! R=[[B4,[B2,B2;B2,B2]]; [[B2,B2;B2,B2],B4]];
 %! assert(full(qtdecomp(A,10,2)), R);
+%!
+%! assert(full(qtdecomp(A,100,[2, 4])), [B4,B4;B4,B4]);
 
-%!assert(full(qtdecomp(A,100,[2, 4])), [B4,B4;B4,B4]);
-
-%!function y = f(A,c1,c2,c3)
-%! if (nargin < 2)
-%!   c1 = 54;
-%! endif
-%! if (nargin < 3)
-%!   c2 = 0;
-%! endif
-%! if (nargin < 4)
-%!   c3 = 0;
-%! endif
-%! y = (A(1,1,:)!=((c1+c2+c3)*ones(1,1,size(A,3))))(:);
-
-%!assert(full(qtdecomp(A,@f)),[ones(4),B4;ones(4,8)]); 
-%!assert(full(qtdecomp(A,@f,54)),[ones(4),B4;ones(4,8)]);
-%!assert(full(qtdecomp(A,@f,4,40,10)),[ones(4),B4;ones(4,8)]);
-
-%!# no params
 %!test
+%! f = @(A, c1 = 54, c2 = 0, c3 = 0) y = (A (1, 1, :) != ((c1+c2+c3) * ones (1, 1, size (A, 3))))(:);
+%!
+%! assert(full(qtdecomp(A,@f)),[ones(4),B4;ones(4,8)]); 
+%! assert(full(qtdecomp(A,@f,54)),[ones(4),B4;ones(4,8)]);
+%! assert(full(qtdecomp(A,@f,4,40,10)),[ones(4),B4;ones(4,8)]);
+
+%!test
+%!# no params
 %! first_eq=inline("(A(1,1,:)!=(54*ones(1,1,size(A,3))))(:)","A");
 %! assert(full(qtdecomp(A,first_eq)),[ones(4),B4;ones(4,8)]); 
 
-%!# 1 param
 %!test
+%!# 1 param
 %! first_eq=inline("(A(1,1,:)!=(c*ones(1,1,size(A,3))))(:)","A","c");
 %! assert(full(qtdecomp(A,first_eq,54)),[ones(4),B4;ones(4,8)]); 
 
-%!# 3 params
 %!test
+%!# 3 params
 %! first_eq=inline("(A(1,1,:)!=((c1+c2+c3)*ones(1,1,size(A,3))))(:)","A","c1","c2","c3");
 %! assert(full(qtdecomp(A,first_eq,4,40,10)),[ones(4),B4;ones(4,8)]); 
 
