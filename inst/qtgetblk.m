@@ -47,7 +47,7 @@ function [varargout] = qtgetblk(I, S, dim)
   endif
 
   ## get blocks
-  [i,j,v]=spfind(S);
+  [i,j,v]=find(S);
 
   ## filter the ones which match dim
   idx=find(v==dim);

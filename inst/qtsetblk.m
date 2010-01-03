@@ -33,7 +33,7 @@ function J = qtsetblk(I, S, dim, vals)
   endif
 
   ## get blocks
-  [ii,ji,v]=spfind(S);
+  [ii,ji,v]=find(S);
 
   ## filter the ones which match dim
   idx=find(v==dim);
