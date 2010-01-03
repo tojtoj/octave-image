@@ -30,6 +30,14 @@ function retval = imtophat(im, se)
   endif
   
   ## Perform filtering
-  retval = im & !imopen(im, SE);
+  retval = im & !imopen(im, se);
 
 endfunction
+
+%!test
+%! I = [1 1 1; 1 1 1; 1 1 1;];
+%! se = [1 1; 0 1;];
+%! result = imtophat(I, se);
+%! expected = [0 0 1; 0 0 1; 1 1 1];
+%! assert(expected, result);
+
