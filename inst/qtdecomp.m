@@ -275,9 +275,9 @@ endfunction
 %!test
 %! f = @(A, c1 = 54, c2 = 0, c3 = 0) y = (A (1, 1, :) != ((c1+c2+c3) * ones (1, 1, size (A, 3))))(:);
 %!
-%! assert(full(qtdecomp(A,@f)),[ones(4),B4;ones(4,8)]); 
-%! assert(full(qtdecomp(A,@f,54)),[ones(4),B4;ones(4,8)]);
-%! assert(full(qtdecomp(A,@f,4,40,10)),[ones(4),B4;ones(4,8)]);
+%! assert(full(qtdecomp(A,f)),[ones(4),B4;ones(4,8)]); 
+%! assert(full(qtdecomp(A,f,54)),[ones(4),B4;ones(4,8)]);
+%! assert(full(qtdecomp(A,f,4,40,10)),[ones(4),B4;ones(4,8)]);
 
 %!test
 %!# no params
