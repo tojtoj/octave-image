@@ -59,6 +59,7 @@ Filtering
  nonmax_supress
 Black and white image functions
  bwarea
+ bwcount
  bwdist 
  bweuler 
  bwfill 
