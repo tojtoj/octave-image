@@ -353,14 +353,17 @@ function [bw, out_threshold, g45_out, g135_out] = edge (im, method, varargin)
       else
         sigma = 2;
       endif
+
       ## Change scale
       J = imsmooth(double(im), "Gaussian", sigma);
+
       ## Canny enhancer
       p = [1 0 -1]/2;
       Jx = conv2(J, p,  "same");
       Jy = conv2(J, p', "same");
       Es = sqrt( Jx.^2 + Jy.^2 );
-      Eo = atan2(Jy,Jx);
+      Eo = pi - mod (atan2 (Jy, Jx) - pi, pi);
+
       ## Get thresholds
       if (nargin > 2 && isscalar(varargin{1}))
         thresh = [0.4*varargin{1}, varargin{1}];
