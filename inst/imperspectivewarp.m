@@ -137,6 +137,8 @@ function [warped, valid] = imperspectivewarp(im, P, interp = "bilinear", bbox = 
   YI = PD(2,:)./PD(3,:);
   XI = reshape(XI, sy, sx);
   YI = reshape(YI, sy, sx);
+
+  clear X Y D PD;
   
   ## Interpolate
   [warped, valid] = imremap(im, XI, YI, interp, extrapolation_value);
