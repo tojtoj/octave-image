@@ -127,7 +127,7 @@ function retval = regionprops (bw, varargin)
     L = bw; # the image was already labelled
     num_labels = max (L (:));
   else
-    [L, num_labels] = bwlabel (logical (bw));
+    [L, num_labels] = bwlabel (bw);
   endif
   
   ## Compute the properties
@@ -223,7 +223,46 @@ function retval = regionprops (bw, varargin)
           retval (k).PixelValues = bw (L == k)(:);
         endfor
     
-      #case "orientation"
+      case "orientation"
+        for k = 1:num_labels
+          [Y, X] = find (L == k);
+          if (numel (Y) > 1)
+            C = cov ([X(:), Y(:)]);
+            [V, lambda] = eig (C);
+            [max_val, max_idx] = max (diag (lambda));
+            v = V (:, max_idx);
+            retval (k).Orientation = 180 - 180 * atan2 (v (2), v (1)) / pi;
+          else
+            retval (k).Orientation = 0; # XXX: What does the other brand do?
+          endif
+        endfor
+        
+      %{
+      case "majoraxislength"
+        for k = 1:num_labels
+          [Y, X] = find (L == k);
+          if (numel (Y) > 1)
+            C = cov ([X(:), Y(:)]);
+            lambda = eig (C);
+            retval (k).MajorAxisLength = (max (lambda));
+          else
+            retval (k).MajorAxisLength = 1;
+          endif
+        endfor
+        
+      case "minoraxislength"
+        for k = 1:num_labels
+          [Y, X] = find (L == k);
+          if (numel (Y) > 1)
+            C = cov ([X(:), Y(:)]);
+            lambda = eig (C);
+            retval (k).MinorAxisLength = (min (lambda));
+          else
+            retval (k).MinorAxisLength = 1;
+          endif
+        endfor
+      %}
+      
       #case "extrema"
       #case "convexarea"      
       #case "convexhull"
@@ -231,9 +270,7 @@ function retval = regionprops (bw, varargin)
       #case "conveximage"
       #case "subarrayidx"
       #case "eccentricity"
-      #case "majoraxislength"
       #case "equivdiameter"
-      #case "minoraxislength"
 
       otherwise
         error ("regionprops: unsupported property '%s'", properties {k});
