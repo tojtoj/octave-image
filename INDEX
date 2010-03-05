@@ -61,7 +61,6 @@ Black and white image functions
  bwarea
  bwboundaries
  bwconncomp
- bwcount
  bwdist 
  bweuler 
  bwfill 
