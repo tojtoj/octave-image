@@ -9,7 +9,7 @@ Read/write
  imwrite 
  imfinfo
  imginfo
- bmpwrite jpgread jpgwrite pngread pngwrite
+ bmpwrite
  readexif
 Reshape
  imcrop
