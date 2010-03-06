@@ -243,15 +243,12 @@ octave_value_list do_filtering (const MT &A, const boolNDArray &dom,
   const octave_idx_type out_numel = out.numel ();
 
   // Iterate over every element of 'out'.
-  dim_vector idx_dim (1, 1);
-  idx_dim (0) = ndims;
+  dim_vector idx_dim (ndims, 1);
   Array<octave_idx_type> dom_idx (idx_dim);
   Array<octave_idx_type> A_idx (idx_dim);
   Array<octave_idx_type> out_idx (idx_dim, 0);
   
-  dim_vector values_size (2, 1);
-  values_size (0) = 1;
-  values_size (1) = len;
+  dim_vector values_size (1, len);
   MT values (values_size);
   
   for (octave_idx_type i = 0; i < out_numel; i++)
