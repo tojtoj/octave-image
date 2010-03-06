@@ -50,7 +50,6 @@ Filtering
  medfilt2 
  ordfilt2
  ordfiltn 
- cordflt2
  uintlut
  stretchlim
  makelut applylut
