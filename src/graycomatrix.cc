@@ -95,11 +95,11 @@ the different distances and angles to use.\n\
 			int j = (int)I(row, col);
 
 			if (i >= 0 && i < L && j >= 0 && j < L) {
-			    Array<int> coord = Array<int> (4);
-			    coord(0) = i;
-			    coord(1) = j;
-			    coord(2) = d_idx;
-			    coord(3) = th_idx;
+			    Array<int> coord (4, 1);
+			    coord (0, 0) = i;
+			    coord (1, 0) = j;
+			    coord (2, 0) = d_idx;
+			    coord (3, 0) = th_idx;
 			    
 			    P(coord)++;			    
 			} else {
