@@ -39,6 +39,7 @@ Analysis and Statistics
  hough_circle
  graythresh
  immaximas
+ phantom
 Filtering
  imfilter
  colfilt
