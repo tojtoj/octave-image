@@ -25,8 +25,8 @@
 ##
 ##   @var{method}
 ##     @itemize @w
-##       @item "nearest" neighbor: fast, but produces aliasing effects.
-##       @item "bilinear" interpolation: does anti-aliasing, but is slightly slower (default).
+##       @item "nearest" neighbor: fast, but produces aliasing effects (default).
+##       @item "bilinear" interpolation: does anti-aliasing, but is slightly slower.
 ##       @item "bicubic" interpolation: does anti-aliasing, preserves edges better than bilinear interpolation, but gray levels may slightly overshoot at sharp edges. This is probably the best method for most purposes, but also the slowest.
 ##       @item "Fourier" uses Fourier interpolation, decomposing the rotation matrix into 3 shears. This method often results in different artifacts than homography-based methods.  Instead of slightly blurry edges, this method can result in ringing artifacts (little waves near high-contrast edges).  However, Fourier interpolation is better at maintaining the image information, so that unrotating will result in an image closer to the original than the other methods.
 ##     @end itemize
@@ -58,7 +58,7 @@
 ## Created: 2004-10-18
 ## Version: 0.7
 
-function [imgPost, H, valid] = imrotate(imgPre, thetaDeg, interp="bilinear", bbox="loose", extrapval=NA)
+function [imgPost, H, valid] = imrotate(imgPre, thetaDeg, interp="nearest", bbox="loose", extrapval=NA)
   ## Check input
   if (nargin < 2)
     error("imrotate: not enough input arguments");

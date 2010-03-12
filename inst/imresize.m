@@ -15,7 +15,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{B}= imresize (@var{A}, @var{m})
-## Scales the image @var{A} by a factor @var{m} using nearest neighbour
+## Scales the image @var{A} by a factor @var{m} using bicubic neighbour
 ## interpolation. If @var{m} is less than 1 the image size will be reduced,
 ## and if @var{m} is greater than 1 the image will be enlarged. If the image
 ## is being enlarged the it will be convolved with a 11x11 Gaussian FIR filter
@@ -48,7 +48,7 @@
 ## @seealso{imremap, imrotate, interp2}
 ## @end deftypefn
 
-function ret = imresize(im, m, interp = "nearest", filter = 11)
+function ret = imresize(im, m, interp = "bicubic", filter = 11)
   if (nargin < 2)
     error("imresize: not enough input arguments");
   endif
