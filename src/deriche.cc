@@ -1,5 +1,6 @@
  /* $Id$ */
- #include <octave/oct.h>
+#include <octave/oct.h>
+#include <octave/ArrayN.h>
  /****************************************************************************
   * (C)opyright Christian Kotz 2006
   * This code has no warranty whatsover. Do what you like with this code 
@@ -99,7 +100,7 @@
         return octave_value(b);     
      }
      case vecgrad:{
-        Array<double> b(dim_vector(h,w,2));
+        ArrayN<double> b(dim_vector(h,w,2));
         dericheVec(p.fortran_vec(), b.fortran_vec(), h, w, h, alpha);
         return octave_value(b);
      }
