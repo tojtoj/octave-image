@@ -56,6 +56,8 @@ Filtering
  makelut applylut
  deriche
  radon
+ rho_filter
+ iradon
  nonmax_supress
 Black and white image functions
  bwarea
