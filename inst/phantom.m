@@ -148,7 +148,7 @@ function [n, ellip] = read_args (varargin)
     if (ischar (varargin {1}))
       ellip = select_phantom (varargin {1});
     else
-      if (size (varargin {1}, 1) != 6)
+      if (size (varargin {1}, 2) != 6)
         error ("Wrong number of columns in user phantom");
       endif
       ellip = varargin {1};
