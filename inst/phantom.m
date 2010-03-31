@@ -135,10 +135,10 @@ function [n, ellip] = read_args (varargin)
   if (nargin == 1)
     if (ischar (varargin {1}))
       ellip = select_phantom (varargin {1});
-    elseif (numel (varargin {1} == 1))
+    elseif (numel (varargin {1}) == 1)
       n = varargin {1};
     else
-      if (size (varargin {1}, 1) != 6)
+      if (size (varargin {1}, 2) != 6)
         error ("Wrong number of columns in user phantom");
       endif
       ellip = varargin {1};
@@ -208,5 +208,8 @@ endfunction
 %! imshow (P, []);
 
 % $Log$
+% 2010/03/31 lxop
+% Fixed typo that prevented the use of custom ellipses
+%
 % 2010/03/09 lxop
 % First commit to repo
