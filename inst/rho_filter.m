@@ -85,20 +85,19 @@
 function [filtered_proj, filt] = rho_filter (proj, type, scaling)
 
   filtered_proj = proj;
+  
+  if (nargin < 3)
+    scaling = 1;
+  endif
+  if (nargin < 2) || (size (type) == 0)
+    type = 'ram-lak';
+  endif
 
   if (strcmpi (type, 'none'))
     return;
   endif
   
-  if (nargin < 2) || (size (type) == 0)
-    type = 'ram-lak';
-  endif
-  
-  if (nargin < 3)
-    scaling = 1;
-  endif
-  
-  if (scaling > 1)
+  if (scaling > 1) || (scaling < 0)
     error ('Scaling factor must be in [0,1]');
   endif
   
@@ -171,5 +170,8 @@ endfunction
 %! figure, imshow (reconstruction, [])
 
 % $Log$
+% 2010-04-08 lxop
+% Fixed default argument settings and checking.
+%
 % 2010-03-19 lxop
 % Function completed to Matlab compatible level.
