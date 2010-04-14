@@ -38,9 +38,9 @@ function im2 = im2double(im1)
     case "double"
       im2 = im1;
     case "uint8"
-      im2 = double(im1)/255;
+      im2 = double(im1) / 255;
     case "uint16"
-      im2 = double(im1)(pow2(16)-1);
+      im2 = double(im1) / (pow2(16)-1);
     otherwise
       error("im2double: unsupported image class");
   endswitch
