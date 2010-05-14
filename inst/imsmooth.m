@@ -463,6 +463,7 @@ endfunction
 
 ## Mean Shift smoothing for gray-scale images
 ## XXX: This function doesn't work!!
+#{
 function J = mean_shift(I, s1, s2)
   sz = [size(I,2), size(I,1)];
   ## Mean Shift
@@ -496,3 +497,4 @@ function J = mean_shift(I, s1, s2)
   ## Compute result
   J = I(ms);
 endfunction
+#}
