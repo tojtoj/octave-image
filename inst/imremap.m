@@ -100,11 +100,11 @@ function [warped, valid] = imremap(im, XI, YI, interp = "bilinear", extrapval = 
 endfunction
 
 function [warped, valid] = grayinterp(im, XI, YI, interp, extrapval)
-  %if (strcmp(interp, "cubic"))
-  %  warped = graybicubic(double(im), XI, YI, NA);
-  %else
+  if (strcmp(interp, "cubic"))
+    warped = graybicubic(double(im), XI, YI, NA);
+  else
     warped = interp2(double(im), XI, YI, interp, NA);
-  %endif
+  endif
   valid = !isna(warped);
   warped(!valid) = extrapval;
 endfunction
