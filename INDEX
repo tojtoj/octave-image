@@ -11,6 +11,7 @@ Read/write
  imginfo
  bmpwrite
  readexif
+ tiff_tag_read
 Reshape
  imcrop
  imremap
