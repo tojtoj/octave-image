@@ -94,6 +94,7 @@ function [filtered_proj, filt] = rho_filter (proj, type, scaling)
   endif
 
   if (strcmpi (type, 'none'))
+    filt = 1;
     return;
   endif
   
@@ -170,6 +171,11 @@ endfunction
 %! figure, imshow (reconstruction, [])
 
 % $Log$
+% 2010-05-27 lxop
+% Function now returns a value in `filt' when `none' is specified
+% as the filter type.  Fixes the warning that was occuring with
+% the demo.
+%
 % 2010-04-08 lxop
 % Fixed default argument settings and checking.
 %
