@@ -32,18 +32,19 @@
 
 function grad = mmgradm (im, se_dil, se_ero)
 
+  ## sanity checks
   if (nargin == 1)
     error ("Structuring element must be specified");
-  elseif (nargin == 2)
-    se_ero = se_dil;
+  elseif (nargin == 2)              # if only one SE is specified, use it for both erosion and dilation
+    se_ero  = se_dil;
   elseif (nargin == 3)
     # all is good
   else
     print_usage;
   endif
 
-  dilated = imdilate(im, se_dil);
-  eroded  = imerode(im, se_ero);
+  dilated   = imdilate  (im, se_dil);
+  eroded    = imerode   (im, se_ero);
 
-  grad = dilated - eroded;
+  grad      = dilated - eroded;
 endfunction
