@@ -1,4 +1,5 @@
 ## Copyright (C) 2005  Carvalho-Mariel
+## Copyright (C) 2010  Carnë Draug <carandraug+dev@gmail.com>
 ## 
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
@@ -12,25 +13,43 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{B} = imtophat (@var{A}, @var{se})
+## @deftypefn {Function File} @var{B} = imtophat (@var{A}, @var{se}, @var{type})
 ## Perform morphological top hat filtering.
+##
 ## The image @var{A} must be a grayscale or binary image, and @var{se} must be a
 ## structuring element.
+##
+## @var{type} defines the type of top hat transform. To perform a white, or
+## opening, top-hat transform its value must be @code{open} or @code{white}. To
+## perform a black, or closing, top-hat transform its value must be @code{close}
+## or @code{black}. If @var is not specified, it performs a white top-hat
+## transform.
+##
+## @seealso{imerode, imdilate, imopen, imclose, mmgradm}
 ## @end deftypefn
 
-function retval = imtophat(im, se)
+function retval = imtophat(im, se, trans)
+
   ## Checkinput
-  if (nargin != 2)
+  if (nargin <=1 || nargin > 3)
     print_usage();
+  elseif (nargin == 2)
+    trans = "white";
   endif
   if (!ismatrix(im) || !isreal(im))
     error("imtophat: first input argument must be a real matrix");
-  endif
-  if (!ismatrix(se) || !isreal(se))
+  elseif (!ismatrix(se) || !isreal(se))
     error("imtophat: second input argument must be a real matrix");
   endif
-  
+
   ## Perform filtering
-  retval = im & !imopen(im, se);
+  if ( strcmpi(trans, "white") || strcmpi(trans, "open") )
+    retval = im - imopen(im, se);
+  elseif ( strcmpi(trans, "black") || strcmpi(trans, "close") )
+    retval = imclose(im, se) - im;
+  else
+    error ("Unexpected type of top-hat transform");
+  endif
 
 endfunction
 
