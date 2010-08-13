@@ -30,21 +30,10 @@ function retval = imdilate(im, se)
     error("imdilate: second input argument must be a real matrix");
   endif
 
-  if (isinteger(im))
-    padding = intmax(class(im));
-  elseif (islogical(im))
-    padding = logical(1);
-  elseif (isreal(im))
-    padding = Inf;
-  else
-    error("Unexpected class for the image. Must be logical, integer ou real matrix")
-  endif
-
   ## Perform filtering
-  ## Dilation of A by B is the erosion of A's complement by the reflection of B
-  ## Since erosion will be performed in the complement, padding must also be the
-  ## complement of zero
+  ## Filtering must be done with the reflection of the structuring element (they
+  ## are not always symmetrical)
   se      = imrotate(se, 180);
-  retval  = !ordfiltn(!im, 1, se, padding);
+  retval  = ordfiltn(im, sum(se(:)!=0), se, 0);
 
 endfunction
