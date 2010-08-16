@@ -36,16 +36,12 @@ function retval = imdilate(im, se)
   ## are not always symmetrical)
   se      = imrotate(se, 180);
 
-  ## If image is logical, try to use filter2 from signal package. If it is not,
-  ## or filter2 function is not available, use slower version ordfiltn
-  try
-    if (islogical(im))
-      retval=filter2(se,im)>0;    # This line comes from the function dilate, copyright by Josep Mones i Teixidor
-    else
-      error;
-    endif
-  catch
+  ## If image is binary/logical, try to use filter2 (much faster)
+  if (islogical(im))
+    # The following line comes from the function dilate, copyright by Josep Mones i Teixidor
+    retval  = filter2(se,im)>0;
+  else
     retval  = ordfiltn(im, sum(se(:)!=0), se, 0);
-  end_try_catch
+  endif
 
 endfunction
