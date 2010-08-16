@@ -65,6 +65,10 @@ function BW2 = dilate(BW1, SE, a, b)
   # "Binarize" BW1, just in case image is not [1,0]
   BW1=BW1!=0;
 
+  ## Filtering must be done with the reflection of the structuring element (they
+  ## are not always symmetrical)
+  SE = imrotate(SE, 180);
+
   for i=1:n
     # create result matrix
     BW1=filter2(SE,BW1)>0;
