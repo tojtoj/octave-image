@@ -1,4 +1,5 @@
 ## Copyright (C) 2008 Soren Hauberg
+## Copyright (C) 2010 Carnë Draug <carandraug+dev@gmail.com>
 ## 
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
@@ -34,6 +35,17 @@ function retval = imdilate(im, se)
   ## Filtering must be done with the reflection of the structuring element (they
   ## are not always symmetrical)
   se      = imrotate(se, 180);
-  retval  = ordfiltn(im, sum(se(:)!=0), se, 0);
+
+  ## If image is logical, try to use filter2 from signal package. If it is not,
+  ## or filter2 function is not available, use slower version ordfiltn
+  try
+    if (islogical(im))
+      retval=filter2(se,im)>0;    # This line comes from the function dilate, copyright by Josep Mones i Teixidor
+    else
+      error;
+    endif
+  catch
+    retval  = ordfiltn(im, sum(se(:)!=0), se, 0);
+  end_try_catch
 
 endfunction
