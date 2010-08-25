@@ -18,6 +18,11 @@
 ## Returns the correlation coefficient between @var{I} and @var{j}.
 ## @var{I}, @var{J} must be real type matrices or vectors of same size.
 ## @seealso{cov, std2}
+##
+## @strong{Note:} To replicate the behaviour of MatLab's corr2, use the form
+## @example
+## r = corr2(I(:), J(:))
+## @end example
 ## @end deftypefn
 
 
@@ -38,5 +43,5 @@ function r = corr2 (I, J)
     error("corr2: arguments must be of same size")
   endif
   
-  r = cov (I, J) / (std2(I)*std2(J));    
+  r = cov (I, J) / (std2(I)*std2(J));
 endfunction
