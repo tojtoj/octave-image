@@ -152,6 +152,8 @@ function [imgPost, H, valid] = imrotate(imgPre, thetaDeg, interp="nearest", bbox
 
   ## Now the actual rotations happen
   if (strcmpi(interp, "Fourier"))
+    c = class (imgPre);
+    imgPre = im2double (imgPre);
     if (isgray(imgPre))
       imgPost = imrotate_Fourier(imgPre, thetaDeg, interp, bbox);
     else # rgb image
@@ -160,6 +162,15 @@ function [imgPost, H, valid] = imrotate(imgPre, thetaDeg, interp="nearest", bbox
       endfor
     endif
     valid = NA;
+    
+    switch (c)
+      case "uint8"
+        imgPost = im2uint8 (imgPost);
+      case "uint16"
+        imgPost = im2uint16 (imgPost);
+      case "single"
+        imgPost = single (imgPost);
+    endswitch
   else
     [imgPost, valid] = imperspectivewarp(imgPre, H, interp, bbox, extrapval);
   endif
