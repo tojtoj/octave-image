@@ -35,13 +35,14 @@ function r = corr2 (I, J)
     print_usage ();
   endif
 
-  if !(ismatrix(I) && isreal(I) && ismatrix(J) && isreal(J))
-	error("corr2: argument must be a real type matrix");
+  if (!(ismatrix (I) && isreal (I) && ismatrix (J) && isreal (J)))
+	error ("corr2: argument must be a real type matrix");
   endif
 
-  if (size (I) != size (J))
-    error("corr2: arguments must be of same size")
+  if (!size_equal (I, J))
+    error ("corr2: arguments must be of same size")
   endif
   
-  r = cov (I, J) / (std2(I)*std2(J));
+  r = cov (I (:), J (:)) / (std2 (I) * std2 (J));
 endfunction
+
