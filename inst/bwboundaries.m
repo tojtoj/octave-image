@@ -64,9 +64,9 @@ function [B, L, num_labels] = bwboundaries (bw, N = 4, options = "holes")
   ## Warn if the user request more output arguments than our implementation supports
   if (nargout > 3)
 %    warning ("%s %s %s", ...
-%             "bwboundaries: adjacency matrix output is currently not supported." ...
-%             "Please contact the Octave-Forge community if you want to contribute" ...
-%s             "an implementation of this");
+%             "bwboundaries: adjacency matrix output is currently not supported. " ...
+%             "Please contact the Octave-Forge community if you want to contribute " ...
+%             "an implementation of this");
   endif
   
   ## Make sure 'bw' is logical
@@ -80,8 +80,8 @@ function [B, L, num_labels] = bwboundaries (bw, N = 4, options = "holes")
     [R, C] = find (segment);
     if (numel (R) > 1)
       ## XXX: support 8-neighbors
-      #B {n} = __imboundary__ (segment, N, R (1), C (1));
-      B {n} = __imboundary__ (segment, 4, R (1), C (1));
+%      B {n} = __imboundary__ (segment, 4, R (1), C (1));
+      B {n} = __imboundary__ (segment.', N, C (1), R (1));
     else
       B {n} = [R, C];
     endif
