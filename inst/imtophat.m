@@ -13,7 +13,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{B} = imtophat (@var{A}, @var{se})
-## @deftypefn {Function File} @var{B} = imtophat (@var{A}, @var{se}, @var{type})
+## @deftypefnx{Function File} @var{B} = imtophat (@var{A}, @var{se}, @var{type})
 ## Perform morphological top hat filtering.
 ##
 ## The image @var{A} must be a grayscale or binary image, and @var{se} must be a
@@ -22,7 +22,7 @@
 ## @var{type} defines the type of top hat transform. To perform a white, or
 ## opening, top-hat transform its value must be @code{open} or @code{white}. To
 ## perform a black, or closing, top-hat transform its value must be @code{close}
-## or @code{black}. If @var is not specified, it performs a white top-hat
+## or @code{black}. If @var{type} is not specified, it performs a white top-hat
 ## transform.
 ##
 ## @seealso{imerode, imdilate, imopen, imclose, mmgradm}
