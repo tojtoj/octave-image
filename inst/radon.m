@@ -29,7 +29,7 @@
 function [RT,xp] = radon (I,theta)
 
   ## Input checking
-  if (nargin == 0 | nargin > 2)
+  if (nargin == 0 || nargin > 2)
     print_usage ();
   elseif (nargin == 1)
     theta = 0:179;
