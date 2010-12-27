@@ -36,69 +36,75 @@ The angles are given in degrees and defaults to -90:90.\n\
 The algorithm is described in\n\
 Digital Image Processing by Gonzales & Woods (2nd ed., p. 587)\n\
 @end deftypefn\n\
-") {
+")
+{
+  octave_value_list retval;
+  const int nargin = args.length ();
+  const bool DEF_THETA = (nargin == 1);
 
-    octave_value_list retval;
-    const int nargin = args.length();
-    const bool DEF_THETA = (nargin==1);
-
-    if (1 > nargin || nargin > 2) {
-	print_usage ();
-	return retval;
+  if (1 > nargin || nargin > 2)
+    {
+      print_usage ();
+      return retval;
     } 
 
-    const Matrix I = args(0).matrix_value();
-    const ColumnVector thetas = (DEF_THETA) ? ColumnVector(Range(-M_PI/2.0,M_PI/2.0, M_PI/180.0).matrix_value()) 
-                                            : ColumnVector(args(1).vector_value());
-    if (error_state) {
-	print_usage ();
-	return retval;
+  const Matrix I = args (0).matrix_value ();
+  const ColumnVector thetas = (DEF_THETA) ? ColumnVector (Range (-M_PI/2.0, M_PI/2.0, M_PI/180.0).matrix_value ()) 
+                                          : ColumnVector (args (1).vector_value ());
+  if (error_state)
+    {
+      print_usage ();
+      return retval;
     }
 
-    const int r = I.rows();
-    const int c = I.columns();
-    const int thetas_length = thetas.length();
+  const int r = I.rows ();
+  const int c = I.columns ();
+  const int thetas_length = thetas.length ();
 
-    Matrix xMesh = Matrix(r, c);
-    Matrix yMesh = Matrix(r, c);
-    for (int m = 0; m < r; m++) {
-	for (int n = 0; n < c; n++) {
-	    xMesh(m, n) = n+1;
-	    yMesh(m, n) = m+1;
-	}
+  Matrix xMesh (r, c);
+  Matrix yMesh (r, c);
+  for (int m = 0; m < r; m++)
+    {
+      for (int n = 0; n < c; n++)
+        {
+          xMesh (m, n) = n + 1;
+          yMesh (m, n) = m + 1;
+        }
     }
 
-    Matrix size = Matrix(1, 2);
-    size(0) = r; size(1) = c;
-    const double diag_length = sqrt( size.sumsq()(0) );
-    const int nr_bins = 2 * (int)ceil(diag_length) - 1;
-    RowVector bins = RowVector( Range(1, nr_bins).matrix_value() ) - ceil(nr_bins/2.);
-    const int bins_length = bins.length();
+  Matrix size (1, 2);
+  size (0) = r; size (1) = c;
+  const double diag_length = sqrt (size.sumsq ()(0));
+  const int nr_bins = 2 * (int)ceil (diag_length) - 1;
+  RowVector bins = RowVector (Range(1, nr_bins).matrix_value ()) - ceil (nr_bins/2.0);
+  const int bins_length = bins.length ();
 
-    Matrix J = Matrix(bins_length, thetas_length);
+  Matrix J (bins_length, thetas_length, 0.0);
 
-    for (int i = 0; i < thetas_length; i++) {
-	const double theta = thetas(i);
+  for (int i = 0; i < thetas_length; i++)
+    {
+      const double theta = thetas (i);
 
-	const double cT = cos(theta);
-	const double sT = sin(theta);
-	for (int x = 0; x < r; x++) {
-	    for (int y = 0; y < c; y++) {
-		if ( I(x, y) == 1 ) {
-		    const int rho = (int)floor( cT*x + sT*y + 0.5 );
-		    const int bin = (int)(rho - bins(0));
-		    if ( (bin > 0) && (bin < bins_length) ) {
-			J(bin, i)++;
-		    }
-		}
-	    }
-	}
+      const double cT = cos (theta);
+      const double sT = sin (theta);
+      for (int x = 0; x < r; x++)
+        {
+          for (int y = 0; y < c; y++)
+            {
+              if (I(x, y) == 1)
+                {
+                  const int rho = (int)floor (cT*x + sT*y + 0.5);
+                  const int bin = (int)(rho - bins (0));
+                  if ((bin > 0) && (bin < bins_length))
+                    J (bin, i)++;
+                }
+            }
+        }
     }
 
-    retval.append(J);
-    retval.append(bins);
-    return retval;
-
+  retval.append (J);
+  retval.append (bins);
+  return retval;
 }
 
 /*
