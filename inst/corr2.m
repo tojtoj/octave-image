@@ -19,10 +19,6 @@
 ## @var{I}, @var{J} must be real type matrices or vectors of same size.
 ## @seealso{cov, std2}
 ##
-## @strong{Note:} To replicate the behaviour of MatLab's corr2, use the form
-## @example
-## r = corr2(I(:), J(:))
-## @end example
 ## @end deftypefn
 
 
