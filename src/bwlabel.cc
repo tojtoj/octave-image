@@ -30,9 +30,9 @@
 
 
 #include <oct.h>
+#include <algorithm>
 
 #define     NO_OBJECT       0
-#define     MIN(x, y)       (((x) < (y)) ? (x) : (y))
 
 static int find (int set [], int x)
 {
@@ -193,7 +193,7 @@ The algorithm is derived from  BKP Horn, Robot Vision, MIT Press,\n\
                         }
                       else
                         {
-                          int tlabel = MIN (B, C);
+                          int tlabel = std::min (B, C);
                           lset [B] = tlabel;
                           lset [C] = tlabel;
                           L.elem (r, c) = tlabel;
