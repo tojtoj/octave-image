@@ -61,17 +61,6 @@ Digital Image Processing by Gonzales & Woods (2nd ed., p. 587)\n\
   const int c = I.columns ();
   const int thetas_length = thetas.length ();
 
-  Matrix xMesh (r, c);
-  Matrix yMesh (r, c);
-  for (int m = 0; m < r; m++)
-    {
-      for (int n = 0; n < c; n++)
-        {
-          xMesh (m, n) = n + 1;
-          yMesh (m, n) = m + 1;
-        }
-    }
-
   Matrix size (1, 2);
   size (0) = r; size (1) = c;
   const double diag_length = sqrt (size.sumsq ()(0));
