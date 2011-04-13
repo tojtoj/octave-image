@@ -46,10 +46,21 @@ function retval = imtophat(im, se, trans)
   endif
 
   ## Perform filtering
+  ## Note that in case that the transform is to applied to a logical image,
+  ## subtraction must be handled in a different way (x & !y) instead of (x - y)
+  ## or it will return a double precision matrix
   if ( strcmpi(trans, "white") || strcmpi(trans, "open") )
-    retval = im - imopen(im, se);
+    if (islogical(im))
+      retval = im & !imopen(im,se);
+    else
+      retval = im - imopen(im, se);
+    endif
   elseif ( strcmpi(trans, "black") || strcmpi(trans, "close") )
-    retval = imclose(im, se) - im;
+    if (islogical(im))
+      retval = imclose(im, se) & !im;
+    else
+      retval = imclose(im, se) - im;
+    endif
   else
     error ("Unexpected type of top-hat transform");
   endif
