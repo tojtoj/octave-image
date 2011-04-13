@@ -17,7 +17,8 @@
 ## Perform morphological top hat filtering.
 ##
 ## The image @var{A} must be a grayscale or binary image, and @var{se} must be a
-## structuring element.
+## structuring element. Both must have the same class, e.g., if @var{A} is a
+## logical matrix, @var{se} must also be logical.
 ##
 ## @var{type} defines the type of top hat transform. To perform a white, or
 ## opening, top-hat transform its value must be @code{open} or @code{white}. To
@@ -40,6 +41,8 @@ function retval = imtophat(im, se, trans)
     error("imtophat: first input argument must be a real matrix");
   elseif (!ismatrix(se) || !isreal(se))
     error("imtophat: second input argument must be a real matrix");
+  elseif ( !strcmp(class(im), class(se)) )
+    error("imtophat: image and structuring element must have the same class");
   endif
 
   ## Perform filtering
