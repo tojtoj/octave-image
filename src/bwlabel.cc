@@ -298,7 +298,7 @@ The algorithm is derived from  BKP Horn, Robot Vision, MIT Press,\n\
 }
 
 /*
-%!assert(bwlabel([0 1 0; 0 0 0; 1 0 1]),[0 1 0; 0 0 0; 2 0 3]);
+%!assert(bwlabel(logical([0 1 0; 0 0 0; 1 0 1])),[0 1 0; 0 0 0; 2 0 3]);
 */
 
 

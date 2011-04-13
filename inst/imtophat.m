@@ -56,7 +56,7 @@ endfunction
 %!test
 %! I = [1 1 1; 1 1 1; 1 1 1;];
 %! se = [1 1; 0 1;];
-%! result = imtophat(I, se);
+%! result = logical(imtophat(I, se));
 %! expected = 0.5 < [0 0 1; 0 0 1; 1 1 1];
 %! assert(expected, result);
 
