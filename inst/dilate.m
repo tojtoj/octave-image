@@ -83,8 +83,7 @@ endfunction
 
 
 
-%!assert(dilate(eye(3),[1])==eye(3));	# using [1] as a mask returns the same value
-%!assert(dilate(eye(3),[1,0,0])==[[0;0],eye(2);0,0,0]);
+%!assert(dilate(eye(3),[1])==eye(3));                     # using [1] as a mask returns the same value
+%!assert(dilate(eye(3),[1,0,0])==[0,0,0;1,0,0;0,1,0]);    # check if it works with non-symmetric SE
 %!assert(dilate(eye(3),[1,0,0,0])==[[0;0],eye(2);0,0,0]); # test if center is correctly calculated on even masks
-
 
