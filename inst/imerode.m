@@ -15,8 +15,11 @@
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{B} = imerode (@var{A}, @var{se})
 ## Perform morphological erosion on a given image.
+##
 ## The image @var{A} must be a grayscale or binary image, and @var{se} must be a
-## structuring element.
+## structuring element. Both must have the same class, e.g., if @var{A} is a
+## logical matrix, @var{se} must also be logical.
+##
 ## @seealso{imdilate, imopen, imclose}
 ## @end deftypefn
 
@@ -27,9 +30,10 @@ function retval = imerode(im, se)
   endif
   if (!ismatrix(im) || !isreal(im))
     error("imerode: first input argument must be a real matrix");
-  endif
-  if (!ismatrix(se) ||  !isreal(se))
+  elseif (!ismatrix(se) || !isreal(se))
     error("imerode: second input argument must be a real matrix");
+  elseif ( !strcmp(class(im), class(se)) )
+    error("imerode: image and structuring element must have the same class");
   endif
 
   ## Perform filtering
