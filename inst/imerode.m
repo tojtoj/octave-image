@@ -1,4 +1,6 @@
+## Copyright (C) 2004 Josep Mones i Teixidor  <jmones@puntbarra.com>
 ## Copyright (C) 2008 Soren Hauberg
+## Copyright (C) 2011 Carnë Draug <carandraug+dev@gmail.com>
 ## 
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
@@ -31,5 +33,12 @@ function retval = imerode(im, se)
   endif
 
   ## Perform filtering
-  retval = ordfiltn(im, 1, se, 0);
+  ## If image is binary/logical, try to use filter2 (much faster)
+  if (islogical(im))
+    thr     = sum(se(:));
+    retval  = filter2(se,im) == thr;
+  else
+    retval  = ordfiltn(im, 1, se, 0);
+  endif
+
 endfunction
