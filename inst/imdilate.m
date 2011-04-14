@@ -1,3 +1,4 @@
+## Copyright (C) 2004 Josep Mones i Teixidor  <jmones@puntbarra.com>
 ## Copyright (C) 2008 Soren Hauberg
 ## Copyright (C) 2010 Carnë Draug <carandraug+dev@gmail.com>
 ## 
@@ -27,7 +28,7 @@ function retval = imdilate(im, se)
   if (!ismatrix(im) || !isreal(im))
     error("imdilate: first input argument must be a real matrix");
   endif
-  if (!ismatrix(se) ||  !isreal(se))
+  if (!ismatrix(se) || !isreal(se))
     error("imdilate: second input argument must be a real matrix");
   endif
 
@@ -38,7 +39,6 @@ function retval = imdilate(im, se)
 
   ## If image is binary/logical, try to use filter2 (much faster)
   if (islogical(im))
-    # The following line comes from the function dilate, copyright by Josep Mones i Teixidor
     retval  = filter2(se,im)>0;
   else
     retval  = ordfiltn(im, sum(se(:)!=0), se, 0);
