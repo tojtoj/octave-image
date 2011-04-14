@@ -70,7 +70,12 @@ endfunction
 %!test
 %! I = [1 1 1; 1 1 1; 1 1 1;];
 %! se = [1 1; 0 1;];
-%! result = logical(imtophat(I, se));
+%! ## class of input should be the same as the output
+%! result = imtophat(logical(I), logical(se));
 %! expected = 0.5 < [0 0 1; 0 0 1; 1 1 1];
 %! assert(expected, result);
+%! result = imtophat((I), (se));
+%! expected = [0 0 1; 0 0 1; 1 1 1];
+%! assert(expected, result);
+
 
