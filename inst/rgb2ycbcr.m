@@ -1,8 +1,8 @@
-## Copyright (C) 2011 Santiago Reyes González
+## Copyright (C) 2011 Santiago Reyes González <mailalcuete@gmail.com>
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
-## as published by the Free Software Foundation; either version 2
+## as published by the Free Software Foundation; either version 3
 ## of the License, or (at your option) any later version.
 ##
 ## This program is distributed in the hope that it will be useful,
@@ -12,32 +12,28 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{B} =  rgb2ycbcr(@var{A})
-## Perform colour convertion on a given image.
-## The image @var{A} must be a image.
-## The convertion change the image RGB to YCbCr, i.e.
+## Perform colour convertion from RGB to YCbCr on a given image.
+##
+## The image @var{A} must be a NxMx3 image. The conversion
+## The convertion changes the image from the RGB color model to YCbCr e.g.
 ## @example
 ## imOut = rgb2ycbcr(imIn);
 ## @end example
-## @seealso{cmunique, cmpermute}
+## Currently this function only works with @samp{uint8} and will always return
+## an @samp{uint8} matrix.
+## @seealso{cmunique}
 ## @end deftypefn
 
-function im_out =  rgb2ycbcr(im)
-  dimensiones=size(im);
-  if (length(dimensiones) == 3)
-    row=dimensiones(1,1);
-    column=dimensiones(1,2);
-    depth=dimensiones(1,3);
-  end
-  if (depth == 3)
-    im_cal = im2double(im);
-    for i=1:row
-      for j=1:column
-        im_out(i,j,1) = uint8(floor(77*im_cal(i,j,1)+ 150*im_cal(i,j,2) + 29*im_cal(i,j,3)));
-        im_out(i,j,2) = uint8(floor(((-44*im_cal(i,j,1) - 87*im_cal(i,j,2) + 131*im_cal(i,j,3))/256 + 0.5)*256));
-        im_out(i,j,3) = uint8(floor(((131*im_cal(i,j,1) - 110*im_cal(i,j,2) - 21*im_cal(i,j,3))/256 + 0.5)*256));
-      endfor
-    endfor
-  else
-    error ("rgb2ycbcr: the matrix mmust be a NxMx3");
+function im_out =  rgb2ycbcr_mod(im)
+  if (nargin != 1)
+    print_usage;
+  elseif (length(size(im)) != 3 || size(im,3) != 3)
+    error("image must be NxMx3");
   endif
+
+  im            = im2double(im);
+  im_out(:,:,1) = uint8(floor(77*im(:,:,1)    + 150*im(:,:,2) + 29*im(:,:,3)));
+  im_out(:,:,2) = uint8(floor(((-44*im(:,:,1) - 87*im(:,:,2)  + 131*im(:,:,3))/256 + 0.5)*256));
+  im_out(:,:,3) = uint8(floor(((131*im(:,:,1) - 110*im(:,:,2) - 21*im(:,:,3))/256 + 0.5)*256));
+
 endfunction
