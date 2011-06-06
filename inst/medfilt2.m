@@ -58,7 +58,7 @@ if((n - 2*floor(n/2)) == 0) % n even - more work
   nth = floor(n/2);
   a = ordfilt2(A, nth, domain, padding);
   b = ordfilt2(A, nth + 1, domain, padding);
-  retval = (a + b)./2;
+  retval = a./2 + b./2; # split into two divisions to avoid overflow on integer data
 else
   nth = floor(n/2) + 1;
   retval = ordfilt2(A, nth, domain, padding);
