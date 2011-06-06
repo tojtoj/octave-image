@@ -36,7 +36,7 @@
 ## References:
 ## W. K. Pratt, "Digital Image Processing", 3rd Edition, pp 593-595
 ##
-## @seealso qtgetblk
+## @seealso{qtgetblk}
 ## @end deftypefn
 
 ## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
