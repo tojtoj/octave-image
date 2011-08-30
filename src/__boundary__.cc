@@ -21,6 +21,7 @@ along with this program; If not, see <http://www.gnu.org/licenses/>.
  *      b = boundary(region, conn=8)
  */
 #include <octave/oct.h>
+#include <octave/oct-locbuf.h>
 
 using namespace std;
 
@@ -118,7 +119,7 @@ point is the same as the first.\n\
       const int* mBack = (conn == 4) ? back4 : back8;
 
       // relative indexes into the region for the Moore neighbourhood pixels
-      int mi [conn];
+      OCTAVE_LOCAL_BUFFER (int, mi, conn);
       for (int i = 0; i < conn; ++i)
         mi[i] = mr[i] + (rows * mc [i]);
 
