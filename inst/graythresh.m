@@ -47,7 +47,7 @@ function level = graythresh (I)
 
     ## Calculation of the normalized histogram
     n = 256;
-    h = hist(I(:), n);        
+    h = hist(I(:), 1:n);        
     h = h/(length(I(:))+1);
     
     ## Calculation of the cumulated histogram and the mean values
@@ -58,15 +58,15 @@ function level = graythresh (I)
     end    
          
     ## Initialisation of the values used for the threshold calculation
-    w0 = w(1);
+    level = find (h > 0, 1);
+    w0 = w(level);
     w1 = 1-w0;
-    mu0 = mu(1)/w0;
-    mu1 = (mu(end)-mu(1))/w1;
+    mu0 = mu(level)/w0;
+    mu1 = (mu(end)-mu(level))/w1;
     max = w0*w1*(mu1-mu0)*(mu1-mu0);
-    level = 1;
     
     ## For each step of the histogram, calculation of the threshold and storing of the maximum
-    for i = 2:n
+    for i = find (h > 0)
         w0 = w(i);
         w1 = 1-w0;
         mu0 = mu(i)/w0;
