@@ -24,7 +24,7 @@
 ## @seealso{cmunique}
 ## @end deftypefn
 
-function im_out =  rgb2ycbcr_mod(im)
+function im_out =  rgb2ycbcr(im)
   if (nargin != 1)
     print_usage;
   elseif (length(size(im)) != 3 || size(im,3) != 3)
