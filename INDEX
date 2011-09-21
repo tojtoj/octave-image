@@ -1,35 +1,28 @@
 image >> Image processing
 Display
- image 
- imagesc 
- imshow 
  rgbplot
 Read/write
- imread 
- imwrite 
- imfinfo
  imginfo
  bmpwrite
  readexif
  tiff_tag_read
 Reshape
- imcrop
  imremap
- imperspectivewarp 
- imresize 
+ imperspectivewarp
+ imresize
  imrotate
  imrotate_Fourier
  imtranslate
  imshear
  impad
- padarray 
+ padarray
  rotate_scale
 Analysis and Statistics
  fftconv2
- corr2 
- imhist 
- mean2 
- std2 
+ corr2
+ imhist
+ mean2
+ std2
  entropy
  qtdecomp
  qtgetblk
@@ -46,12 +39,12 @@ Filtering
  colfilt
  fspecial
  imsmooth
- histeq 
- imadjust 
- imnoise 
- medfilt2 
+ histeq
+ imadjust
+ imnoise
+ medfilt2
  ordfilt2
- ordfiltn 
+ ordfiltn
  uintlut
  stretchlim
  makelut applylut
@@ -64,15 +57,16 @@ Black and white image functions
  bwarea
  bwboundaries
  bwconncomp
- bwdist 
- bweuler 
- bwfill 
- bwlabel 
- bwmorph 
- bwperim 
- bwselect 
- dilate 
- erode 
+ bwdist
+ bweuler
+ bwfill
+ bwlabel
+ bwmorph
+ bwperim
+ bwselect
+ dilate
+ edtfunc
+ erode
  bwborder edge
  conndef
  bwhitmiss
@@ -84,43 +78,30 @@ Morhophological Operations
  imopen
  imclose
  imtophat
+ mmgradm
 Colour controls
- cmpermute 
- cmunique 
- imapprox 
- rgb2ycbcr 
- ycbcr2rgb 
+ cmpermute
+ cmunique
+ rgb2ycbcr
 Representation
- dither 
- gray2ind 
- grayslice 
- im2bw 
+ imdither
+ grayslice
+ im2bw
  im2double
  im2uint8
  im2uint16
- ind2gray 
- ind2rgb 
- isbw 
- isgray 
- isind 
- isrgb 
- mat2gray 
- rgb2gray 
- rgb2ind 
+ isbw
+ isgray
+ isind
+ isrgb
+ mat2gray
+ rgb2gray
  label2rgb
  imcomplement
 Colour maps
- flag 
- lines 
- colorcube 
- vga 
- contrast 
  colorgradient
 Region-based and block processing
  roicolor
- roifill
- roifilt2
- roipoly
  poly2mask
  bestblk
  blkproc
