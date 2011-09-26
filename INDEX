@@ -65,7 +65,6 @@ Black and white image functions
  bwperim
  bwselect
  dilate
- edtfunc
  erode
  bwborder edge
  conndef
