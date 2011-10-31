@@ -1,5 +1,5 @@
-## Copyright (C) 2004 Josep Mones i Teixidor  <jmones@puntbarra.com>
-## Copyright (C) 2008 Soren Hauberg
+## Copyright (C) 2004 Josep Mones i Teixidor <jmones@puntbarra.com>
+## Copyright (C) 2008 Soren Hauberg <soren@hauberg.org>
 ## Copyright (C) 2011 Carnë Draug <carandraug+dev@gmail.com>
 ## 
 ## This program is free software; you can redistribute it and/or
@@ -13,12 +13,19 @@
 ## GNU General Public License for more details.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} @var{B} = imerode (@var{A}, @var{se})
+## @deftypefn {Function File} {@var{B} =} imerode (@var{A}, @var{se})
 ## Perform morphological erosion on a given image.
 ##
-## The image @var{A} must be a grayscale or binary image, and @var{se} must be a
+## The image @var{A} must be a grayscale or binary image, and @var{se} a
 ## structuring element. Both must have the same class, e.g., if @var{A} is a
-## logical matrix, @var{se} must also be logical.
+## logical matrix, @var{se} must also be logical. Note that the erosion
+## algorithm is different for each class, being much faster for logical
+## matrices. As such, if you have a binary matrix, you should use @code{logical}
+## first. This will also reduce the memory usage of your code.
+##
+## The center of @var{SE} is calculated using floor((size(@var{SE})+1)/2).
+##
+## Pixels outside the image are considered to be 0.
 ##
 ## @seealso{imdilate, imopen, imclose}
 ## @end deftypefn
@@ -46,3 +53,10 @@ function retval = imerode(im, se)
   endif
 
 endfunction
+
+%!demo
+%! imerode(ones(5,5),ones(3,3))
+%! % creates a zeros border around ones.
+
+%!assert(imerode(eye(3),[1])==eye(3));                                           # using [1] as a mask returns the same value
+%!assert(imerode([0,1,0;1,1,1;0,1,0],[0,0,0;0,0,1;0,1,1])==[1,0,0;0,0,0;0,0,0]); # check if it works with non-symmetric SE
