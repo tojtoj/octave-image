@@ -27,8 +27,15 @@
 ##     @itemize @w
 ##       @item "nearest" neighbor: fast, but produces aliasing effects (default).
 ##       @item "bilinear" interpolation: does anti-aliasing, but is slightly slower.
-##       @item "bicubic" interpolation: does anti-aliasing, preserves edges better than bilinear interpolation, but gray levels may slightly overshoot at sharp edges. This is probably the best method for most purposes, but also the slowest.
-##       @item "Fourier" uses Fourier interpolation, decomposing the rotation matrix into 3 shears. This method often results in different artifacts than homography-based methods.  Instead of slightly blurry edges, this method can result in ringing artifacts (little waves near high-contrast edges).  However, Fourier interpolation is better at maintaining the image information, so that unrotating will result in an image closer to the original than the other methods.
+##       @item "bicubic" interpolation: does anti-aliasing, preserves edges better
+## than bilinear interpolation, but gray levels may slightly overshoot at sharp
+## edges. This is probably the best method for most purposes, but also the slowest.
+##       @item "Fourier" uses Fourier interpolation, decomposing the rotation
+## matrix into 3 shears. This method often results in different artifacts than
+## homography-based methods.  Instead of slightly blurry edges, this method can
+## result in ringing artifacts (little waves near high-contrast edges).  However,
+## Fourier interpolation is better at maintaining the image information, so that
+## unrotating will result in an image closer to the original than the other methods.
 ##     @end itemize
 ##
 ##   @var{bbox}
@@ -101,9 +108,9 @@ function [imgPost, H, valid] = imrotate(imgPre, thetaDeg, interp="nearest", bbox
     ## Compute new size by projecting zero-base image corner pixel
     ## coordinates through the rotation:
     corners = [0, 0;
-	       (R * [sizePre(2) - 1; 0             ])';
-	       (R * [sizePre(2) - 1; sizePre(1) - 1])';
-	       (R * [0             ; sizePre(1) - 1])' ];
+               (R * [sizePre(2) - 1; 0             ])';
+               (R * [sizePre(2) - 1; sizePre(1) - 1])';
+               (R * [0             ; sizePre(1) - 1])' ];
     sizePost(2) = round(max(corners(:,1)) - min(corners(:,1))) + 1;
     sizePost(1) = round(max(corners(:,2)) - min(corners(:,2))) + 1;
     ## This size computation yields perfect results for 0-degree (mod
@@ -117,7 +124,7 @@ function [imgPost, H, valid] = imrotate(imgPre, thetaDeg, interp="nearest", bbox
   ## homography:
   oPre  = ([ sizePre(2);  sizePre(1)] + 1) / 2;
   oPost = ([sizePost(2); sizePost(1)] + 1) / 2;
-  T = oPost - R * oPre;		# translation part of the homography
+  T = oPost - R * oPre;         # translation part of the homography
 
   ## And here is the homography mapping old to new coordinates:
   H = [[R; 0 0] [T; 1]];
@@ -126,7 +133,7 @@ function [imgPost, H, valid] = imrotate(imgPre, thetaDeg, interp="nearest", bbox
   if (mod(thetaDeg, 90) == 0)
     nRot90 = mod(thetaDeg, 360) / 90;
     if (mod(thetaDeg, 180) == 0 || sizePre(1) == sizePre(2) ||
-	strcmpi(bbox, "loose"))
+        strcmpi(bbox, "loose"))
       imgPost = rot90(imgPre, nRot90);
       return;
     elseif (mod(sizePre(1), 2) == mod(sizePre(2), 2))
@@ -136,9 +143,9 @@ function [imgPost, H, valid] = imrotate(imgPre, thetaDeg, interp="nearest", bbox
       imgPost = zeros(sizePre);
       hw = min(sizePre) / 2 - 0.5;
       imgPost   (round(oPost(2) - hw) : round(oPost(2) + hw),
-		 round(oPost(1) - hw) : round(oPost(1) + hw) ) = ...
-	  imgRot(round(oPost(1) - hw) : round(oPost(1) + hw),
-		 round(oPost(2) - hw) : round(oPost(2) + hw) );
+                 round(oPost(1) - hw) : round(oPost(1) + hw) ) = ...
+          imgRot(round(oPost(1) - hw) : round(oPost(1) + hw),
+                 round(oPost(2) - hw) : round(oPost(2) + hw) );
       return;
     else
       ## Here, bbox is "crop", the rotation angle is +/- 90 degrees, and
@@ -180,7 +187,7 @@ endfunction
 %! ## Verify minimal loss across six rotations that add up to 360 +/- 1 deg.:
 %! methods = { "nearest", "bilinear", "bicubic", "Fourier" };
 %! angles     = [ 59  60  61  ];
-%! tolerances = [ 7.4 8.5 8.6	  # nearest
+%! tolerances = [ 7.4 8.5 8.6     # nearest
 %!                3.5 3.1 3.5     # bilinear
 %!                2.7 2.0 2.7     # bicubic
 %!                2.7 1.6 2.8 ]/8;  # Fourier
@@ -192,7 +199,7 @@ endfunction
 %!      - 10*(X/5 - X.^3 - Y.^5).*exp(-X.^2-Y.^2) \
 %!      - 1/3*exp(-(X+1).^2 - Y.^2);
 %!
-%! x -= min(x(:));	      # Fourier does not handle neg. values well
+%! x -= min(x(:));            # Fourier does not handle neg. values well
 %! x = x./max(x(:));
 %! for m = 1:(length(methods))
 %!   y = x;
