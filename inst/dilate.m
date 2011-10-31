@@ -68,7 +68,6 @@ function BW2 = dilate(BW1, SE, a, b)
   ## Filtering must be done with the reflection of the structuring element (they
   ## are not always symmetrical)
   SE = imrotate(SE, 180);
-
   for i=1:n
     # create result matrix
     BW1=filter2(SE,BW1)>0;
@@ -81,10 +80,7 @@ endfunction
 %! dilate(eye(5),ones(2,2))
 %! % returns a thick diagonal.
 
-
-
+## tests
 %!assert(dilate(eye(3),[1])==eye(3));                     # using [1] as a mask returns the same value
 %!assert(dilate(eye(3),[1,0,0])==[0,0,0;1,0,0;0,1,0]);    # check if it works with non-symmetric SE
-## TODO the next assertion is commented since we do not know how the right answer for the calculation
-%!##assert(dilate(eye(3),[1,0,0,0])==XXX); # test if center is correctly calculated on even masks
-
+%!assert(dilate(eye(3),[1,0,0,0])==[0,0,0;1,0,0;0,1,0]);  # test if center is correctly calculated on even masks
