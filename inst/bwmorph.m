@@ -184,7 +184,7 @@
 ## W. K. Pratt, "Digital Image Processing"
 ## Gonzalez and Woods, "Digital Image Processing"
 ##
-## @seealso{dilate, erode, makelut, applylut}
+## @seealso{imdilate, imerode, imtophat, makelut, applylut}
 ## @end deftypefn
 
 
@@ -214,8 +214,8 @@ function BW2 = bwmorph(BW, operation, n)
     
   switch(operation)
     case('bothat')
-      se=ones(3);
-      BW2=erode(dilate(BW, se), se)-BW;
+      se  = ones(3);
+      BW2 = imtophat (BW, se, 'close');
       if(n>1)
         ## TODO: check if ignoring n>1 is ok. Should I just ignore it
         ## TODO: without a warning?
@@ -266,8 +266,8 @@ function BW2 = bwmorph(BW, operation, n)
       return;
 
     case('close')
-      se=ones(3);
-      BW2=erode(dilate(BW, se), se);
+      se  = ones(3);
+      BW2 = imclose (BW, se);
       if(n>1)
         ## TODO: check if ignoring n>1 is ok.
         disp("WARNING: n>1 has no sense here. Using n=1. Please fill a bug if you think this behaviour is not correct");
@@ -297,10 +297,10 @@ function BW2 = bwmorph(BW, operation, n)
       
 
     case('dilate')
-      cmd="BW2=dilate(BW, ones(3));";
+      cmd="BW2=imdilate(BW, ones(3));";
 
     case('erode')
-      cmd="BW2=erode(BW, ones(3));";
+      cmd="BW2=imerode(BW, ones(3));";
       
     case('fill')
       ## lut=makelut(inline("x(2,2)||(sum((x&[0,1,0;1,0,1;0,1,0])(:))==4)","x"),3);
@@ -349,8 +349,8 @@ function BW2 = bwmorph(BW, operation, n)
       cmd="BW2=applylut(BW, lut);";
 
     case('open')
-      se=ones(3);
-      BW2=dilate(erode(BW, se), se);
+      se  = ones(3);
+      BW2 = imopen (BW, se);
       if(n>1)
         ## TODO: check if ignoring n>1 is ok.
         disp("WARNING: n>1 has no sense here. Using n=1. Please fill a bug if you think this behaviour is not correct");
@@ -527,8 +527,8 @@ function BW2 = bwmorph(BW, operation, n)
 
 
     case('tophat')
-      se=ones(3);
-      BW2=BW-dilate(erode(BW, se), se);
+      se  = ones(3);
+      BW2 = imtophat (BW, se, 'open');
       if(n>1)
         ## TODO: check if ignoring n>1 is ok.
         disp("WARNING: n>1 has no sense here. Using n=1. Please fill a bug if you think this behaviour is not correct");
