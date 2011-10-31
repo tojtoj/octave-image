@@ -42,6 +42,8 @@
 ## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 
 function BW2 = dilate(BW1, SE, a, b)
+  warning ("'dilate' has been deprecated in favor of 'imdilate'. This function will be removed from future versions of the 'image' package");
+
   alg='spatial';
   n=1;
   if (nargin < 1 || nargin > 4)
