@@ -111,7 +111,8 @@ Region-based and block processing
  entropyfilt
 Utilities
  getrangefromclass
- iptnum2ordinal
- iptcheckstrs
- iptchecknargin
+ iptcheckconn
  iptcheckmap
+ iptchecknargin
+ iptcheckstrs
+ iptnum2ordinal
