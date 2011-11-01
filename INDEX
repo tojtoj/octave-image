@@ -109,3 +109,8 @@ Region-based and block processing
  rangefilt
  stdfilt
  entropyfilt
+Utilities
+ iptnum2ordinal
+ iptcheckstrs
+ iptchecknargin
+ iptcheckmap
