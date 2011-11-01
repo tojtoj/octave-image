@@ -110,6 +110,7 @@ Region-based and block processing
  stdfilt
  entropyfilt
 Utilities
+ getrangefromclass
  iptnum2ordinal
  iptcheckstrs
  iptchecknargin
