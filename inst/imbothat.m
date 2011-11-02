@@ -12,33 +12,24 @@
 ## GNU General Public License for more details.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} @var{B} = imtophat (@var{A}, @var{se})
-## @deftypefnx{Function File} @var{B} = imtophat (@var{A}, @var{se}, @var{type})
-## Perform morphological top hat filtering.
+## @deftypefn {Function File} @var{B} = imbothat (@var{A}, @var{se})
+## Perform morphological bottom hat filtering.
 ##
 ## The image @var{A} must be a grayscale or binary image, and @var{se} must be a
 ## structuring element. Both must have the same class, e.g., if @var{A} is a
 ## logical matrix, @var{se} must also be logical.
 ##
-## @var{type} defines the type of top hat transform. To perform a white, or
-## opening, top-hat transform its value must be @code{open} or @code{white}. To
-## perform a black, or closing, top-hat transform its value must be @code{close}
-## or @code{black}. If @var{type} is not specified, it performs a white top-hat
+## A bottom-hat transform is also known as 'black', or 'closing', top-hat
 ## transform.
 ##
-## A 'black', or 'closing', top-hat transform is also known as bottom-hat
-## transform and so that is the same @code{imbothat}.
-##
-## @seealso{imerode, imdilate, imopen, imclose, imbothat, mmgradm}
+## @seealso{imerode, imdilate, imopen, imclose, imtophat, mmgradm}
 ## @end deftypefn
 
-function retval = imtophat (im, se, trans)
+function retval = imbothat (im, se)
 
   ## Checkinput
   if (nargin <=1 || nargin > 3)
     print_usage();
-  elseif (nargin == 2)
-    trans = "white";
   endif
   if (!ismatrix(im) || !isreal(im))
     error("imtophat: first input argument must be a real matrix");
@@ -52,27 +43,10 @@ function retval = imtophat (im, se, trans)
   ## Note that in case that the transform is to applied to a logical image,
   ## subtraction must be handled in a different way (x & !y) instead of (x - y)
   ## or it will return a double precision matrix
-  if ( strcmpi(trans, "white") || strcmpi(trans, "open") )
-    if (islogical(im))
-      retval = im & !imopen(im,se);
-    else
-      retval = im - imopen(im, se);
-    endif
-  elseif ( strcmpi(trans, "black") || strcmpi(trans, "close") )
-    retval = imbothat (im, se);
+  if (islogical(im))
+    retval = imclose(im, se) & !im;
   else
-    error ("Unexpected type of top-hat transform");
+    retval = imclose(im, se) - im;
   endif
 
 endfunction
-
-%!test
-%! I = [1 1 1; 1 1 1; 1 1 1;];
-%! se = [1 1; 0 1;];
-%! ## class of input should be the same as the output
-%! result = imtophat(logical(I), logical(se));
-%! expected = 0.5 < [0 0 1; 0 0 1; 1 1 1];
-%! assert(expected, result);
-%! result = imtophat((I), (se));
-%! expected = [0 0 1; 0 0 1; 1 1 1];
-%! assert(expected, result);
