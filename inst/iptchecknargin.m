@@ -42,10 +42,15 @@ function iptchecknargin (low, high, in, func_name)
     error ("Minimun number of arguments cannot be larger than maximum number of arguments")
   endif
 
+  ## error ends in \n so the back trace of the error is not show. This is on
+  ## purpose since the whole idea of this function is already to give a properly
+  ## formatted error message
   if (in < low)
-    error ("Not enough input arguments.");
+    error ("Function %s expected at least %d input arguments(s) but was called instead with %d input argument(s).\n", ...
+           func_name, low, in);
   elseif (in > high)
-    error ("Too many input arguments.");
+    error ("Function %s expected at most %d input argument(s) but was called instead with %d input argument(s).\n", ...
+           func_name, high, in);
   endif
 
 endfunction
