@@ -32,11 +32,11 @@ function retval = imbothat (im, se)
     print_usage();
   endif
   if (!ismatrix(im) || !isreal(im))
-    error("imtophat: first input argument must be a real matrix");
+    error("imbothat: first input argument must be a real matrix");
   elseif (!ismatrix(se) || !isreal(se))
-    error("imtophat: second input argument must be a real matrix");
+    error("imbothat: second input argument must be a real matrix");
   elseif ( !strcmp(class(im), class(se)) )
-    error("imtophat: image and structuring element must have the same class");
+    error("imbothat: image and structuring element must have the same class");
   endif
 
   ## Perform filtering
