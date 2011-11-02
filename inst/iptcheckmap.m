@@ -40,9 +40,12 @@ function iptcheckmap (in, func_name, var_name, pos)
     error ("Argument pos must be a real positive integer");
   endif
 
+  ## error ends in \n so the back trace of the error is not show. This is on
+  ## purpose since the whole idea of this function is already to give a properly
+  ## formatted error message
   if (!strcmp (class(in), "double") || columns (in) != 3 || ndims (in) != 2 || !isreal (in) || min (in(:) < 0 || max (in(:) > 1)
-    error ("Function %s expected input number %d, %s, to be a valid colormap.\n ...
-      Valid colormaps must be nonempty, double, 2-D matrices with 3 columns.", ...
+    error ("Function %s expected input number %d, %s, to be a valid colormap.\n...
+       Valid colormaps must be nonempty, double, 2-D matrices with 3 columns.\n", ...
       func_name, pos, var_name);
   endif
 

@@ -46,12 +46,15 @@ function out = iptcheckstrs (in, valid_str, func_name, var_name, pos)
 
   idx = find (strcmpi (valid_str, in) == 1, 1, "first");
 
+  ## error ends in \n so the back trace of the error is not show. This is on
+  ## purpose since the whole idea of this function is already to give a properly
+  ## formatted error message
   if (isempty (idx))
     valid_str = cellfun (@(x) cstrcat (x, ", "), valid_str, "UniformOutput", false);
     valid_str = cstrcat (valid_str{:});
     error("Function %s expected its %s input argument, %s, to match one of these strings:\n...
          %s\n...
-       The input, '%s', did not match any of the valid strings.", ...
+       The input, '%s', did not match any of the valid strings.\n", ...
       func_name, iptnum2ordinal (pos), var_name, valid_str(1:end-2), in);
   else
     out = valid_str{idx};
