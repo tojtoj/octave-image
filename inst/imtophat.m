@@ -59,6 +59,7 @@ function retval = imtophat (im, se, trans)
       retval = im - imopen(im, se);
     endif
   elseif ( strcmpi(trans, "black") || strcmpi(trans, "close") )
+    warning ("Use of the '%s' option of imtophat has been deprecated in favor of 'imbothat'. This option will be removed from future versions of the 'imtophat' function", trans);
     retval = imbothat (im, se);
   else
     error ("Unexpected type of top-hat transform");
