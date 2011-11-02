@@ -184,7 +184,7 @@
 ## W. K. Pratt, "Digital Image Processing"
 ## Gonzalez and Woods, "Digital Image Processing"
 ##
-## @seealso{imdilate, imerode, imtophat, makelut, applylut}
+## @seealso{imdilate, imerode, imtophat, imbothat, makelut, applylut}
 ## @end deftypefn
 
 
@@ -215,7 +215,7 @@ function BW2 = bwmorph(BW, operation, n)
   switch(operation)
     case('bothat')
       se  = ones(3);
-      BW2 = imtophat (BW, se, 'close');
+      BW2 = imbothat (BW, se);
       if(n>1)
         ## TODO: check if ignoring n>1 is ok. Should I just ignore it
         ## TODO: without a warning?
@@ -528,7 +528,7 @@ function BW2 = bwmorph(BW, operation, n)
 
     case('tophat')
       se  = ones(3);
-      BW2 = imtophat (BW, se, 'open');
+      BW2 = imtophat (BW, se);
       if(n>1)
         ## TODO: check if ignoring n>1 is ok.
         disp("WARNING: n>1 has no sense here. Using n=1. Please fill a bug if you think this behaviour is not correct");

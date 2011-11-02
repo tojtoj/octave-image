@@ -27,7 +27,7 @@
 ## The morphological gradient of a image corresponds to its erosion subtracted
 ## to its dilation.
 ##
-## @seealso{imerode, imdilate, imopen, imclose, imtophat}
+## @seealso{imerode, imdilate, imopen, imclose, imtophat, imbothat}
 ## @end deftypefn
 
 function grad = mmgradm (im, se_dil, se_ero)
