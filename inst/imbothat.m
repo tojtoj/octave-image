@@ -28,7 +28,7 @@
 function retval = imbothat (im, se)
 
   ## Checkinput
-  if (nargin <=1 || nargin > 3)
+  if (nargin != 2)
     print_usage();
   endif
   if (!ismatrix(im) || !isreal(im))
