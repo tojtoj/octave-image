@@ -13,18 +13,11 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{B} = imtophat (@var{A}, @var{se})
-## @deftypefnx{Function File} @var{B} = imtophat (@var{A}, @var{se}, @var{type})
 ## Perform morphological top hat filtering.
 ##
 ## The image @var{A} must be a grayscale or binary image, and @var{se} must be a
 ## structuring element. Both must have the same class, e.g., if @var{A} is a
 ## logical matrix, @var{se} must also be logical.
-##
-## @var{type} defines the type of top hat transform. To perform a white, or
-## opening, top-hat transform its value must be @code{open} or @code{white}. To
-## perform a black, or closing, top-hat transform its value must be @code{close}
-## or @code{black}. If @var{type} is not specified, it performs a white top-hat
-## transform.
 ##
 ## A 'black', or 'closing', top-hat transform is also known as bottom-hat
 ## transform and so that is the same @code{imbothat}.
@@ -35,10 +28,12 @@
 function retval = imtophat (im, se, trans)
 
   ## Checkinput
-  if (nargin <=1 || nargin > 3)
+  if (nargin < 2 || nargin > 3)
     print_usage();
   elseif (nargin == 2)
     trans = "white";
+  elseif (nargin == 3 && ischar (trans))
+    warning ("Use of the 'trans' argument in imtophat to specify a closing or opening top-hat transform has been deprecated in favor of using the functions 'imtophat' or 'imbothat'. This option will be removed from future versions of the 'imtophat' function");
   endif
   if (!ismatrix(im) || !isreal(im))
     error("imtophat: first input argument must be a real matrix");
@@ -46,6 +41,8 @@ function retval = imtophat (im, se, trans)
     error("imtophat: second input argument must be a real matrix");
   elseif ( !strcmp(class(im), class(se)) )
     error("imtophat: image and structuring element must have the same class");
+  elseif (!ischar (trans))
+    error("imtophat: third input argument must be a string with 'white', 'open, 'black', or 'close'");
   endif
 
   ## Perform filtering
@@ -59,7 +56,6 @@ function retval = imtophat (im, se, trans)
       retval = im - imopen(im, se);
     endif
   elseif ( strcmpi(trans, "black") || strcmpi(trans, "close") )
-    warning ("Use of the '%s' option of imtophat has been deprecated in favor of 'imbothat'. This option will be removed from future versions of the 'imtophat' function", trans);
     retval = imbothat (im, se);
   else
     error ("Unexpected type of top-hat transform");
