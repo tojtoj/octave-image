@@ -16,7 +16,7 @@
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{X} =} grayslice (@var{I},@var{n})
 ## @deftypefnx {Function File} {@var{X} =} grayslice (@var{I},@var{v})
-## creates an indexed image @var{X} from an intensitiy image @var{I}
+## Creates an indexed image @var{X} from an intensitiy image @var{I}
 ## using multiple threshold levels.
 ## A scalar integer value @var{n} sets the levels to
 ## @example
@@ -37,32 +37,29 @@
 ## X = grayslice(I,[0.1,0.33,0.75,0.9])
 ## @end group
 ##
-## @seealso{im2bw}
+## @seealso{im2bw, gray2ind}
 ## @end deftypefn
 
-## Author:	Kai Habel <kai.habel@gmx.de>
-## Date:	03. August 2000
+## Author:  Kai Habel <kai.habel@gmx.de>
+## Date:    03. August 2000
 
 function X = grayslice (I, v)
 
   if (nargin != 2)
-    usage ("grayslice(...) number of arguments must be 1 or 2");
+    print_usage;
   endif
 
-  if (is_scalar(v) && (fix(v) == v))
-
+  if (isscalar (v) && isnumeric (v) && (fix (v) == v))
     v = (1:v - 1) / v;
 
   elseif (isvector(v))
-
     if (any (v < 0) || (any (v > 1)))
-      error ("slice vector must be in range [0,1]")
+      error ("Slice vector must be in range [0,1]")
     endif
     v = [0,v,1];
+
   else
-
-    usage("second argument");
-
+    error ("Second argument 'v' must be either an integer scalar or a vector");
   endif
 
   [r, c] = size (I);
