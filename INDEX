@@ -75,6 +75,7 @@ Morhophological Operations
  imdilate
  imopen
  imclose
+ imbothat
  imtophat
  mmgradm
 Colour controls
