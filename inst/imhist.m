@@ -59,7 +59,6 @@ function [nn, bins] = imhist (I, b)
         warning ("largest index exceeds length of colormap");
       endif
     elseif (isnumeric (b) && isscalar (b) && fix(b) == b)
-      using_colormap = false;
       bins = 0:b-1;
     else
       error ("second argument should either be a positive integer scalar or a colormap");
@@ -75,14 +74,14 @@ function [nn, bins] = imhist (I, b)
   ## cases and use only the "new" code when "using_colormap" is false
   ## Carnë Draug 10/11/2011
   if (nargout == 0)
-    if (using_colormap)
+    if (exist ("using_colormap", "var") && using_colormap)
       hist (I(:), bins);
     else
       [nn] = histc (I(:), bins);
       stem (bins, nn);
     endif
   else
-    if (using_colormap)
+    if (exist ("using_colormap", "var") && using_colormap)
       [nn,bins] = hist (I(:), bins);
     else
       [nn] = histc (I(:), bins);
