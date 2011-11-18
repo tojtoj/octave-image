@@ -5,7 +5,7 @@
     copyright 2002 Jeffrey E. Boyd
 
     - uses 4, 6, or 8 connectedness
-    - See BKP Horn, Robot Vision, MIT Press, 1986, p 66 - 71 
+    - See BKP Horn, Robot Vision, MIT Press, 1986, p 66 - 71
 
     labeling scheme
 
@@ -16,15 +16,15 @@
         +-+-+-+
         | | | |
         +-+-+-+
-                
+
     A is the center pixel of a neighborhood.  In the 3 versions of
     connectedness:
-    
+
     4:  A connects to B and C
     6:  A connects to B, C, and D
     8:  A connects to B, C, D, and E
-    
-    
+
+
 --------------------------------------------------------------------- */
 
 
@@ -50,13 +50,13 @@ static bool any_bad_argument (const octave_value_list& args)
       print_usage ();
       return true;
     }
-    
+
   if (!args (0).is_bool_matrix ())
     {
       error ("bwlabel: first input argument must be a 'logical' matrix");
       return true;
     }
-    
+
   if (nargin == 2)
     {
       if (!args (1).is_real_scalar ())
@@ -71,8 +71,8 @@ static bool any_bad_argument (const octave_value_list& args)
           return true;
         }
     }
-    
-  return false;    
+
+  return false;
 }
 
 DEFUN_DLD(bwlabel, args, , "\
@@ -96,30 +96,30 @@ The algorithm is derived from  BKP Horn, Robot Vision, MIT Press,\n\
   octave_value_list rval;
   if (any_bad_argument (args))
     return rval;
-    
+
   // input arguments
   boolMatrix BW = args (0).bool_matrix_value ();     // the input binary image
   int nr = BW.rows ();
   int nc = BW.columns ();
-  
+
   // n-hood connectivity
   int n;
   if (args.length () < 2)
     n = 8;
   else
     n = args (1).int_value ();
-    
+
   // results
   Matrix L (nr, nc);     // the label image
   int nobj;              // number of objects found in image
-    
+
   // other variables
   int ntable;            // number of elements in the component table/tree
-    
+
   OCTAVE_LOCAL_BUFFER (int, lset, nr * nc);   // label table/tree
   ntable = 0;
   lset [0] = 0;
-    
+
   for (int r = 0; r < nr; r++)
     {
       for (int c = 0; c < nc; c++)
@@ -132,22 +132,22 @@ The algorithm is derived from  BKP Horn, Robot Vision, MIT Press,\n\
                 B = 0;
               else
                 B = find (lset, (int)L.elem (r, c-1));
-              
+
               if (r == 0)
                 C = 0;
               else
                 C = find (lset, (int)L.elem (r-1, c));
-              
+
               if (r == 0 || c == 0)
                 D = 0;
               else
                 D = find (lset, (int)L.elem (r-1, c-1));
-              
+
               if (r == 0 || c == nc - 1)
                 E = 0;
               else
                 E = find (lset, (int)L.elem(r-1, c+1));
-                    
+
               if (n == 4)
                 {
                   // apply 4 connectedness
@@ -236,9 +236,9 @@ The algorithm is derived from  BKP Horn, Robot Vision, MIT Press,\n\
                         {
                           tlabel = E;
                         }
-                        
+
                       L.elem (r, c) = tlabel;
-                      
+
                       if (B && B != tlabel)
                         lset [B] = tlabel;
                       if (C && C != tlabel)
@@ -262,7 +262,7 @@ The algorithm is derived from  BKP Horn, Robot Vision, MIT Press,\n\
             }
         }
     }
-    
+
   // consolidate component table
   for (int i = 0; i <= ntable; i++)
     lset [i] = find (lset, i);
@@ -271,7 +271,7 @@ The algorithm is derived from  BKP Horn, Robot Vision, MIT Press,\n\
   for (int r = 0; r < nr; r++)
     for (int c = 0; c < nc; c++)
       L.elem (r, c) = lset [(int)L.elem (r, c)];
-    
+
   // count up the objects in the image
   for (int i = 0; i <= ntable; i++)
     lset [i] = 0;
@@ -300,5 +300,3 @@ The algorithm is derived from  BKP Horn, Robot Vision, MIT Press,\n\
 /*
 %!assert(bwlabel(logical([0 1 0; 0 0 0; 1 0 1])),[0 1 0; 0 0 0; 2 0 3]);
 */
-
-
