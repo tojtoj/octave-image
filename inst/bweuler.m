@@ -1,8 +1,9 @@
-## Copyright (C) 2004 Josep Mones i Teixidor
+## Copyright (C) 2004 Josep Mones i Teixidor <jmones@puntbarra.com>
+## Copyright (C) 2011 Adrián del Pino <delpinonavarrete@gmail.com>
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 2 of the License, or
+## the Free Software Foundation; either version 3 of the License, or
 ## (at your option) any later version.
 ##
 ## This program is distributed in the hope that it will be useful,
@@ -14,21 +15,15 @@
 ## along with this program; If not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {@var{eul} = } bweuler (@var{BW},@var{n})
-## Calculates the Euler number of a binary image.
+## @deftypefn {Function File} {@var{eul} = } bweuler (@var{BW}, @var{n})
+## Calculate the Euler number of a binary image.
 ##
-## @var{eul}=bweuler(@var{BW}, @var{n}) calculates the Euler number @var{eul} of a binary
-## image @var{BW}, which is a scalar whose value is the total number of
-## objects in an image minus the number of holes.
+## This function calculates the Euler number @var{eul} of a binary
+## image @var{BW}. This number is a scalar whose value represents the total
+## number of objects in @var{BW} minus the number of holes.
 ##
-## @var{n} can have the values:
-## @table @code
-## @item 4
-## bweuler will use 4-connected neighbourhood definition.
-## @item 8
-## bweuler will use 8-connected neighbourhood definition. This is the
-## default value.
-## @end table
+## @var{n} is an optional argument that specifies the neighbourhood
+## connectivity. Must either be 4 or 8. If omitted, defaults to 8.
 ##
 ## This function uses Bit Quads as described in "Digital Image
 ## Processing" to calculate euler number.
@@ -36,34 +31,47 @@
 ## References:
 ## W. K. Pratt, "Digital Image Processing", 3rd Edition, pp 593-595
 ##
-## @seealso{qtgetblk}
+## @seealso{bwmorph, bwperim, qtgetblk}
 ## @end deftypefn
 
 ## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 
-function eul = bweuler(BW, n)
-  if(nargin<1 || nargin>2)
-    usage("eul=bweuler(BW,n)");
-  endif
-  if(nargin<2)
-    n=8;
+function eul = bweuler (BW, n = 8)
+  if (nargin < 1 || nargin > 2)
+    print_usage;
+  elseif (!isbw (BW))
+    error("first argument must be a Black and White image");
   endif
 
-  ## q1lut=makelut(inline("sum(x(:))==1","x"),2);
-  ## q3lut=makelut(inline("sum(x(:))==3","x"),2);
-  ## qdlut=makelut(inline("all((x==eye(2))(:))||all((x==fliplr(eye(2)))(:))","x"),2);
   ## lut_4=(q1lut-q3lut+2*qdlut)/4;  # everything in one lut will be quicker
-  ## lut_8=(q1lut-q3lut-2*qdlut)/4;
-  ## we precalculate this...
-  if(n==8)
-    lut=[0;.25;.25;0;.25;0;-.5;-.25;.25;-.5;0;-.25;0;-.25;-.25;0];
-  elseif(n==4)
-    lut=[0;.25;.25;0;.25;0;.5;-.25;.25;.5;0;-.25;0;-.25;-.25;0];
-  else
-    error("bweuler: n can only be 4 or 8.");
+  ## lut_8=(q1lut-q3lut-2*qdlut)/4;  # but only the final result is divided by four 
+  ## we precalculate this...         # to save more time
+
+  if (!isnumeric (n) || !isscalar (n) || (n != 8 && n != 4))
+    error("second argument must either be 4 or 8");
+  elseif (n == 8)
+    lut = [0; 1; 1; 0; 1; 0; -2; -1; 1; -2; 0; -1; 0; -1; -1; 0];
+  elseif (n == 4)
+    lut = [0; 1; 1; 0; 1; 0; 2; -1; 1; 2; 0; -1; 0; -1; -1; 0];
   endif
-  
-  eul=sum(applylut(BW,lut)(:));
+
+  ## Adding zeros to the top and left bordes to avoid errors when figures touch these borders.
+  ## Notice that 1 0 is equivalent to 1 0 0 because there are implicit zeros in the bottom and right
+  ##             0 1                  0 1 0
+  ##                                  0 0 0 
+  ## borders. Therefore, there are three one-pixel and one diagonal pixels. So, we get 3 * 1 - 2 = 1
+  ## (error) instead of 6 * 1 - 2 = 4 (correct).
+
+  BWaux  = zeros (rows (BW) + 1, columns (BW) + 1);
+
+  for r = 1 : rows(BW)
+     for c = 1 : columns (BW)
+        BWaux (r + 1, c + 1) = BW (r, c);
+     endfor
+  endfor
+
+  eul = sum (applylut (BWaux, lut) (:)) / 4;
+
 endfunction
 
 %!demo
