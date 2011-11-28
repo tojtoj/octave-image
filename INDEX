@@ -60,6 +60,7 @@ Black and white image functions
  bweuler
  bwfill
  bwlabel
+ bwlabeln
  bwmorph
  bwperim
  bwselect
