@@ -215,13 +215,16 @@ populate_neighbours(const boolNDArray& conn_mask)
 DEFUN_DLD(bwlabeln, args, , "\
 -*- texinfo -*-\n\
 @deftypefn {Function File} {[@var{l}, @var{num}] =} bwlabeln(@var{bw}, @var{n})\n\
+Label foreground objects in the n-dimensional binary image @var{bw}.\n\
 \n\
-Labels foreground objects in the n-dimensional binary image @var{bw}.\n\
+The optional argument @var{n} sets the connectivity and defaults 26.\n\
+\n\
 The output @var{l} is an Nd-array where 0 indicates a background\n\
 pixel, 1 indicates that the pixel belong to object number 1, 2 that\n\
 the pixel belong to object number 2, etc. The total number of objects\n\
 is @var{num}.\n\
 \n\
+@seealso{bwconncomp, bwlabel, regionprops}\n\
 @end deftypefn\n\
 ")
 {
