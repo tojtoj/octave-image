@@ -2,7 +2,7 @@
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 2 of the License, or
+## the Free Software Foundation; either version 3 of the License, or
 ## (at your option) any later version.
 ##
 ## This program is distributed in the hope that it will be useful,
@@ -29,50 +29,51 @@
 ## @code{ones(repmat(3,1,@var{num_dims}))}.
 ## @end table
 ##
+## @seealso{iptcheckconn}
 ## @end deftypefn
-
-
 
 ## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 
-function conn = conndef(num_dims,conntype)
-  if(nargin!=2)
-    usage("conn=conndef(num_dims, type)");
+function conn = conndef (num_dims, conntype)
+
+  if (nargin!=2)
+    print_usage;
+  elseif (!isnumeric (num_dims) || !isscalar (num_dims) || num_dims <= 0 || fix (num_dims) != num_dims)
+    error ("number of dimensions must be a positive integer.");
+  elseif (!ischar (conntype))
+    error ("second argument must be a string with type of connectivity.")
   endif
-  if(num_dims<=0)
-    error("conndef: num_dims must be > 0");
-  endif
-    
-  if(strcmp(conntype,"minimal"))
-    if(num_dims==1)
-      conn=[1;1;1];
-    elseif(num_dims==2)
-      conn=[0,1,0;1,1,1;0,1,0];
+
+  ## support for 1 dimension does not exist in Matlab where num_dims must be >= 2
+  if (num_dims == 1)
+    conn = [1; 1; 1];
+  ## matlab is case insensitive when checking the type
+  elseif (strcmpi (conntype, "minimal"))
+    if (num_dims == 2)
+      conn = [0 1 0
+              1 1 1
+              0 1 0];
     else
-      conn=zeros(repmat(3,1,num_dims));
-      idx={};
-      idx{1}=1:3;
-      for i=2:num_dims
-	idx{i}=2;
+      conn   = zeros (repmat (3, 1, num_dims));
+      idx    = {};
+      idx{1} = 1:3;
+      for i = 2:num_dims
+        idx{i} = 2;
       endfor
-      conn(idx{:})=1;
-      for i=2:num_dims
-	idx{i-1}=2;
-	idx{i}=1:3;
-	conn(idx{:})=1;
+      conn(idx{:}) = 1;
+      for i = 2:num_dims
+        idx{i-1}     = 2;
+        idx{i}       = 1:3;
+        conn(idx{:}) = 1;
       endfor
     endif
-    
-  elseif(strcmp(conntype,"maximal"))
-    if(num_dims==1)
-      conn=[1;1;1];
-    else
-      conn=ones(repmat(3,1,num_dims));
-    endif
+
+  elseif (strcmpi (conntype, "maximal"))
+    conn = ones (repmat (3, 1, num_dims));
   else
-    error("conndef: invalid type parameter.");
+    error("invalid type of connectivity '%s'.", conntype);
   endif
-  
+
 endfunction
 
 %!demo
@@ -80,7 +81,6 @@ endfunction
 %! % Create a 2-D minimal connectivity array
 
 %!assert(conndef(1,'minimal'), [1;1;1]);
-
 %!assert(conndef(2,'minimal'), [0,1,0;1,1,1;0,1,0]);
 
 %!test
@@ -94,21 +94,3 @@ endfunction
 %!assert(conndef(2,'maximal'), ones(3,3));
 %!assert(conndef(3,'maximal'), ones(3,3,3));
 %!assert(conndef(4,'maximal'), ones(3,3,3,3));
-
-
-
-% $Log$
-% Revision 1.3  2007/03/23 16:14:36  adb014
-% Update the FSF address
-%
-% Revision 1.2  2007/01/04 23:41:47  hauberg
-% Minor changes in help text
-%
-% Revision 1.1  2006/08/20 12:59:32  hauberg
-% Changed the structure to match the package system
-%
-% Revision 1.2  2005/07/03 01:10:19  pkienzle
-% Try to correct for missing newline at the end of the file
-%
-% Revision 1.1  2004/08/15 19:38:44  jmones
-% conndef added: Creates a connectivity array
