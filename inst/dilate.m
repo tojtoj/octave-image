@@ -19,6 +19,10 @@
 ## @deftypefnx {Function File} {@var{BW2} = } dilate (@var{BW1},@var{SE},...,@var{n})
 ## Perform a dilation morphological operation on a binary image.
 ##
+## @emph{warning}: @code{dilate} has been deprecated in favor of
+## @code{imdilate}. This function will be removed from future versions of the
+## 'image' package".
+##
 ## BW2 = dilate(BW1, SE) returns a binary image with the result of a dilation
 ## operation on @var{BW1} using neighbour mask @var{SE}.
 ##

@@ -19,6 +19,10 @@
 ## @deftypefnx {Function File} {@var{BW2} = } erode (@var{BW1},@var{SE},...,@var{n})
 ## Perform an erosion morphological operation on a binary image.
 ##
+## @emph{warning}: @code{erode} has been deprecated in favor of
+## @code{imerode}. This function will be removed from future versions of the
+## 'image' package".
+##
 ## BW2 = erosion(BW1, SE) returns a binary image with the result of an erosion
 ## operation on @var{BW1} using neighbour mask @var{SE}.
 ##
