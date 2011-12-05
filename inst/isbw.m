@@ -43,17 +43,20 @@ function bool = isbw (BW, logic = "logical")
     ## this is the matlab compatible way (before they removed the function)
     bool = islogical (BW);
 
-    ## the following block is just temporary since we are not being backwards compatible
+    ## the following block is just temporary to keep backwards compatibility
     if (!islogical (BW) && all (all ((BW == 1) + (BW == 0))))
       persistent warned = false;
       if (! warned)
         warned = true;
         warning ("isbw: image is not logical matrix and therefore not binary but all values are either 0 and 1.")
-        warning ("isbw: old versions of the function would return true. Use the call isbw (img, \"non-logical\") instead.")
+        warning ("isbw: future versions of this function will return true. Consider using the call isbw (img, \"non-logical\").")
       endif
+      bool = true;
     endif
+    ## end of temporary block for backwards compatibility
 
   elseif (strcmpi (logic, "non-logical"))
     bool = all (all ((BW == 1) + (BW == 0)));
   endif
+
 endfunction
