@@ -44,7 +44,7 @@ function bool = isbw (BW, logic = "logical")
     bool = islogical (BW);
 
     ## the following block is just temporary to keep backwards compatibility
-    if (!islogical (BW) && all (all ((BW == 1) + (BW == 0))))
+    if (!islogical (BW) && is_bw_nonlogical (BW))
       persistent warned = false;
       if (! warned)
         warned = true;
@@ -56,7 +56,16 @@ function bool = isbw (BW, logic = "logical")
     ## end of temporary block for backwards compatibility
 
   elseif (strcmpi (logic, "non-logical"))
-    bool = all (all ((BW == 1) + (BW == 0)));
+    ## to speed this up, we can look at a sample of the image first
+    bool = is_bw_nonlogical (BW(1:ceil (rows (BW) /100), 1:ceil (columns (BW) /100)));
+      if (bool)
+        ## sample was true, we better make sure it's real
+        bool = is_bw_nonlogical (BW);
+      endif
   endif
 
+endfunction
+
+function bool = is_bw_nonlogical (BW)
+  bool = all (all ((BW == 1) + (BW == 0)));
 endfunction
