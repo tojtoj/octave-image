@@ -38,7 +38,7 @@ function bool = isgray (img)
   endif
 
   bool = false;
-  if (ismatrix (img) && ndims (img) == 2 && !issparse (img))
+  if (ismatrix (img) && ndims (img) == 2 && !issparse (img) && !isempty (img))
     switch (class (img))
       case "double"
         ## to speed this up, we can look at a sample of the image first

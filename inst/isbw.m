@@ -37,7 +37,7 @@ function bool = isbw (BW, logic = "logical")
   endif
 
   ## an image cannot be a sparse matrix
-  if (!ismatrix (BW) || issparse (BW))
+  if (!ismatrix (BW) || issparse (BW) || isempty (BW))
     bool = false;
   elseif (strcmpi (logic, "logical"))
     ## this is the matlab compatible way (before they removed the function)
