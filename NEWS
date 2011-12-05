@@ -11,8 +11,6 @@ Summary of important user-visible changes for image 1.1.0:
       iptchecknargin
       iptcheckstrs
       iptnum2ordinal
-        
-      
 
  ** The following functions have been deprecated in previous releases
     of the image package and have now been removed:
@@ -28,9 +26,17 @@ Summary of important user-visible changes for image 1.1.0:
  ** With the new function `imbothat' the transform option of
     `imtophat' has been deprecated.
 
- ** the following functions have had been changed for bug fixes and/or
+ ** The following functions have had been changed for bug fixes and/or
     improved matlab compatibility
 
       bweuler
       imhist
       conndef
+      isbw
+
+ ** `isbw' now defines a black-and-white image as a binary non-sparse
+    matrix. This is compatible with matlab. To use the old behaviour,
+    use the new option for the call "isbw (img, "non-logical").
+    For backwards compatibility, if a non-logical matrix of 0 and 1 is
+    used as input, `isbw' will still return true but a warning will be
+    issued since this will deprecated later.
