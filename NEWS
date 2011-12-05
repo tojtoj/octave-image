@@ -33,6 +33,9 @@ Summary of important user-visible changes for image 1.1.0:
       imhist
       conndef
       isbw
+      isgray
+      isrgb
+      isind
 
  ** `isbw' now defines a black-and-white image as a binary non-sparse
     matrix. This is compatible with matlab. To use the old behaviour,
@@ -40,3 +43,5 @@ Summary of important user-visible changes for image 1.1.0:
     For backwards compatibility, if a non-logical matrix of 0 and 1 is
     used as input, `isbw' will still return true but a warning will be
     issued since this will deprecated later.
+
+ ** `isrgb' now returns false for logical matrix.
