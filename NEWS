@@ -1,0 +1,36 @@
+Summary of important user-visible changes for image 1.1.0:
+-------------------------------------------------------------------
+
+ ** The following functions are new:
+
+      bwlabeln
+      getrangefromclass
+      imbothat
+      iptcheckconn
+      iptcheckmap
+      iptchecknargin
+      iptcheckstrs
+      iptnum2ordinal
+        
+      
+
+ ** The following functions have been deprecated in previous releases
+    of the image package and have now been removed:
+
+      imginfo
+
+ ** The following functions have been deprecated (see their help text
+    for the recommended alternatives):
+
+      dilate
+      erode
+
+ ** With the new function `imbothat' the transform option of
+    `imtophat' has been deprecated.
+
+ ** the following functions have had been changed for bug fixes and/or
+    improved matlab compatibility
+
+      bweuler
+      imhist
+      conndef
