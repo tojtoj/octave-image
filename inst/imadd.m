@@ -26,12 +26,13 @@
 ## in which case @var{out} will be double. Alternatively, the class can be
 ## specified with @var{class}.
 ##
-##@emph{Note 1}: you can force output class to be logical by specifying
+## @emph{Note 1}: you can force output class to be logical by specifying
 ## @var{class}. This is incompatible with @sc{matlab} which will @emph{not} honour
 ## request to return a logical matrix.
 ##
 ## @emph{Note 2}: the values are truncated to the maximum value of the output
 ## class.
+## @seealso{imsubtract}
 ## @end deftypefn
 
 function img = imadd (img, val, out_class = class (img))
