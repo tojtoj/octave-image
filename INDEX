@@ -1,28 +1,13 @@
 image >> Image processing
-Display
- rgbplot
-Read/write
- bmpwrite
- readexif
- tiff_tag_read
-Reshape
- imremap
- imperspectivewarp
- imresize
- imrotate
- imrotate_Fourier
- imtranslate
- imshear
- impad
- padarray
- rotate_scale
 Analysis and Statistics
+ edge
  fftconv2
  corr2
  imhist
  mean2
  std2
  entropy
+ entropyfilt
  qtdecomp
  qtgetblk
  qtsetblk
@@ -30,87 +15,103 @@ Analysis and Statistics
  houghtf
  hough_line
  hough_circle
- graythresh
  immaximas
- phantom
-Filtering
- imfilter
- colfilt
- fspecial
- imsmooth
- histeq
- imadjust
- imnoise
- medfilt2
- ordfilt2
- ordfiltn
- uintlut
- stretchlim
- makelut applylut
- deriche
- radon
- rho_filter
- iradon
- nonmax_supress
+ rangefilt
+ regionprops
+ stdfilt
+Arithmetics
+ imadd
+ imcomplement
 Black and white image functions
+ applylut
  bwarea
+ bwborder
  bwboundaries
  bwconncomp
  bwdist
  bweuler
  bwfill
+ bwhitmiss
  bwlabel
  bwlabeln
  bwmorph
  bwperim
  bwselect
- dilate
- erode
- bwborder edge
- conndef
- bwhitmiss
- regionprops
  fchcode
-Morhophological Operations
- imerode
- imdilate
- imopen
- imclose
- imbothat
- imtophat
- mmgradm
-Colour controls
+ makelut
+Colour maps and Colour controls
  cmpermute
  cmunique
+ colorgradient
  rgb2ycbcr
-Representation
- imdither
+Display
+ rgbplot
+Enhancement and Restoration
+ histeq
+ imadjust
+ imnoise
+ imsmooth
+ medfilt2
+ ordfilt2
+ ordfiltn
+ stretchlim
+Filtering and Transforms
+ deriche
+ fspecial
+ imfilter
+ iradon
+ nonmax_supress
+ phantom
+ radon
+ rho_filter
+ uintlut
+Morhophological Operations
+ conndef
+ imbothat
+ imclose
+ imdilate
+ imerode
+ imopen
+ imtophat
+ mmgradm
+Read/write
+ bmpwrite
+ readexif
+ tiff_tag_read
+Region-based and block processing
+ bestblk
+ blockproc
+ col2im
+ colfilt
+ im2col
+ nlfilter
+ poly2mask
+ roicolor
+Spatial transformations
+ impad
+ imperspectivewarp
+ imremap
+ imresize
+ imrotate
+ imrotate_Fourier
+ imshear
+ imtranslate
+ rotate_scale
+Types and Type conversions
  grayslice
+ graythresh
  im2bw
  im2double
  im2uint8
  im2uint16
+ imdither
  isbw
  isgray
  isind
  isrgb
+ label2rgb
  mat2gray
  rgb2gray
- label2rgb
- imcomplement
-Colour maps
- colorgradient
-Region-based and block processing
- roicolor
- poly2mask
- bestblk
- blkproc
- nlfilter
- im2col
- col2im
- rangefilt
- stdfilt
- entropyfilt
 Utilities
  getrangefromclass
  iptcheckconn
@@ -118,3 +119,4 @@ Utilities
  iptchecknargin
  iptcheckstrs
  iptnum2ordinal
+ padarray

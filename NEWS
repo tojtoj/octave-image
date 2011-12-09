@@ -3,8 +3,10 @@ Summary of important user-visible changes for image 1.1.0:
 
  ** The following functions are new:
 
+      blockproc
       bwlabeln
       getrangefromclass
+      imadd
       imbothat
       iptcheckconn
       iptcheckmap
@@ -20,6 +22,7 @@ Summary of important user-visible changes for image 1.1.0:
  ** The following functions have been deprecated (see their help text
     for the recommended alternatives):
 
+      blkproc
       dilate
       erode
 
