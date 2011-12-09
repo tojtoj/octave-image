@@ -38,25 +38,8 @@ function img = imadd (img, val, out_class = class (img))
 
   if (nargin < 2 || nargin > 3)
     print_usage;
-  elseif ((!isnumeric (img) && !islogical (img)) || isempty (img) || issparse (img) || !isreal (img))
-    error ("first argument must be a numeric or logical, non-empty, non-sparse real matrix")
-  elseif ((!isnumeric (val) && !islogical (val)) || isempty (val) || issparse (val) || !isreal (val))
-    error ("second argument must be a numeric, non-empty, non-sparse real matrix")
-  elseif (!ischar (out_class))
-    error ("third argument must be a string that specifies the output class")
   endif
-
-  img_class = class (img);
-  if (all (size (img) == size (val)) && strcmpi (img_class, class (val)))
-    [img, val] = convert (out_class, img, val);
-  elseif (isscalar (val) && isfloat (val))
-    ## according to matlab's documentation, if val is not an image of same size
-    ## and class as img, then it must be a double scalar. But why not also support
-    ## a single scalar and use isfloat?
-    img = convert (out_class, img);
-  else
-    error ("second argument must either be of same class and size of the first or a floating point scalar")
-  end
+  [img, val] = imarithmetics ("imadd", img, val, out_class);
 
   ## output class is the same as input img, unless img is logical in which case
   ## it should be double. Tested in matlab by Freysh at ##matlab:
@@ -79,25 +62,4 @@ function img = imadd (img, val, out_class = class (img))
     img = img + val;
   endif
 
-endfunction
-
-function [a, b] = convert (out_class, a, b = 0)
-  ## in the case that we only want to convert one matrix, this subfunction is called
-  ## with 2 arguments only. Then, b takes the value of zero so that the call to the
-  ## functions that change the class is insignificant
-  if (!strcmpi (class (a), out_class))
-    switch tolower (out_class)
-      case {"logical"}  a = logical (a); b = logical (b);
-      case {"uint8"}    a = uint8   (a); b = uint8   (b);
-      case {"uint16"}   a = uint16  (a); b = uint16  (b);
-      case {"uint32"}   a = uint32  (a); b = uint32  (b);
-      case {"int8"}     a = int8    (a); b = int8    (b);
-      case {"int16"}    a = int16   (a); b = int16   (b);
-      case {"int32"}    a = int32   (a); b = int32   (b);
-      case {"double"}   a = double  (a); b = double  (b);
-      case {"single"}   a = single  (a); b = single  (b);
-      otherwise
-        error ("requested class '%s' for output is not supported")
-    endswitch
-  endif
 endfunction
