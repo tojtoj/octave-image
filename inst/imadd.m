@@ -26,7 +26,12 @@
 ## in which case @var{out} will be double. Alternatively, the class can be
 ## specified with @var{class}.
 ##
-## Note that the values are truncated to the maximum value of the output class.
+##@emph{Note 1}: you can force output class to be logical by specifying
+## @var{class}. This is incompatible with @sc{matlab} which will @emph{not} honour
+## request to return a logical matrix.
+##
+## @emph{Note 2}: the values are truncated to the maximum value of the output
+## class.
 ## @end deftypefn
 
 function img = imadd (img, val, out_class = class (img))
@@ -54,19 +59,25 @@ function img = imadd (img, val, out_class = class (img))
   end
 
   ## output class is the same as input img, unless img is logical in which case
-  ## it should be double. In that case, I'm assuming that if both images are
-  ## logical, the addition is made as if they were doubles.
-  ## should ask someone to test the following in matlab:
-  ## a = logical([1 0 1 1]); b = logical([1 0 0 0]); c = imadd (a, b);
-  ## a = logical([1 0 1 1]); b = logical([1 0 1 1]); c = imadd (a, b, "logical");
-  ## what's important to check is:
-  ##    (1) is c(1) == 2 on the first example? Then addition is done img + val.
-  ##    (2) output class. If it is logical on the second example
-  ## also the following
-  ## a = uint16(round(rand(5)*300)); b = uint16(round(rand(5)*300)); c = imadd (a, b, "uint8")
-  ##  what happens when the request output class does not take even the values
-  ## of the input image? Is the requested for the class also honored?
-  img = img + val;
+  ## it should be double. Tested in matlab by Freysh at ##matlab:
+  ##   - if you imadd 2 logical matrix, it's not the union. You actually get values of 2
+  ##   - the previous is true even if you specify "logical" as output class. It does
+  ##     not honors the request, output will be double class anyway, not even a
+  ##     warning will be issued (but we in octave are nicer and will)
+  ##   - you can specify smaller integer types for output than input and values
+  ##     are truncated. Input uint16 and request uint8, it will be respected
+
+  ## this is matlab imcompatible on purpose. We are compatible and return double
+  ## anyway, even if both input are logical (and wether this is correct is
+  ## already debatable), but if the user forcelly requests output class to be
+  ## logical, then he must be expecting it (matlab returns double anyway and
+  ## ignores request).
+
+  if (nargin > 2 && strcmpi (out_class, "logical"))
+    img = img | val;
+  else
+    img = img + val;
+  endif
 
 endfunction
 
@@ -80,6 +91,9 @@ function [a, b] = convert (out_class, a, b = 0)
       case {"uint8"}    a = uint8   (a); b = uint8   (b);
       case {"uint16"}   a = uint16  (a); b = uint16  (b);
       case {"uint32"}   a = uint32  (a); b = uint32  (b);
+      case {"int8"}     a = int8    (a); b = int8    (b);
+      case {"int16"}    a = int16   (a); b = int16   (b);
+      case {"int32"}    a = int32   (a); b = int32   (b);
       case {"double"}   a = double  (a); b = double  (b);
       case {"single"}   a = single  (a); b = single  (b);
       otherwise
