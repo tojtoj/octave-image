@@ -21,6 +21,7 @@
 ## For binary images, the complement is computed as @code{!@var{A}}, for floating
 ## point images it is computed as @code{1 - @var{A}}, and for integer images as
 ## @code{intmax(class(@var{A})) - @var{A}}.
+## @seealso{imadd, imdivide, immultiply, imsubtract}
 ## @end deftypefn
 
 function B = imcomplement(A)

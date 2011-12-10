@@ -32,7 +32,7 @@
 ##
 ## @emph{Note 2}: the values are truncated to the mininum value of the output
 ## class.
-## @seealso{imadd}
+## @seealso{imadd, imcomplement, imdivide, immultiply}
 ## @end deftypefn
 
 function img = imsubtract (img, val, out_class = class (img))

@@ -28,7 +28,7 @@
 ##
 ## @emph{Note}: the values are truncated to the mininum value of the output
 ## class.
-## @seealso{imadd, imsubtract}
+## @seealso{imadd, imcomplement, immultiply, imsubtract}
 ## @end deftypefn
 
 function img = imdivide (img, val, out_class = class (img))
