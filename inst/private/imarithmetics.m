@@ -42,7 +42,7 @@ function [img, val] = imarithmetics (func, img, val, out_class)
     ## a single scalar and use isfloat?
     img = convert (out_class, img);
   else
-    error ("second argument must either be of same class and size of the first or a floating point scalar")
+    error ("%s: second argument must either be of same class and size of the first or a floating point scalar", func)
   end
 endfunction
 
@@ -56,13 +56,15 @@ function [a, b] = convert (out_class, a, b = 0)
       case {"uint8"}    a = uint8   (a); b = uint8   (b);
       case {"uint16"}   a = uint16  (a); b = uint16  (b);
       case {"uint32"}   a = uint32  (a); b = uint32  (b);
+      case {"uint64"}   a = uint64  (a); b = uint64  (b);
       case {"int8"}     a = int8    (a); b = int8    (b);
       case {"int16"}    a = int16   (a); b = int16   (b);
       case {"int32"}    a = int32   (a); b = int32   (b);
+      case {"int64"}    a = int64   (a); b = int64   (b);
       case {"double"}   a = double  (a); b = double  (b);
       case {"single"}   a = single  (a); b = single  (b);
       otherwise
-        error ("requested class '%s' for output is not supported")
+        error ("%s: requested class '%s' for output is not supported", func, out_class)
     endswitch
   endif
 endfunction
