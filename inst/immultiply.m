@@ -50,7 +50,7 @@ function img = immultiply (img, val, out_class = class (img))
 endfunction
 
 %!assert (immultiply (uint8   ([255 50]), uint16  ([300 50])),           uint8  ([255 255]));  # default to first class and truncate
-%!assert (immultiply (uint8   ([250 50]), uint16  ([  3  4]), "uint32"), uint32 ([750 400]));  # defining output class works (not in matlab?)
+%!assert (immultiply (uint8   ([250 50]), uint16  ([  3  4]), "uint32"), uint32 ([750 200]));  # defining output class works (not in matlab?)
 %!assert (immultiply (uint8   ([255 50]),                  4),           uint8  ([255 200]));  # works multiplying by a scalar
 %!assert (immultiply (logical ([  1  0]), uint16  ([300 50])),           uint16 ([300   0]));  # output class defaults to whatever input is not logical
 %!assert (immultiply (logical ([  1  0]), logical ([  1  1])),           double ([  1   0]));  # tested on matlab for compatibility
