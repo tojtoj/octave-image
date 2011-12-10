@@ -22,7 +22,7 @@
 ## original function
 ## @end deftypefn
 
-function [img, val] = imarithmetics (func, img, val, out_class)
+function [img, val] = imarithmetics (func, img, val, out_class, in_args)
 
   is_valid = @(x) ((!isnumeric (x) && !islogical (x)) || isempty (x) || issparse (x) || !isreal (x));
 
@@ -34,9 +34,20 @@ function [img, val] = imarithmetics (func, img, val, out_class)
     error ("%s: third argument must be a string that specifies the output class", func)
   endif
 
-  if (all (size (img) == size (val)) && strcmpi (class (img), class (val)))
+  same_size = all (size (img) == size (val));
+  if (same_size && strcmpi (class (img), class (val)))
     [img, val] = convert (out_class, img, val);
-  elseif (isscalar (val) && isfloat (val))
+
+  ## multiplication doesn't require same input class and output class defaults to
+  ## whatever input class is not logical (first img, then val)
+  elseif (strcmp (func, "immultiply") && same_size)
+    if (in_args > 2)
+      ## user defined, do nothing
+    elseif (islogical (img) && !islogical (val))
+      out_class = class (val);
+    endif
+    [img, val] = convert (out_class, img, val);
+  elseif (isscalar (val) && isfloat (val) && !strcmp (func, "imabsdiff"))
     ## according to matlab's documentation, if val is not an image of same size
     ## and class as img, then it must be a double scalar. But why not also support
     ## a single scalar and use isfloat?
@@ -50,7 +61,7 @@ function [a, b] = convert (out_class, a, b = 0)
   ## in the case that we only want to convert one matrix, this subfunction is called
   ## with 2 arguments only. Then, b takes the value of zero so that the call to the
   ## functions that change the class is insignificant
-  if (!strcmpi (class (a), out_class))
+  if ((nargin == 3 && any (!strcmpi ({class(a), class(b)}, out_class))) || (nargin == 2 && !strcmpi (class (a), out_class)))
     switch tolower (out_class)
       case {"logical"}  a = logical (a); b = logical (b);
       case {"uint8"}    a = uint8   (a); b = uint8   (b);

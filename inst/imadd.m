@@ -23,7 +23,7 @@
 ## to the image @var{a}.
 ##
 ## The class of @var{out} will be the same as @var{a} unless @var{a} is logical
-## in which case @var{out} will be double. Alternatively, the class can be
+## in which case @var{out} will be double. Alternatively, it can be
 ## specified with @var{class}.
 ##
 ## @emph{Note 1}: you can force output class to be logical by specifying
@@ -64,3 +64,10 @@ function img = imadd (img, val, out_class = class (img))
   endif
 
 endfunction
+
+%!assert (imadd (uint8   ([23 250]), uint8   ([23 250])),            uint8   ([46 255])); # default to first class and truncate
+%!assert (imadd (uint8   ([23 250]), 10),                            uint8   ([33 255])); # works adding a scalar
+%!assert (imadd (uint8   ([23 250]), uint8   ([23 250]), "uint16"),  uint16  ([46 500])); # defining output class works
+%!assert (imadd (logical ([ 1   0]), logical ([ 1   1])),            double  ([ 2   1])); # return double for two logical images
+%!assert (imadd (logical ([ 1   0]), logical ([ 1   1]), "logical"), logical ([ 1   1])); # this is matlab incompatible on purpose
+%!fail  ("imadd (uint8   ([23 250]), uint16  ([23 250]))")                                # input need to have same class

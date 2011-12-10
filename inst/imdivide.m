@@ -23,7 +23,7 @@
 ## by it.
 ##
 ## The class of @var{out} will be the same as @var{a} unless @var{a} is logical
-## in which case @var{out} will be double. Alternatively, the class can be
+## in which case @var{out} will be double. Alternatively, it can be
 ## specified with @var{class}.
 ##
 ## @emph{Note}: the values are truncated to the mininum value of the output
@@ -52,3 +52,10 @@ function img = imdivide (img, val, out_class = class (img))
   end_unwind_protect
 
 endfunction
+
+%!assert (imdivide (uint8   ([23 250]), uint8   ([ 2  50])),            uint8   ([ 12   5])); # default to first class
+%!assert (imdivide (uint8   ([56 255]), uint8   ([ 0   0])),            uint8   ([255 255])); # dividing by zero works (tested in matlab)
+%!assert (imdivide (uint8   ([23 250]), 2),                             uint8   ([ 12 125])); # works subtracting a scalar
+%!assert (imdivide (uint8   ([23 250]), uint8   ([ 2  50]), "uint16"),  uint16  ([ 12   5])); # defining output class works (not in matlab)
+%!assert (imdivide (logical ([1 1 0 0]), logical ([1 0 1 0])),          double  ([1 Inf 0 NaN])); # dividing logical matrix  (tested in matlab)
+%!fail  ("imdivide (uint8   ([23 250]), uint16  ([23 250]))")                                 # input needs to have same class

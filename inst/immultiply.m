@@ -23,7 +23,7 @@
 ## multiplie by it.
 ##
 ## The class of @var{out} will be the same as @var{a} unless @var{a} is logical
-## in which case @var{out} will be double. Alternatively, the class can be
+## in which case @var{out} will be double. Alternatively, it can be
 ## specified with @var{class}.
 ##
 ## @emph{Note}: the values are truncated to the mininum value of the output
@@ -36,10 +36,11 @@ function img = immultiply (img, val, out_class = class (img))
   if (nargin < 2 || nargin > 3)
     print_usage;
   endif
-  [img, val] = imarithmetics ("immultiply", img, val, out_class);
+  [img, val] = imarithmetics ("immultiply", img, val, out_class, nargin);
 
-  ## matlab doesn't even gives a warning in this situation, it simply returns
-  ## a double precision float
+  ## have to check how matlab behaves in this situtation. Their documentation
+  ## does not say anything but add and subtract silently ignore it and return
+  ## double anyway. This may be done in the call to imarithmetics
   if (nargin > 2 && strcmpi (out_class, "logical"))
     warning ("Ignoring request to return logical as output of multiplication.");
   endif
@@ -47,3 +48,9 @@ function img = immultiply (img, val, out_class = class (img))
   img = img .* val;
 
 endfunction
+
+%!assert (immultiply (uint8   ([255 50]), uint16  ([300 50])),           uint8  ([255 255]));  # default to first class and truncate
+%!assert (immultiply (uint8   ([250 50]), uint16  ([  3  4]), "uint32"), uint32 ([750 400]));  # defining output class works (not in matlab?)
+%!assert (immultiply (uint8   ([255 50]),                  4),           uint8  ([255 200]));  # works multiplying by a scalar
+%!assert (immultiply (logical ([  1  0]), uint16  ([300 50])),           uint16 ([300   0]));  # output class defaults to whatever input is not logical
+%!assert (immultiply (logical ([  1  0]), logical ([  1  1])),           double ([  1   0]));  # tested on matlab for compatibility
