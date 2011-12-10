@@ -32,7 +32,7 @@
 ##
 ## @emph{Note 2}: the values are truncated to the maximum value of the output
 ## class.
-## @seealso{imcomplement, imdivide, immultiply, imsubtract}
+## @seealso{imabsdiff, imcomplement, imdivide, immultiply, imsubtract}
 ## @end deftypefn
 
 function img = imadd (img, val, out_class = class (img))
@@ -70,4 +70,4 @@ endfunction
 %!assert (imadd (uint8   ([23 250]), uint8   ([23 250]), "uint16"),  uint16  ([46 500])); # defining output class works
 %!assert (imadd (logical ([ 1   0]), logical ([ 1   1])),            double  ([ 2   1])); # return double for two logical images
 %!assert (imadd (logical ([ 1   0]), logical ([ 1   1]), "logical"), logical ([ 1   1])); # this is matlab incompatible on purpose
-%!fail  ("imadd (uint8   ([23 250]), uint16  ([23 250]))")                                # input need to have same class
+%!fail  ("imadd (uint8   ([23 250]), uint16  ([23 250]))");                               # input need to have same class

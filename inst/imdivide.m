@@ -28,7 +28,7 @@
 ##
 ## @emph{Note}: the values are truncated to the mininum value of the output
 ## class.
-## @seealso{imadd, imcomplement, immultiply, imsubtract}
+## @seealso{imabsdiff, imadd, imcomplement, immultiply, imsubtract}
 ## @end deftypefn
 
 function img = imdivide (img, val, out_class = class (img))
@@ -58,4 +58,4 @@ endfunction
 %!assert (imdivide (uint8   ([23 250]), 2),                             uint8   ([ 12 125])); # works subtracting a scalar
 %!assert (imdivide (uint8   ([23 250]), uint8   ([ 2  50]), "uint16"),  uint16  ([ 12   5])); # defining output class works (not in matlab)
 %!assert (imdivide (logical ([1 1 0 0]), logical ([1 0 1 0])),          double  ([1 Inf 0 NaN])); # dividing logical matrix  (tested in matlab)
-%!fail  ("imdivide (uint8   ([23 250]), uint16  ([23 250]))")                                 # input needs to have same class
+%!fail  ("imdivide (uint8   ([23 250]), uint16  ([23 250]))");                                # input needs to have same class

@@ -46,7 +46,7 @@
 ##
 ## Because both 190 and 200 were truncated to 127 before subtraction, their difference
 ## is zero.
-## @seealso{imadd, imcomplement, imdivide, immultiply}
+## @seealso{imabsdiff, imadd, imcomplement, imdivide, immultiply}
 ## @end deftypefn
 
 function img = imsubtract (img, val, out_class = class (img))
@@ -80,4 +80,4 @@ endfunction
 %!assert (imsubtract (uint8   ([23 250]), uint8   ([24 255]), "int8"),    int8    ([-1   0])); # signed integers kinda work (not in matlab)
 %!assert (imsubtract (logical ([ 1   0]), logical ([ 1   1])),            double  ([ 0  -1])); # return double for two logical images
 %!assert (imsubtract (logical ([ 1   0]), logical ([ 1   1]), "logical"), logical ([ 0   0])); # this is matlab incompatible on purpose
-%!fail  ("imsubtract (uint8   ([23 250]), uint16  ([23 250]))")                                # input need to have same class
+%!fail  ("imsubtract (uint8   ([23 250]), uint16  ([23 250]))");                               # input need to have same class
