@@ -22,6 +22,8 @@ Analysis and Statistics
 Arithmetics
  imadd
  imcomplement
+ imdivide
+ immultiply
  imsubtract
 Black and white image functions
  applylut
