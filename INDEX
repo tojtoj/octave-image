@@ -24,6 +24,7 @@ Arithmetics
  imadd
  imcomplement
  imdivide
+ imlincomb
  immultiply
  imsubtract
 Black and white image functions

@@ -31,7 +31,7 @@
 ##
 ## @emph{Note 2}: the values are truncated to the mininum value of the output
 ## class.
-## @seealso{imadd, imcomplement, imdivide, immultiply, imsubtract}
+## @seealso{imadd, imcomplement, imdivide, imlincomb, immultiply, imsubtract}
 ## @end deftypefn
 
 function img = imabsdiff (img, val, out_class = class (img))

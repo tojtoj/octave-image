@@ -32,7 +32,7 @@
 ##
 ## @emph{Note 2}: the values are truncated to the maximum value of the output
 ## class.
-## @seealso{imabsdiff, imcomplement, imdivide, immultiply, imsubtract}
+## @seealso{imabsdiff, imcomplement, imdivide, imlincomb, immultiply, imsubtract}
 ## @end deftypefn
 
 function img = imadd (img, val, out_class = class (img))

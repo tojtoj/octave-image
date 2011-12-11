@@ -10,6 +10,7 @@ Summary of important user-visible changes for image 1.1.0:
       imadd
       imbothat
       imdivide
+      imlincomb
       immultiply
       imsubtract
       iptcheckconn

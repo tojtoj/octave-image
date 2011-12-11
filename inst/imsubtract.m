@@ -46,7 +46,7 @@
 ##
 ## Because both 190 and 200 were truncated to 127 before subtraction, their difference
 ## is zero.
-## @seealso{imabsdiff, imadd, imcomplement, imdivide, immultiply}
+## @seealso{imabsdiff, imadd, imcomplement, imdivide, imlincomb, immultiply}
 ## @end deftypefn
 
 function img = imsubtract (img, val, out_class = class (img))

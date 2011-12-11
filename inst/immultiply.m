@@ -28,7 +28,7 @@
 ##
 ## @emph{Note}: the values are truncated to the mininum value of the output
 ## class.
-## @seealso{imabsdiff, imadd, imcomplement, imdivide, imsubtract}
+## @seealso{imabsdiff, imadd, imcomplement, imdivide, imlincomb, imsubtract}
 ## @end deftypefn
 
 function img = immultiply (img, val, out_class = class (img))
