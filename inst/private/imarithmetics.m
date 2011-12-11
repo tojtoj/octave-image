@@ -26,10 +26,8 @@ function [img, val] = imarithmetics (func, img, val, out_class, in_args)
 
   is_valid = @(x) ((!isnumeric (x) && !islogical (x)) || isempty (x) || issparse (x) || !isreal (x));
 
-  if (is_valid (img))
-    error ("%s: first argument must be a numeric or logical, non-empty, non-sparse real matrix", func)
-  elseif (is_valid (img))
-    error ("%s: second argument must be a numeric, non-empty, non-sparse real matrix", func)
+  if (is_valid (img) || is_valid (val))
+    error ("%s: input must be a numeric or logical, non-empty, non-sparse real matrix", func)
   elseif (!ischar (out_class))
     error ("%s: third argument must be a string that specifies the output class", func)
   endif
