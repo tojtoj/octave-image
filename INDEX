@@ -16,6 +16,7 @@ Analysis and Statistics
  hough_line
  hough_circle
  immaximas
+ normxcorr2
  rangefilt
  regionprops
  stdfilt
