@@ -47,10 +47,10 @@ the different distances and angles to use.\n\
     octave_value_list retval;
 
     if (args.length() != 4) {
-	print_usage ();
-	// 'I' must be integer values [0, nr_of_levels-1]
+        print_usage ();
+        // 'I' must be integer values [0, nr_of_levels-1]
 
-	return retval;
+        return retval;
     }
 
     // Input arguments
@@ -60,8 +60,8 @@ the different distances and angles to use.\n\
     ColumnVector th = ColumnVector(args(3).vector_value());
 
     if (error_state) {
-	print_usage ();
-	return retval;
+        print_usage ();
+        return retval;
     }
 
     // Create output NDArray, P
@@ -75,42 +75,42 @@ the different distances and angles to use.\n\
     //int cnt = 0; //unused
 
     for (int r = 0; r < I.rows(); r++) {
-	for (int c = 0; c < I.columns(); c++) {
-	    OCTAVE_QUIT;
-	    
-	    int i = (int)I(r,c);
+        for (int c = 0; c < I.columns(); c++) {
+            OCTAVE_QUIT;
+            
+            int i = (int)I(r,c);
 
-	    for (int d_idx = 0; d_idx < d.length(); d_idx++) {
-		int d_val = (int)d(d_idx);
-		for (int th_idx = 0; th_idx < th.length(); th_idx++) {
-		    
-		    double angle = th(th_idx);
-		    
-		    int row = r + (int)floor(cos(angle) * d_val + 0.5);
-		    int col = c - (int)floor(sin(angle) * d_val + 0.5);
+            for (int d_idx = 0; d_idx < d.length(); d_idx++) {
+                int d_val = (int)d(d_idx);
+                for (int th_idx = 0; th_idx < th.length(); th_idx++) {
+                    
+                    double angle = th(th_idx);
+                    
+                    int row = r + (int)floor(cos(angle) * d_val + 0.5);
+                    int col = c - (int)floor(sin(angle) * d_val + 0.5);
 
-		    if ( ( row >= 0 ) && ( row < I.rows() ) &&
-			 ( col >= 0 ) && ( col < I.cols() ) ) {
+                    if ( ( row >= 0 ) && ( row < I.rows() ) &&
+                         ( col >= 0 ) && ( col < I.cols() ) ) {
 
-			int j = (int)I(row, col);
+                        int j = (int)I(row, col);
 
-			if (i >= 0 && i < L && j >= 0 && j < L) {
-			    Array<int> coord (4, 1);
-			    coord (0, 0) = i;
-			    coord (1, 0) = j;
-			    coord (2, 0) = d_idx;
-			    coord (3, 0) = th_idx;
-			    
-			    P(coord)++;			    
-			} else {
-			    warning("Image contains invalid gray-level! (%d, %d)", i, j);
-			} 
-		    }
+                        if (i >= 0 && i < L && j >= 0 && j < L) {
+                            Array<int> coord (4, 1);
+                            coord (0, 0) = i;
+                            coord (1, 0) = j;
+                            coord (2, 0) = d_idx;
+                            coord (3, 0) = th_idx;
+                            
+                            P(coord)++;
+                        } else {
+                            warning("Image contains invalid gray-level! (%d, %d)", i, j);
+                        } 
+                    }
 
-		}
-	    }
+                }
+            }
 
-	}
+        }
     }
 
     return octave_value(P);
@@ -145,6 +145,5 @@ the different distances and angles to use.\n\
 %!
 %!  graycomatrix(a, 3, 1, [0 1]*-pi/4)
 %!
-
 
 */
