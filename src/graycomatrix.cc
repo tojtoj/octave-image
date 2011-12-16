@@ -95,7 +95,7 @@ the different distances and angles to use.\n\
                         int j = (int)I(row, col);
 
                         if (i >= 0 && i < L && j >= 0 && j < L) {
-                            Array<int> coord (4, 1);
+                            Array<int> coord (dim_vector (4, 1), 0);
                             coord (0, 0) = i;
                             coord (1, 0) = j;
                             coord (2, 0) = d_idx;
