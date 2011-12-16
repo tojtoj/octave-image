@@ -15,7 +15,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{cc} =} normxcorr2 (@var{template}, @var{img})
-## @deftypefn {Function File} {@var{cc} =} normxcorr2 (@var{template}, @var{img})
+## @deftypefnx {Function File} {@var{cc} =} normxcorr2 (@var{template}, @var{img})
 ## Compute the normalized 2D cross correlation.
 ##
 ## The output matrix @var{cc} shows the correlation coefficients of @var{template}
