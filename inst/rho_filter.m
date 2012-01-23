@@ -124,7 +124,7 @@ function [filtered_proj, filt] = rho_filter (proj, type, scaling)
   elseif (strcmpi (type, 'hamming'))
     filt = fftshift (hamming (length (rho)));
   elseif (strcmpi (type, 'hann'))
-    filt = fftshift (hann (length (rho)));
+    filt = fftshift (hanning (length (rho)));
   elseif (strcmpi (type, 'cosine'))
     f = 0.5 * (0:length (rho) - 1)' / length (rho);
     filt = fftshift (sin (2 * pi * f));
