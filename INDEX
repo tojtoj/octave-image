@@ -50,6 +50,7 @@ Colour maps and Colour controls
  cmunique
  colorgradient
  rgb2ycbcr
+ wavelength2rgb
 Display
  rgbplot
 Enhancement and Restoration

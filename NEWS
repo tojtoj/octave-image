@@ -19,6 +19,7 @@ Summary of important user-visible changes for image 1.1.0:
       iptcheckstrs
       iptnum2ordinal
       normxcorr2
+      wavelength2rgb
 
  ** The following functions have been deprecated in previous releases
     of the image package and have now been removed:
