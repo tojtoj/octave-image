@@ -60,9 +60,9 @@ function rgb = wavelength2rgb (wavelength, intensity_max = 255, gamma = 0.8)
 
   if (nargin < 1 || nargin > 3)
     print_usage;
-  elseif (!isnumeric (wavelength) || !isscalar (wavelength) || wavelength > 0)
+  elseif (!isnumeric (wavelength) || !isscalar (wavelength) || wavelength <= 0)
     error ("wavelength must a positive numeric scalar");
-  elseif (!isnumeric (intensity_max) || !isscalar (intensity_max) || intensity_max > 0)
+  elseif (!isnumeric (intensity_max) || !isscalar (intensity_max) || intensity_max <= 0)
     error ("intensity_max must a positive numeric scalar");
   elseif (!isnumeric (gamma) || !isscalar (gamma) || gamma > 1 || gamma < 0)
     error ("gamma must a numeric scalar between 1 and 0");
