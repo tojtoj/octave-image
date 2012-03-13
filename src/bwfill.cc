@@ -1,14 +1,6 @@
-/*
- * BWFILL: fill a bw image starting at points
- * imo= block(im, xregs, yregs);
- *
- * Copyright (C) 1999 Andy Adler
- * This code has no warrany whatsoever.
- * Do what you like with this code as long as you
- *     leave this copyright in place.
- *
- * $Id$
- */
+// Copyright (C) 1999 Andy Adler
+// This code has no warrany whatsoever.
+// Do what you like with this code as long as you leave this copyright in place.
 
 #include <octave/oct.h>
 
@@ -38,7 +30,7 @@ Perform a flood-fill operation on the binary image @var{bw1}.\n\
 The flood-filling starts in the pixel (@var{r}, @var{c}). If @var{r} and @var{c}\n\
 are vectors of the same length, each pixel pair (@var{r}(i), @var{c}(i)) will\n\
 be a starting point for a flood-fill operation.\n\
-The argument @var{n} changes the neighborhood connectivity for the flood-fill\n\
+The argument @var{n} changes the neighborhood connectivity (of the holes) for the flood-fill\n\
 operation. @var{n} can be either 4 or 8, and has a default value of 8.\n\
 \n\
 The output is the processed image @var{bw2} and the indexes of the filled\n\
@@ -70,6 +62,13 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
   const int imM = im.rows ();
   const int imN = im.columns ();
 
+  if (imM == 1 || imN == 1) // check for vector inputs.
+     {
+       retval (0)= im;
+       retval (1)= ColumnVector (0);
+       return retval;
+     }
+
   int nb = 8;
   int npoints = 0;
   bool fillmode= false;
@@ -85,20 +84,20 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
       for (int j=2; j<= imN-1; j++)
         {
           xseed (idx)   = j;
-          yseed (idx++) = 1;   
+          yseed (idx++) = 1;
           xseed (idx)   = j;
-          yseed (idx++) = imM;   
+          yseed (idx++) = imM;
         }
 
       for (int i=2; i<= imM-1; i++)
         {
           yseed (idx)   = i;
-          xseed (idx++) = 1;   
+          xseed (idx++) = 1;
           yseed (idx)   = i;
-          xseed (idx++) = imN;   
+          xseed (idx++) = imN;
         }
 
-      if (nargin >= 4)
+      if (nargin >= 3)
          nb = (int)args (2).double_value ();
      }
   else // end: holes mode?
@@ -122,9 +121,9 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
        yseed = tmp;
       }
       npoints= xseed.length ();
-      if (nargin >= 4) 
+      if (nargin >= 4)
         nb = (int)args (3).double_value ();
-  } // holes mode? 
+  } // holes mode?
 
 /*
  * put a one pixel thick boundary around the image
@@ -133,7 +132,7 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
   int ioM = imM + 2;
   OCTAVE_LOCAL_BUFFER (unsigned char, imo, (imM+2) * (imN+2));
 
-  for (int i = 0; i < imM; i++) 
+  for (int i = 0; i < imM; i++)
     for (int j = 0; j < imN; j++)
       imo [(i+1) + ioM*(j+1)] = (im (i, j) > 0);
 
@@ -144,10 +143,10 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
     imo [ioM*j]= imo[imM+1 + ioM*j] = 3;
 
   // This is obviously big enough for the point stack, but I'm
-  // sure it can be smaller. 
+  // sure it can be smaller.
   OCTAVE_LOCAL_BUFFER (int, ptstack, ioM*imN);
 
-  int seedidx = npoints; 
+  int seedidx = npoints;
   npoints= 0;
   while ( (--seedidx) >= 0 )
     {
@@ -159,7 +158,7 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
           warning ("bwfill: (%d, %d) out of bounds", x, y);
           continue;
         }
-      const int pt = x * ioM + y; 
+      const int pt = x * ioM + y;
       checkpoint (pt , imo, ptstack, &npoints);
     }
 
@@ -194,7 +193,7 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
       idxpoint   = 0;
     }
 
-  for (int i = 0; i < imM; i++) 
+  for (int i = 0; i < imM; i++)
     for (int j = 0; j < imN; j++)
       {
         imout (i, j) = (double) (imo [(i+1) + ioM*(j+1)] != notvalidpt);
@@ -204,78 +203,16 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
 
   /*
   Matrix imout( imM+2, imN+2 );
-  for (int i=0; i<imM+2; i++) 
+  for (int i=0; i<imM+2; i++)
     for (int j=0; j<imN+2; j++)
       imout(i,j) = (double) imo[i + ioM*j];
   */
 
   retval (0)= imout;
   // we need to do this to be able to return a proper empty vector
-  if (idx > 0) 
+  if (idx > 0)
     retval (1)= idxout.extract (0, idx-1);
   else
     retval (1)= ColumnVector (0);
   return retval;
 }
-
-
-/*
- * $Log$
- * Revision 1.3  2007/01/04 21:58:50  hauberg
- * Texinfo-fication of the help texts
- *
- * Revision 1.2  2006/08/23 23:58:45  adb014
- * remove cruft of #ifdef
- *
- * Revision 1.1  2006/08/20 12:59:36  hauberg
- * Changed the structure to match the package system
- *
- * Revision 1.7  2006/05/19 06:58:50  jwe
- * *** empty log message ***
- *
- * Revision 1.5  2003/05/15 21:25:40  pkienzle
- * OCTAVE_LOCAL_BUFFER now requires #include <memory>
- *
- * Revision 1.4  2003/03/05 15:31:52  pkienzle
- * Backport to octave-2.1.36
- *
- * Revision 1.3  2003/02/20 23:03:57  pkienzle
- * Use of "T x[n]" where n is not constant is a g++ extension so replace it with
- * OCTAVE_LOCAL_BUFFER(T,x,n), and other things to keep the picky MipsPRO CC
- * compiler happy.
- *
- * Revision 1.2  2002/11/02 10:39:36  pkienzle
- * gcc 3.2 wants \n\ for multi-line strings.
- *
- * Revision 1.1  2002/03/17 02:38:51  aadler
- * fill and edge detection operators
- *
- * Revision 1.9  2000/06/16 20:22:47  aadler
- * mods for 2.1/2.0 compat
- *
- * Revision 1.8  2000/06/13 17:27:24  aadler
- * mods for 2.1.30
- *
- * Revision 1.7  1999/06/10 19:42:12  aadler
- * minor verbose fix
- *
- * Revision 1.6  1999/06/08 16:30:30  aadler
- * bug fix. reversed r,c input arguments
- *
- * Revision 1.5  1999/06/08 15:41:02  aadler
- * now fills in holes
- *
- * Revision 1.4  1999/06/08 15:21:02  aadler
- * fixed bug that so specified points are only used if they can fill
- *
- * Revision 1.3  1999/06/08 15:05:08  aadler
- * now returns 1 and gives index output
- *
- * Revision 1.2  1999/06/04 21:58:57  aadler
- * fixed 8 vs 4 neighborhood
- *
- * Revision 1.1  1999/06/04 21:43:20  aadler
- * Initial revision
- *
- *
- */
