@@ -33,38 +33,36 @@
 ## @seealso{conv2}
 ## @end deftypefn
 
-## Author: Stefan van der Walt <stefan@sun.ac.za>
-## Date: 2004
-
 function X = fftconv2(varargin)
     if (nargin < 2)
-	usage("fftconv2(a,b[,shape]) or fftconv2(v1, v2, a, shape)")
+      print_usage;
     endif
 
     shape = "full";
     rowcolumn = 0;
     
-    if ((nargin > 2) && ismatrix(varargin{3}))
-	## usage: fftconv2(v1, v2, a[, shape])
+    if ((nargin > 2) && ismatrix(varargin{3}) && !ischar(varargin{3}))
 
-	rowcolumn = 1;
-	v1 = varargin{1}(:)';
-	v2 = varargin{2}(:);
-	orig_a = varargin{3};
-	
-	if (nargin == 4) shape = varargin{4}; endif
+        ## usage: fftconv2(v1, v2, a[, shape])
+
+        rowcolumn = 1;
+        v1 = varargin{1}(:)';
+        v2 = varargin{2}(:);
+        orig_a = varargin{3};
+
+        if (nargin == 4) shape = varargin{4}; endif
     else
-	## usage: fftconv2(a, b[, shape])
-	
-	a = varargin{1};
-	b = varargin{2};
-	if (nargin == 3) shape = varargin{3}; endif
+        ## usage: fftconv2(a, b[, shape])
+
+        a = varargin{1};
+        b = varargin{2};
+        if (nargin == 3) shape = varargin{3}; endif
 
     endif
 
     if (rowcolumn)
-	a = fftconv2(orig_a, v2);
-	b = v1;
+        a = fftconv2(orig_a, v2);
+        b = v1;
     endif
     
     ra = rows(a);
@@ -78,18 +76,18 @@ function X = fftconv2(varargin)
     X = ifft2(A.*B);
 
     if (rowcolumn)
-	rb = rows(v2);
-	ra = rows(orig_a);
-	cb = columns(v1);
-	ca = columns(orig_a);
+        rb = rows(v2);
+        ra = rows(orig_a);
+        cb = columns(v1);
+        ca = columns(orig_a);
     endif
     
     if strcmp(shape,"same")
-	r_top = ceil((rb + 1) / 2);
-	c_top = ceil((cb + 1) / 2);
-	X = X(r_top:r_top + ra - 1, c_top:c_top + ca - 1);
+        r_top = ceil((rb + 1) / 2);
+        c_top = ceil((cb + 1) / 2);
+        X = X(r_top:r_top + ra - 1, c_top:c_top + ca - 1);
     elseif strcmp(shape, "valid")
-	X = X(rb:ra, cb:ca);
+        X = X(rb:ra, cb:ca);
     endif
 endfunction
 
@@ -130,5 +128,3 @@ endfunction
 %!
 %! ## Convolve the cross with the blob
 %! imshow(real(fftconv2(z, b, 'same')*N))
-
-
