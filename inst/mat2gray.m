@@ -15,8 +15,25 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {@var{I} =} mat2gray (@var{M}, [@var{min} @var{max}])
-## Converts a matrix to a intensity image.
+## @deftypefn {Function File} {@var{I} =} mat2gray (@var{M})
+## @deftypefnx {Function File} {@var{I} =} mat2gray (@var{M}, [@var{min} @var{max}])
+## Convert a matrix to an intensity image.
+##
+## The returned matrix @var{I} is a grayscale image, of double class and in the
+## range of values [0, 1]. The optional arguments @var{min} and @var{max} will
+## set the limits of the conversion; values in @var{M} below @var{min} and
+## above @var{max} will be set to 0 and 1 on @var{I} respectively.
+##
+## @var{max} and @var{min} default to the maximum and minimum values of @var{M}.
+##
+## If @var{min} is larger than @var{max}, the `inverse' will be returned. Values
+## in @var{M} above @var{max} will be set to 0 while the ones below @var{min}
+## will be set to 1.
+##
+## @strong{Caution:} For compatibility with @sc{matlab}, Octave's mat2gray
+## will return a matrix of ones if @var{min} and @var{max} are equal, even for
+## values below @var{min}.
+##
 ## @seealso{gray2ind, ind2gray, rgb2gray, im2double, im2uin16, im2uint8, im2int16}
 ## @end deftypefn
 
