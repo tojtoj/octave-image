@@ -1,33 +1,17 @@
-/* ---------------------------------------------------------------------
-
-    bwimage.cc - octave module to label componenets of a binary image
-
-    copyright 2002 Jeffrey E. Boyd
-
-    - uses 4, 6, or 8 connectedness
-    - See BKP Horn, Robot Vision, MIT Press, 1986, p 66 - 71
-
-    labeling scheme
-
-        +-+-+-+
-        |D|C|E|
-        +-+-+-+
-        |B|A| |
-        +-+-+-+
-        | | | |
-        +-+-+-+
-
-    A is the center pixel of a neighborhood.  In the 3 versions of
-    connectedness:
-
-    4:  A connects to B and C
-    6:  A connects to B, C, and D
-    8:  A connects to B, C, D, and E
-
-
---------------------------------------------------------------------- */
-
-
+//Copyright (C) 2002 Jeffrey E. Boyd <boyd@cpsc.ucalgary.ca>
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; either version 3 of the License, or (at your option) any later
+// version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+// details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, see <http://www.gnu.org/licenses/>.
 
 #include <oct.h>
 #include <algorithm>
