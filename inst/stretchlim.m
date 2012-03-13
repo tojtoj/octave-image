@@ -1,4 +1,4 @@
-## Copyright (C) 2004 Josep Mones i Teixidor
+## Copyright (C) 2004 Josep Mones i Teixidor <jmones@puntbarra.com>
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -66,14 +66,12 @@
 ## @seealso{imadjust}
 ## @end deftypefn
 
-## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
-
 function LOW_HIGH = stretchlim(image, TOL)
   if (nargin<1 || nargin>2)
-    usage("LOW_HIGH=stretchlim(I [, TOL]), LOW_HIGH=stretchlim(RGB [, TOL])");
+    print_usage;
   endif
   
-  if(!ismatrix(image))
+  if(!ismatrix(image) || ischar(image))
     error("stretchlim: image should be a matrix");
   endif
   
@@ -84,13 +82,13 @@ function LOW_HIGH = stretchlim(image, TOL)
   else
     if(isscalar(TOL))
       if(TOL<0 || TOL>=0.5)
-	error("stretchlim: TOL out of bounds. Expected: 0<=TOL<0.5");
+        error("stretchlim: TOL out of bounds. Expected: 0<=TOL<0.5");
       endif
       low_count=TOL;
       high_count=TOL;               ## as before...
     elseif(isvector(TOL))
       if(length(TOL)!=2)
-	error("stretchlim: TOL length must be 2.");
+        error("stretchlim: TOL length must be 2.");
       endif
       low_count=TOL(1);
       high_count=1-TOL(2);          ## as before...
@@ -106,7 +104,7 @@ function LOW_HIGH = stretchlim(image, TOL)
   psimage=prod(simage(1:2));
   low_count*=psimage;
   high_count*=psimage;
-	 
+
   if(length(simage)<=2)
     ## intensity
     LOW_HIGH=__stretchlim_plane__(image, low_count, high_count);
@@ -114,8 +112,8 @@ function LOW_HIGH = stretchlim(image, TOL)
     ## RGB
     LOW_HIGH=zeros(2,3);
     for i=1:3
-      LOW_HIGH(:,i)=__stretchlim_plane__(image(:,:,i), low_count, \
-					 high_count);
+      LOW_HIGH(:,i)=__stretchlim_plane__(image(:,:,i), low_count, ...
+                                         high_count);
     endfor
   else
     error("stretchlim: invalid image.");
@@ -142,7 +140,7 @@ function LOW_HIGH = __stretchlim_plane__(plane, low_count, high_count)
       d1=low_count-sum(sorted<low);
       d2=sum(sorted<low2)-low_count;
       if(d2<d1)
-	low=low2;
+        low=low2;
       endif
     endif
       
@@ -153,7 +151,7 @@ function LOW_HIGH = __stretchlim_plane__(plane, low_count, high_count)
       d1=high_count-sum(sorted>high);
       d2=sum(sorted>high2)-high_count;
       if(d2<d1)
-	high=high2;
+        high=high2;
       endif
     endif
 
@@ -205,4 +203,3 @@ endfunction
 %! RGB(:,:,2)=[2:2:200];
 %! RGB(:,:,3)=[4:4:400];
 %! assert(stretchlim(RGB),[2,4,8;99,198,396]);
-
