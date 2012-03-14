@@ -303,10 +303,10 @@ sorted list containing the elements of the neighbourhood. The value of @math{n}\
 is given in the @var{arg} argument. The corresponding user interface is available\n\
 in @code{ordfilt2} and @code{ordfiltn}.\n\
 @item \"std\"\n\
-Compute the local standard deviation. The correponding user interface is available\n\
+Compute the local standard deviation. The corresponding user interface is available\n\
 in @code{stdfilt}.\n\
 @item \"entropy\"\n\
-Compute the local entropy. The correponding user interface is available\n\
+Compute the local entropy. The corresponding user interface is available\n\
 in @code{entropyfilt}.\n\
 @item \"range\"\n\
 Compute the local range of the data. The corresponding user interface is\n\
