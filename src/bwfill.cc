@@ -25,7 +25,7 @@ void checkpoint (int pt, unsigned char *imo, int *ptstack, int *npoints)
 
 DEFUN_DLD (bwfill, args, ,"\
 -*- texinfo -*-\n\
-@deftypefn {Function File} {[@var{bw2}, @var{idx}] =} bwfill(@var{bw1}, @var{c}, @var{r}, @var{n})\n\
+@deftypefn {Loadable Function} {[@var{bw2}, @var{idx}] =} bwfill(@var{bw1}, @var{c}, @var{r}, @var{n})\n\
 Perform a flood-fill operation on the binary image @var{bw1}.\n\
 The flood-filling starts in the pixel (@var{r}, @var{c}). If @var{r} and @var{c}\n\
 are vectors of the same length, each pixel pair (@var{r}(i), @var{c}(i)) will\n\
@@ -35,7 +35,7 @@ operation. @var{n} can be either 4 or 8, and has a default value of 8.\n\
 \n\
 The output is the processed image @var{bw2} and the indexes of the filled\n\
 pixels @var{idx}\n\
-@deftypefnx{Function File} {[@var{bw2}, @var{idx}] =} bwfill(@var{bw1}, \"holes\", @var{n})\n\
+@deftypefnx{Loadable Function} {[@var{bw2}, @var{idx}] =} bwfill(@var{bw1}, \"holes\", @var{n})\n\
 If the string \"holes\" is given instead of starting points for the flood-fill\n\
 operation, the function finds interior holes in @var{bw1} and fills them.\n\
 @end deftypefn\n\

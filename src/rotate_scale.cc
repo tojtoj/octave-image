@@ -31,7 +31,7 @@ do_interpolation (
 
 DEFUN_DLD (rotate_scale, args, , "\
 -*- texinfo -*-\n\
-@deftypefn {Function File} {@var{im1} =} rotate_scale(@var{im0}, @var{lm0}, @var{lm1}, @var{out_size})\n\
+@deftypefn {Loadable Function} {@var{im1} =} rotate_scale(@var{im0}, @var{lm0}, @var{lm1}, @var{out_size})\n\
 Arbitrary rotation and scaling of a gray-scale image using fast bilinear interpolation.\n\
 \n\
 The image @var{im0} will be rotated and scaled such that the landmark points in\n\

@@ -47,13 +47,13 @@ static bool any_bad_argument(const octave_value_list& args) {
 
 DEFUN_DLD(nonmax_supress,args,nargout,"\
 -*- texinfo -*-\n\
-@deftypefn {Function File} nonmax_supress (@var{Es}, @var{Eo})\n\
+@deftypefn {Loadable Function} nonmax_supress (@var{Es}, @var{Eo})\n\
 Performs non-maximum supression on the given edge data. \
 @var{Es} is a matrix containing the edge strength (the length of \
 the gradient), and @var{Eo} is the edge normal orientation (the \
 direction of the gradient).\n\
 \n\
-@deftypefnx {Function File} nonmax_supress (@var{Es}, @var{Eo},\
+@deftypefnx {Loadable Function} nonmax_supress (@var{Es}, @var{Eo},\
  @var{low}, @var{high} )\n\
 Performs non-maximum supression and hysteresis thresholdong, using \
 @var{low} and @var{high} as thresholds.\n\

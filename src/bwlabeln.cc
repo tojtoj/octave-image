@@ -214,7 +214,7 @@ populate_neighbours(const boolNDArray& conn_mask)
 
 DEFUN_DLD(bwlabeln, args, , "\
 -*- texinfo -*-\n\
-@deftypefn {Function File} {[@var{l}, @var{num}] =} bwlabeln(@var{bw}, @var{n})\n\
+@deftypefn {Loadable Function} {[@var{l}, @var{num}] =} bwlabeln(@var{bw}, @var{n})\n\
 Label foreground objects in the n-dimensional binary image @var{bw}.\n\
 \n\
 The optional argument @var{n} sets the connectivity and defaults 26.\n\

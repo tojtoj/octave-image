@@ -27,8 +27,8 @@ using namespace std;
 
 DEFUN_DLD(__boundary__, args, nargout,
 "-*- texinfo -*-\n\
-@deftypefn {Function File} {@var{b} = } boundary(@var{region})\n\
-@deftypefnx {Function File} {@var{b} = } boundary(@var{region}, @var{conn})\n\
+@deftypefn {Loadable Function} {@var{b} = } boundary(@var{region})\n\
+@deftypefnx {Loadable Function} {@var{b} = } boundary(@var{region}, @var{conn})\n\
 Trace the boundary of an object in a binary image.\n\
 \n\
 @code{boundary} computes the exterior clockwise boundary of the single \

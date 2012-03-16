@@ -61,7 +61,7 @@ static bool any_bad_argument (const octave_value_list& args)
 
 DEFUN_DLD(bwlabel, args, , "\
 -*- texinfo -*-\n\
-@deftypefn {Function File} {[@var{l}, @var{num}] =} bwlabel(@var{bw}, @var{n})\n\
+@deftypefn {Loadable Function} {[@var{l}, @var{num}] =} bwlabel(@var{bw}, @var{n})\n\
 Labels foreground objects in the binary image @var{bw}.\n\
 The output @var{l} is a matrix where 0 indicates a background pixel,\n\
 1 indicates that the pixel belong to object number 1, 2 that the pixel\n\

@@ -26,7 +26,7 @@
 
 DEFUN_DLD(graycomatrix, args, , "\
 -*- texinfo -*-\n\
-@deftypefn {Function File} {@var{P} =} graycomatrix(@var{im}, @var{levels}, @var{distances}, @var{angles})\n\
+@deftypefn {Loadable Function} {@var{P} =} graycomatrix(@var{im}, @var{levels}, @var{distances}, @var{angles})\n\
 Calculates the gray-level co-occurrence matrix @var{P} of a gray-level image @var{im}.\n\
 \n\
 @var{P} is a 4-dimensional matrix (histogram). The value @var{P}(@var{i},@var{j},@var{d},@var{theta})\n\
