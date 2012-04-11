@@ -36,10 +36,10 @@
 ## @seealso{im2bw, im2uint16, im2uint8}
 ## @end deftypefn
 
-function im = im2double (im, ind = false)
+function im = im2double (im, indexed = false)
 
   ## Input checking (private function that is used for all im2class functions)
-  im_class = imconversion (nargin, "im2double", ind, im);
+  im_class = imconversion (nargin, "im2double", indexed, im);
 
   switch im_class
     case "double"
@@ -47,9 +47,9 @@ function im = im2double (im, ind = false)
     case {"logical", "single"}
       im = double (im);
     case {"uint8", "uint16"}
-      if (ind)
+      if (indexed)
         im = double (im) + 1;
-      elseif (isind (im))
+      else
         im = double (im) / double (intmax (im_class));
       endif
     case "int16"
