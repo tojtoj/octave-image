@@ -1,4 +1,3 @@
-## Copyright (C) 2007 Søren Hauberg <soren@hauberg.org>
 ## Copyright (C) 2012 Carnë Draug <carandraug+dev@gmail.com>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
@@ -15,9 +14,9 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} @var{im2} = im2double (@var{im1})
-## @deftypefnx {Function File} @var{im2} = im2double (@var{im1}, "indexed")
-## Convert input image @var{im1} to double precision.
+## @deftypefn {Function File} @var{im2} = im2single (@var{im1})
+## @deftypefnx {Function File} @var{im2} = im2single (@var{im1}, "indexed")
+## Convert input image @var{im1} to single precision.
 ##
 ## The following images type are supported: double, single, uint8, uint16, int16,
 ## binary (logical), indexed. If @var{im1} is an indexed images, the second
@@ -27,43 +26,43 @@
 ## @itemize @bullet
 ## @item uint8, uint16, int16 - output will be rescaled for the interval [0 1]
 ## with the limits of the class;
-## @item double - output will be the same as input;
-## @item single - output will have the same values as input but the class will
-## double;
-## @item indexed, logical - converted to double class.
+## @item single - output will be the same as input;
+## @item double - output will have the same values as input but the class will
+## single;
+## @item indexed, logical - converted to single class.
 ## @end itemize
 ##
 ## @seealso{im2bw, im2uint16, im2uint8}
 ## @end deftypefn
 
-function im = im2double (im, indexed = false)
+function im = im2single (im, indexed = false)
 
   ## Input checking (private function that is used for all im2class functions)
-  im_class = imconversion (nargin, "im2double", indexed, im);
+  im_class = imconversion (nargin, "im2single", indexed, im);
 
   ## READ BEFORE MAKE CHANGES:
-  ## this function is pretty much the same as im2single. Any changes on this code
+  ## this function is pretty much the same as im2double. Any changes on this code
   ## should most likely also be done there
 
   switch im_class
-    case "double"
+    case "single"
       ## do nothing, return the same
-    case {"logical", "single"}
-      im = double (im);
+    case {"logical", "double"}
+      im = single (im);
     case {"uint8", "uint16"}
       if (indexed)
-        im = double (im) + 1;
+        im = single (im) + 1;
       else
-        im = double (im) / double (intmax (im_class));
+        im = single (im) / single (intmax (im_class));
       endif
     case "int16"
-      im = (double (im) + double (intmax (im_class)) + 1) / double (intmax ("uint16"));
+      im = (single (im) + single (intmax (im_class)) + 1) / single (intmax ("uint16"));
     otherwise
       error ("unsupported image class %s", im_class);
   endswitch
 endfunction
 
-%!assert(im2double([1 2 3]), [1 2 3]);                  # double returns the same
-%!assert(im2double(uint8([0 255])), [0 1]);             # basic usage
-%!assert(im2double(uint8([1 25]), "indexed"), [2 26]);  # test indexed
-%!assert(im2double(int16([-32768 32768])), [0 1]);      # test signed integer
+%!assert(im2single([1 2 3]), single([1 2 3]));                  # double returns the same
+%!assert(im2single(uint8([0 255])), single([0 1]));             # basic usage
+%!assert(im2single(uint8([1 25]), "indexed"), single([2 26]));  # test indexed
+%!assert(im2single(int16([-32768 32768])), single([0 1]));      # test signed integer
