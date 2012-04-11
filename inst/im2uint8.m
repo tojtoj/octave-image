@@ -1,47 +1,83 @@
-## Copyright (C) 2007  Søren Hauberg
-## 
-## This program is free software; you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 2, or (at your option)
-## any later version.
-## 
-## This program is distributed in the hope that it will be useful, but
-## WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-## General Public License for more details. 
-## 
-## You should have received a copy of the GNU General Public License
-## along with this file.  If not, see <http://www.gnu.org/licenses/>.
+## Copyright (C) 2007 Søren Hauberg <soren@hauberg.org>
+## Copyright (C) 2012 Carnë Draug <carandraug+dev@gmail.com>
+##
+## This program is free software; you can redistribute it and/or modify it under
+## the terms of the GNU General Public License as published by the Free Software
+## Foundation; either version 3 of the License, or (at your option) any later
+## version.
+##
+## This program is distributed in the hope that it will be useful, but WITHOUT
+## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+## details.
+##
+## You should have received a copy of the GNU General Public License along with
+## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} @var{im2} = im2uint8(@var{im1})
-## Converts the input image to an image of class uint8.
+## @deftypefn {Function File} @var{im2} = im2uint8 (@var{im1})
+## @deftypefnx {Function File} @var{im2} = im2uint8 (@var{im1}, "indexed")
+## Convert input image @var{im1} to uint16 precision.
 ##
-## If the input image is of class uint8 the output is unchanged.
-## If the input is of class double the result will be multiplied
-## by 255 and converted to uint8, and if the input is of class uint16 the
-## image will be divided by 257 and converted to uint8.
+## The following images type are supported: double, single, uint8, uint16, int16,
+## binary (logical), indexed. If @var{im1} is an indexed images, the second
+## argument must be a string with the value `indexed'.
+##
+## Processing will depend on the class of the input image @var{im1}:
+## @itemize @bullet
+## @item uint8 - returns the same as input
+## @item uint16, double, single, int16, logical - output will be rescaled for the
+## interval of the uint8 class [0 255]
+## @item indexed - depends on the input class. No value can be above the max of
+## the uint8 class (255).
+## @end itemize
+##
 ## @seealso{im2bw, im2uint16, im2double}
 ## @end deftypefn
 
-function im2 = im2uint8(im1)
-  ## Input checking
-  if (nargin < 1)
-    print_usage();
+function im = im2uint8 (im, indexed = false)
+
+  ## Input checking (private function that is used for all im2class functions)
+  im_class = imconversion (nargin, "im2uint8", indexed, im);
+
+  if (indexed)
+    imax = max (im(:));
+    if (imax > intmax ("uint8"))
+      error ("Too many colors '%d' for an indexed uint8 image", imax);
+    endif
   endif
-  if (!isgray(im1) && !isrgb(im1))
-    error("im2uint8: input must be an image");
-  endif
-  
-  ## Take action depending on the class of the data
-  switch (class(im1))
-    case "double"
-      im2 = uint8(255*im1);
+
+  switch im_class
     case "uint8"
-      im2 = im1;
+      ## do nothing, return the same
+    case {"single", "double"}
+      if (indexed)
+        im = uint8 (im) - 1;
+      else
+        im = uint8 (im * double (intmax ("uint8")));
+      endif
+    case "logical"
+      im = uint8 (im) * intmax ("uint8");
     case "uint16"
-      im2 = uint8(im1/257);
+      if (indexed)
+        im = uint8 (im);
+      else
+        ## 257 is the ratio between the max of uint8 and uint16
+        ## double (intmax ("uint16")) / double (intmax ("uint8")) == 257
+        im = uint8 (im / 257);
+      endif
+    case "int16"
+      im = uint8 ((double (im) + double (intmax (im_class)) + 1) / 257);
     otherwise
-      error("im2uint8: unsupported image class");
+      error ("unsupported image class %s", im_class);
   endswitch
+
 endfunction
+
+%!assert(im2uint8(uint8([1 2 3])), uint8([1 2 3]));               # uint16 returns the same
+%!assert(im2uint8(uint16([0 65535])), uint8([0 255]));            # basic usage with uint16
+%!assert(im2uint8([0 0.5 1]), uint8([0 128 255]));                # basic usage with double
+%!assert(im2uint8([1 2]), uint8([255 255]));                      # for double, above 1 is same as 1
+%!assert(im2uint8(uint16([3 25]), "indexed"), uint8([3 25]));     # test indexed uint8
+%!assert(im2uint8([3 25], "indexed"), uint8([2 24]));             # test indexed double
+%!assert(im2uint8(int16([-32768 0 32768])), uint8([0 128 255]));  # test signed integer

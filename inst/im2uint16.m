@@ -45,7 +45,7 @@ function im = im2uint16 (im, indexed = false)
       ## do nothing, return the same
     case {"single", "double"}
       if (indexed)
-        imax = max( im(:));
+        imax = max (im(:));
         if ( imax > intmax ("uint16"))
           error ("Too many colors '%d' for an indexed uint16 image", imax);
         endif
