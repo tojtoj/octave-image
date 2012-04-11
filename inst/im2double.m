@@ -15,8 +15,8 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} @var{im2} = im2double(@var{im1})
-## @deftypefnx {Function File} @var{im2} = im2double(@var{im1}, "indexed")
+## @deftypefn {Function File} @var{im2} = im2double (@var{im1})
+## @deftypefnx {Function File} @var{im2} = im2double (@var{im1}, "indexed")
 ## Convert input image @var{im1} to double precision.
 ##
 ## The following images type are supported: double, single, uint8, uint16, int16,

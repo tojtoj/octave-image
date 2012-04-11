@@ -44,6 +44,7 @@ Summary of important user-visible changes for image 1.1.0:
       imhist
       conndef
       im2double
+      im2uint16
       isbw
       isgray
       isrgb
