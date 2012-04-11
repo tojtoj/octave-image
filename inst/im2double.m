@@ -28,15 +28,16 @@ function im2 = im2double(im1)
   ## Input checking
   if (nargin < 1)
     print_usage();
-  endif
-  if (!isgray(im1) && !isrgb(im1))
+  elseif (!isgray(im1) && !isrgb(im1) && !isbw(im1))
     error("im2double: input must be an image");
   endif
-  
+
   ## Take action depending on the class of the data
   switch (class(im1))
     case "double"
       im2 = im1;
+    case "logical"
+      im2 = double(im1);
     case "uint8"
       im2 = double(im1) / 255;
     case "uint16"

@@ -43,6 +43,7 @@ Summary of important user-visible changes for image 1.1.0:
       bweuler
       imhist
       conndef
+      im2double
       isbw
       isgray
       isrgb
