@@ -32,7 +32,7 @@
 ## @item indexed, logical - converted to single class.
 ## @end itemize
 ##
-## @seealso{im2bw, im2uint16, im2uint8}
+## @seealso{im2bw, im2double, im2int16, im2uint8, im2uint16}
 ## @end deftypefn
 
 function im = im2single (im, indexed = false)

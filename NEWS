@@ -6,6 +6,7 @@ Summary of important user-visible changes for image 1.1.0:
       blockproc
       bwlabeln
       getrangefromclass
+      im2int16
       im2single
       imabsdiff
       imadd

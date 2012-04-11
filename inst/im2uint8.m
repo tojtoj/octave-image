@@ -32,7 +32,7 @@
 ## the uint8 class (255).
 ## @end itemize
 ##
-## @seealso{im2bw, im2uint16, im2double}
+## @seealso{im2bw, im2double, im2int16, im2single, im2uint16}
 ## @end deftypefn
 
 function im = im2uint8 (im, indexed = false)

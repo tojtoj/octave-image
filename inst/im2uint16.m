@@ -32,7 +32,7 @@
 ## the max of the uint16 class (65535).
 ## @end itemize
 ##
-## @seealso{im2bw, im2double, im2uint8}
+## @seealso{im2bw, im2double, im2int16, im2single, im2uint8}
 ## @end deftypefn
 
 function im = im2uint16 (im, indexed = false)
