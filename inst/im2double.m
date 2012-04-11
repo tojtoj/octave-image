@@ -67,3 +67,8 @@ function im2 = im2double (im1, ind = false)
       error ("unsupported image class");
   endswitch
 endfunction
+
+%!assert(im2double([1 2 3]), [1 2 3]);                  # double returns the same
+%!assert(im2double(uint8([0 255])), [0 1]);             # basic usage
+%!assert(im2double(uint8([1 25]), "indexed"), [2 26]);  # test indexed
+%!assert(im2double(int16([-32768 32768])), [0 1]);      # test signed integer
