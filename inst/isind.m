@@ -16,7 +16,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{bool} = isind (@var{img})
-## Return true if @var{img} is a RGB image.
+## Return true if @var{img} is an indexed image.
 ##
 ## A variable is considereed to be an indexed image if it is 2-dimensional,
 ## non-sparse matrix and:
