@@ -36,35 +36,26 @@
 ## @seealso{im2bw, im2uint16, im2uint8}
 ## @end deftypefn
 
-function im2 = im2double (im1, ind = false)
-  ## Input checking
-  if (nargin < 1 || nargin > 2)
-    print_usage;
-  elseif (nargin == 2 && (!ischar (ind) || !strcmpi (ind, "indexed")))
-    error ("second argument must be a string with the word `indexed'");
-  endif
+function im = im2double (im, ind = false)
 
-  if (ind && !isind (im1))
-    error ("input should have been an indexed image but it is not");
-  endif
+  ## Input checking (private function that is used for all im2class functions)
+  im_class = imconversion (nargin, "im2double", ind, im);
 
-  ## Take action depending on the class of the data
-  in_class = class (im1);
-  switch in_class
+  switch im_class
     case "double"
-      im2 = im1;
+      ## do nothing, return the same
     case {"logical", "single"}
-      im2 = double (im1);
+      im = double (im);
     case {"uint8", "uint16"}
       if (ind)
-        im2 = double (im1) + 1;
-      elseif (isind (im1))
-        im2 = double (im1) / double (intmax (in_class));
+        im = double (im) + 1;
+      elseif (isind (im))
+        im = double (im) / double (intmax (im_class));
       endif
     case "int16"
-      im2 = (double (im1) + double (intmax (in_class)) + 1) / double (intmax ("uint16"));
+      im = (double (im) + double (intmax (im_class)) + 1) / double (intmax ("uint16"));
     otherwise
-      error ("unsupported image class");
+      error ("unsupported image class %s", im_class);
   endswitch
 endfunction
 
