@@ -61,11 +61,16 @@ function out = mat2gray (in, scale)
   out_min = double (out_min);
   out_max = double (out_max);
 
-  out = ones (size (in));
+  ## if max and min are the same, matlab seems to simple truncate the input
+  ## between 0 and 1, and ignores the min/max values set. Don't get the logic
+  ## but hey! Matlab compatibility
   if (out_min == out_max)
-    ## if max and min are the same, matlab seems to simple return 1s, even
-    ## for values under the minimum/maximum. As such, we are done here
+    in(in>1) = 1;
+    in(in<0) = 0;
+    out = in;
     return
+  else
+    out = ones (size (in));
   endif
 
   out(in <= out_min) = 0;
@@ -89,4 +94,6 @@ endfunction
 %!assert(mat2gray([1 2 3]), [0 0.5 1]);           # standard use
 %!assert(mat2gray(repmat ([1 2; 3 3], [1 1 3])), repmat ([0 0.5; 1 1], [1 1 3])); # setting min and max
 %!assert(mat2gray([1 2 3], [2 2]), [1 1 1]);      # equal min and max
+%!assert(mat2gray([-1 0 0.5 3], [2 2]), [0 0 0.5 1]);      # equal min and max
+%!assert(mat2gray(ones(3*0.5)), ones(3*0.5));      # equal min and max from the image (not set)
 %!assert(mat2gray([1 2 3], [3 1]), [1 0.5 0]);    # max and min inverted
