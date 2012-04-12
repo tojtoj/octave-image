@@ -37,7 +37,7 @@
 ## @seealso{gray2ind, ind2gray, rgb2gray, im2double, im2uin16, im2uint8, im2int16}
 ## @end deftypefn
 
-function out = mat2gray (in, scale)
+function in = mat2gray (in, scale)
 
   if (nargin < 1 || nargin > 2)
     print_usage;
@@ -67,26 +67,27 @@ function out = mat2gray (in, scale)
   if (out_min == out_max)
     in(in>1) = 1;
     in(in<0) = 0;
-    out = in;
     return
-  else
-    out = ones (size (in));
   endif
 
-  out(in <= out_min) = 0;
-  ## no need to worry with values above or equal to out_max because
-  ## the output matrix was already generated with ones()
+  ## we are editing the input matrix rather than creating a new one to save
+  ## memory. We need to make sure it's double though
+  in = double(in);
 
   ## it's faster to get the index of values between max and min only once
-  ## than to have it calculated on both sides of the assignment
-  idx      = (in > out_min & in < out_max);
-  out(idx) =  (1/(out_max - out_min)) * (double(in(idx)) - out_min);
+  ## than to have it calculated on both sides of the assignment later on. We
+  ## need to get the index before starting editing
+  idx = (in > out_min & in < out_max);
+
+  in(in <= out_min) = 0;
+  in(in >= out_max) = 1;
+  in(idx) = (1/(out_max - out_min)) * (double(in(idx)) - out_min);
 
   ## if the given min and max are in the inverse order...
   if (nargin > 1 && scale(1) > scale (2))
     ## matlab seems to allow setting the min higher than the max but not by
     ## checking which one is actually correct. Seems to just invert it
-    out = abs (out - 1);
+    in = abs (in - 1);
   endif
 
 endfunction
