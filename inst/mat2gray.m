@@ -30,9 +30,21 @@
 ## in @var{M} above @var{max} will be set to 0 while the ones below @var{min}
 ## will be set to 1.
 ##
-## @strong{Caution:} For compatibility with @sc{matlab}, Octave's mat2gray
-## will return a matrix of ones if @var{min} and @var{max} are equal, even for
-## values below @var{min}.
+## @strong{Caution:} For compatibility with @sc{matlab}, if @var{min} and @var{max}
+## are equal (either from being actually being set manually or automatically
+## calculated from the @var{M} min and max values, Octave's mat2gray will truncate
+## all values between [0 1]. For example
+##
+## @example
+## @group
+## mat2gray ([-2 0 0.5 0.9 5], [2 2])
+##      @result{} [0  0  0.5  0.9  1]
+## mat2gray ([0.5 0.5 0.5])
+##      @result{} [0.5  0.5  0.5]
+## mat2gray ([4 4 4])
+##      @result{} [1  1  1]
+## @end group
+## @end example
 ##
 ## @seealso{gray2ind, ind2gray, rgb2gray, im2double, im2uin16, im2uint8, im2int16}
 ## @end deftypefn
