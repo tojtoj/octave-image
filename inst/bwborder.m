@@ -23,7 +23,7 @@
 ## neighbor that is not set.
 ## @end deftypefn
 
-## Author:        Etienne Grossmann <etienne@isr.ist.utl.pt>
+## Author:        Etienne Grossmann <etienne@egdn.net>
 ## Last modified: January 2000
 
 function b = bwborder(im)
