@@ -1,4 +1,4 @@
-## Copyright (C) 1999,2000 Kai Habel <kai.habel@gmx.de>
+## Copyright (C) 1999, 2000 Kai Habel <kai.habel@gmx.de>
 ## Copyright (C) 2011, 2012 Carnë Draug <carandraug+dev@gmail.com>
 ##
 ## This program is free software; you can redistribute it and/or modify it under

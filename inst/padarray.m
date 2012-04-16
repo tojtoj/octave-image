@@ -1,17 +1,17 @@
-## Copyright (C) 2004 Josep Mones i Teixidor
+## Copyright (C) 2004 Josep Mones i Teixidor <jmones@puntbarra.com>
 ##
-## This program is free software; you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 2 of the License, or
-## (at your option) any later version.
+## This program is free software; you can redistribute it and/or modify it under
+## the terms of the GNU General Public License as published by the Free Software
+## Foundation; either version 3 of the License, or (at your option) any later
+## version.
 ##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
+## This program is distributed in the hope that it will be useful, but WITHOUT
+## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+## details.
 ##
-## You should have received a copy of the GNU General Public License
-## along with this program; If not, see <http://www.gnu.org/licenses/>.
+## You should have received a copy of the GNU General Public License along with
+## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{B} = } padarray (@var{A},@var{padsize})
@@ -65,8 +65,6 @@
 ## elements defined by @var{padsize}.
 ## @end table
 ## @end deftypefn
-
-## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 
 function B = padarray(A, padsize, padval = 0, direction = "both")
   # Check parameters
@@ -342,33 +340,3 @@ endfunction
 %! assert(padarray(A,[1,2],'symmetric','pre'), B(2:4,2:6));
 %! assert(padarray(A,[1,2],'symmetric','post'), B(3:5,4:8));
 %! assert(padarray(A,[1,2],'symmetric','both'), B(2:5,2:8));
-
-
-
-%
-% $Log$
-% Revision 1.2  2007/03/23 16:14:37  adb014
-% Update the FSF address
-%
-% Revision 1.1  2006/08/20 12:59:35  hauberg
-% Changed the structure to match the package system
-%
-% Revision 1.6  2005/09/08 02:00:17  pkienzle
-% [for Bill Denney] isstr -> ischar
-%
-% Revision 1.5  2004/09/03 18:33:11  pkienzle
-% skip tests which use cat(3,X,Y) for octave <= 2.1.57
-%
-% Revision 1.4  2004/09/03 13:37:10  jmones
-% Corrected behaviour for int* and uint* types
-%
-% Revision 1.3  2004/08/15 19:21:50  jmones
-% support column vector padsize
-%
-% Revision 1.2  2004/08/11 15:04:59  pkienzle
-% Convert dos line endings to unix line endings
-%
-% Revision 1.1  2004/08/08 21:20:25  jmones
-% uintlut and padarray functions added
-%
-%

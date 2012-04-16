@@ -1,18 +1,18 @@
 ## Copyright (C) 2004 Josep Mones i Teixidor <jmones@puntbarra.com>
 ## Copyright (C) 2011 Adrián del Pino <delpinonavarrete@gmail.com>
 ##
-## This program is free software; you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 3 of the License, or
-## (at your option) any later version.
+## This program is free software; you can redistribute it and/or modify it under
+## the terms of the GNU General Public License as published by the Free Software
+## Foundation; either version 3 of the License, or (at your option) any later
+## version.
 ##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
+## This program is distributed in the hope that it will be useful, but WITHOUT
+## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+## details.
 ##
-## You should have received a copy of the GNU General Public License
-## along with this program; If not, see <http://www.gnu.org/licenses/>.
+## You should have received a copy of the GNU General Public License along with
+## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{eul} = } bweuler (@var{BW}, @var{n})
@@ -33,8 +33,6 @@
 ##
 ## @seealso{bwmorph, bwperim, qtgetblk}
 ## @end deftypefn
-
-## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 
 function eul = bweuler (BW, n = 8)
   if (nargin < 1 || nargin > 2)
@@ -97,19 +95,3 @@ endfunction
 %! assert(bweuler(A,4),2);
 %! assert(bweuler(A,8),1);
 %! assert(bweuler(A),1);
-
-% $Log$
-% Revision 1.3  2007/03/23 16:14:36  adb014
-% Update the FSF address
-%
-% Revision 1.2  2007/01/04 23:41:47  hauberg
-% Minor changes in help text
-%
-% Revision 1.1  2006/08/20 12:59:31  hauberg
-% Changed the structure to match the package system
-%
-% Revision 1.2  2005/07/03 01:10:19  pkienzle
-% Try to correct for missing newline at the end of the file
-%
-% Revision 1.1  2004/08/15 19:33:20  jmones
-% bweuler: Calculates the Euler number of a binary image

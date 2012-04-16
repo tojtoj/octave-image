@@ -1,19 +1,17 @@
 ## Copyright (C) 2007 Alexander Barth <barth.alexander@gmail.com>
 ##
+## This program is free software; you can redistribute it and/or modify it under
+## the terms of the GNU General Public License as published by the Free Software
+## Foundation; either version 3 of the License, or (at your option) any later
+## version.
 ##
-## This program is free software; you can redistribute it and/or modify it
-## under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 3 of the License, or (at
-## your option) any later version.
+## This program is distributed in the hope that it will be useful, but WITHOUT
+## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+## details.
 ##
-## This program is distributed in the hope that it will be useful, but
-## WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-## General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program; see the file COPYING.  If not, see
-## <http://www.gnu.org/licenses/>.
+## You should have received a copy of the GNU General Public License along with
+## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {[@var{RT},@var{xp}] =} radon(@var{I}, @var{theta})
@@ -24,7 +22,6 @@
 ## The variable @var{xp} represents the x-axis of the rotated coordinate.
 ## If @var{theta} is not defined, then 0:179 is assumed.
 ## @end deftypefn
-
 
 function [RT,xp] = radon (I,theta)
 
@@ -84,5 +81,3 @@ endfunction
 %!test
 %! A = radon(ones(2,2),30);
 %! assert (A,[0 0 0.608253175473055 2.103325780167649 1.236538105676658 0.051882938682637 0]',1e-10)
-
-

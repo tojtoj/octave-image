@@ -1,26 +1,17 @@
-## Copyright (C) 2010 Carnë Draug
-## 
-## This program is free software; you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 3 of the License, or
-## (at your option) any later version.
-## 
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-## 
-## You should have received a copy of the GNU General Public License
-## along with this program; If not, see <http://www.gnu.org/licenses/>.
+## Copyright (C) 2010 Carnë Draug <carandraug+dev@gmail.com>
 ##
-## Based on the documentation at
-##  * http://en.wikipedia.org/wiki/Tagged_Image_File_Format
-##  * http://partners.adobe.com/public/developer/en/tiff/TIFF6.pdf
-##  * http://ibb.gsf.de/homepage/karsten.rodenacker/IDL/Lsmfile.doc
-##  * http://www.awaresystems.be/imaging/tiff/faq.html
+## This program is free software; you can redistribute it and/or modify it under
+## the terms of the GNU General Public License as published by the Free Software
+## Foundation; either version 3 of the License, or (at your option) any later
+## version.
 ##
-## and the function tiff_read by F. Nedelec, EMBL (www.cytosim.org)
-##  * http://www.cytosim.org/misc/index.html
+## This program is distributed in the hope that it will be useful, but WITHOUT
+## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+## details.
+##
+## You should have received a copy of the GNU General Public License along with
+## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} [@var{value}, @var{offset}] = tiff_tag_read (@var{file}, @var{tag}, @var{ifd})
@@ -36,6 +27,15 @@
 ## @seealso{imread, imfinfo, readexif}
 ## @end deftypefn
 
+## Based on the documentation at
+##  * http://en.wikipedia.org/wiki/Tagged_Image_File_Format
+##  * http://partners.adobe.com/public/developer/en/tiff/TIFF6.pdf
+##  * http://ibb.gsf.de/homepage/karsten.rodenacker/IDL/Lsmfile.doc
+##  * http://www.awaresystems.be/imaging/tiff/faq.html
+##
+## and the function tiff_read by F. Nedelec, EMBL (www.cytosim.org)
+##  * http://www.cytosim.org/misc/index.html
+##
 ## * On the TIFF image file header:
 ##     bytes 00-01 --> byte order used within the file: "II" for little endian
 ##                     and "MM" for big endian byte ordering.

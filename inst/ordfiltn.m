@@ -1,20 +1,17 @@
-## Copyright (C) 2008 Soren Hauberg
+## Copyright (C) 2008 Soren Hauberg <soren@hauberg.org>
 ##
-## This program is free software; you can redistribute it and/or
-## modify it under the terms of the GNU General Public License
-## as published by the Free Software Foundation; either version 3
-## of the License, or (at your option) any later version.
+## This program is free software; you can redistribute it and/or modify it under
+## the terms of the GNU General Public License as published by the Free Software
+## Foundation; either version 3 of the License, or (at your option) any later
+## version.
 ##
-## This program is distributed in the hope that it will be useful, but
-## WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-## General Public License for more details.
+## This program is distributed in the hope that it will be useful, but WITHOUT
+## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+## details.
 ##
-## You should have received a copy of the GNU General Public License
-## along with this program; If not, see <http://www.gnu.org/licenses/>.
-##
-## This function is based on 'ordfilt2' by Teemu Ikonen which is released under
-## GPLv2 or later.
+## You should have received a copy of the GNU General Public License along with
+## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {} ordfiltn(@var{A}, @var{nth}, @var{domain}, [@var{S}, @var{padding}])
@@ -36,10 +33,8 @@
 ## @seealso{ordfilt2, padarray}
 ## @end deftypefn
 
-
-## Author: Teemu Ikonen <tpikonen@pcu.helsinki.fi>
-## Created: 5.5.2000
-## Keywords: image processing filtering
+## This function is based on 'ordfilt2' by Teemu Ikonen <tpikonen@pcu.helsinki.fi>
+## which is released under GPLv2 or later.
 
 function retval = ordfiltn(A, nth, domain, varargin)
   ## Check input

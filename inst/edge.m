@@ -1,25 +1,17 @@
-## Copyright (C) 2008 Søren Hauberg
-## 
-## This program is free software; you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 3 of the License, or
-## (at your option) any later version.
-## 
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-## 
-## You should have received a copy of the GNU General Public License
-## along with this program; if not, write to the Free Software
-## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+## Copyright (C) 2008 Søren Hauberg <soren@hauberg.org>
 ##
-## Note: The implementation and help text for the 'andy' edge detector came with
-## the following notice:
-##   Copyright (C) 1999 Andy Adler
-##   This code has no warrany whatsoever.
-##   Do what you like with this code as long as you
-##   leave this copyright in place.
+## This program is free software; you can redistribute it and/or modify it under
+## the terms of the GNU General Public License as published by the Free Software
+## Foundation; either version 3 of the License, or (at your option) any later
+## version.
+##
+## This program is distributed in the hope that it will be useful, but WITHOUT
+## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+## details.
+##
+## You should have received a copy of the GNU General Public License along with
+## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{bw} =} edge (@var{im}, @var{method})
@@ -142,6 +134,13 @@
 ##
 ## @seealso{fspecial, nonmax_supress}
 ## @end deftypefn
+
+## Note: The implementation and help text for the 'andy' edge detector came with
+## the following notice:
+##   Copyright (C) 1999 Andy Adler
+##   This code has no warrany whatsoever.
+##   Do what you like with this code as long as you
+##   leave this copyright in place.
 
 function [bw, out_threshold, g45_out, g135_out] = edge (im, method, varargin)
   ## Get the image

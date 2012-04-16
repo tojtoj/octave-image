@@ -1,3 +1,6 @@
+## Author: Paul Kienzle <pkienzle@users.sf.net>
+## This program is granted to the public domain.
+
 ## -*- texinfo -*-
 ## @deftypefn {Function File} colfilt(@var{A}, [@var{r}, @var{c}], [@var{m}, @var{n}], 'sliding', @var{f},...)
 ## Apply filter to matrix blocks
@@ -24,9 +27,6 @@
 ##
 ## The present version does not handle 'distinct'
 ## @end deftypefn
-
-## This software is granted to the public domain
-## Author: Paul Kienzle <pkienzle@users.sf.net>
 
 function B = colfilt(A,filtsize,blksize,blktype,f,varargin)
    ## Input checking

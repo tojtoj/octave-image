@@ -1,17 +1,17 @@
-## Copyright (C) 2004-2005 Justus H. Piater
+## Copyright (C) 2004-2005 Justus H. Piater <Justus.Piater@ULg.ac.be>
 ##
-## This program is free software; you can redistribute it and/or
-## modify it under the terms of the GNU General Public License
-## as published by the Free Software Foundation; either version 2
-## of the License, or (at your option) any later version.
+## This program is free software; you can redistribute it and/or modify it under
+## the terms of the GNU General Public License as published by the Free Software
+## Foundation; either version 3 of the License, or (at your option) any later
+## version.
 ##
-## This program is distributed in the hope that it will be useful, but
-## WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-## General Public License for more details.
+## This program is distributed in the hope that it will be useful, but WITHOUT
+## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+## details.
 ##
-## You should have received a copy of the GNU General Public License
-## along with this program; If not, see <http://www.gnu.org/licenses/>.
+## You should have received a copy of the GNU General Public License along with
+## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {} imrotate(@var{imgPre}, @var{theta}, @var{method}, @var{bbox}, @var{extrapval})
@@ -60,10 +60,6 @@
 ##                  and which pixels are extrapolated. This output is
 ##                  not available if Fourier interpolation is used.
 ## @end deftypefn
-
-## Author: Justus H. Piater  <Justus.Piater@ULg.ac.be>
-## Created: 2004-10-18
-## Version: 0.7
 
 function [imgPost, H, valid] = imrotate(imgPre, thetaDeg, interp="nearest", bbox="loose", extrapval=NA)
   ## Check input
@@ -212,7 +208,6 @@ endfunction
 %!   end
 %! end
 
-
 %!#test
 %! ## Verify exactness of near-90 and 90-degree rotations:
 %! X = rand(99);
@@ -224,7 +219,6 @@ endfunction
 %!     assert(norm(Y - imrotate(X, angle, "nearest", :, 0)) == 0); # near zero-sum
 %!   end
 %! end
-
 
 %!#test
 %! ## Verify preserved pixel density:
@@ -239,4 +233,3 @@ endfunction
 %!   end
 %!   assert(t, range, tolerances(m));
 %! end
-

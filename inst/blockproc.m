@@ -1,23 +1,23 @@
-## Copyright (C) 2004 Josep Mones i Teixidor
+## Copyright (C) 2004 Josep Mones i Teixidor <jmones@puntbarra.com>
 ##
-## This program is free software; you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 2 of the License, or
-## (at your option) any later version.
+## This program is free software; you can redistribute it and/or modify it under
+## the terms of the GNU General Public License as published by the Free Software
+## Foundation; either version 3 of the License, or (at your option) any later
+## version.
 ##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
+## This program is distributed in the hope that it will be useful, but WITHOUT
+## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+## details.
 ##
-## You should have received a copy of the GNU General Public License
-## along with this program; If not, see <http://www.gnu.org/licenses/>.
+## You should have received a copy of the GNU General Public License along with
+## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{B} = } blockproc (@var{A}, [@var{m},@var{n}], @var{fun})
-## @deftypefnx {Function File} {@var{B} = } blockproc (@var{A}, [@var{m},@var{n}], @var{fun}, ...)
-## @deftypefnx {Function File} {@var{B} = } blockproc (@var{A}, [@var{m},@var{n}], [@var{mborder},@var{nborder}], @var{fun}, @var{...})
-## @deftypefnx {Function File} {@var{B} = } blockproc (@var{A}, 'indexed', ...)
+## @deftypefnx {Function File} {@var{B} = } blockproc (@var{A}, [@var{m},@var{n}], @var{fun}, @dots{})
+## @deftypefnx {Function File} {@var{B} = } blockproc (@var{A}, [@var{m},@var{n}], [@var{mborder},@var{nborder}], @var{fun}, @dots{})
+## @deftypefnx {Function File} {@var{B} = } blockproc (@var{A}, 'indexed', @dots{})
 ## Processes image in blocks using user-supplied function.
 ##
 ## @code{B=blockproc(A,[m,n],fun)} divides image @var{A} in
@@ -27,10 +27,10 @@
 ## at the bottom and right borders of the image.  0 is used as a padding
 ## value.
 ##
-## @code{B=blockproc(A,[m,n],fun,...)} behaves as described above but
+## @code{B=blockproc(A,[m,n],fun, @dots{})} behaves as described above but
 ## passes extra parameters to function @var{fun}.
 ##
-## @code{B=blockproc(A,[m,n],[mborder,nborder],fun,...)} behaves as
+## @code{B=blockproc(A,[m,n],[mborder,nborder],fun, @dots{})} behaves as
 ## described but uses blocks which overlap with neighbour blocks.
 ## Overlapping dimensions are @var{mborder} vertically and @var{nborder}
 ## horizontally. This doesn't change the number of blocks in an image
@@ -38,15 +38,13 @@
 ## border requires extra padding on all edges of the image. 0 is used as
 ## a padding value.
 ##
-## @code{B=blockproc(A,'indexed',...)} assumes that @var{A} is an indexed
+## @code{B=blockproc(A,'indexed', @dots{})} assumes that @var{A} is an indexed
 ## image, so it pads the image using proper value: 0 for uint8 and
 ## uint16 images and 1 for double images. Keep in mind that if 'indexed'
 ## is not specified padding is always done using 0.
 ##
 ## @seealso{colfilt,inline,bestblk}
 ## @end deftypefn
-
-## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 
 function B = blockproc(A, varargin)
   if(nargin<3)
@@ -167,38 +165,3 @@ endfunction
 %!assert(blockproc(uint8(eye(6)),'indexed',[1,2],[1,1],inline("sum(x(:))","x")),[2,1,0;3,2,0;2,3,1;1,3,2;0,2,3;0,1,2]);
 %!assert(blockproc(uint16(eye(6)),[1,2],[1,1],inline("sum(x(:))","x")),[2,1,0;3,2,0;2,3,1;1,3,2;0,2,3;0,1,2]);
 %!assert(blockproc(uint16(eye(6)),'indexed',[1,2],[1,1],inline("sum(x(:))","x")),[2,1,0;3,2,0;2,3,1;1,3,2;0,2,3;0,1,2]);
-
-
-%
-% $Log$
-% Revision 1.5  2007/03/23 16:14:36  adb014
-% Update the FSF address
-%
-% Revision 1.4  2007/01/04 23:44:22  hauberg
-% Minor changes in help text
-%
-% Revision 1.3  2007/01/04 23:37:54  hauberg
-% Minor changes in help text
-%
-% Revision 1.2  2006/10/08 21:41:04  adb014
-% check isnumeric for vector and 'function_handle' not 'function handle' in isa test
-%
-% Revision 1.1  2006/08/20 12:59:31  hauberg
-% Changed the structure to match the package system
-%
-% Revision 1.5  2005/09/08 02:00:17  pkienzle
-% [for Bill Denney] isstr -> ischar
-%
-% Revision 1.4  2004/11/15 16:04:20  pkienzle
-% Fix tests for functions which return boolean matrices
-%
-% Revision 1.3  2004/09/03 17:49:37  jmones
-% Improved uint8 and uint16 padding expections
-%
-% Revision 1.2  2004/09/03 13:40:13  jmones
-% Check result has same class as function result, and improved fun param checking
-%
-% Revision 1.1  2004/08/15 19:27:46  jmones
-% blockproc: block process an image using user-supplied function
-%
-%

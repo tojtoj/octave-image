@@ -1,3 +1,7 @@
+## Copyright (C) 1999 Andy Adler
+## This code has no warrany whatsoever.
+## Do what you like with this code as long as you leave this copyright in place.
+
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {[@var{imout}, @var{idx}] =} bwselect(@var{im}, @var{cols}, @var{rows}, @var{connect})
 ## Select connected regions in a binary image.
@@ -17,12 +21,6 @@
 ## @end table
 ## @end deftypefn
 
-# Copyright (C) 1999 Andy Adler
-# This code has no warrany whatsoever.
-# Do what you like with this code as long as you
-#     leave this copyright in place.
-#
-# $Id$
 function [imout, idx] = bwselect( im, cols, rows, connect )
 
 if nargin<4
@@ -33,23 +31,3 @@ end
 
 imout= zeros( size(jnk) );
 imout( idx ) = 1;
-
-# 
-# $Log$
-# Revision 1.3  2007/01/04 23:41:47  hauberg
-# Minor changes in help text
-#
-# Revision 1.2  2007/01/02 21:58:38  hauberg
-# Documentation is now in Texinfo (looks better on the website)
-#
-# Revision 1.1  2006/08/20 12:59:32  hauberg
-# Changed the structure to match the package system
-#
-# Revision 1.1  2002/03/17 02:38:52  aadler
-# fill and edge detection operators
-#
-# Revision 1.1  1999/06/08 17:06:01  aadler
-# Initial revision
-#
-#
-

@@ -1,17 +1,17 @@
-## Copyright (C) 2000 Teemu Ikonen
+## Copyright (C) 2000 Teemu Ikonen <tpikonen@pcu.helsinki.fi>
 ##
-## This program is free software; you can redistribute it and/or
-## modify it under the terms of the GNU General Public License
-## as published by the Free Software Foundation; either version 2
-## of the License, or (at your option) any later version.
+## This program is free software; you can redistribute it and/or modify it under
+## the terms of the GNU General Public License as published by the Free Software
+## Foundation; either version 3 of the License, or (at your option) any later
+## version.
 ##
-## This program is distributed in the hope that it will be useful, but
-## WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-## General Public License for more details.
+## This program is distributed in the hope that it will be useful, but WITHOUT
+## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+## details.
 ##
-## You should have received a copy of the GNU General Public License
-## along with this program; If not, see <http://www.gnu.org/licenses/>.
+## You should have received a copy of the GNU General Public License along with
+## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {} impad(@var{A}, @var{xpad}, @var{ypad}, [@var{padding}, [@var{const}]])
@@ -46,10 +46,6 @@
 ## 
 ## @end table
 ## @end deftypefn
-
-## Author: Teemu Ikonen <tpikonen@pcu.helsinki.fi>
-## Created: 5.5.2000
-## Keywords: padding image processing
 
 ## A nice test matrix for padding:
 ## A = 10*[1:5]' * ones(1,5) + ones(5,1)*[1:5]
@@ -93,7 +89,7 @@ function retim = impad(im, xpad, ypad, padding = "zeros", const = 1)
         retval(ypad(1)+1 : ypad(1)+origy, xpad(1)+1 : xpad(1)+origx) = A;
       case "replicate"
         y1 = origy-ypad(1)+1;
-        x1 = origx-xpad(1)+1;    
+        x1 = origx-xpad(1)+1;
         if (y1 < 1 || x1 < 1 || ypad(2) > origy || xpad(2) > origx)
           error("impad: too large padding for this padding type");
         else
@@ -138,5 +134,5 @@ function retim = impad(im, xpad, ypad, padding = "zeros", const = 1)
     endswitch
     
     retim(:,:,iter) = retval;
-  endfor      
+  endfor
 endfunction

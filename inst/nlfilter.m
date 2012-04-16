@@ -1,22 +1,22 @@
-## Copyright (C) 2004 Josep Mones i Teixidor
+## Copyright (C) 2004 Josep Mones i Teixidor <jmones@puntbarra.com>
 ##
-## This program is free software; you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 2 of the License, or
-## (at your option) any later version.
+## This program is free software; you can redistribute it and/or modify it under
+## the terms of the GNU General Public License as published by the Free Software
+## Foundation; either version 3 of the License, or (at your option) any later
+## version.
 ##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
+## This program is distributed in the hope that it will be useful, but WITHOUT
+## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+## details.
 ##
-## You should have received a copy of the GNU General Public License
-## along with this program; If not, see <http://www.gnu.org/licenses/>.
+## You should have received a copy of the GNU General Public License along with
+## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{B} = } nlfilter (@var{A}, [@var{m},@var{n}], @var{fun})
-## @deftypefnx {Function File} {@var{B} = } nlfilter (@var{A}, [@var{m},@var{n}], @var{fun}, ...)
-## @deftypefnx {Function File} {@var{B} = } nlfilter (@var{A},'indexed', ...)
+## @deftypefnx {Function File} {@var{B} = } nlfilter (@var{A}, [@var{m},@var{n}], @var{fun}, @dots{})
+## @deftypefnx {Function File} {@var{B} = } nlfilter (@var{A},'indexed', @dots{})
 ## Processes image in sliding blocks using user-supplied function.
 ##
 ## @code{B=nlfilter(A,[m,n],fun)} passes sliding @var{m}-by-@var{n}
@@ -28,18 +28,16 @@
 ## 
 ## Center of block is taken at ceil([@var{m},@var{n}]/2).
 ##
-## @code{B=nlfilter(A,[m,n],fun,...)} behaves as described above but
+## @code{B=nlfilter(A,[m,n],fun, @dots{})} behaves as described above but
 ## passes extra parameters to function @var{fun}.
 ##
-## @code{B=nlfilter(A,'indexed',...)} assumes that @var{A} is an indexed
+## @code{B=nlfilter(A,'indexed', @dots{})} assumes that @var{A} is an indexed
 ## image, so it pads the image using proper value: 0 for uint8 and
 ## uint16 images and 1 for double images. Keep in mind that if 'indexed'
 ## is not specified padding is always done using 0.
 ##
 ## @seealso{colfilt,blkproc,inline}
 ## @end deftypefn
-
-## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 
 function B = nlfilter(A, varargin)
   if(nargin<3)
@@ -53,7 +51,7 @@ function B = nlfilter(A, varargin)
     indexed=true;
     p+=1;
     if(isa(A,"uint8") || isa(A,"uint16"))
-	padval=0;
+      padval=0;
     else
       padval=1; 
     endif
@@ -113,7 +111,7 @@ function B = nlfilter(A, varargin)
   ## calc end offsets
   me=postpad(1)+prepad(1);
   ne=postpad(2)+prepad(2);
-	
+
   ## We concatenate everything to preserve fun return type
   for i=1:as(1)
     r=feval(fun,A(i:i+me,1:1+ne),varargin{p+1:nargin-1});
@@ -143,36 +141,3 @@ endfunction
 
 % Check if function class is preserved
 %!assert(nlfilter(uint8(eye(4)),'indexed',[2,3],inline("int8(sum(x(:)))","x")),int8([2,2,1,0;1,2,2,1;0,1,2,2;0,0,1,1]));
-
-
-
-%
-% $Log$
-% Revision 1.4  2007/03/23 16:14:37  adb014
-% Update the FSF address
-%
-% Revision 1.3  2007/01/04 23:50:47  hauberg
-% Put seealso before end deftypefn
-%
-% Revision 1.2  2007/01/04 23:37:54  hauberg
-% Minor changes in help text
-%
-% Revision 1.1  2006/08/20 12:59:35  hauberg
-% Changed the structure to match the package system
-%
-% Revision 1.5  2005/09/08 02:00:17  pkienzle
-% [for Bill Denney] isstr -> ischar
-%
-% Revision 1.4  2004/11/15 16:04:20  pkienzle
-% Fix tests for functions which return boolean matrices
-%
-% Revision 1.3  2004/09/03 13:28:32  jmones
-% Corrected behaviour for int* and uint* types
-%
-% Revision 1.2  2004/08/15 19:43:11  jmones
-% corrected a typo in doc
-%
-% Revision 1.1  2004/08/15 19:42:14  jmones
-% nlfilter: Processes image in siliding blocks using user-supplied function
-%
-%

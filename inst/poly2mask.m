@@ -1,17 +1,17 @@
-## Copyright (C) 2004 Josep Mones i Teixidor
+## Copyright (C) 2004 Josep Mones i Teixidor <jmones@puntbarra.com>
 ##
-## This program is free software; you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 2 of the License, or
-## (at your option) any later version.
+## This program is free software; you can redistribute it and/or modify it under
+## the terms of the GNU General Public License as published by the Free Software
+## Foundation; either version 3 of the License, or (at your option) any later
+## version.
 ##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
+## This program is distributed in the hope that it will be useful, but WITHOUT
+## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+## details.
 ##
-## You should have received a copy of the GNU General Public License
-## along with this program; If not, see <http://www.gnu.org/licenses/>.
+## You should have received a copy of the GNU General Public License along with
+## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{BW} = } poly2mask (@var{x},@var{y},@var{m},@var{n})
@@ -40,10 +40,7 @@
 ## compatible with MATLAB.
 ## @end deftypefn
 
-
 ## TODO: check how to create a logical BW without any conversion
-
-## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
 
 function BW = poly2mask (x, y, m, n)
   if (nargin != 4)
@@ -225,35 +222,3 @@ endfunction
 %!    0,0,0,0,0,0];
 %! R=logical(R);
 %! assert(poly2mask(x,y,5,6), R);
-
-
-
-
-
-%
-% $Log$
-% Revision 1.3  2007/03/23 16:14:37  adb014
-% Update the FSF address
-%
-% Revision 1.2  2007/01/04 23:37:54  hauberg
-% Minor changes in help text
-%
-% Revision 1.1  2006/08/20 12:59:35  hauberg
-% Changed the structure to match the package system
-%
-% Revision 1.5  2004/09/07 14:47:50  pkienzle
-% Avoid segfaults on pre-2.1.58 octave.  Invisible whitespace changes.
-%
-% Revision 1.4  2004/09/03 17:12:36  jmones
-% Uses uint8 to save some temporal memory (suggested by David Bateman)
-%
-% Revision 1.3  2004/09/03 13:32:07  jmones
-% Work with logical arrays from BW creation
-%
-% Revision 1.2  2004/08/11 17:39:51  jmones
-% Algorithm url in docs corrected.
-%
-% Revision 1.1  2004/08/11 17:34:11  jmones
-% poly2mask added: creates filled polygon bw mask
-%
-%

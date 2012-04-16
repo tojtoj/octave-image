@@ -61,7 +61,7 @@
 ## corresponding value to 1 if the block should be split, and 0
 ## otherwise.
 ##
-## S = qtdecomp(I, fun, ...) behaves as qtdecomp(I, fun) but passes
+## S = qtdecomp(I, fun, @dots{}) behaves as qtdecomp(I, fun) but passes
 ## extra parameters to @var{fun}.
 ##
 ## @seealso{qtgetblk, qtsetblk}
