@@ -1,20 +1,20 @@
-## Copyright (C) 2004 Josep Mones i Teixidor
+## Copyright (C) 2004 Josep Mones i Teixidor <jmones@puntbarra.com>
 ##
-## This program is free software; you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 2 of the License, or
-## (at your option) any later version.
+## This program is free software; you can redistribute it and/or modify it under
+## the terms of the GNU General Public License as published by the Free Software
+## Foundation; either version 3 of the License, or (at your option) any later
+## version.
 ##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
+## This program is distributed in the hope that it will be useful, but WITHOUT
+## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+## details.
 ##
-## You should have received a copy of the GNU General Public License
-## along with this program; If not, see <http://www.gnu.org/licenses/>.
+## You should have received a copy of the GNU General Public License along with
+## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {@var{J} = } qtsetblk (@var{I},@var{S},@var{dim},@var{vals})
+## @deftypefn {Function File} {@var{J} =} qtsetblk (@var{I}, @var{S}, @var{dim}, @var{vals})
 ## Set block values in a quadtree decomposition.
 ##
 ## J=qtsetblk(I,S,dim,vals) sets all the @var{dim}-by-@var{dim} blocks
@@ -25,11 +25,9 @@
 ## @seealso{qtdecomp, qtgetblk}
 ## @end deftypefn
 
-## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
-
-function J = qtsetblk(I, S, dim, vals)
-  if (nargin!=4)
-    usage("J=qtsetblk(I,S,dim,vals)");
+function J = qtsetblk (I, S, dim, vals)
+  if (nargin != 4)
+    print_usage;
   endif
 
   ## get blocks
@@ -47,13 +45,11 @@ function J = qtsetblk(I, S, dim, vals)
   ie=ii+dim-1;
   je=ji+dim-1;
 
-
   J=I;
   for b=1:length(idx)
     J(ii(b):ie(b),ji(b):je(b))=vals(:,:,b);
   endfor
 endfunction
-
 
 %!demo
 %! J=qtsetblk(eye(4),qtdecomp(eye(4)),2,ones(2,2,2))
@@ -64,11 +60,11 @@ endfunction
 %!     3, 6, 3, 1,58,53,67,65;
 %!     3, 6, 3, 1,58,53,67,65;
 %!     3, 6, 3, 1,58,53,67,65;
-%!    23,42,42,42,99,99,99,99;    
-%!    27,42,42,42,99,99,99,99;    
-%!    23,22,26,25,99,99,99,99;    
+%!    23,42,42,42,99,99,99,99;
+%!    27,42,42,42,99,99,99,99;
+%!    23,22,26,25,99,99,99,99;
 %!    22,22,24,22,99,99,99,99];
-%! S=qtdecomp(A,10);
+%! S = qtdecomp (A, 10);
 
 %!test
 %! R=A;
@@ -90,24 +86,3 @@ endfunction
 %! R=A;
 %! R(5:6,1:2)=10;
 %! assert(qtsetblk(A,S,1,ones(1,1,4)*10),R);
-
-
-
-%
-% $Log$
-% Revision 1.4  2007/03/23 16:14:37  adb014
-% Update the FSF address
-%
-% Revision 1.3  2007/01/04 23:50:47  hauberg
-% Put seealso before end deftypefn
-%
-% Revision 1.2  2007/01/04 23:41:47  hauberg
-% Minor changes in help text
-%
-% Revision 1.1  2006/08/20 12:59:35  hauberg
-% Changed the structure to match the package system
-%
-% Revision 1.1  2004/08/11 19:52:41  jmones
-% qtsetblk added
-%
-%

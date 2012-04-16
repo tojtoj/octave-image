@@ -1,5 +1,8 @@
+## Author: Paul Kienzle <pkienzle@users.sf.net>
+## This program is granted to the public domain.
+
 ## -*- texinfo -*-
-## @deftypefn {Function File} @var{M} = colorgradient(@var{C}, @var{w}, @var{n})
+## @deftypefn {Function File} {@var{M} =} colorgradient (@var{C}, @var{w}, @var{n})
 ## Define a colour map which smoothly traverses the given colors.
 ## @var{C} contains the colours, one row per r,g,b value.
 ## @var{w}(i) is the relative length of the transition from colour i to colour i+1
@@ -14,12 +17,9 @@
 ## @end example
 ## @end deftypefn
 
-## This program is granted to the public domain.
-## Author: Paul Kienzle <pkienzle@users.sf.net>
-
-function ret = colorgradient(C,w,n)
+function ret = colorgradient (C, w, n)
   if nargin < 1 || nargin > 3
-    usage("M = colorgradient(C,w,n)")
+    print_usage;
   endif
 
   if nargin == 1

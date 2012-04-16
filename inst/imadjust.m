@@ -1,30 +1,26 @@
-## Copyright (C) 2004 Josep Mones i Teixidor
+## Copyright (C) 1999,2000 Kai Habel <kai.habel@gmx.de>
+## Copyright (C) 2004 Josep Mones i Teixidor <jmones@puntbarra.com>
 ##
-## This program is free software; you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 2 of the License, or
-## (at your option) any later version.
+## This program is free software; you can redistribute it and/or modify it under
+## the terms of the GNU General Public License as published by the Free Software
+## Foundation; either version 3 of the License, or (at your option) any later
+## version.
 ##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
+## This program is distributed in the hope that it will be useful, but WITHOUT
+## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+## details.
 ##
-## You should have received a copy of the GNU General Public License
-## along with this program; If not, see <http://www.gnu.org/licenses/>.
-##
-##
-## Based on old imadjust.m (GPL):
-## Copyright (C) 1999,2000  Kai Habel
-
+## You should have received a copy of the GNU General Public License along with
+## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} @var{J}= imadjust (@var{I})
-## @deftypefnx {Function File} @var{J}= imadjust (@var{I},[@var{low_in};@var{high_in}])
-## @deftypefnx {Function File} @var{J}= imadjust (@var{I},[@var{low_in};@var{high_in}],[@var{low_out};@var{high_out}])
-## @deftypefnx {Function File} @var{J}= imadjust (..., @var{gamma})
-## @deftypefnx {Function File} @var{newmap}= imadjust (@var{map}, ...)
-## @deftypefnx {Function File} @var{RGB_out}= imadjust (@var{RGB}, ...)
+## @deftypefn {Function File} {@var{J} =} imadjust (@var{I})
+## @deftypefnx {Function File} {@var{J} =} imadjust (@var{I},[@var{low_in};@var{high_in}])
+## @deftypefnx {Function File} {@var{J} =} imadjust (@var{I},[@var{low_in};@var{high_in}],[@var{low_out};@var{high_out}])
+## @deftypefnx {Function File} {@var{J} =} imadjust (@dots{}, @var{gamma})
+## @deftypefnx {Function File} {@var{newmap} =} imadjust (@var{map}, @dots{})
+## @deftypefnx {Function File} {@var{RGB_out} =} imadjust (@var{RGB}, @dots{})
 ## Adjust image or colormap values to a specified range.
 ##
 ## @code{J=imadjust(I)} adjusts intensity image @var{I} values so that
@@ -47,14 +43,14 @@
 ## @var{high_out} instead of 0 and 1. A default value @code{[]} can also
 ## be used for this parameter, which is taken as @code{[0;1]}.
 ##
-## @code{J=imadjust(...,gamma)} takes, in addition of 3 parameters
+## @code{J=imadjust(@dots{},gamma)} takes, in addition of 3 parameters
 ## explained above, an extra parameter @var{gamma}, which specifies the
 ## shape of the mapping curve between input elements and output
 ## elements, which is linear (as taken if this parameter is omitted). If
 ## @var{gamma} is above 1, then function is weighted towards lower
 ## values, and if below 1, towards higher values.
 ##
-## @code{newmap=imadjust(map,...)} applies a transformation to a
+## @code{newmap=imadjust(map,@dots{})} applies a transformation to a
 ## colormap @var{map}, which output is @var{newmap}. This transformation
 ## is the same as explained above, just using a map instead of an image.
 ## @var{low_in}, @var{high_in}, @var{low_out}, @var{high_out} and
@@ -62,7 +58,7 @@
 ## for all three color components of a map; or it can be 1-by-3
 ## vectors, to define unique mappings for each component.
 ##
-## @code{RGB_out=imadjust(RGB,...)} adjust RGB image @var{RGB} (a
+## @code{RGB_out=imadjust(RGB,@dots{})} adjust RGB image @var{RGB} (a
 ## M-by-N-by-3 array) the same way as specified in images and colormaps.
 ## Here too @var{low_in}, @var{high_in}, @var{low_out}, @var{high_out} and
 ## @var{gamma} can be scalars or 1-by-3 matrices, to specify the same
@@ -95,46 +91,27 @@
 ## @seealso{stretchlim, brighten}
 ## @end deftypefn
 
-## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
-
 ## TODO: When Octave 2.1.58 is out multiply indices if input argument is
 ## TODO: of class int* or uint*.
 
-function ret = imadjust (image, in, out, gamma)
+function ret = imadjust (image, in = stretchlim (image), out = [0;1], gamma = 1)
 
   if (nargin < 1 || nargin > 4)
-    usage ("imadjust(...) number of arguments must be between 1 and 4");
-  endif
-
-  if (nargin < 4)
-    gamma = 1;              ## default gamma
+    print_usage;
   endif
 
   if !(ismatrix(image))
     error ("imadjust(image,...) first parameter must be a image matrix or colormap");
   endif
 
-  if (nargin==1)
-    in=stretchlim(image);   ## this saturates 1% on lower and 1% on
-    out=[0;1];              ## higher values
-  endif
-
-  if (nargin==2)
-    out=[0;1];              ## default out
-  endif
-
   if !((ismatrix(in) || isempty(in)) && (ismatrix(out) || isempty(out)) )
-    usage("imadjust(image,[low high],[bottom top],gamma)");
+    print_usage;
   endif
 
   if (isempty(in))
     in=[0;1];               ## default in
   endif
 
-  if (isempty(out))
-    out=[0;1];              ## default out
-  endif
-  
   simage=size(image);
   if (length(simage)==3 && simage(3)==3)
     ## image is rgb
@@ -157,13 +134,13 @@ function ret = imadjust (image, in, out, gamma)
       ret=[];
       ## process each color
       for i=1:3
-	ret=horzcat(ret,__imadjust_plane__(image(:,i),in(1,i),in(2,i),out(1,i),out(2,i),gamma(i)));
+        ret=horzcat(ret,__imadjust_plane__(image(:,i),in(1,i),in(2,i),out(1,i),out(2,i),gamma(i)));
       endfor
 
     else
       ## image is a intensity image
       if( !isvector(in) || length(in)!=2 || !isvector(out) || length(out)!=2 || !isscalar(gamma) || (gamma<0) || (gamma==Inf) )
-	error("imadjust: on an intensity image, in and out must be 2-by-1 and gamma a positive scalar.");
+        error("imadjust: on an intensity image, in and out must be 2-by-1 and gamma a positive scalar.");
       endif
       ret=__imadjust_plane__(image,in(1),in(2),out(1),out(2),gamma);
     endif
@@ -172,7 +149,6 @@ function ret = imadjust (image, in, out, gamma)
     error("imadjust: first parameter must be a colormap, an intensity image or a RGB image");
   endif
 endfunction
-
 
 ## This does all the work. I has a plane; li and hi input low and high
 ## values; and lo and ho, output bottom and top values.
@@ -183,7 +159,6 @@ function ret=__imadjust_plane__(I, li, hi, lo, ho, gamma)
   ret = ret + (I >= li & I < hi) .* (lo + (ho - lo) .* ((I - li) / (hi - li)) .^ gamma);
   ret = ret + (I >= hi) .* ho;
 endfunction
-
 
 ## Checks in, out and gamma to see if they are ok for colormap and RGB
 ## cases.
@@ -226,7 +201,6 @@ function [in, out, gamma]=__imadjust_check_3d_args__(in, out, gamma)
 
 endfunction
 
-
 # bad arguments
 
 # bad images
@@ -251,16 +225,15 @@ endfunction
 
 %!# a test with input and output args
 %!assert(imadjust([1:100],[50;90],[-50;-30]), \
-%!	 [-50*ones(1,49), linspace(-50,-30,90-50+1), -30*ones(1,10)]);
+%!       [-50*ones(1,49), linspace(-50,-30,90-50+1), -30*ones(1,10)]);
 
 %!# a test with input and output args in a row vector (Compatibility behaviour)
 %!assert(imadjust([1:100],[50,90],[-50,-30]), \
-%!	 [-50*ones(1,49), linspace(-50,-30,90-50+1), -30*ones(1,10)]);
+%!       [-50*ones(1,49), linspace(-50,-30,90-50+1), -30*ones(1,10)]);
 
 %!# the previous test, "negated"
 %!assert(imadjust([1:100],[50;90],[-30;-50]), \
-%!	 [-30*ones(1,49), linspace(-30,-50,90-50+1), -50*ones(1,10)]);
-
+%!       [-30*ones(1,49), linspace(-30,-50,90-50+1), -50*ones(1,10)]);
 
 %!shared cm,cmn
 %! cm=[[1:10]',[2:11]',[3:12]'];
@@ -280,7 +253,7 @@ endfunction
 %!       [[0,linspace(0,1,6),1,1,1]',                                   \
 %!        [0,0,linspace(0,1,6),1,1]',                                   \
 %!        [0,0,0,linspace(0,1,6),1]']                                   \
-%!       ))(:)) < 1e-10                                                 \     
+%!       ))(:)) < 1e-10                                                 \
 %!       );
 
 %!# a colormap, different input and output on each
@@ -296,9 +269,8 @@ endfunction
 %!       [[0,linspace(0,1,6),1,1,1]',                                   \
 %!        [0,0,linspace(0,1,6).^2,1,1]'+1,                              \
 %!        [0,0,0,linspace(0,1,6).^3,1]'+2]                              \
-%!       )(:))) < 1e-10                                                 \    
+%!       )(:))) < 1e-10                                                 \
 %!       );
-
 
 %!shared iRGB,iRGBn,oRGB
 %! iRGB=zeros(10,1,3);
@@ -325,7 +297,6 @@ endfunction
 %! t(:,:,3)+=30;
 %! assert(imadjust(iRGBn,[0;1],[10,20,30;11,21,31]),t);
 
-
 %!# a RGB, different input on each, we need increased tolerance for this test
 %!assert(sum(abs((imadjust(iRGB,[2,4,6;7,9,11],[0;1]) - oRGB)(:))) < 1e-10);
 
@@ -342,20 +313,3 @@ endfunction
 %! t(:,:,2)=t(:,:,2).^2+1;
 %! t(:,:,3)=t(:,:,3).^3+2;
 %! assert(sum(abs((imadjust(iRGB,[2,4,6;7,9,11],[0,1,2;1,2,3],[1,2,3]) - t)(:))) < 1e-10);
-
-
-%
-% $Log$
-% Revision 1.3  2007/03/23 16:14:37  adb014
-% Update the FSF address
-%
-% Revision 1.2  2007/01/04 23:47:43  hauberg
-% Put seealso before end deftypefn
-%
-% Revision 1.1  2006/08/20 12:59:33  hauberg
-% Changed the structure to match the package system
-%
-% Revision 1.3  2004/09/01 22:51:14  jmones
-% Fully recoded: NDArray support, docs, tests, more compatible with MATLAB, changed copyright
-%
-%

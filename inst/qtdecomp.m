@@ -1,25 +1,25 @@
-## Copyright (C) 2004 Josep Mones i Teixidor
+## Copyright (C) 2004 Josep Mones i Teixidor <jmones@puntbarra.com>
 ##
-## This program is free software; you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 2 of the License, or
-## (at your option) any later version.
+## This program is free software; you can redistribute it and/or modify it under
+## the terms of the GNU General Public License as published by the Free Software
+## Foundation; either version 3 of the License, or (at your option) any later
+## version.
 ##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
+## This program is distributed in the hope that it will be useful, but WITHOUT
+## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+## details.
 ##
-## You should have received a copy of the GNU General Public License
-## along with this program; If not, see <http://www.gnu.org/licenses/>.
+## You should have received a copy of the GNU General Public License along with
+## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {@var{S} = } qtdecomp (@var{I})
-## @deftypefnx {Function File} {@var{S} = } qtdecomp (@var{I},@var{threshold})
-## @deftypefnx {Function File} {@var{S} = } qtdecomp (@var{I},@var{threshold},@var{mindim})
-## @deftypefnx {Function File} {@var{S} = } qtdecomp (@var{I},@var{threshold},@var{[mindim maxdim]})
-## @deftypefnx {Function File} {@var{S} = } qtdecomp (@var{I},@var{fun})
-## @deftypefnx {Function File} {@var{S} = } qtdecomp (@var{I},@var{fun},@var{P1},@var{P2},...)
+## @deftypefn {Function File} {@var{S} =} qtdecomp (@var{I})
+## @deftypefnx {Function File} {@var{S} =} qtdecomp (@var{I}, @var{threshold})
+## @deftypefnx {Function File} {@var{S} =} qtdecomp (@var{I}, @var{threshold}, @var{mindim})
+## @deftypefnx {Function File} {@var{S} =} qtdecomp (@var{I}, @var{threshold}, [@var{mindim} @var{maxdim}])
+## @deftypefnx {Function File} {@var{S} =} qtdecomp (@var{I}, @var{fun})
+## @deftypefnx {Function File} {@var{S} =} qtdecomp (@var{I}, @var{fun}, @var{P1}, @var{P2}, @dots{})
 ## Performs quadtree decomposition.
 ##
 ## qtdecomp decomposes a square image @var{I} into four equal-sized
@@ -67,14 +67,10 @@
 ## @seealso{qtgetblk, qtsetblk}
 ## @end deftypefn
 
-## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
-
-function S = qtdecomp(I, p1, varargin)
-  if (nargin<1)
-    usage("S=qtdecomp(I)");
-  endif
-  
-  if (!ismatrix(I) || size(I,1)!=size(I,2))
+function S = qtdecomp (I, p1, varargin)
+  if (nargin < 1)
+    print_usage;
+  elseif (!ismatrix(I) || size(I,1)!=size(I,2))
     error("qtdecomp: I should be a square matrix.");
   endif
 
@@ -107,24 +103,23 @@ function S = qtdecomp(I, p1, varargin)
     endif
 
     if (nargin>3)
-      usage("S=qtdecomp(I,threshold,mindim),        \
-	  S=qtdecomp(I,threshold,[mindim maxdim])");
+      print_usage;
     elseif (nargin==3)
       dims=varargin{1};
       if (isvector(dims)&&length(dims)==2)
-	mindim=dims(1);
-	maxdim=dims(2);
+        mindim=dims(1);
+        maxdim=dims(2);
       elseif (isreal(dims))
-	mindim=dims;
+        mindim=dims;
       else
-	error("qtdecomp: third parameter must be 'mindim' or '[mindim maxdim]'");
+        error("qtdecomp: third parameter must be 'mindim' or '[mindim maxdim]'");
       endif
       ## we won't check if mindim or maxdim are powers of 2. It's too
       ## restrictive and don't need it at all.
     endif
     
   elseif strcmp(typeinfo(p1),"function handle") ...
-  	  || strcmp(typeinfo(p1),"inline function")
+          || strcmp(typeinfo(p1),"inline function")
     ## function handles seem to return true to isscalar
     fun=p1;
     decision_method=2;
@@ -151,12 +146,12 @@ function S = qtdecomp(I, p1, varargin)
     if(initial_splits>0)
       divs=2^initial_splits;
       if (rem(curr_size,divs)!=0)
-	error("qtdecomp: Can't decompose I enough times to fulfill maxdim requirement.");
+        error("qtdecomp: Can't decompose I enough times to fulfill maxdim requirement.");
       endif
       ## update curr_size
       curr_size/=divs;
       if(curr_size<mindim)
-	error("qtdecomp: maxdim restriction collides with mindim restriction.");
+        error("qtdecomp: maxdim restriction collides with mindim restriction.");
       endif
       els=([0:divs-1]*curr_size+1).';
       offsets=[kron(els,ones(divs,1)), kron(ones(divs,1),els)];
@@ -173,37 +168,37 @@ function S = qtdecomp(I, p1, varargin)
       finished = true;
     else
       if (decision_method<2)
-	db=logical(ones(rows(offsets),1));
-	for r=1:rows(offsets)
-	  o=offsets(r,:);
-	  fo=offsets(r,:)+curr_size-1;
+        db=logical(ones(rows(offsets),1));
+        for r=1:rows(offsets)
+          o=offsets(r,:);
+          fo=offsets(r,:)+curr_size-1;
 
-	  if(decision_method==0)
-	    ## is everything equal?
-	    if (all(I(o(1),o(2))==I(o(1):fo(1),o(2):fo(2))))
-	      db(r)=0;
-	    endif
-	  else
-	    ## check threshold
-	    t=I(o(1):fo(1),o(2):fo(2));
-	    t=t(:);
-	    if ((max(t)-min(t))<=threshold)
-	      db(r)=0;
-	    endif
-	  endif
-	endfor
+          if(decision_method==0)
+            ## is everything equal?
+            if (all(I(o(1),o(2))==I(o(1):fo(1),o(2):fo(2))))
+              db(r)=0;
+            endif
+          else
+            ## check threshold
+            t=I(o(1):fo(1),o(2):fo(2));
+            t=t(:);
+            if ((max(t)-min(t))<=threshold)
+              db(r)=0;
+            endif
+          endif
+        endfor
       elseif(decision_method==2)
-	## function handle decision method
-	## build blocks
-	b=zeros(curr_size,curr_size,rows(offsets));
-	rbc=offsets(:,1:2)+curr_size-1;
-	for r=1:rows(offsets)
-	  b(:,:,r)=I(offsets(r,1):rbc(r,1),offsets(r,2):rbc(r,2));
-	endfor
+        ## function handle decision method
+        ## build blocks
+        b=zeros(curr_size,curr_size,rows(offsets));
+        rbc=offsets(:,1:2)+curr_size-1;
+        for r=1:rows(offsets)
+          b(:,:,r)=I(offsets(r,1):rbc(r,1),offsets(r,2):rbc(r,2));
+        endfor
 
-	db=feval(fun, b, varargin{:});
+        db=feval(fun, b, varargin{:});
       else
-	error("qtdecomp: execution shouldn't reach here. Please report this as a bug.");
+        error("qtdecomp: execution shouldn't reach here. Please report this as a bug.");
       endif
 
       ## Add blocks that won't divide to results
@@ -224,11 +219,9 @@ function S = qtdecomp(I, p1, varargin)
   S=sparse(res(:,1),res(:,2),res(:,3),size(I,1),size(I,2));
 endfunction
 
-
 %!demo
 %! full(qtdecomp(eye(8)))
 %! %It finds 2 big blocks of 0 and it decomposes further where 0 and 1 are mixed.
-
 
 %!# Test if odd-sized limits split
 %!assert(full(qtdecomp(eye(5))), reshape([5,zeros(1,24)],5,5));
@@ -245,9 +238,9 @@ endfunction
 %!     3, 6, 3, 1,58,53,67,65;
 %!     3, 6, 3, 1,58,53,67,65;
 %!     3, 6, 3, 1,58,53,67,65;
-%!    23,42,42,42,99,99,99,99;    
-%!    27,42,42,42,99,99,99,99;    
-%!    23,22,26,25,99,99,99,99;    
+%!    23,42,42,42,99,99,99,99;
+%!    27,42,42,42,99,99,99,99;
+%!    23,22,26,25,99,99,99,99;
 %!    22,22,24,22,99,99,99,99];
 %! B2=[2,0;0,0];
 %! B4=zeros(4); B4(1,1)=4;
@@ -282,60 +275,14 @@ endfunction
 %!test
 %!# no params
 %! first_eq=inline("(A(1,1,:)!=(54*ones(1,1,size(A,3))))(:)","A");
-%! assert(full(qtdecomp(A,first_eq)),[ones(4),B4;ones(4,8)]); 
+%! assert(full(qtdecomp(A,first_eq)),[ones(4),B4;ones(4,8)]);
 
 %!test
 %!# 1 param
 %! first_eq=inline("(A(1,1,:)!=(c*ones(1,1,size(A,3))))(:)","A","c");
-%! assert(full(qtdecomp(A,first_eq,54)),[ones(4),B4;ones(4,8)]); 
+%! assert(full(qtdecomp(A,first_eq,54)),[ones(4),B4;ones(4,8)]);
 
 %!test
 %!# 3 params
 %! first_eq=inline("(A(1,1,:)!=((c1+c2+c3)*ones(1,1,size(A,3))))(:)","A","c1","c2","c3");
-%! assert(full(qtdecomp(A,first_eq,4,40,10)),[ones(4),B4;ones(4,8)]); 
-
-
-
-%
-% $Log$
-% Revision 1.5  2007/03/23 16:14:37  adb014
-% Update the FSF address
-%
-% Revision 1.4  2007/01/04 23:50:47  hauberg
-% Put seealso before end deftypefn
-%
-% Revision 1.3  2007/01/04 23:41:47  hauberg
-% Minor changes in help text
-%
-% Revision 1.2  2006/10/09 19:58:09  adb014
-% Remove dependency on miscellaneous transpose function. Simplify tests and add function handle tests
-%
-% Revision 1.1  2006/08/20 12:59:35  hauberg
-% Changed the structure to match the package system
-%
-% Revision 1.8  2006/01/03 02:09:15  pkienzle
-% Reorder tests so that shared variables are displayed unless relevant.
-%
-% Revision 1.7  2006/01/02 22:05:06  pkienzle
-% Reduce number of shared variables in tests
-%
-% Revision 1.6  2004/09/09 19:36:35  jmones
-% all_va_args -> varargin{:}. Now works on 2.1.58
-%
-% Revision 1.5  2004/09/08 14:07:22  pkienzle
-% Fix test for 'inline function'
-%
-% Revision 1.4  2004/08/11 19:52:41  jmones
-% qtsetblk added
-%
-% Revision 1.3  2004/08/11 00:05:21  jmones
-% seealso qtgetblk added to doc
-%
-% Revision 1.2  2004/08/10 00:19:42  jmones
-% Corrected misleading comment.
-%
-% Revision 1.1  2004/08/09 01:48:54  jmones
-% Added qtdecomp: quadtree decomposition
-%
-%
-
+%! assert(full(qtdecomp(A,first_eq,4,40,10)),[ones(4),B4;ones(4,8)]);

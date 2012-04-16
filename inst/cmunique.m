@@ -1,22 +1,22 @@
-## Copyright (C) 2004 Josep Mones i Teixidor
+## Copyright (C) 2004 Josep Mones i Teixidor <jmones@puntbarra.com>
 ##
-## This program is free software; you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 2 of the License, or
-## (at your option) any later version.
+## This program is free software; you can redistribute it and/or modify it under
+## the terms of the GNU General Public License as published by the Free Software
+## Foundation; either version 3 of the License, or (at your option) any later
+## version.
 ##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
+## This program is distributed in the hope that it will be useful, but WITHOUT
+## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+## details.
 ##
-## You should have received a copy of the GNU General Public License
-## along with this program; If not, see <http://www.gnu.org/licenses/>.
+## You should have received a copy of the GNU General Public License along with
+## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {[@var{Y}, @var{newmap}] = } cmunique (@var{X},@var{map})
-## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] = } cmunique (@var{RGB})
-## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] = } cmunique (@var{I})
+## @deftypefn {Function File} {[@var{Y}, @var{newmap}] =} cmunique (@var{X}, @var{map})
+## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] =} cmunique (@var{RGB})
+## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] =} cmunique (@var{I})
 ## Finds colormap with unique colors and corresponding image.
 ##
 ## @code{[Y,newmap]=cmunique(X,map)} returns an indexed image @var{y}
@@ -50,12 +50,9 @@
 ##
 ## @end deftypefn
 
-
-## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
-
-function [Y, newmap] = cmunique(P1, P2)
+function [Y, newmap] = cmunique (P1, P2)
   if (nargin<1 || nargin>2)
-    usage("[Y, newmap] = cmunique(X, map), [Y, newmap] = cmunique(RGB), [Y, newmap] = cmunique(I)");
+    print_usage;
   endif
   
 
@@ -70,17 +67,17 @@ function [Y, newmap] = cmunique(P1, P2)
   else
     switch(size(P1,3))
       case(1)
-	## I case
-	[newmap,i,j]=unique(P1);                        ## calculate unique colormap
-	newmap=repmat(newmap,1,3);                      ## get a RGB colormap
-	Y=reshape(j,rows(P1),columns(P1));              ## Y is j reshaped
+        ## I case
+        [newmap,i,j]=unique(P1);                        ## calculate unique colormap
+        newmap=repmat(newmap,1,3);                      ## get a RGB colormap
+        Y=reshape(j,rows(P1),columns(P1));              ## Y is j reshaped
       case(3)
-	## RGB case
-	map=[P1(:,:,1)(:), P1(:,:,2)(:), P1(:,:,3)(:)]; ## build a map with all values
-	[newmap,i,j]=unique(map, 'rows');               ## calculate unique colormap
-	Y=reshape(j,rows(P1),columns(P1));              ## Y is j reshaped
+        ## RGB case
+        map=[P1(:,:,1)(:), P1(:,:,2)(:), P1(:,:,3)(:)]; ## build a map with all values
+        [newmap,i,j]=unique(map, 'rows');               ## calculate unique colormap
+        Y=reshape(j,rows(P1),columns(P1));              ## Y is j reshaped
       otherwise
-	error("cmunique: first parameter is invalid.");
+        error("cmunique: first parameter is invalid.");
     endswitch
     
     ## if image was uint8 or uint16 we have to convert newmap to [0,1] range
@@ -93,16 +90,13 @@ function [Y, newmap] = cmunique(P1, P2)
     ## convert Y to uint8 (0-based indices then)
     Y=uint8(Y-1);
   endif
-
   
 endfunction
-
 
 %!demo
 %! [Y,newmap]=cmunique([1:4;5:8],[hot(4);hot(4)])
 %! # Both rows are equal since map maps colors to the same value
 %! # cmunique will give the same indices to both
-
 
 %!# This triggers invalid first parameter
 %!error(cmunique(zeros(3,3,2)));
@@ -182,30 +176,3 @@ endfunction
 %! assert(Id,newmap(:,1)(Y+1));
 %! assert(Id,newmap(:,2)(Y+1));
 %! assert(Id,newmap(:,3)(Y+1));
-
-%
-% $Log$
-% Revision 1.3  2007/03/23 16:14:36  adb014
-% Update the FSF address
-%
-% Revision 1.2  2007/01/04 23:44:22  hauberg
-% Minor changes in help text
-%
-% Revision 1.1  2006/08/20 12:59:32  hauberg
-% Changed the structure to match the package system
-%
-% Revision 1.4  2004/09/08 16:06:31  jmones
-% Solved problem with uint8 indexing and reduced tests on types (suggested by P. Kienzle)
-%
-% Revision 1.3  2004/09/03 17:07:26  jmones
-% Support for uint8 and uint16 types added.
-%
-% Revision 1.2  2004/08/17 15:48:03  jmones
-% Clarified expected data for RGB images in doc
-%
-% Revision 1.1  2004/08/17 15:45:40  jmones
-% cmunique: Finds colormap with unique colors and corresponding image
-%
-%
-	
-

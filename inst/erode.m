@@ -1,22 +1,22 @@
-## Copyright (C) 2004 Josep Mones i Teixidor
+## Copyright (C) 2004 Josep Mones i Teixidor <jmones@puntbarra.com>
 ##
-## This program is free software; you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 2 of the License, or
-## (at your option) any later version.
+## This program is free software; you can redistribute it and/or modify it under
+## the terms of the GNU General Public License as published by the Free Software
+## Foundation; either version 3 of the License, or (at your option) any later
+## version.
 ##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
+## This program is distributed in the hope that it will be useful, but WITHOUT
+## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+## details.
 ##
-## You should have received a copy of the GNU General Public License
-## along with this program; If not, see <http://www.gnu.org/licenses/>.
+## You should have received a copy of the GNU General Public License along with
+## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {@var{BW2} = } erode (@var{BW1},@var{SE})
-## @deftypefnx {Function File} {@var{BW2} = } erode (@var{BW1},@var{SE},@var{alg})
-## @deftypefnx {Function File} {@var{BW2} = } erode (@var{BW1},@var{SE},...,@var{n})
+## @deftypefn {Function File} {@var{BW2} =} erode (@var{BW1}, @var{SE})
+## @deftypefnx {Function File} {@var{BW2} =} erode (@var{BW1}, @var{SE}, @var{alg})
+## @deftypefnx {Function File} {@var{BW2} =} erode (@var{BW1}, @var{SE}, @dots{}, @var{n})
 ## Perform an erosion morphological operation on a binary image.
 ##
 ## @emph{warning}: @code{erode} has been deprecated in favor of
@@ -37,21 +37,24 @@
 ## BW2 = erode(BW1, SE, alg) returns the result of a erosion operation 
 ## using algorithm @var{alg}. Only 'spatial' is implemented at the moment.
 ##
-## BW2 = erosion(BW1, SE, ..., n) returns the result of @var{n} erosion
+## BW2 = erosion(BW1, SE, @dots{}, n) returns the result of @var{n} erosion
 ## operations on @var{BW1}.
 ##
 ## @seealso{dilate}
 ## @end deftypefn
 
-## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
-
-function BW2 = erode(BW1, SE, a, b)
-  warning ("'erode' has been deprecated in favor of 'imerode'. This function will be removed from future versions of the 'image' package");
+function BW2 = erode (BW1, SE, a, b)
+  persistent warned = false;
+  if (! warned)
+    warned = true;
+    warning ("Octave:deprecated-function",
+             "`erode' has been deprecated in favor of `imerode'. This function will be removed from future versions of the `image' package");
+  endif
 
   alg='spatial';
   n=1;
   if (nargin < 1 || nargin > 4)
-    usage ("BW2 = erode(BW1, SE [, alg] [, n])");
+    print_usage;
   endif
   if nargin ==  4
     alg=a;
@@ -86,9 +89,5 @@ endfunction
 %! erode(ones(5,5),ones(3,3))
 %! % creates a zeros border around ones.
 
-
-
 %!assert(erode([0,1,0;1,1,1;0,1,0],[0,0,0;0,0,1;0,1,1])==[1,0,0;0,0,0;0,0,0]);
 %!assert(erode([0,1,0;1,1,1;0,1,0],[0,1;1,1])==[1,0,0;0,0,0;0,0,0]);
-
-

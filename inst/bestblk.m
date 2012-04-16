@@ -1,17 +1,17 @@
-## Copyright (C) 2004 Josep Mones i Teixidor
+## Copyright (C) 2004 Josep Mones i Teixidor <jmones@puntbarra.com>
 ##
-## This program is free software; you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 2 of the License, or
-## (at your option) any later version.
+## This program is free software; you can redistribute it and/or modify it under
+## the terms of the GNU General Public License as published by the Free Software
+## Foundation; either version 3 of the License, or (at your option) any later
+## version.
 ##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
+## This program is distributed in the hope that it will be useful, but WITHOUT
+## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+## details.
 ##
-## You should have received a copy of the GNU General Public License
-## along with this program; If not, see <http://www.gnu.org/licenses/>.
+## You should have received a copy of the GNU General Public License along with
+## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{siz} = } bestblk ([@var{m} @var{n}], @var{k})
@@ -40,20 +40,10 @@
 ## @seealso{blkproc}
 ## @end deftypefn
 
-
-## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
-
-function [varargout] = bestblk(ims,k)
-  if(nargin<1 || nargin>2)
-    usage("siz=bestblk([m,n],k), [mb,nb]=bestblk([m,n],k)");
-  endif
-  if(nargout>2)
-    usage("siz=bestblk([m,n],k), [mb,nb]=bestblk([m,n],k)");
-  endif
-  if(nargin<2)
-    k=100;
-  endif
-  if(!isvector(ims))
+function [varargout] = bestblk (ims, k = 100)
+  if (nargin < 1 || nargin > 2 || nargout > 2)
+    print_usage;
+  elseif (!isvector (ims))
     error("bestblk: first parameter is not a vector.");
   endif
   ims=ims(:);
@@ -67,8 +57,8 @@ function [varargout] = bestblk(ims,k)
     for i=round(min(mi/10,k/2)):k
       pt=rem(mi,i);
       if(pt<p)
-	p=pt;
-	mb=i;
+        p=pt;
+        mb=i;
       endif
     endfor
   endif
@@ -79,8 +69,8 @@ function [varargout] = bestblk(ims,k)
     for i=round(min(ni/10,k/2)):k
       pt=rem(ni,i);
       if(pt<p)
-	p=pt;
-	nb=i;
+        p=pt;
+        nb=i;
       endif
     endfor
   endif
@@ -100,19 +90,3 @@ endfunction
 
 %!assert(bestblk([300;100],150),[30;100]);
 %!assert(bestblk([256,128],17),[16;16]);
-
-% $Log$
-% Revision 1.3  2007/03/23 16:14:36  adb014
-% Update the FSF address
-%
-% Revision 1.2  2007/01/04 23:44:22  hauberg
-% Minor changes in help text
-%
-% Revision 1.1  2006/08/20 12:59:31  hauberg
-% Changed the structure to match the package system
-%
-% Revision 1.2  2005/07/03 01:10:19  pkienzle
-% Try to correct for missing newline at the end of the file
-%
-% Revision 1.1  2004/08/15 19:01:05  jmones
-% bestblk added: Calculates best block size for block processing

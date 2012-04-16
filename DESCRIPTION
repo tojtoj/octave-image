@@ -11,5 +11,5 @@ Description: The Octave-forge Image package provides functions for
  operations, linear filtering, and much more.
 Depends: octave (>= 3.4.0), signal
 Autoload: yes
-License: GPL version 2 or later
+License: GPLv3+, simplified BSD
 Url: http://octave.sf.net

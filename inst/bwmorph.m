@@ -1,21 +1,21 @@
-## Copyright (C) 2004 Josep Mones i Teixidor
+## Copyright (C) 2004 Josep Mones i Teixidor <jmones@puntbarra.com>
 ##
-## This program is free software; you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 2 of the License, or
-## (at your option) any later version.
+## This program is free software; you can redistribute it and/or modify it under
+## the terms of the GNU General Public License as published by the Free Software
+## Foundation; either version 3 of the License, or (at your option) any later
+## version.
 ##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
+## This program is distributed in the hope that it will be useful, but WITHOUT
+## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+## details.
 ##
-## You should have received a copy of the GNU General Public License
-## along with this program; If not, see <http://www.gnu.org/licenses/>.
+## You should have received a copy of the GNU General Public License along with
+## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {@var{BW2} = } bwmorph (@var{BW},@var{operation})
-## @deftypefnx {Function File} {@var{BW2} = } bwmorph (@var{BW},@var{operation},@var{n})
+## @deftypefn {Function File} {@var{BW2} =} bwmorph (@var{BW}, @var{operation})
+## @deftypefnx {Function File} {@var{BW2} =} bwmorph (@var{BW}, @var{operation}, @var{n})
 ## Perform a morphological operation on a binary image.
 ##
 ## BW2=bwmorph(BW,operation) performs a morphological operation
@@ -187,23 +187,16 @@
 ## @seealso{imdilate, imerode, imtophat, imbothat, makelut, applylut}
 ## @end deftypefn
 
-
 ## TODO: As soon as Octave doesn't segfault when assigning values to a
 ## TODO: bool matrix, remove all conversions from lut to logical and
 ## TODO: just create it as a logical from the beginning.
 
 ## TODO: n behaviour should be tested in all cases for compatibility.
 
-## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
-
-function BW2 = bwmorph(BW, operation, n)
+function BW2 = bwmorph (BW, operation, n = 1)
   if(nargin<2 || nargin>3)
-    usage("BW2=bwmorph(BW, operation [,n])");
-  endif
-  if(nargin<3)
-    n=1;
-  endif
-  if(n<0)
+    print_usage;
+  elseif(n<0)
     error("bwmorph: n should be > 0");
   elseif(n==0) ## we'll just return the same matrix (check this!)
     BW2=BW;
@@ -587,38 +580,3 @@ endfunction
 %!assert(bwmorph(slBW,'skel-lantuejoul',2),[rslBW(1:8,:);logical(zeros(4,7))]);
 %!assert(bwmorph(slBW,'skel-lantuejoul',3),rslBW);
 %!assert(bwmorph(slBW,'skel-lantuejoul',Inf),rslBW);
-
-
-%
-% $Log$
-% Revision 1.4  2007/03/23 16:14:36  adb014
-% Update the FSF address
-%
-% Revision 1.3  2007/01/04 23:41:47  hauberg
-% Minor changes in help text
-%
-% Revision 1.2  2006/10/15 08:04:55  hauberg
-% Fixed texinfo in bwmorph
-%
-% Revision 1.1  2006/08/20 12:59:32  hauberg
-% Changed the structure to match the package system
-%
-% Revision 1.6  2004/09/16 02:14:40  pkienzle
-% Use frivolous uint8() call to block tests for version 2.1.57 and earlier
-%
-% Revision 1.5  2004/09/15 20:36:57  jmones
-% logical(1) => true
-%
-% Revision 1.4  2004/09/15 20:00:00  jmones
-% Updated tests to match Gonzalez&Woods example
-%
-% Revision 1.3  2004/09/15 13:51:10  pkienzle
-% Use logical in tests; reduce number of shared variables in tests.
-%
-% Revision 1.2  2004/09/01 22:35:47  jmones
-% Added Lantuejoul skeletonizing algorithm from Gonzalez&Woods
-%
-% Revision 1.1  2004/08/15 19:47:04  jmones
-% bwmorph added: Perform a morphological operation on a binary image
-%
-%

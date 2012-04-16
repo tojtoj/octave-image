@@ -1,21 +1,21 @@
-## Copyright (C) 2004 Josep Mones i Teixidor
+## Copyright (C) 2004 Josep Mones i Teixidor <jmones@puntbarra.com>
 ##
-## This program is free software; you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 2 of the License, or
-## (at your option) any later version.
+## This program is free software; you can redistribute it and/or modify it under
+## the terms of the GNU General Public License as published by the Free Software
+## Foundation; either version 3 of the License, or (at your option) any later
+## version.
 ##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
+## This program is distributed in the hope that it will be useful, but WITHOUT
+## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+## details.
 ##
-## You should have received a copy of the GNU General Public License
-## along with this program; If not, see <http://www.gnu.org/licenses/>.
+## You should have received a copy of the GNU General Public License along with
+## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {@var{lut} = } makelut (@var{fun},@var{n})
-## @deftypefnx {Function File} {@var{lut} = } makelut (@var{fun},@var{n},@var{P1},@var{P2},...)
+## @deftypefn {Function File} {@var{lut} =} makelut (@var{fun}, @var{n})
+## @deftypefnx {Function File} {@var{lut} =} makelut (@var{fun}, @var{n}, @var{P1}, @var{P2}, @dots{})
 ## Create a lookup table which can be used by applylut.
 ##
 ## lut = makelut(fun,n) returns a vector which can be used by applylut
@@ -31,19 +31,15 @@
 ## vector with its result, suitable to be used by applylut. The length
 ## of this vector is 2^(@var{n}^2), so 16 for 2-by-2 and 512 for 3-by-3.
 ##
-## makelut also passes parameters @var{P1}, @var{P2}, .... to @var{fun}. 
+## makelut also passes parameters @var{P1}, @var{P2}, .... to @var{fun}.
 ##
 ## @seealso{applylut}
 ## @end deftypefn
 
-## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
-
-function lut = makelut(fun, n, varargin)
+function lut = makelut (fun, n, varargin)
   if (nargin < 2)
-    usage ("lut = makelut(fun, n [, ...])");
-  endif
-
-  if (n<2)
+    print_usage;
+  elseif (n < 2)
     error ("makelut: n should be a natural number >= 2");
   endif
 
@@ -67,6 +63,3 @@ endfunction
 %!assert(prod(makelut(inline('x(1,1)==1','x'),3)==[zeros(2^8,1);ones(2^8,1)])==1); # test 3-by-3
 %!assert(prod(makelut(inline('x(1,1)==1','x'),4)==[zeros(2^15,1);ones(2^15,1)])==1); # test 4-by-4
 %!assert(prod(makelut(inline('x(2,1)==1','x'),3)==[zeros(2^7,1);ones(2^7,1);zeros(2^7,1);ones(2^7,1)])==1); # another test for 3-by-3
-
-
-

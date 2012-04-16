@@ -1,22 +1,22 @@
-## Copyright (C) 2004 Josep Mones i Teixidor
+## Copyright (C) 2004 Josep Mones i Teixidor <jmones@puntbarra.com>
 ##
-## This program is free software; you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 2 of the License, or
-## (at your option) any later version.
+## This program is free software; you can redistribute it and/or modify it under
+## the terms of the GNU General Public License as published by the Free Software
+## Foundation; either version 3 of the License, or (at your option) any later
+## version.
 ##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
+## This program is distributed in the hope that it will be useful, but WITHOUT
+## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+## details.
 ##
-## You should have received a copy of the GNU General Public License
-## along with this program; If not, see <http://www.gnu.org/licenses/>.
+## You should have received a copy of the GNU General Public License along with
+## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {@var{B} = } im2col (@var{A}, [@var{m},@var{n}], @var{block_type})
-## @deftypefnx {Function File} {@var{B} = } im2col (@var{A}, [@var{m},@var{n}])
-## @deftypefnx {Function File} {@var{B} = } im2col (@var{A}, 'indexed', ...)
+## @deftypefn {Function File} {@var{B} =} im2col (@var{A}, [@var{m}, @var{n}], @var{block_type})
+## @deftypefnx {Function File} {@var{B} =} im2col (@var{A}, [@var{m}, @var{n}])
+## @deftypefnx {Function File} {@var{B} =} im2col (@var{A}, 'indexed', @dots{})
 ## Rearranges image blocks into columns.
 ##
 ## @code{B=im2col(A, [m, n], blocktype)} rearranges blocks in @var{A}
@@ -47,7 +47,7 @@
 ## @code{B=im2col(A,[m,n])} takes @code{distinct} as a default value for
 ## @var{block_type}. 
 ##
-## @code{B=im2col(A,'indexed',...)} will treat @var{A} as an indexed
+## @code{B=im2col(A,'indexed', @dots{})} will treat @var{A} as an indexed
 ## image, so it will pad using 1 if @var{A} is double. All other cases
 ## (incluing indexed matrices with uint8 and uint16 types and
 ## non-indexed images) will use 0 as padding value.
@@ -58,11 +58,9 @@
 ## @seealso{col2im}
 ## @end deftypefn
 
-## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
-
-function B = im2col(A, varargin)
-  if(nargin<2 || nargin>4)
-    usage("B=im2col(B [, 'indexed'], [m,n] [, block_type])");
+function B = im2col (A, varargin)
+  if(nargin < 2 || nargin > 4)
+    print_usage;
   endif
 
   ## check 'indexed' presence
@@ -70,14 +68,14 @@ function B = im2col(A, varargin)
   p=1;
   if(ischar(varargin{1}) && strcmp(varargin{1}, "indexed"))
     if(nargin<3)
-      usage("B=im2col(B [, 'indexed'], [m,n] [, block_type])");
+      print_usage;
     endif
     indexed=true;
     p+=1;
     if(isa(A,"uint8") || isa(A,"uint16"))
-	padval=0;
+      padval=0;
     else
-      padval=1; 
+      padval=1;
     endif
   else
     padval=0;
@@ -106,9 +104,8 @@ function B = im2col(A, varargin)
 
   ## if we didn't have 'indexed' but had 4 parameters there's an error
   if(nargin>p)
-      usage("B=im2col(B [, 'indexed'], [m,n] [, block_type])");
+    print_usage;
   endif
-
   
   ## common checks
   if(!ismatrix(A))
@@ -121,42 +118,42 @@ function B = im2col(A, varargin)
       sp=mod(-size(A)',[m;n]);
 
       if(any(sp))
-	A=padarray(A,sp,padval,'post');
+        A=padarray(A,sp,padval,'post');
       endif
 
       ## iterate through all blocks
       B=[];
       for i=1:m:size(A,1) ## up to bottom
-	for j=1:n:size(A,2) ## left to right
-	  ## TODO: check if we can horzcat([],uint8([10;11])) in a
-	  ## future Octave version > 2.1.58
-	  if(isempty(B))
-	    B=A(i:i+m-1,j:j+n-1)(:);
-	  else
-	    B=horzcat(B, A(i:i+m-1,j:j+n-1)(:));
-	  endif
-	endfor
+        for j=1:n:size(A,2) ## left to right
+          ## TODO: check if we can horzcat([],uint8([10;11])) in a
+          ## future Octave version > 2.1.58
+          if(isempty(B))
+            B=A(i:i+m-1,j:j+n-1)(:);
+          else
+            B=horzcat(B, A(i:i+m-1,j:j+n-1)(:));
+          endif
+        endfor
       endfor
       
     case('sliding')
       if(indexed)
-	disp("WARNING: 'indexed' has no sense when using sliding.");
+        disp("WARNING: 'indexed' has no sense when using sliding.");
       endif
       if(m>size(A,1) || n>size(A,2))
-	error("im2col: block size can't be greater than image size in sliding");
+        error("im2col: block size can't be greater than image size in sliding");
       endif
       ## TODO: check if matlab uses top-down and left-right order
       B=[];
       for j=1:1:size(A,2)-n+1 ## left to right
-	for i=1:1:size(A,1)-m+1 ## up to bottom
-	  ## TODO: check if we can horzcat([],uint8([10;11])) in a
-	  ## future Octave version > 2.1.58
-	  if(isempty(B))
-	    B=A(i:i+m-1,j:j+n-1)(:);
-	  else
-	    B=horzcat(B, A(i:i+m-1,j:j+n-1)(:));
-	  endif
-	endfor
+        for i=1:1:size(A,1)-m+1 ## up to bottom
+          ## TODO: check if we can horzcat([],uint8([10;11])) in a
+          ## future Octave version > 2.1.58
+          if(isempty(B))
+            B=A(i:i+m-1,j:j+n-1)(:);
+          else
+            B=horzcat(B, A(i:i+m-1,j:j+n-1)(:));
+          endif
+        endfor
       endfor
       
     otherwise
@@ -215,31 +212,3 @@ endfunction
 %!# now sliding uint8 & uint16
 %!assert(im2col(uint8(As),[2,4],'sliding'), uint8(Bs));
 %!assert(im2col(uint16(As),[2,4],'sliding'), uint16(Bs));
-
-
-
-
-%
-% $Log$
-% Revision 1.4  2007/03/23 16:14:36  adb014
-% Update the FSF address
-%
-% Revision 1.3  2007/01/04 23:47:43  hauberg
-% Put seealso before end deftypefn
-%
-% Revision 1.2  2007/01/04 23:37:54  hauberg
-% Minor changes in help text
-%
-% Revision 1.1  2006/08/20 12:59:33  hauberg
-% Changed the structure to match the package system
-%
-% Revision 1.3  2005/09/08 02:00:17  pkienzle
-% [for Bill Denney] isstr -> ischar
-%
-% Revision 1.2  2004/09/03 17:37:08  jmones
-% Added support for int* and uint* types
-%
-% Revision 1.1  2004/08/18 14:39:07  jmones
-% im2col and col2im added
-%
-%

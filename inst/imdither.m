@@ -1,26 +1,29 @@
 ## Copyright (C) 2009 Sergey Kirgizov
 ##
-## This program is free software; you can redistribute it and/or
-## modify it under the terms of the GNU General Public License
-## as published by the Free Software Foundation; either version 3
-## of the License, or (at your option) any later version.
-## 
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
+## This program is free software; you can redistribute it and/or modify it under
+## the terms of the GNU General Public License as published by the Free Software
+## Foundation; either version 3 of the License, or (at your option) any later
+## version.
+##
+## This program is distributed in the hope that it will be useful, but WITHOUT
+## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+## details.
+##
+## You should have received a copy of the GNU General Public License along with
+## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {[@var{Y}, @var{newmap}] = } imdither (@var{img})
-## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] = } imdither (@var{img}, @
+## @deftypefn {Function File} {[@var{Y}, @var{newmap}] =} imdither (@var{img})
+## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] =} imdither (@var{img}, @
 ## @var{colors})
-## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] = } imdither (@var{img}, @
+## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] =} imdither (@var{img}, @
 ## @var{colors}, @var{dithtype})
-## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] = } imdither (@var{img}, @
+## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] =} imdither (@var{img}, @
 ## @var{map})
-## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] = } imdither (@var{img}, @
+## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] =} imdither (@var{img}, @
 ## @var{map}, @var{colors})
-## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] = } imdither(@var{img}, @
+## @deftypefnx {Function File} {[@var{Y}, @var{newmap}] =} imdither(@var{img}, @
 ## @var{map}, @var{colors}, @var{dithtype})
 ## Reduce the number a colors of rgb or indexed image.
 ##
@@ -48,19 +51,11 @@
 ##
 ## @end deftypefn
 
-function [Y,newmap] = imdither(im,p1,p2,p3)
-  
+function [Y, newmap] = imdither (im, p1, p2, p3)
   colors="256";
   dithtype="FloydSteinberg";
-  if  ( nargin < 1 )
-    usage([ ...
-       "imdither( rgb )\n", ...
-       "imdither( rgb,colors )\n", ...
-       "imdither( rgb,colors,dithtype )\n", ...
-       "imdither( img,map )\n", ...
-       "imdither( img,map,colors )\n", ...
-       "imdither( img,map,colors,dithtype )\n"       
-       ]);
+  if (nargin < 1)
+    print_usage;
   endif
 
   fname = [tmpnam(),".ppm"];
@@ -74,18 +69,11 @@ function [Y,newmap] = imdither(im,p1,p2,p3)
     endif
     opts=["-colors ",colors;"-dither ",dithtype];
     imwrite(fname,im(:,:,1),im(:,:,2),im(:,:,3),opts);
-    [Y,newmap]=cmunique(imread(fname));        
+    [Y,newmap]=cmunique(imread(fname));
     delete(fname);
-  else    
+  else
     if (nargin <= 1)
-      usage([ ...
-         "imdither( rgb )\n", ...
-         "imdither( rgb,colors )\n", ...
-         "imdither( rgb,colors,dithtype )\n", ...
-         "imdither( img,map )\n", ...
-         "imdither( img,map,colors )\n", ...
-         "imdither( img,map,colors,dithtype )\n"       
-         ]);
+      print_usage;
     endif
                 # indexed
     if (nargin >= 3)
@@ -97,7 +85,7 @@ function [Y,newmap] = imdither(im,p1,p2,p3)
     opts=["-colors ",colors;"-dither ",dithtype];
     im (rows(p1)<=256)
     imwrite(fname,im,(p1+1),opts);
-    [Y,newmap]=cmunique(imread(fname));    
+    [Y,newmap]=cmunique(imread(fname));
     delete(fname);
   endif
 endfunction

@@ -1,22 +1,22 @@
-## Copyright (C) 2004 Josep Mones i Teixidor
+## Copyright (C) 2004 Josep Mones i Teixidor <jmones@puntbarra.com>
 ##
-## This program is free software; you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation; either version 2 of the License, or
-## (at your option) any later version.
+## This program is free software; you can redistribute it and/or modify it under
+## the terms of the GNU General Public License as published by the Free Software
+## Foundation; either version 3 of the License, or (at your option) any later
+## version.
 ##
-## This program is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
+## This program is distributed in the hope that it will be useful, but WITHOUT
+## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+## details.
 ##
-## You should have received a copy of the GNU General Public License
-## along with this program; If not, see <http://www.gnu.org/licenses/>.
+## You should have received a copy of the GNU General Public License along with
+## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {[@var{vals}] = } qtgetblk (@var{I},@var{S},@var{dim})
-## @deftypefnx {Function File} {[@var{vals},@var{idx}] = } qtgetblk (@var{I},@var{S},@var{dim})
-## @deftypefnx {Function File} {[@var{vals},@var{r},@var{c}] = } qtgetblk (@var{I},@var{S},@var{dim})
+## @deftypefn {Function File} {[@var{vals}] =} qtgetblk (@var{I}, @var{S}, @var{dim})
+## @deftypefnx {Function File} {[@var{vals},@var{idx}] =} qtgetblk (@var{I}, @var{S}, @var{dim})
+## @deftypefnx {Function File} {[@var{vals},@var{r},@var{c}] =} qtgetblk (@var{I}, @var{S}, @var{dim})
 ## Obtain block values from a quadtree decomposition.
 ##
 ## [vals]=qtgetblk(I,S,dim) returns a dim-by-dim-by-k array in
@@ -36,14 +36,9 @@
 ## @seealso{qtdecomp, qtsetblk}
 ## @end deftypefn
 
-## Author:  Josep Mones i Teixidor <jmones@puntbarra.com>
-
 function [varargout] = qtgetblk(I, S, dim)
-  if (nargin!=3)
-    usage("[vals,r,c]=qtgetblk(I,S,dim), [vals,idx]=qtgetblk(I,S,dim)");
-  endif
-  if (nargout>3)
-    usage("[vals,r,c]=qtgetblk(I,S,dim), [vals,idx]=qtgetblk(I,S,dim)");
+  if (nargin != 3 || nargout > 3)
+    print_usage;
   endif
 
   ## get blocks
@@ -77,7 +72,6 @@ function [varargout] = qtgetblk(I, S, dim)
   endif
 endfunction
 
-
 %!demo
 %! [vals,r,c]=qtgetblk(eye(4),qtdecomp(eye(4)),2)
 %! % Returns 2 blocks, at [1,3] and [3,1] (2*2 zeros blocks)
@@ -87,9 +81,9 @@ endfunction
 %!     3, 6, 3, 1,58,53,67,65;
 %!     3, 6, 3, 1,58,53,67,65;
 %!     3, 6, 3, 1,58,53,67,65;
-%!    23,42,42,42,99,99,99,99;    
-%!    27,42,42,42,99,99,99,99;    
-%!    23,22,26,25,99,99,99,99;    
+%!    23,42,42,42,99,99,99,99;
+%!    27,42,42,42,99,99,99,99;
+%!    23,22,26,25,99,99,99,99;
 %!    22,22,24,22,99,99,99,99];
 %! S=qtdecomp(A,10);
 
@@ -104,7 +98,6 @@ endfunction
 %! assert(c,[]);
 %! R=[];
 %! assert(va,R);
-
 
 %!test
 %! [va]=qtgetblk(A,S,4);
@@ -138,25 +131,3 @@ endfunction
 %! R(:,:,6)=A(1:2,7:8);
 %! R(:,:,7)=A(3:4,7:8);
 %! assert(va,R);
-
-%
-% $Log$
-% Revision 1.4  2007/03/23 16:14:37  adb014
-% Update the FSF address
-%
-% Revision 1.3  2007/01/04 23:50:47  hauberg
-% Put seealso before end deftypefn
-%
-% Revision 1.2  2007/01/04 23:41:47  hauberg
-% Minor changes in help text
-%
-% Revision 1.1  2006/08/20 12:59:35  hauberg
-% Changed the structure to match the package system
-%
-% Revision 1.3  2006/01/02 20:53:42  pkienzle
-% Reduce number of shared variables in tests
-%
-% Revision 1.2  2004/08/11 19:52:41  jmones
-% qtsetblk added
-%
-%
