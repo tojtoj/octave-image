@@ -63,4 +63,9 @@ Summary of important user-visible changes for image 1.1.0:
 
  ** `isrgb' now returns false for logical matrix.
 
+ ** `tiff_tag_read' had several bug fixes and can now check IFDs beyond
+    the first. It can also accept mutiple tag values and IFDs simultaneously
+    and return a matrix of the values found. Its documentation has been
+    expanded (as well as an explanation of TIFF structure on the source)
+
  ** Package is no longer automatically loaded.
