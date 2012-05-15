@@ -14,9 +14,9 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {@var{B} = } padarray (@var{A},@var{padsize})
-## @deftypefnx {Function File} {@var{B} = } padarray (@var{A},@var{padsize},@var{padval})
-## @deftypefnx {Function File} {@var{B} = } padarray (@var{A},@var{padsize},@var{padval},@var{direction})
+## @deftypefn {Function File} {@var{B} =} padarray (@var{A}, @var{padsize})
+## @deftypefnx {Function File} {@var{B} =} padarray (@var{A}, @var{padsize}, @var{padval})
+## @deftypefnx {Function File} {@var{B} =} padarray (@var{A}, @var{padsize}, @var{padval}, @var{direction})
 ## Pads an array in a configurable way.
 ##
 ## B = padarray(A,padsize) pads an array @var{A} with zeros, where
@@ -97,116 +97,116 @@ function B = padarray(A, padsize, padval = 0, direction = "both")
       ds = size(B);
       ds = [ds, ones(1,dim-length(ds))]; # data size
       ps = ds;
-      ps(dim) = s;		       # padding size
+      ps(dim) = s;                       # padding size
 
       if (ischar(padval))
-	# Init a "index all" cell array. All cases need it.
-	idx = cell(1, length(ds));
-	for i = 1:length(ds)
-	  idx{i} = 1:ds(i);
-	endfor
+        # Init a "index all" cell array. All cases need it.
+        idx = cell(1, length(ds));
+        for i = 1:length(ds)
+          idx{i} = 1:ds(i);
+        endfor
 
-	switch (padval)
-	  case ("circular")
-	    complete = 0;
-	    D = B;
-	    if (ps(dim) > ds(dim))
-	      complete = floor(ps(dim)/ds(dim));
-	      ps(dim) = rem(ps(dim), ds(dim));
-	    endif
-	    if (pre)
-	      for i = 1:complete
-		B = cat(dim, D, B);
-	      endfor
-	      idxt = idx;
-	      idxt{dim} = ds(dim)-ps(dim)+1:ds(dim);
-	      B = cat(dim, D(idxt{:}), B);
-	    endif
-	    if (post)
-	      for i = 1:complete
-		B = cat(dim, B, D);
-	      endfor
-	      idxt = idx;
-	      idxt{dim} = 1:ps(dim);
-	      B = cat(dim, B, D(idxt{:}));
-	    endif
-	    # end circular case
+        switch (padval)
+          case ("circular")
+            complete = 0;
+            D = B;
+            if (ps(dim) > ds(dim))
+              complete = floor(ps(dim)/ds(dim));
+              ps(dim) = rem(ps(dim), ds(dim));
+            endif
+            if (pre)
+              for i = 1:complete
+                B = cat(dim, D, B);
+              endfor
+              idxt = idx;
+              idxt{dim} = ds(dim)-ps(dim)+1:ds(dim);
+              B = cat(dim, D(idxt{:}), B);
+            endif
+            if (post)
+              for i = 1:complete
+                B = cat(dim, B, D);
+              endfor
+              idxt = idx;
+              idxt{dim} = 1:ps(dim);
+              B = cat(dim, B, D(idxt{:}));
+            endif
+            # end circular case
 
-	  case ("replicate")
-	    if (pre)
-	      idxt = idx;
-	      idxt{dim} = 1;
-	      pad = B(idxt{:});
-	      # can we do this without the loop?	
-	      for i = 1:s
-		B = cat(dim, pad, B);
-	      endfor
-	    endif
-	    if (post)
-	      idxt = idx;
-	      idxt{dim} = size(B, dim);
-	      pad = B(idxt{:});
-	      for i = 1:s
-		B = cat(dim, B, pad);
-	      endfor
-	    endif
-	    # end replicate case
-	
-	  case ("symmetric")
-	    if (ps(dim) > ds(dim))
-	      error("padarray: padding is longer than data using symmetric padding");
-	    endif
-	    if (pre)
-	      idxt = idx;
-	      idxt{dim} = ps(dim):-1:1;
-	      B = cat(dim, B(idxt{:}), B);
-	    endif
-	    if (post)
-	      idxt = idx;
-	      sbd = size(B, dim);
-	      idxt{dim} = sbd:-1:sbd-ps(dim)+1;
-	      B = cat(dim, B, B(idxt{:}));
-	    endif
-	    # end symmetric case
+          case ("replicate")
+            if (pre)
+              idxt = idx;
+              idxt{dim} = 1;
+              pad = B(idxt{:});
+              # can we do this without the loop?
+              for i = 1:s
+                B = cat(dim, pad, B);
+              endfor
+            endif
+            if (post)
+              idxt = idx;
+              idxt{dim} = size(B, dim);
+              pad = B(idxt{:});
+              for i = 1:s
+                B = cat(dim, B, pad);
+              endfor
+            endif
+            # end replicate case
+        
+          case ("symmetric")
+            if (ps(dim) > ds(dim))
+              error("padarray: padding is longer than data using symmetric padding");
+            endif
+            if (pre)
+              idxt = idx;
+              idxt{dim} = ps(dim):-1:1;
+              B = cat(dim, B(idxt{:}), B);
+            endif
+            if (post)
+              idxt = idx;
+              sbd = size(B, dim);
+              idxt{dim} = sbd:-1:sbd-ps(dim)+1;
+              B = cat(dim, B, B(idxt{:}));
+            endif
+            # end symmetric case
 
-	  case ("reflect")
-	    if (ps(dim) > ds(dim)-1)
-	      error("padarray: padding is longer than data using 'reflect' padding");
-	    endif
-	    if (pre)
-	      idxt = idx;
-	      idxt{dim} = (ps(dim):-1:1) + 1;
-	      B = cat(dim, B(idxt{:}), B);
-	    endif
-	    if (post)
-	      idxt = idx;
-	      sbd = size(B, dim)-1;
-	      idxt{dim} = sbd:-1:sbd-ps(dim)+1;
-	      B = cat(dim,B,B(idxt{:}));
-	    endif
-	    # end reflect case
+          case ("reflect")
+            if (ps(dim) > ds(dim)-1)
+              error("padarray: padding is longer than data using 'reflect' padding");
+            endif
+            if (pre)
+              idxt = idx;
+              idxt{dim} = (ps(dim):-1:1) + 1;
+              B = cat(dim, B(idxt{:}), B);
+            endif
+            if (post)
+              idxt = idx;
+              sbd = size(B, dim)-1;
+              idxt{dim} = sbd:-1:sbd-ps(dim)+1;
+              B = cat(dim,B,B(idxt{:}));
+            endif
+            # end reflect case
 
-	  otherwise
-	    error("padarray: invalid string in padval parameter.");
+          otherwise
+            error("padarray: invalid string in padval parameter.");
 
-	endswitch
-	# end cases where padval is a string
+        endswitch
+        # end cases where padval is a string
 
       elseif (isscalar(padval))
-	# Handle fixed value padding
-	if (padval == 0)
-	  pad = zeros(ps, class(A));       ## class(pad) = class(A)
-	else
-	  pad = padval*ones(ps, class(A)); ## class(pad) = class(A)
-	endif
-	if (pre && post)
-	  # check if this is not quicker than just 2 calls (one for each)
-	  B = cat(dim, pad, B, pad);
-	elseif (pre)
-	  B = cat(dim, pad, B);
-	elseif (post)
-	  B = cat(dim, B, pad);
-	endif
+        # Handle fixed value padding
+        if (padval == 0)
+          pad = zeros(ps, class(A));       ## class(pad) = class(A)
+        else
+          pad = padval*ones(ps, class(A)); ## class(pad) = class(A)
+        endif
+        if (pre && post)
+          # check if this is not quicker than just 2 calls (one for each)
+          B = cat(dim, pad, B, pad);
+        elseif (pre)
+          B = cat(dim, pad, B);
+        elseif (post)
+          B = cat(dim, B, pad);
+        endif
       endif
     endif
     dim+=1;
@@ -249,10 +249,10 @@ endfunction
 % Test padding on 3D array
 %!test
 %! int8(0); % fail for octave <= 2.1.57 without crashing
-%! assert(padarray([1,2,3;4,5,6],[3,2,1]), cat(3, 			\
-%! 	zeros(8,7),							\
-%! 	[zeros(3,7); [zeros(2,2), [1,2,3;4,5,6], zeros(2,2)]; zeros(3,7)], \
-%! 	zeros(8,7))); 
+%! assert(padarray([1,2,3;4,5,6],[3,2,1]), cat(3,                       \
+%!      zeros(8,7),                                                     \
+%!      [zeros(3,7); [zeros(2,2), [1,2,3;4,5,6], zeros(2,2)]; zeros(3,7)], \
+%!      zeros(8,7)));
 
 % Test if default param are ok
 %!assert(padarray([1,2],[4,5])==padarray([1,2],[4,5],0));
