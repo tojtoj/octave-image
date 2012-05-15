@@ -95,6 +95,7 @@ Region-based and block processing
  poly2mask
  roicolor
 Spatial transformations
+ imcrop
  impad
  imperspectivewarp
  imremap

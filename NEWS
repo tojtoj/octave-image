@@ -11,6 +11,7 @@ Summary of important user-visible changes for image 1.1.0:
       imabsdiff
       imadd
       imbothat
+      imcrop
       imdivide
       imlincomb
       immultiply
