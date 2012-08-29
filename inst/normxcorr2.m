@@ -26,6 +26,8 @@
 function cc = normxcorr2 (temp, img)
   if (nargin != 2)
     print_usage;
+  elseif (rows (temp) > rows (img) || columns (temp) > columns (img))
+    error ("normxcorr2: template must be same size or smaller than image");
   endif
   cc = xcorr2 (img, temp, "coeff");
 endfunction
