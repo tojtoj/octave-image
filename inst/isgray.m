@@ -43,16 +43,12 @@ function bool = isgray (img)
   elseif (ndims (img) == 2)
     switch (class (img))
       case "double"
-        bool = ispart (@is_gray_double, img);
+        bool = ispart (@is_double_image, img);
       case {"uint8", "uint16"}
         bool = true;
     endswitch
   endif
 
-endfunction
-
-function bool = is_gray_double (img)
-  bool = all ((img(:) >= 0 & img(:) <= 1) | isnan (img(:)));
 endfunction
 
 %!shared a

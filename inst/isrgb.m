@@ -44,16 +44,12 @@ function bool = isrgb (img)
   elseif (ndims (img) == 3 && size (img, 3) == 3)
     switch (class (img))
       case "double"
-        bool = ispart (@is_rgb_double, img);
+        bool = ispart (@is_double_image, img);
       case {"uint8", "uint16"}
         bool = true;
     endswitch
   endif
 
-endfunction
-
-function bool = is_rgb_double (img)
-  bool = all ((img(:) >= 0 & img(:) <= 1) | isnan (img(:)));
 endfunction
 
 %!# Non-matrix
