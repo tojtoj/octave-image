@@ -37,15 +37,12 @@ function bool = isind (img)
   endif
 
   bool = false;
-  if (ismatrix (img) && ndims (img) == 2 && !issparse (img) && isreal (img) && !isempty (img))
+  if (!isimage (img))
+    bool = false;
+  elseif (ndims (img) == 2 && isreal (img))
     switch (class (img))
       case "double"
-        ## to speed this up, we can look at a sample of the image first
-        bool = is_ind_double (img(1:ceil (rows (img) /100), 1:ceil (columns (img) /100)));
-        if (bool)
-          ## sample was true, we better make sure it's real
-          bool = is_ind_double (img);
-        endif
+        bool = ispart (@is_ind_double, img);
       case {"uint8", "uint16"}
         bool = true;
     endswitch
