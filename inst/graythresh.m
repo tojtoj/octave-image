@@ -30,7 +30,7 @@
 
 ## Note:
 ## This function is taken from
-## http://www.irit.fr/recherches/SAMOVA/MEMBERS/JOLY/Homepage_files/IRR05/Barre-Piquot/graythresh.m
+## http://www.irit.fr/~Philippe.Joly/Teaching/M2IRR/IRR05/
 ## I added texinfo documentation, error checking and sanitised the code.
 ##    -- Søren Hauberg
 
