@@ -39,15 +39,12 @@ function bool = isrgb (img)
   endif
 
   bool = false;
-  if (ismatrix (img) && ndims (img) == 3 && size (img, 3) == 3 && !issparse (img) && !isempty (img))
+  if (!isimage (img))
+    bool = false;
+  elseif (ndims (img) == 3 && size (img, 3) == 3)
     switch (class (img))
       case "double"
-        ## to speed this up, we can look at a sample of the image first
-        bool = is_rgb_double (img(1:ceil (rows (img) /100), 1:ceil (columns (img) /100)));
-        if (bool)
-          ## sample was true, we better make sure it's real
-          bool = is_rgb_double (img);
-        endif
+        bool = ispart (@is_rgb_double, img);
       case {"uint8", "uint16"}
         bool = true;
     endswitch
@@ -58,10 +55,6 @@ endfunction
 function bool = is_rgb_double (img)
   bool = all ((img(:) >= 0 & img(:) <= 1) | isnan (img(:)));
 endfunction
-
-%!demo
-%! isrgb(rand(1,2,3))
-%! # A 1-by-2-by-3 double matrix with elements between 0 and 1 is a RGB image.
 
 %!# Non-matrix
 %!assert(isrgb("this is not a RGB image"),false);
