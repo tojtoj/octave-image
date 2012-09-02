@@ -17,12 +17,12 @@
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{bool} = isbw (@var{img})
 ## @deftypefnx {Function File} @var{bool} = isbw (@var{img}, @var{logic})
-## Return true if @var{img} is a black-white image.
+## Return true if @var{img} is a black and white image.
 ##
-## The optional argument @var{logic} must be the string `logical' or
-## `non-logical'. The first defines a black and white image as a logical matrix,
-## while the second defines it as a matrix comprised of the values 1 and 0
-## only. Defaults to `logical'.
+## The optional argument @var{logic} defines what is considered a black and
+## white image. Possible values are the strings `logical' or `non-logical'. The
+## first defines it as a logical matrix, while the second defines it as a matrix
+## where the only values are 1 and 0. Defaults to `logical'.
 ##
 ## @seealso{isgray, isind, islogical, isrgb}
 ## @end deftypefn
@@ -36,32 +36,27 @@ function bool = isbw (BW, logic = "logical")
     error ("second argument must either be a string 'logical' or 'non-logical'")
   endif
 
-  ## an image cannot be a sparse matrix
-  if (!ismatrix (BW) || issparse (BW) || isempty (BW))
+  bool = false;
+  if (!isimage (BW))
     bool = false;
   elseif (strcmpi (logic, "logical"))
     ## this is the matlab compatible way (before they removed the function)
     bool = islogical (BW);
 
-    ## the following block is just temporary to keep backwards compatibility
-    if (!islogical (BW) && is_bw_nonlogical (BW))
+    ## FIXME the following block is just temporary to keep backwards compatibility
+    if (nargin == 1 && !islogical (BW) && isbw (BW, "non-logical"))
       persistent warned = false;
       if (! warned)
         warned = true;
         warning ("isbw: image is not logical matrix and therefore not binary but all values are either 0 and 1.")
-        warning ("isbw: future versions of this function will return true. Consider using the call isbw (img, \"non-logical\").")
+        warning ("isbw: future versions of this function will return true. Consider using the call `isbw (img, \"non-logical\")'.")
       endif
       bool = true;
     endif
     ## end of temporary block for backwards compatibility
 
   elseif (strcmpi (logic, "non-logical"))
-    ## to speed this up, we can look at a sample of the image first
-    bool = is_bw_nonlogical (BW(1:ceil (rows (BW) /100), 1:ceil (columns (BW) /100)));
-      if (bool)
-        ## sample was true, we better make sure it's real
-        bool = is_bw_nonlogical (BW);
-      endif
+    bool = ispart (@is_bw_nonlogical, BW);
   endif
 
 endfunction
@@ -69,3 +64,12 @@ endfunction
 function bool = is_bw_nonlogical (BW)
   bool = all (all ((BW == 1) + (BW == 0)));
 endfunction
+
+%!shared a
+%! a = round(rand(100));
+%!assert (isbw (a, "non-logical"), true);
+%!assert (isbw (a, "logical"), false);
+%!assert (isbw (logical(a), "logical"), true);
+%!assert (isbw (logical(a), "non-logical"), true);
+%! a(50, 50) = 2;
+%!assert (isbw (a, "non-logical"), false);
