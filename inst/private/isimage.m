@@ -18,7 +18,7 @@
 
 function bool = isimage (img)
   bool = true;
-  if (!ismatrix (img) || issparse (img) || isempty (img))
+  if (!ismatrix (img) || issparse (img) || isempty (img) || !isreal (img))
     bool = false;
   endif
 endfunction

@@ -39,7 +39,7 @@ function bool = isind (img)
   bool = false;
   if (!isimage (img))
     bool = false;
-  elseif (ndims (img) == 2 && isreal (img))
+  elseif (ndims (img) == 2)
     switch (class (img))
       case "double"
         bool = isindex (img);
