@@ -38,15 +38,12 @@ function bool = isgray (img)
   endif
 
   bool = false;
-  if (ismatrix (img) && ndims (img) == 2 && !issparse (img) && !isempty (img))
+  if (!isimage (img))
+    bool = false;
+  elseif (ndims (img) == 2)
     switch (class (img))
       case "double"
-        ## to speed this up, we can look at a sample of the image first
-        bool = is_gray_double (img(1:ceil (rows (img) /100), 1:ceil (columns (img) /100)));
-        if (bool)
-          ## sample was true, we better make sure it's real
-          bool = is_gray_double (img);
-        endif
+        bool = ispart (@is_gray_double, img);
       case {"uint8", "uint16"}
         bool = true;
     endswitch
@@ -57,3 +54,13 @@ endfunction
 function bool = is_gray_double (img)
   bool = all ((img(:) >= 0 & img(:) <= 1) | isnan (img(:)));
 endfunction
+
+%!shared a
+%! a = rand (100);
+%!assert (isgray (a), true);
+%! a(50, 50) = 2;
+%!assert (isgray (a), false);
+%! a = uint8 (randi (255, 100));
+%!assert (isgray (a), true);
+%! a = int8 (a);
+%!assert (isgray (a), false);
