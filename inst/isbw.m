@@ -62,7 +62,7 @@ function bool = isbw (BW, logic = "logical")
 endfunction
 
 function bool = is_bw_nonlogical (BW)
-  bool = all (all ((BW == 1) + (BW == 0)));
+  bool = all ((BW == 1)(:) + (BW == 0)(:));
 endfunction
 
 %!shared a
