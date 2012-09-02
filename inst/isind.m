@@ -42,7 +42,7 @@ function bool = isind (img)
   elseif (ndims (img) == 2)
     switch (class (img))
       case "double"
-        bool = isindex (img);
+        bool = ispart (@isindex, img);
       case {"uint8", "uint16"}
         bool = true;
     endswitch
