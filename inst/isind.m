@@ -42,16 +42,12 @@ function bool = isind (img)
   elseif (ndims (img) == 2 && isreal (img))
     switch (class (img))
       case "double"
-        bool = ispart (@is_ind_double, img);
+        bool = isindex (img);
       case {"uint8", "uint16"}
         bool = true;
     endswitch
   endif
 
-endfunction
-
-function bool = is_ind_double (img)
-  bool = all (img(:) == fix (img(:))) && all (img(:) >= 1);
 endfunction
 
 %!fail(isind([]))         ## should fail for empty matrix
