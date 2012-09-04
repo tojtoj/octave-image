@@ -32,14 +32,6 @@ bool operator== (const coord& a, const coord& b)
   return true;
 }
 
-bool in_range (const coord& a, const dim_vector& size_vec)
-{
-  for(octave_idx_type i = 0; i < a.nelem (); i++)
-    if (a(i) < 0 or a(i) >= size_vec(i))
-      return false;
-  return true;
-}
-
 //Lexicographic order for coords
 bool operator< (const coord& a, const coord& b)
 {
@@ -61,31 +53,12 @@ bool operator< (const coord& a, const coord& b)
   return true;
 }
 
-struct coord_hash
-{
-  inline size_t operator() (const coord& c) const
-  {
-    size_t seed = 0;
-    for(octave_idx_type i = 0; i < c.nelem (); i++)
-    {
-      //Boost's hash
-      seed ^= c(i) + 0x9e3779b9 + (seed<<6) + (seed>>2);
-    }
-    return seed;
-  }
-
-  inline size_t operator()(size_t s) const
-  {
-    return s;
-  }
-};
-
 // A few basic utility functions
 //{
 inline
 coord
-to_coord(const dim_vector& dv,
-         octave_idx_type k)
+to_coord (const dim_vector& dv,
+          octave_idx_type k)
 {
   octave_idx_type n = dv.length ();
   coord retval ( dim_vector (n, 1));
@@ -95,6 +68,21 @@ to_coord(const dim_vector& dv,
       k /= dv(j);
     }
   return retval;
+}
+
+inline
+octave_idx_type
+coord_to_pad_idx (const dim_vector& dv,
+                  const coord& c)
+{
+  octave_idx_type idx = 0;
+  octave_idx_type mul = 1;
+  for (octave_idx_type j = 0; j < dv.length (); j++)
+    {
+      idx += mul*c(j);
+      mul *= dv(j) + 2;
+    }
+  return idx;
 }
 
 inline
@@ -139,28 +127,34 @@ operator- (const coord& a)
 }
 //}
 
-std::set<coord>
-populate_neighbours(const boolNDArray& conn_mask)
+std::set<octave_idx_type>
+populate_neighbours(const boolNDArray& conn_mask,
+                    const dim_vector& size_vec)
 {
+  std::set<octave_idx_type> neighbours_idx;
   std::set<coord> neighbours;
 
   dim_vector conn_size = conn_mask.dims ();
-  coord centre(dim_vector(conn_size.length (), 1), 1);
-  coord zero(dim_vector(conn_size.length (), 1), 0);
+  coord centre (dim_vector(conn_size.length (), 1), 1);
+  coord zero (dim_vector(conn_size.length (), 1), 0);
   for (octave_idx_type idx = 0; idx < conn_mask.nelem (); idx++)
     {
       if (conn_mask(idx))
         {
-          coord aidx = to_coord(conn_size, idx) - centre;
+          coord aidx = to_coord (conn_size, idx) - centre;
+
           //The zero coordinates are the centre, and the negative ones
           //are the ones reflected about the centre, and we don't need
           //to consider those.
           if( aidx == zero or neighbours.find(-aidx) != neighbours.end() )
             continue;
+
           neighbours.insert (aidx);
+
+          neighbours_idx.insert (coord_to_pad_idx(size_vec, aidx));
          }
     }
-  return neighbours;
+  return neighbours_idx;
 }
 
 boolNDArray
@@ -265,7 +259,22 @@ get_mask (const boolNDArray& BW)
   return boolNDArray (mask_dims, 1);
 }
 
-#include <iostream>
+octave_idx_type
+get_padded_index (octave_idx_type r,
+                  const dim_vector& dv)
+{
+  octave_idx_type mult = 1;
+  octave_idx_type padded = 0;
+  for (octave_idx_type j = 0; j < dv.length (); j++)
+    {
+      padded += mult*(r % dv(j) + 1);
+      mult *= dv(j) + 2;
+      r /= dv(j);
+    }
+  return padded;
+}
+
+
 
 DEFUN_DLD(bwlabeln, args, , "\
 -*- texinfo -*-\n\
@@ -286,7 +295,7 @@ is @var{num}.\n\
 {
   octave_value_list rval;
 
-  union_find<coord, coord_hash> u_f;
+  union_find<octave_idx_type> u_f;
 
   octave_idx_type nargin = args.length ();
 
@@ -350,40 +359,49 @@ is @var{num}.\n\
   if (error_state)
     return rval;
 
-  using std::set;
+  auto neighbours = populate_neighbours(conn_mask, size_vec);
 
-  set<coord> neighbours = populate_neighbours(conn_mask);
+  // Use temporary array with borders padded with zeros. Labels will
+  // also go in here eventually.
+  dim_vector padded_size = size_vec;
+  for (octave_idx_type j = 0; j < size_vec.length (); j++)
+    padded_size(j) += 2;
 
-  std::cout << "Union-finding..." << std::endl;;
+  NDArray L (padded_size, 0);
 
-  bool* BW_vec = BW.fortran_vec ();
-  for (octave_idx_type idx = 0; idx < BW.nelem (); idx++)
+  // L(2:end-1, 2:end, ..., 2:end-1) = BW
+  L.insert(BW, coord (dim_vector (size_vec.length (), 1), 1));
+
+  double* L_vec = L.fortran_vec ();
+
+  for (octave_idx_type BWidx = 0; BWidx < BW.nelem (); BWidx++)
     {
-      if (BW_vec[idx])
-        {
-          coord aidx = to_coord (size_vec, idx);
+      octave_idx_type Lidx = get_padded_index (BWidx, size_vec);
 
+      if (L_vec[Lidx])
+        {
           //Insert this one into its group
-          u_f.find_id(aidx);
+          u_f.find_id(Lidx);
 
           //Replace this with C++0x range-based for loop later
           //(implemented in gcc 4.6)
           for (auto nbr = neighbours.begin (); nbr != neighbours.end (); nbr++)
             {
-              coord n = *nbr + aidx;
-              if (in_range (n,size_vec) and BW(n) )
-                u_f.unite (n,aidx);
+              octave_idx_type n = *nbr + Lidx;
+              if (L_vec[n] )
+                u_f.unite (n, Lidx);
             }
         }
     }
 
-  NDArray L (size_vec, 0);
+
   unordered_map<octave_idx_type, octave_idx_type> ids_to_label;
   octave_idx_type next_label = 1;
 
   auto idxs  = u_f.get_objects ();
 
   //C++0x foreach later
+
   for (auto idx = idxs.begin (); idx != idxs.end (); idx++)
     {
       octave_idx_type label;
@@ -399,7 +417,7 @@ is @var{num}.\n\
           label = try_label -> second;
         }
 
-      L(idx->first) = label;
+      L_vec[idx->first] = label;
     }
 
   rval(0) = L;
