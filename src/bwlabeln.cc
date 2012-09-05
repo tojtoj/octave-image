@@ -412,14 +412,17 @@ is @var{num}.\n\
           ids_to_label[id] = label;
         }
       else
-        {
           label = try_label -> second;
-        }
 
       L_vec[*idx] = label;
     }
 
-  rval(0) = L;
+  // Remove the zero padding...
+  Array<idx_vector> inner_slice (dim_vector (size_vec.length (), 1));
+  for (octave_idx_type i = 0; i < padded_size.length (); i++)
+    inner_slice(i) = idx_vector (1, padded_size(i) - 1);
+
+  rval(0) = L.index (inner_slice);
   rval(1) = ids_to_label.size ();
   return rval;
 }

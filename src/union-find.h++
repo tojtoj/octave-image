@@ -71,8 +71,6 @@ public:
     voxel *v1 = voxels[root1], *v2 = voxels[root2];
     if (root1 != root2)
       {
-
-
         if ( v1->rank > v2->rank)
           v1->parent = root2;
         else if (v1->rank < v2->rank)
