@@ -18,6 +18,7 @@
 #include <oct.h>
 #include <set>
 #include "union-find.h++"
+#include <unordered_map>
 
 typedef Array<octave_idx_type> coord;
 
@@ -295,8 +296,6 @@ is @var{num}.\n\
 {
   octave_value_list rval;
 
-  union_find<octave_idx_type> u_f;
-
   octave_idx_type nargin = args.length ();
 
   if (nargin < 1 || nargin > 2)
@@ -373,6 +372,7 @@ is @var{num}.\n\
   L.insert(BW, coord (dim_vector (size_vec.length (), 1), 1));
 
   double* L_vec = L.fortran_vec ();
+  union_find u_f (L.nelem ());
 
   for (octave_idx_type BWidx = 0; BWidx < BW.nelem (); BWidx++)
     {
@@ -381,7 +381,7 @@ is @var{num}.\n\
       if (L_vec[Lidx])
         {
           //Insert this one into its group
-          u_f.find_id(Lidx);
+          u_f.find (Lidx);
 
           //Replace this with C++0x range-based for loop later
           //(implemented in gcc 4.6)
@@ -395,17 +395,16 @@ is @var{num}.\n\
     }
 
 
-  unordered_map<octave_idx_type, octave_idx_type> ids_to_label;
+  std::unordered_map<octave_idx_type, octave_idx_type> ids_to_label;
   octave_idx_type next_label = 1;
 
-  auto idxs  = u_f.get_objects ();
+  auto idxs  = u_f.get_ids ();
 
   //C++0x foreach later
-
   for (auto idx = idxs.begin (); idx != idxs.end (); idx++)
     {
       octave_idx_type label;
-      octave_idx_type id = u_f.find_id (idx->first);
+      octave_idx_type id = u_f.find (*idx);
       auto try_label = ids_to_label.find (id);
       if( try_label == ids_to_label.end ())
         {
@@ -417,7 +416,7 @@ is @var{num}.\n\
           label = try_label -> second;
         }
 
-      L_vec[idx->first] = label;
+      L_vec[*idx] = label;
     }
 
   rval(0) = L;

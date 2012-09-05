@@ -15,118 +15,85 @@
 
 // union-find.h++
 
-#include <unordered_map>
-#include <list>
+#include <vector>
 
-using std::unordered_map;
-using std::list;
+struct voxel{
+  octave_idx_type rank;
+  octave_idx_type parent;
+};
 
-// T - type of object we're union-finding for
-// H - hash for the map
-template <typename T, typename H = std::hash<T> >
 class union_find
 {
 
-//Dramatis personae
 private:
+  std::vector<voxel*> voxels;
 
-  //Each root has rank.
-  unordered_map<octave_idx_type, octave_idx_type, H> num_ranks;
-
-  //Each object points to its parent, possibly itself.
-  unordered_map<octave_idx_type, octave_idx_type, H> parent_pointers;
-
-  //Represent each object by a number and vice versa.
-  unordered_map<octave_idx_type, T, H>      num_to_objects;
-  unordered_map<T, octave_idx_type, H>      objects_to_num;
-
-// Act 1
 public:
 
-  //Insert a collection of objects
-  void insert_objects (const list<T>& objects)
-  {
-    for (auto i = objects.begin (); i != objects.end (); i++)
-      {
-        find (*i);
-      }
-  }
+  union_find (octave_idx_type s) : voxels (s, NULL) {};
 
+  ~union_find ()
+  {
+    for (auto v = voxels.begin(); v != voxels.end(); v++)
+      delete *v;
+  }
 
   //Give the root representative id for this object, or insert into a
   //new set if none is found
-  octave_idx_type find_id (const T& object)
+  octave_idx_type find (octave_idx_type idx)
   {
 
     //Insert new element if not found
-    if (objects_to_num.find (object) == objects_to_num.end () )
+    auto v = voxels[idx];
+    if (!v)
       {
-        //Assign number serially to objects
-        octave_idx_type obj_num = objects_to_num.size ()+1;
-
-        num_ranks[obj_num] = 0;
-        objects_to_num[object] = obj_num;
-        num_to_objects[obj_num] = object;
-        parent_pointers[obj_num] = obj_num;
-        return obj_num;
+        voxel* new_voxel = new voxel;
+        new_voxel->rank = 0;
+        new_voxel->parent = idx;
+        voxels[idx] = new_voxel;
+        return idx;
       }
 
-    //Path from this element to its root, we'll build it.
-    list<octave_idx_type> path (1, objects_to_num[object]);
-    octave_idx_type par = parent_pointers[path.back ()];
-    while ( par != path.back () )
-      {
-        path.push_back (par);
-        par = parent_pointers[par];
-      }
+    voxel* elt = v;
+    if (elt->parent != idx)
+      elt->parent = find (elt->parent);
 
-    //Update everything we've seen to point to the root.
-    for (auto i = path.begin (); i != path.end (); i++)
-      {
-        parent_pointers[*i] = par;
-      }
-
-    return par;
-  }
-
-  T find( const T& object)
-  {
-    return num_to_objects[find_id (object)];
+    return elt->parent;
   }
 
   //Given two objects, unite the sets to which they belong
-  void unite (const T& obj1, const T& obj2)
+  void unite (octave_idx_type idx1, octave_idx_type idx2)
   {
-    octave_idx_type on1 = find_id(obj1), on2 = find_id(obj2);
+    octave_idx_type root1 = find (idx1), root2 = find (idx2);
 
     //Check if any union needs to be done, maybe they already are
     //in the same set.
-    if (on1 != on2)
+    voxel *v1 = voxels[root1], *v2 = voxels[root2];
+    if (root1 != root2)
       {
-        octave_idx_type r1 = num_ranks[on1], r2 = num_ranks[on2];
 
-        if ( r1 < r2)
-          {
-            parent_pointers[on1] = on2;
-            num_ranks.erase (on1); //Only root nodes need a rank
-          }
-        else if (r2 > r1)
-          {
-            parent_pointers[on2] = on1;
-            num_ranks.erase (on2);
-          }
+
+        if ( v1->rank > v2->rank)
+          v1->parent = root2;
+        else if (v1->rank < v2->rank)
+          v2->parent = root1;
         else
           {
-            parent_pointers[on2] = on1;
-            num_ranks.erase (on2);
-            num_ranks[on1]++;
+            v2->parent = root1;
+            v1->rank++;
           }
       }
   }
 
-  const unordered_map<T, octave_idx_type, H>& get_objects()
+  std::vector<octave_idx_type> get_ids()
   {
-    return objects_to_num;
+    std::vector<octave_idx_type> ids;
+
+    for (size_t i = 0; i < voxels.size (); i++)
+      if (voxels[i])
+        ids.push_back (i);
+
+    return ids;
   };
 
 };
