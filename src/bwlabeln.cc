@@ -304,9 +304,9 @@ is @var{num}.\n\
     return rval;
   }
 
-  if (!args(0).is_bool_type ())
+  if (!args(0).is_numeric_type () && !args(0).is_bool_type ())
     {
-      error ("bwlabeln: first input argument must be a 'logical' ND-array");
+      error ("bwlabeln: first input argument must be an ND array");
       return rval;
     }
 
@@ -331,7 +331,7 @@ is @var{num}.\n\
           else
             conn_mask = get_mask (N);
         }
-      else if (args(2).is_bool_type() )
+      else if (args(2).is_numeric_type () || args(2).is_bool_type ())
         {
           conn_mask = args(2).bool_array_value ();
           dim_vector conn_mask_dims = conn_mask.dims ();
@@ -349,7 +349,7 @@ is @var{num}.\n\
         }
       else
         error ("bwlabeln: second input argument must be a real scalar "
-               "or a 'logical' connectivity array");
+               "or a connectivity array");
     }
   else
     // Get the maximal mask that has same number of dims as BW.
