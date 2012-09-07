@@ -1,17 +1,18 @@
-// Copyright (C) 2011 Jordi Gutiérrez Hermoso <jordigh@octave.org>
+// Copyright (C) 2011-2012 Jordi Gutiérrez Hermoso <jordigh@octave.org>
 //
-// This program is free software; you can redistribute it and/or modify it under
-// the terms of the GNU General Public License as published by the Free Software
-// Foundation; either version 3 of the License, or (at your option) any later
-// version.
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as
+// published by the Free Software Foundation; either version 3 of the
+// License, or (at your option) any later version.
 //
-// This program is distributed in the hope that it will be useful, but WITHOUT
-// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-// FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
-// details.
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+// General Public License for more details.
 //
-// You should have received a copy of the GNU General Public License along with
-// this program; if not, see <http://www.gnu.org/licenses/>.
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see
+// <http://www.gnu.org/licenses/>.
 
 // bwlabeln.cc ---
 
@@ -88,20 +89,6 @@ coord_to_pad_idx (const dim_vector& dv,
 
 inline
 coord
-operator+ (const coord& a, const coord& b)
-{
-  octave_idx_type na = a.nelem ();
-  coord retval( dim_vector(na,1) );
-  for (octave_idx_type i = 0; i < na; i++)
-    {
-      retval(i) = a(i) + b(i);
-    }
-  return retval;
-}
-
-
-inline
-coord
 operator- (const coord& a, const coord& b)
 {
   octave_idx_type na = a.nelem ();
@@ -169,7 +156,7 @@ get_mask(int N){
 
   static bool mask8[] = {1, 1, 1,
                          1, 0, 1,
-                         1, 0, 1};
+                         1, 1, 1};
 
   static bool mask6[] = {0, 0, 0,
                          0, 1, 0,
@@ -264,6 +251,11 @@ octave_idx_type
 get_padded_index (octave_idx_type r,
                   const dim_vector& dv)
 {
+  // This function converts a linear index from the unpadded array
+  // into a linear index of the array with zero padding around it. I
+  // worked it out on paper, but if you want me to explain this, I'd
+  // have to work it out again. ;-) --jgh
+
   octave_idx_type mult = 1;
   octave_idx_type padded = 0;
   for (octave_idx_type j = 0; j < dv.length (); j++)
