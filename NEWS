@@ -76,4 +76,6 @@ Summary of important user-visible changes for image 1.1.0:
     and return a matrix of the values found. Its documentation has been
     expanded (as well as an explanation of TIFF structure on the source)
 
+ ** Package is now dependent on GNU Octave version 3.6.0 or later.
+
  ** Package is no longer automatically loaded.

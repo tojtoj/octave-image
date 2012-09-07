@@ -9,7 +9,7 @@ Description: The Octave-forge Image package provides functions for
  The package also provides functions for feature extraction, image
  statistics, spatial and geometric transformations, morphological
  operations, linear filtering, and much more.
-Depends: octave (>= 3.4.0), signal
+Depends: octave (>= 3.6.0), signal
 Autoload: no
 License: GPLv3+, simplified BSD
 Url: http://octave.sf.net
