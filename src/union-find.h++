@@ -24,6 +24,8 @@ struct voxel{
 
 class union_find
 {
+  // Union-find data structure, see e.g.
+  // http://en.wikipedia.org/wiki/Union-find
 
 private:
   std::vector<voxel*> voxels;

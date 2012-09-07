@@ -282,6 +282,9 @@ pixel, 1 indicates that the pixel belong to object number 1, 2 that\n\
 the pixel belong to object number 2, etc. The total number of objects\n\
 is @var{num}.\n\
 \n\
+The algorithm used is a disjoint-set data structure, a.k.a. union-find.\n\
+See, for example, http://en.wikipedia.org/wiki/Union-find\n\
+\n\
 @seealso{bwconncomp, bwlabel, regionprops}\n\
 @end deftypefn\n\
 ")
