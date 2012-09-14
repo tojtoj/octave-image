@@ -31,7 +31,7 @@ function bool = iscolormap (cm)
   endif
 
   bool = false;
-  if (ismatrix (cm) && isreal (cm) isnumeric (cm) && columns(cm) == 3 &&
+  if (ismatrix (cm) && isreal (cm) && isnumeric (cm) && columns(cm) == 3 &&
       ndims (cm) == 2 && strcmp (class (cm), "double") &&
       min (cm(:)) >= 0 && max (cm(:)) <= 1)
     bool = true;
