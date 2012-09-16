@@ -99,14 +99,14 @@ function [level, goodness] = graythresh (img, algo = "otsu")
     endif
 
     ## If the image is RGB convert it to grayscale
-    if (isrgb(img))
+    if (isrgb (img))
       img = rgb2gray (img);
     endif
 
     switch tolower (algo)
       case {"otsu"}
         ## Calculation of the normalized histogram
-        n = intmax (class (img)) + 1;
+        n = double (intmax (class (img))) + 1;
         h = hist (img(:), 1:n);
         h = h / (length (img(:)) + 1);
 
@@ -115,7 +115,7 @@ function [level, goodness] = graythresh (img, algo = "otsu")
         mu = zeros (n, 1);
         mu(1) = h(1);
         for i = 2:n
-            mu(i) = mu(i-1) + i * h(i);
+          mu(i) = mu(i-1) + i * h(i);
         endfor
 
         ## Initialisation of the values used for the threshold calculation
@@ -134,12 +134,12 @@ function [level, goodness] = graythresh (img, algo = "otsu")
             mu0 = mu(i) / w0;
             mu1 = (mu(end) - mu(i)) / w1;
             s = w0 * w1 * (mu1 - mu0) * (mu1 - mu0);
-            if (s > max)
+            if (s > goodness)
                 goodness = s;
                 level    = i;
             endif
         endfor
-        
+
         ## Normalisation of the threshold
         level /= n;
       otherwise
