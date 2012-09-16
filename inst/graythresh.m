@@ -91,58 +91,58 @@
 ##    added texinfo documentation, error checking and sanitised the code.
 
 function [level, goodness] = graythresh (img, algo = "otsu")
-    ## Input checking
-    if (nargin < 1 || nargin > 2)
-      print_usage();
-    elseif (!isgray (img) && !isrgb (img))
-      error ("graythresh: input must be an image");
-    endif
+  ## Input checking
+  if (nargin < 1 || nargin > 2)
+    print_usage();
+  elseif (!isgray (img) && !isrgb (img))
+    error ("graythresh: input must be an image");
+  endif
 
-    ## If the image is RGB convert it to grayscale
-    if (isrgb (img))
-      img = rgb2gray (img);
-    endif
+  ## If the image is RGB convert it to grayscale
+  if (isrgb (img))
+    img = rgb2gray (img);
+  endif
 
-    switch tolower (algo)
-      case {"otsu"}
-        ## Calculation of the normalized histogram
-        n = double (intmax (class (img))) + 1;
-        h = hist (img(:), 1:n);
-        h = h / (length (img(:)) + 1);
+  switch tolower (algo)
+    case {"otsu"}
+      ## Calculation of the normalized histogram
+      n = double (intmax (class (img))) + 1;
+      h = hist (img(:), 1:n);
+      h = h / (length (img(:)) + 1);
 
-        ## Calculation of the cumulated histogram and the mean values
-        w  = cumsum (h);
-        mu = zeros (n, 1);
-        mu(1) = h(1);
-        for i = 2:n
-          mu(i) = mu(i-1) + i * h(i);
-        endfor
+      ## Calculation of the cumulated histogram and the mean values
+      w  = cumsum (h);
+      mu = zeros (n, 1);
+      mu(1) = h(1);
+      for i = 2:n
+        mu(i) = mu(i-1) + i * h(i);
+      endfor
 
-        ## Initialisation of the values used for the threshold calculation
-        level = find (h > 0, 1);
-        w0  = w(level);
-        w1  = 1 - w0;
-        mu0 = mu(level) / w0;
-        mu1 = (mu(end) - mu(level)) / w1;
-        goodness = w0 * w1 * (mu1 - mu0) * (mu1 - mu0);
-        
-        ## For each step of the histogram, calculation of the threshold
-        ## and storing of the maximum
-        for i = find (h > 0)
-            w0 = w(i);
-            w1 = 1 - w0;
-            mu0 = mu(i) / w0;
-            mu1 = (mu(end) - mu(i)) / w1;
-            s = w0 * w1 * (mu1 - mu0) * (mu1 - mu0);
-            if (s > goodness)
-                goodness = s;
-                level    = i;
-            endif
-        endfor
+      ## Initialisation of the values used for the threshold calculation
+      level = find (h > 0, 1);
+      w0  = w(level);
+      w1  = 1 - w0;
+      mu0 = mu(level) / w0;
+      mu1 = (mu(end) - mu(level)) / w1;
+      goodness = w0 * w1 * (mu1 - mu0) * (mu1 - mu0);
+      
+      ## For each step of the histogram, calculation of the threshold
+      ## and storing of the maximum
+      for i = find (h > 0)
+        w0 = w(i);
+        w1 = 1 - w0;
+        mu0 = mu(i) / w0;
+        mu1 = (mu(end) - mu(i)) / w1;
+        s = w0 * w1 * (mu1 - mu0) * (mu1 - mu0);
+        if (s > goodness)
+          goodness = s;
+          level    = i;
+        endif
+      endfor
 
-        ## Normalisation of the threshold
-        level /= n;
-      otherwise
-        error ("graythresh: unknown method '%s'", algo);
-    endswitch
+      ## Normalisation of the threshold
+      level /= n;
+    otherwise
+      error ("graythresh: unknown method '%s'", algo);
+  endswitch
 endfunction
