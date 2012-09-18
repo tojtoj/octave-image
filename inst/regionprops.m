@@ -23,71 +23,87 @@
 ## identified by @code{bwlabel}) in the binary image @var{BW}. The result is a
 ## structure array containing an entry per property per object.
 ##
-## The following properties can be computed.
+## The following properties can be computed:
 ##
-## @table @t
+## @table @asis
 ## @item "Area"
 ## The number of pixels in the object.
-## @item "EulerNumber"
-## @itemx "euler_number"
-## The Euler number of the object (see @code{bweuler} for details).
+##
 ## @item "BoundingBox"
 ## @itemx "bounding_box"
 ## The bounding box of the object. This is represented as a 4-vector where the
 ## first two entries are the @math{x} and @math{y} coordinates of the upper left
 ## corner of the bounding box, and the two last entries are the width and the
 ## height of the box.
-## @item "Extent"
-## The area of the object divided by the area of the bounding box.
-## @item "Perimeter"
-## The length of the boundary of the object.
+##
 ## @item "Centroid"
 ## The center coordinate of the object.
-## @item "PixelIdxList"
-## @itemx "pixel_idx_list"
-## The indices of the pixels in the object.
+##
+## @item "EulerNumber"
+## @itemx "euler_number"
+## The Euler number of the object (see @code{bweuler} for details).
+##
+## @item "Extent"
+## The area of the object divided by the area of the bounding box.
+##
 ## @item "FilledArea"
 ## @itemx "filled_area"
 ## The area of the object including possible holes.
-## @item "PixelList"
-## @itemx "pixel_list"
-## The actual pixel values inside the object. This is only useful for grey scale
-## images.
+##
 ## @item "FilledImage"
 ## @itemx "filled_image"
 ## A binary image with the same size as the object's bounding box that contains
 ## the object with all holes removed.
+##
 ## @item "Image"
 ## An image with the same size as the bounding box that contains the original pixels.
+##
 ## @item "MaxIntensity"
 ## @itemx "max_intensity"
 ## The maximum intensity inside the object.
-## @item "MinIntensity"
-## @itemx "min_intensity"
-## The minimum intensity inside the object.
-## @item "WeightedCentroid"
-## @itemx "weighted_centroid"
-## The centroid of the object where pixel values are used as weights.
+##
 ## @item "MeanIntensity"
 ## @itemx "mean_intensity"
 ## The mean intensity inside the object.
+##
+## @item "MinIntensity"
+## @itemx "min_intensity"
+## The minimum intensity inside the object.
+##
+## @item "Perimeter"
+## The length of the boundary of the object.
+##
+## @item "PixelIdxList"
+## @itemx "pixel_idx_list"
+## The indices of the pixels in the object.
+##
+## @item "PixelList"
+## @itemx "pixel_list"
+## The actual pixel values inside the object. This is only useful for grey scale
+## images.
+##
 ## @item "PixelValues"
 ## @itemx "pixel_values"
 ## The pixel values inside the object represented as a vector.
+##
+## @item "WeightedCentroid"
+## @itemx "weighted_centroid"
+## The centroid of the object where pixel values are used as weights.
 ## @end table
 ##
 ## The requested properties can either be specified as several input arguments
 ## or as a cell array of strings. As a short-hand it is also possible to give
 ## the following strings as arguments.
 ##
-## @table @t
+## @table @asis
 ## @item "basic"
-## The following properties are computed: @t{"Area"}, @t{"Centroid"} and @t{"BoundingBox"}.
+## The following properties are computed: @t{"Area"}, @t{"Centroid"} and
+## @t{"BoundingBox"}. This is the default.
+##
 ## @item "all"
 ## All properties are computed.
 ## @end table
 ##
-## If no properties are given, @t{basic} is assumed.
 ## @seealso{bwlabel, bwperim, bweuler}
 ## @end deftypefn
 
@@ -345,4 +361,3 @@ function C = all_coords (bw, flip = true, singleton = false)
     C = [C; C];
   endif
 endfunction
-  
