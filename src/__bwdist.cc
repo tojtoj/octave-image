@@ -90,7 +90,7 @@ pixels, the index points to the pixel itself.) The return value\n\
 {
   const int nargin = args.length();
   octave_value_list retval;
-  
+
   /* Check for proper number of input and output arguments */
   if ((nargin < 1) || (nargin>2)) {
     error ("bwdist accepts only one or two input parameters.");
@@ -119,13 +119,13 @@ pixels, the index points to the pixel itself.) The return value\n\
       charMatrix method = args(1).char_matrix_value();
       if(method(0) == 'e') caseMethod = 0; // Euclidean;
       else if (method(0) == 'c') {
-	if(method(1) == 'h') caseMethod = 1; // chessboard
-	else if(method(1) == 'i') caseMethod = 2; // cityblock
+        if(method(1) == 'h') caseMethod = 1; // chessboard
+        else if(method(1) == 'i') caseMethod = 2; // cityblock
       }
       else if(method(0) == 'q') caseMethod = 3; // quasi-Euclidean
       else {
-	warning ("unknown metric, using 'euclidean'");
-	caseMethod = 0;
+        warning ("unknown metric, using 'euclidean'");
+        caseMethod = 0;
       }
     }
 
@@ -141,46 +141,46 @@ pixels, the index points to the pixel itself.) The return value\n\
       switch(caseMethod) {
 
       case 1:
-	chessboard(bw, rows, cols, xdist, ydist);
-	for(int i=0; i<rows*cols; i++) {
-	  D(i) = DIST_CHESSBOARD(xdist[i], ydist[i]);
-	}
-	break;
+        chessboard(bw, rows, cols, xdist, ydist);
+        for(int i=0; i<rows*cols; i++) {
+          D(i) = DIST_CHESSBOARD(xdist[i], ydist[i]);
+        }
+        break;
 
       case 2:
-	cityblock(bw, rows, cols, xdist, ydist);
-	for(int i=0; i<rows*cols; i++) {
-	  D(i) = DIST_CITYBLOCK(xdist[i], ydist[i]);
-	}
-	break;
+        cityblock(bw, rows, cols, xdist, ydist);
+        for(int i=0; i<rows*cols; i++) {
+          D(i) = DIST_CITYBLOCK(xdist[i], ydist[i]);
+        }
+        break;
 
       case 3:
-	quasi_euclidean(bw, rows, cols, xdist, ydist);
-	for(int i=0; i<rows*cols; i++) {
-	  D(i) = DIST_QUASI_EUCLIDEAN(xdist[i], ydist[i]);
-	}
-	break;
+        quasi_euclidean(bw, rows, cols, xdist, ydist);
+        for(int i=0; i<rows*cols; i++) {
+          D(i) = DIST_QUASI_EUCLIDEAN(xdist[i], ydist[i]);
+        }
+        break;
 
       case 0:
       default:
-	euclidean(bw, rows, cols, xdist, ydist);
-	/* Remember sqrt() for the final output */
-	for(int i=0; i<rows*cols; i++) {
-	  D(i) = sqrt((double)DIST_EUCLIDEAN(xdist[i], ydist[i]));
-	}
-	break;
+        euclidean(bw, rows, cols, xdist, ydist);
+        /* Remember sqrt() for the final output */
+        for(int i=0; i<rows*cols; i++) {
+          D(i) = sqrt((double)DIST_EUCLIDEAN(xdist[i], ydist[i]));
+        }
+        break;
       }
 
       retval(0) = D;
 
       if(nargout > 1) {
-	/* Create a second output array */
-	Matrix C (rows, cols);
-	/* Compute optional 'index to closest object pixel' */
-	for(int i=0; i<rows*cols; i++) {
-	  C (i) = i+1 - xdist[i] - ydist[i]*rows;
-	}
-	retval(1) = C;
+        /* Create a second output array */
+        Matrix C (rows, cols);
+        /* Compute optional 'index to closest object pixel' */
+        for(int i=0; i<rows*cols; i++) {
+          C (i) = i+1 - xdist[i] - ydist[i]*rows;
+        }
+        retval(1) = C;
       }
     }
   }
