@@ -36,30 +36,7 @@
 ## @end deftypefn
 
 function im = im2single (im, indexed = false)
-
-  ## Input checking (private function that is used for all im2class functions)
-  im_class = imconversion (nargin, "im2single", indexed, im);
-
-  ## READ BEFORE MAKE CHANGES:
-  ## this function is pretty much the same as im2double. Any changes on this code
-  ## should most likely also be done there
-
-  switch im_class
-    case "single"
-      ## do nothing, return the same
-    case {"logical", "double"}
-      im = single (im);
-    case {"uint8", "uint16"}
-      if (indexed)
-        im = single (im) + 1;
-      else
-        im = single (im) / single (intmax (im_class));
-      endif
-    case "int16"
-      im = (single (im) + single (intmax (im_class)) + 1) / single (intmax ("uint16"));
-    otherwise
-      error ("unsupported image class %s", im_class);
-  endswitch
+  im = im2float ("single", nargin, im, indexed);
 endfunction
 
 %!assert(im2single([1 2 3]), single([1 2 3]));                  # double returns the same
