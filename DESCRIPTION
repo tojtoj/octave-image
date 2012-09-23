@@ -2,7 +2,7 @@ Name: Image
 Version: 1.0.15
 Date: 2011-09-26
 Author: various authors
-Maintainer: Soren Hauberg <soren@hauberg.org>
+Maintainer: Carnë Draug <carandraug+dev@gmail.com>
 Title: Image Processing
 Description: The Octave-forge Image package provides functions for
  processing images.
