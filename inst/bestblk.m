@@ -37,7 +37,7 @@
 ## @code{round(min(dimension/10,k/2))} which minimizes padding.
 ##
 ##
-## @seealso{blkproc}
+## @seealso{blockproc}
 ## @end deftypefn
 
 function [varargout] = bestblk (ims, k = 100)
