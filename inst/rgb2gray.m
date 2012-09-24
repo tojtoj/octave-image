@@ -15,10 +15,11 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{gray}= rgb2gray (@var{rgb})
-## Convert RGB image or colormap to a grayscale.
+## Convert RGB image or colormap to grayscale.
 ##
-## If the input is an RGB image, the conversion to a gray image
-## is computed as the mean value of the color channels.
+## If the input is an RGB image, the conversion to a gray image is computed as
+## the mean value of the color channels. Supported classes are single, double,
+## uint8 and uint16.
 ##
 ## If the input is a color map it is converted into the YIQ space
 ## of ntsc. The luminance value (Y) is taken to create a gray color map.
@@ -36,7 +37,7 @@ function gray = rgb2gray (rgb)
     gray    = ntscmap (:, 1) * ones (1, 3);
   elseif (isimage (rgb) && ndims(rgb) == 3)
     switch(class(rgb))
-    case "double"
+    case {"single", "double"}
       gray = mean(rgb,3);
     case "uint8"
       gray = uint8(mean(rgb,3));
