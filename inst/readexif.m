@@ -36,13 +36,17 @@
 
 function exif = readexif(file, thumbnail)
 
+  if (nargin < 1 || nargin > 2)
+    print_usage;
+  endif
+
   % Enable the debug flag to see more of the JPG sections.
 
   debug = false;
 
-  in = fopen(file);
+  [in, msg] = fopen(file);
   if (in<0)
-    error('File "%s" not found !', file);
+    error ("readexif: could not open `%s': %s", file, msg);
   end
 
   s = fread(in, 1, 'uint16', 'ieee-be');
