@@ -25,16 +25,11 @@ function r = corr2 (I, J)
 
   if (nargin != 2)
     print_usage ();
-  endif
-
-  if (!(ismatrix (I) && isreal (I) && ismatrix (J) && isreal (J)))
-    error ("corr2: argument must be a real type matrix");
-  endif
-
-  if (!size_equal (I, J))
+  elseif (!ismage (I) || !isimage (J))
+    error ("corr2: argument must be real matrices");
+  elseif (!size_equal (I, J))
     error ("corr2: arguments must be of same size")
   endif
-  
   r = cov (I (:), J (:)) / (std2 (I) * std2 (J));
-endfunction
 
+endfunction
