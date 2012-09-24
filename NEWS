@@ -37,6 +37,7 @@ Summary of important user-visible changes for image 1.1.0:
     for the recommended alternatives):
 
       blkproc
+      bmpwrite
       dilate
       erode
 

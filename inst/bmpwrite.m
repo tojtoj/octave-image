@@ -4,6 +4,11 @@
 ## -*- texinfo -*-
 ## @deftypefn {Function File} bmpwrite (@var{X}, @var{map}, @var{file})
 ## Write the bitmap @var{X} into @var{file} (8-bit indexed uncompressed).
+##
+## @emph{warning}: @code{bmpwrite} has been deprecated in favor of
+## @code{imwrite} in Octave core. This function will be removed from future
+## versions of the 'image' package".
+##
 ## The values in @var{X} are indices into the given RGB colour @var{map}.
 ## @deftypefnx{Function File} bmpwrite (@var{X}, @var{file})
 ## Write the bitmap @var{X} into @var{file} (24-bit truecolor uncompressed).
@@ -11,6 +16,13 @@
 ## @end deftypefn
 
 function bmpwrite(x,colormap_or_file,file)
+  persistent warned = false;
+  if (! warned)
+    warned = true;
+    warning ("Octave:deprecated-function",
+             "`bmpwrite' has been deprecated in favor of `imwrite' in Octave core. This function will be removed from future versions of the `image' package");
+  endif
+
   if nargin==2
      bmpwrite_truecolor(x(:,:,1),x(:,:,2),x(:,:,3),colormap_or_file);
   else
