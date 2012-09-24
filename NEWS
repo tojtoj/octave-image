@@ -48,6 +48,7 @@ Summary of important user-visible changes for image 1.1.0:
     improved matlab compatibility
 
       bweuler
+      bwfill
       imhist
       conndef
       im2double

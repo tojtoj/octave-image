@@ -181,7 +181,7 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
         }
     } // while ( npoints > 0)
 
-  Matrix imout (imM, imN);
+  boolNDArray imout ( dim_vector (imM, imN));
   ColumnVector idxout (imM*imN);
   int idx = 0;
 
@@ -196,7 +196,7 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
   for (int i = 0; i < imM; i++)
     for (int j = 0; j < imN; j++)
       {
-        imout (i, j) = (double) (imo [(i+1) + ioM*(j+1)] != notvalidpt);
+        imout (i, j) = imo [(i+1) + ioM*(j+1)] != notvalidpt;
         if (imo [(i+1) + ioM*(j+1)] == idxpoint)
           idxout (idx++) = (double) (i + j*imM + 1);
       }
