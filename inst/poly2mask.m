@@ -129,7 +129,7 @@ function BW = poly2mask (x, y, m, n)
       ie = ie (:, (ie (1, :) <= n));
       ie = ie (:, (ie (2, :) >= 1));
       for i = 1:columns (ie)
-	BW (sl, ie (1, i):ie (2, i)) = true;
+        BW (sl, ie (1, i):ie (2, i)) = true;
       endfor
     endif
 

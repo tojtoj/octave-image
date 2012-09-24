@@ -44,83 +44,83 @@
 
 function g = imshear(m, axis, alpha, bbox, noshift)
 
-	# The code below only does y-shearing. This is because of
-	# the implementation of fft (operates on columns, but not rows).
-	# So, transpose first for x-shearing.
-	if ( strcmp(axis, "x")==1 )
-		m = m';
-	endif
+  # The code below only does y-shearing. This is because of
+  # the implementation of fft (operates on columns, but not rows).
+  # So, transpose first for x-shearing.
+  if ( strcmp(axis, "x")==1 )
+    m = m';
+  endif
 
-	if ( nargin < 4 )
-		bbox = "loose";
-		noshift = 0;
-	elseif ( nargin < 5 )
-		noshift = 0;
-	endif
+  if ( nargin < 4 )
+    bbox = "loose";
+    noshift = 0;
+  elseif ( nargin < 5 )
+    noshift = 0;
+  endif
 
-	[ydim_orig xdim_orig] = size(m);
-	if ( strcmp(bbox, "wrap") == 0 )
-		ypad = ceil( (xdim_orig+1)/2 * abs(alpha) );
-		m = impad(m, [0,0], [ypad,ypad]);
-	endif
+  [ydim_orig xdim_orig] = size(m);
+  if ( strcmp(bbox, "wrap") == 0 )
+    ypad = ceil( (xdim_orig+1)/2 * abs(alpha) );
+    m = impad(m, [0,0], [ypad,ypad]);
+  endif
 
-	[ydim_new xdim_new] = size(m);
-	xcentre = ( xdim_new + 1 ) / 2;
-	ycentre = ( ydim_new + 1 ) / 2;
+  [ydim_new xdim_new] = size(m);
+  xcentre = ( xdim_new + 1 ) / 2;
+  ycentre = ( ydim_new + 1 ) / 2;
 
-	# This applies FFT to columns of m (x-axis remains a spatial axis).
-	# Because the way that fft and fftshift are implemented, the origin
-	# will move by 1/2 pixel, depending on the polarity of the image
-	# dimensions.
-	#
-	# If dim is even (=2n), then the origin of the fft below is located
-	# at the centre of pixel (n+1). ie. if dim=16, then centre is at 9.
-	#
-	# If dim is odd (=2n+1), then the origin of the fft below is located
-	# at the centre of pixel (n). ie. if dim=15, then centre is at 8.
-	if ( noshift==1 )
-		M = fft(m);
-	else
-		#M = imtranslate(fft(imtranslate(m, -xcentre, ycentre, "wrap")), xcentre, -ycentre, "wrap");
-		M = fftshift(fft(fftshift(m)));
-	endif
+  # This applies FFT to columns of m (x-axis remains a spatial axis).
+  # Because the way that fft and fftshift are implemented, the origin
+  # will move by 1/2 pixel, depending on the polarity of the image
+  # dimensions.
+  #
+  # If dim is even (=2n), then the origin of the fft below is located
+  # at the centre of pixel (n+1). ie. if dim=16, then centre is at 9.
+  #
+  # If dim is odd (=2n+1), then the origin of the fft below is located
+  # at the centre of pixel (n). ie. if dim=15, then centre is at 8.
+  if ( noshift==1 )
+    M = fft(m);
+  else
+    #M = imtranslate(fft(imtranslate(m, -xcentre, ycentre, "wrap")), xcentre, -ycentre, "wrap");
+    M = fftshift(fft(fftshift(m)));
+  endif
 
-	[ydim xdim] = size(m);
-	x = zeros(ydim, xdim);
+  [ydim xdim] = size(m);
+  x = zeros(ydim, xdim);
 
-	# Find coords of the origin of the image.
-	if ( noshift==1 )
-		xc_coord = 1;
-		yc_coord = 1;
-		l = (1:ydim)' - yc_coord;
-		r = (1:xdim) - xc_coord;
-		if ( strcmp(bbox, "wrap")==1 )
-			l((ydim/2):ydim) = l((ydim/2):ydim) - ydim;
-			r((xdim/2):xdim) = r((xdim/2):xdim) - xdim;
-		endif
-	else
-		xc_coord = (xdim+1)/2;
-		yc_coord = (ydim+1)/2;
-		l = (1:ydim)' - yc_coord;
-		r = (1:xdim) - xc_coord;
-	endif
-	x = l * r;
+  # Find coords of the origin of the image.
+  if ( noshift==1 )
+    xc_coord = 1;
+    yc_coord = 1;
+    l = (1:ydim)' - yc_coord;
+    r = (1:xdim) - xc_coord;
+    if ( strcmp(bbox, "wrap")==1 )
+      l((ydim/2):ydim) = l((ydim/2):ydim) - ydim;
+      r((xdim/2):xdim) = r((xdim/2):xdim) - xdim;
+    endif
+  else
+    xc_coord = (xdim+1)/2;
+    yc_coord = (ydim+1)/2;
+    l = (1:ydim)' - yc_coord;
+    r = (1:xdim) - xc_coord;
+  endif
+  x = l * r;
 
-	Ms = M.* exp(2*pi*I*alpha/ydim * x);
+  Ms = M.* exp(2*pi*I*alpha/ydim * x);
 
-	if ( noshift==1 )
-		g = abs(ifft(Ms));
-	else
-		#g = abs(imtranslate( ifft( imtranslate(Ms, -xcentre, ycentre, "wrap") ), xcentre, -ycentre, "wrap"));
-		g = abs( fftshift(ifft(ifftshift(Ms))) );
-	endif
+  if ( noshift==1 )
+    g = abs(ifft(Ms));
+  else
+    #g = abs(imtranslate( ifft( imtranslate(Ms, -xcentre, ycentre, "wrap") ), xcentre, -ycentre, "wrap"));
+    g = abs( fftshift(ifft(ifftshift(Ms))) );
+  endif
 
-	if ( strcmp(bbox, "crop")==1 )
-		g = g(ypad+1:ydim_orig+ypad, :);
-	endif
+  if ( strcmp(bbox, "crop")==1 )
+    g = g(ypad+1:ydim_orig+ypad, :);
+  endif
 
-	# Un-transpose if x-shearing was wanted
-	if ( strcmp(axis, "x")==1 )
-		g = g';
-	endif
+  # Un-transpose if x-shearing was wanted
+  if ( strcmp(axis, "x")==1 )
+    g = g';
+  endif
 endfunction

@@ -129,7 +129,7 @@ endfunction
 
 %!demo
 %! nlfilter(eye(10),[3,3],inline("any(x(:)>0)","x"))
-%! # creates a "wide" diagonal	
+%! # creates a "wide" diagonal
 
 %!assert(nlfilter(eye(4),[2,3],inline("sum(x(:))","x")),[2,2,1,0;1,2,2,1;0,1,2,2;0,0,1,1]);
 %!assert(nlfilter(eye(4),'indexed',[2,3],inline("sum(x(:))","x")),[4,2,1,2;3,2,2,3;2,1,2,4;4,3,4,5]);

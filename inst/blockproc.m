@@ -58,7 +58,7 @@ function B = blockproc(A, varargin)
     indexed=true;
     p+=1;
     if(isa(A,"uint8") || isa(A,"uint16"))
-	padval=0;
+      padval=0;
     else
       padval=1; 
     endif

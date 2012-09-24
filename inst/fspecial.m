@@ -210,7 +210,7 @@ function f = fspecial (type, arg1, arg2)
       else
         angle = 0;
       endif
-	    
+      
       ## First generate a horizontal line across the middle
       f = zeros (sze);
       f (floor (len/2)+1, 1:len) = 1;

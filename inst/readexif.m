@@ -72,13 +72,13 @@ function exif = readexif(file, thumbnail)
     switch s
       case JPEG.SOI
       case JPEG.APP0
-	l = fread(in, 1, 'uint16', 'ieee-be');
+        l = fread(in, 1, 'uint16', 'ieee-be');
         if debug, printf('APP0: %i\n', l); end
         fseek(in, l-2, 'cof');
       case JPEG.APP1
-	l = fread(in, 1, 'uint16', 'ieee-be');
-	if debug, printf('APP1: %i\n', l); end
-	app1 = fread(in, l-2, 'uchar');
+        l = fread(in, 1, 'uint16', 'ieee-be');
+        if debug, printf('APP1: %i\n', l); end
+        app1 = fread(in, l-2, 'uchar');
         if nargin==1
           exif = parseexif(app1);
         else
@@ -86,7 +86,7 @@ function exif = readexif(file, thumbnail)
         end
         % stop reading further, remove following break
         % if you want to extend this parser.
-	break; 
+        break; 
       case JPEG.APP2
         l = fread(in, 1, 'uint16', 'ieee-be');
         if debug, printf('APP2: %i\n', l); end
@@ -118,7 +118,7 @@ function exif = readexif(file, thumbnail)
       case JPEG.EOI % end of image
         printf('EOI');
       otherwise % Skip unknown tags
-	l = fread(in, 1, 'uint16', 'ieee-be');
+        l = fread(in, 1, 'uint16', 'ieee-be');
         if debug, printf('TAG %04X: %i\n', s, l); end
         fseek(in, l-2, 'cof');
     end
@@ -201,31 +201,31 @@ function ifd = ifdparse(dict, data, offset, endian)
                ifd_count, ifd_offset, name);
       end
       if ifd_type>0
-	n = ifdsize(ifd_type);
+        n = ifdsize(ifd_type);
 
-	if n*ifd_count<=4
-	  value = data(j+8:j+8+n*ifd_count-1);
-	  value = reshape(value, n, ifd_count);
-	else
-  	  a = 7+ifd_offset;
-	  b = 7+ifd_offset+n*ifd_count-1;
+        if n*ifd_count<=4
+          value = data(j+8:j+8+n*ifd_count-1);
+          value = reshape(value, n, ifd_count);
+        else
+          a = 7+ifd_offset;
+          b = 7+ifd_offset+n*ifd_count-1;
           if (a>0 && b>0 && a<=length(data) && b<=length(data))
-  	    value = data(7+ifd_offset:7+ifd_offset+n*ifd_count-1);
-	    value = reshape(value, n, ifd_count);
-	  else
-	    value = [];
-	  end
-	end
+            value = data(7+ifd_offset:7+ifd_offset+n*ifd_count-1);
+            value = reshape(value, n, ifd_count);
+          else
+            value = [];
+          end
+        end
       end
    
       switch ifd_type
-	case 01 % unsigned char
+        case 01 % unsigned char
           ifd.(name) = uint8(value);
-	  if debug,
-  	    printf('%02x ', uint8(value));
-	    printf('\n');
+          if debug,
+            printf('%02x ', uint8(value));
+            printf('\n');
           end
-	case 02 % Ascii
+        case 02 % Ascii
           ifd.(name) = char(value);
           if debug, printf('%s\n', char(value)); end
         case 03 % 16 bit unsigned int
@@ -239,34 +239,34 @@ function ifd = ifdparse(dict, data, offset, endian)
           if debug, printf('%i\n', uintn(value, endian)); end
         case 05 % 32 bit unsigned rational
           ifd.(name) = [uintn(value(1:4,:), endian); uintn(value(5:8,:), endian)];
-	  if debug, printf('%i/%i\n',uintn(value(1:4), endian),uintn(value(5:8)), endian); end
+          if debug, printf('%i/%i\n',uintn(value(1:4), endian),uintn(value(5:8)), endian); end
         case 07 % unknown
           ifd.(name) = uint8(value);
           if debug
-    	    printf('%02x ', value);
-  	    printf('\n');
+            printf('%02x ', value);
+            printf('\n');
           end
         case 09 % 32 bit signed int
           ifd.(name) = intn(value, endian);
           if debug, printf('%i\n', intn(value, endian)); end
         case 10 % 32 bit signed rational
           ifd.(name) = [intn(value(1:4,:), endian); intn(value(5:8,:), endian)];
-	  if debug, printf('%i/%i\n',intn(value(1:4), endian),intn(value(5:8)), endian); end
+          if debug, printf('%i/%i\n',intn(value(1:4), endian),intn(value(5:8)), endian); end
         otherwise
-	  printf('%02x ', value);
-	  printf('\n');
+          printf('%02x ', value);
+          printf('\n');
       end
 
       switch ifd_tag
-	case 0x8769, % Exif Pointer
-	  ifd.(name) = ifdparse(exiftags(), data, ifd_offset, endian);
-	case 0x8825, % GPS Pointer
-	  ifd.(name) = ifdparse(gpstags(), data, ifd_offset, endian);
+        case 0x8769, % Exif Pointer
+          ifd.(name) = ifdparse(exiftags(), data, ifd_offset, endian);
+        case 0x8825, % GPS Pointer
+          ifd.(name) = ifdparse(gpstags(), data, ifd_offset, endian);
         case 0xa005 % Interoperatibility Pointer
-	  ifd.(name) = ifdparse(dict, data, ifd_offset, endian);
+          ifd.(name) = ifdparse(dict, data, ifd_offset, endian);
 %        case 0x927c % Makernotes
-%	   ifd.(name) = ifdparse([], data, ifd_offset, endian);
-	otherwise
+%           ifd.(name) = ifdparse([], data, ifd_offset, endian);
+        otherwise
       end
     end
     j = 9+offset+ifd_fields*12;

@@ -57,9 +57,9 @@ function bmpwrite_indexed(x,map,file)
 
     if rows(map) > 256, 
       bmpwrite_truecolor(reshape(map(x,1),size(x))*255,
-			 reshape(map(x,2),size(x))*255,
-			 reshape(map(x,3),size(x))*255,
-			 file);
+                         reshape(map(x,2),size(x))*255,
+                         reshape(map(x,3),size(x))*255,
+                         file);
       return;
     endif
     [h,w] = size(x);

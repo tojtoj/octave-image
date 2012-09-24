@@ -76,17 +76,17 @@
      const double alpha = (nargin <  2) ? 1.0: args(1).double_value();  
      Method method = absgrad;
      if (args.length() >  2){
-	int m = (int)(args(2).double_value());
+        int m = (int)(args(2).double_value());
         switch(m){
-	case 0: break;
-	case 1: method = vecgrad; break;
-        case 2: method = polargrad;		
+        case 0: break;
+        case 1: method = vecgrad; break;
+        case 2: method = polargrad;
           error("not yet implemented. Use builtin 'card2pol' after method 2 (cartesian vector grad).");
-          return octave_value_list ();		
+          return octave_value_list ();
         default:
-          error("unknown method parameter.");		
-          return octave_value_list ();		
-	}	     
+          error("unknown method parameter.");
+          return octave_value_list ();
+        }
      }
   
      Matrix p(args(0).matrix_value());
@@ -94,7 +94,7 @@
      const int w = p.columns();
      switch (method){
      case absgrad:{
-        Matrix b(h, w);	
+        Matrix b(h, w);
         dericheAbs(p.fortran_vec(), b.fortran_vec(), h, w, h, alpha);
         return octave_value(b);     
      }
@@ -104,7 +104,7 @@
         return octave_value(b);
      }
      default:
-	error("method not yet implemented.");
+      error("method not yet implemented.");
         return octave_value_list();
      }     
  }
@@ -120,7 +120,7 @@
   double a2(a1-a0*b1);
   double a3(-a0*b2);
   double *tmp = 0;
-  //const int sz = h*w;	// unused 
+  //const int sz = h*w; // unused 
   try {
     tmp = new double[2*h*w + 2*w];
     if (!tmp) {
@@ -208,8 +208,8 @@
        };
     }  
   }catch(...){
-	delete [] tmp;
-	throw;
+    delete [] tmp;
+    throw;
   }
   delete[] tmp;  
   }
@@ -226,7 +226,7 @@
   double a3(-a0*b2);
   double *tmp = 0;
   double *r=q+h*w;
-  //const int sz = h*w;	 // unused
+  //const int sz = h*w;  // unused
   try {
     tmp = new double[2*h*w + 2*w];
     if (!tmp) {
@@ -250,7 +250,7 @@
     ze = p + linLen*y;
     Ba1 = B1 + w*y;  
     for(int x=0;x < w; x++)
-      Ba1[x] = ze[x] - b1* *(Ba1 + x - w) - b2 * *(Ba1 + x -w -w);   
+      Ba1[x] = ze[x] - b1* *(Ba1 + x - w) - b2 * *(Ba1 + x -w -w);
   };
  
   for(y = h-3 ; y >= 0 ; y--){       // (ii)
@@ -312,9 +312,8 @@
        };
     }  
   }catch(...){
-	delete [] tmp;
-	throw;
+    delete [] tmp;
+    throw;
   }
-  delete[] tmp;  
+  delete[] tmp;
   }
-  

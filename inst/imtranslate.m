@@ -26,45 +26,45 @@
 
 function Y = imtranslate(X, a, b, bbox_in)
 
-	bbox = "wrap";
-	if ( nargin > 3 )
-		bbox = bbox_in;
-	endif
+  bbox = "wrap";
+  if ( nargin > 3 )
+    bbox = bbox_in;
+  endif
 
-	if ( strcmp(bbox, "crop")==1 )
+  if ( strcmp(bbox, "crop")==1 )
 
-		xpad = [0,0];
-		if (a>0)
-			xpad = [0,ceil(a)];
-		elseif (a<0)
-			xpad = [-ceil(a),0];
-		endif
+    xpad = [0,0];
+    if (a>0)
+      xpad = [0,ceil(a)];
+    elseif (a<0)
+      xpad = [-ceil(a),0];
+    endif
 
-		ypad = [0,0];
-		if (b>0)
-			ypad = [ceil(b),0];
-		elseif (b<0)
-			ypad = [0,-ceil(b)];
-		endif
+    ypad = [0,0];
+    if (b>0)
+      ypad = [ceil(b),0];
+    elseif (b<0)
+      ypad = [0,-ceil(b)];
+    endif
 
-		X = impad(X, xpad, ypad, 'zeros');
-	endif
+    X = impad(X, xpad, ypad, 'zeros');
+  endif
 
 
-	[dimy, dimx] = size(X);
-	x = fft2(X);
-	px = exp(-2*pi*i*a*(0:dimx-1)/dimx);
-	py = exp(-2*pi*i*b*(0:dimy-1)/dimy)'; 	% actually to correspond to index notation 'b' should be
-						% replaced with '-b'
-						% but I do not want to brake previous version compatibility
-						% note: it also must be done in the cropping iand padding code
-	P = py * px;
-	y = x .* P;
-	Y = real(ifft2(y)); 	% fft return complex number
-				% for integer shifts imaginary part  is 0 
-				% so real takes care of transfer from complex number to real
+  [dimy, dimx] = size(X);
+  x = fft2(X);
+  px = exp(-2*pi*i*a*(0:dimx-1)/dimx);
+  py = exp(-2*pi*i*b*(0:dimy-1)/dimy)';   % actually to correspond to index notation 'b' should be
+                                          % replaced with '-b'
+                                          % but I do not want to brake previous version compatibility
+                                          % note: it also must be done in the cropping iand padding code
+  P = py * px;
+  y = x .* P;
+  Y = real(ifft2(y));   % fft return complex number
+                        % for integer shifts imaginary part  is 0 
+                        % so real takes care of transfer from complex number to real
 
-	if ( strcmp(bbox, "crop")==1 )
-		Y = Y(  ypad(1)+1:dimy-ypad(2) , xpad(1)+1:dimx-xpad(2));
-	endif
+  if ( strcmp(bbox, "crop")==1 )
+    Y = Y(ypad(1)+1:dimy-ypad(2) , xpad(1)+1:dimx-xpad(2));
+  endif
 endfunction

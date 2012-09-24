@@ -76,7 +76,7 @@ function m=__conditional_mark_patterns_lut_fun__(X, op)
   if(any(op=='ST'))
     m|=(sx==4)&&((x0&&x2&&x3)||(x0&&x2&&x7)||(x1&&x2&&x4)||(x0&&x1&&x6)); ## bond 5
     m|=(sx==4)&&((x0&&x1&&x2)||(x2&&x3&&x4)||(x4&&x5&&x6)||(x6&&x7&&x0)); ## bond 5
-    m|=(sx==5)&&((x0&&x2&&x3&&x7)||(x1&&x2&&x4&&x5)); ## bond 6	
+    m|=(sx==5)&&((x0&&x2&&x3&&x7)||(x1&&x2&&x4&&x5)); ## bond 6
   endif
 
   if(any(op=='STK'))
@@ -85,13 +85,13 @@ function m=__conditional_mark_patterns_lut_fun__(X, op)
            (all(X(1,:))&&(x0||x4)) || \
            (all(X(:,3))&&(x2||x6)) || \
            (all(X(:,1))&&(x2||x6)) || \
-   	   (all(X(3,:))&&(x0||x4)) );
+           (all(X(3,:))&&(x0||x4)) );
     m|=(sx==6)&&( !(x4||x5||x6) || !(x6||x7||x0) || !(x0||x1||x2) || \
-		 !(x2||x3||x4) ); ## bond 7
+     !(x2||x3||x4) ); ## bond 7
     m|=(sx==6)&&( !any(X(:,1)) || !any(X(3,:)) || !any(X(:,3)) || \
-		 !any(X(1,:)) ); ## bond 8
+     !any(X(1,:)) ); ## bond 8
     m|=(sx==7)&&( !(x4||(x3&&x5)) || !(x6||(x5&&x7)) || \
-		 !(x0||(x7&&x1)) || !(x2||(x1&&x3)) ); ## bond 9
+     !(x0||(x7&&x1)) || !(x2||(x1&&x3)) ); ## bond 9
     m|=(sx==8)&&( !x0 || !x2 || !x4 || !x6 ); ## bond 10
   endif
 
@@ -105,13 +105,3 @@ endfunction
 
 %!# We'll only check if number of hits is ok.
 %!assert(sum(makelut("__conditional_mark_patterns_lut_fun__",3,"S")), 58);
-
-%
-% $Log$
-% Revision 1.2  2007/03/23 16:14:36  adb014
-% Update the FSF address
-%
-% Revision 1.1  2004/08/16 14:42:02  jmones
-% Functions used to code bwmorph
-%
-%

@@ -28,7 +28,7 @@ function r = corr2 (I, J)
   endif
 
   if (!(ismatrix (I) && isreal (I) && ismatrix (J) && isreal (J)))
-	error ("corr2: argument must be a real type matrix");
+    error ("corr2: argument must be a real type matrix");
   endif
 
   if (!size_equal (I, J))
