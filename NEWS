@@ -59,6 +59,11 @@ Summary of important user-visible changes for image 1.1.0:
       isrgb
       isind
       mat2gray
+      rgb2gray
+
+ ** `rgb2gray' now also supports images of the class single and performs a
+    weighted conversion to keep the image luminance instead of a the mean
+    through each color.
 
  ** `imhist' is much more compatible with matlab and among other changes,
     it now uses the whole range of the class for the histogram rather than
