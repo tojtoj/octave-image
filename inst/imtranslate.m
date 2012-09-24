@@ -14,7 +14,8 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {@var{Y}} = imtranslate (@var{M}, @var{x}, @var{y} [, @var{bbox}])
+## @deftypefn {Function File} {@var{Y}} = imtranslate (@var{M}, @var{x}, @var{y})
+## @deftypefnx {Function File} {@var{Y}} = imtranslate (@var{M}, @var{x}, @var{y}, @var{bbox})
 ## Translate a 2D image by (x,y) using Fourier interpolation.
 ##
 ## @var{M} is a matrix, and is translated to the right by @var{X} pixels
@@ -24,12 +25,7 @@
 ##
 ## @end deftypefn
 
-function Y = imtranslate(X, a, b, bbox_in)
-
-  bbox = "wrap";
-  if ( nargin > 3 )
-    bbox = bbox_in;
-  endif
+function Y = imtranslate (X, a, b, bbox_in = "wrap")
 
   if ( strcmp(bbox, "crop")==1 )
 
