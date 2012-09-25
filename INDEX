@@ -82,6 +82,8 @@ Morhophological Operations
  imtophat
  mmgradm
 Read/write
+ analyze75info
+ analyze75read
  bmpwrite
  readexif
  tiff_tag_read

@@ -3,6 +3,8 @@ Summary of important user-visible changes for image 1.1.0:
 
  ** The following functions are new:
 
+      analyze75info
+      analyze75read
       blockproc
       bwlabeln
       getrangefromclass
