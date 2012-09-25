@@ -1,4 +1,5 @@
 %% Copyright (C) 2012 Adam H Aitkenhead <adamaitkenhead@hotmail.com>
+%% Copyright (C) 2012 Carnë Draug <carandraug+dev@gmail.com>
 %%
 %% This program is free software; you can redistribute it and/or modify
 %% it under the terms of the GNU General Public License as published by
@@ -14,95 +15,55 @@
 %% along with this program; If not, see <http://www.gnu.org/licenses/>.
 
 %% -*- texinfo -*-
-%% @deftypefn {Function File} {@var{image} = } analyze75read(@var{filename})
-%% @deftypefnx {Function File} {@var{image} = } analyze75read(@var{structure})
-%% Read the image data contained in an Analyze file.
+%% @deftypefn {Function File} {@var{image} =} analyze75read (@var{filename})
+%% @deftypefnx {Function File} {@var{image} =} analyze75read (@var{header})
+%% Read image data of an Analyze 7.5 file.
 %%
-%% FILENAME is a string (giving the filename).
-%% Alternatively, STRUCTURE is a structure containing a field `Filename'
-%% (such as returned by `analyze75info').
+%% @var{filename} must be the path for an Analyze 7.5 file or the path for a
+%% directory with a single .hdr file can be specified. Alternatively, the file
+%% @var{header} can be specified as returned by @code{analyze75info}.
+%%
+%% @seealso{analyze75info}
 %% @end deftypefn
 
-function data = analyze75read(varargin);
-%--------------------------------------------------------------------------
+function data = analyze75read (filename);
 
-%--------------
-% Check filename
-%--------------
-
-filename = varargin{1};
-
-if isstruct(filename)==1 && isfield(filename,'Filename')==1
-  header   = filename;
-  filename = header.Filename;
-elseif exist('filename','var')==1 && exist(filename,'dir')==7
-  filelist = dir([filename,filesep,'*.hdr']);
-  if numel(filelist)==1
-    filename = [filename,filesep,filelist.name];
-  else
-    [filename,filepath] = uigetfile([filename,filesep,'*.hdr'],'Select the input file');
-    filename = [filepath,filename];
+  if (nargin ~= 1)
+    print_usage;
+  elseif (isstruct (filename))
+    if (~isfield (filename, 'Filename'))
+      error ('analyze75read: structure given does not have a `Filename'' field.');
+    else
+      header   = filename;
+      filename = filename.Filename;
+    end
+  elseif (~ischar (filename))
+    error ('analyze75read: `filename'' must be either a string or a structure.');
   end
-elseif ( exist('filename','var')==1 && exist(filename,'file')==0 ) || exist('filename','var')==0
-  [filename,filepath] = uigetfile('*.hdr','Select the input file');
-  filename = [filepath,filename];
+
+  fileprefix = analyze75filename (filename);
+
+  if (~exist ('header', 'var'))
+    header = analyze75info ([fileprefix, '.hdr']);
+  end
+
+  %% finally start reading the actual file
+  [fidI, err] = fopen ([fileprefix, '.img']);
+  if (fidI < 0)
+    error ('analyze75read: unable to fopen `%s'': %s', [fileprefix, '.img'], err);
+  end
+
+  if (strcmp (header.ImgDataType, 'DT_FLOAT'))
+    datatype = 'single';
+  else
+    datatype = 'double';
+  end
+
+  data    = zeros (header.Dimensions, datatype);
+  data(:) = fread (fidI, datatype, header.ByteOrder);
+
+  fclose (fidI);
+
+  %% Rearrange the data
+  data = permute (data, [2,1,3]);
 end
-
-% Strip the filename of the extension
-
-fileextH = strfind(filename,'.hdr');
-fileextI = strfind(filename,'.img');
-if isempty(fileextH)==0
-  fileprefix = filename(1:fileextH-1);
-elseif isempty(fileextI)==0
-  fileprefix = filename(1:fileextI-1);
-else
-  fileprefix = filename;
-end
-
-%--------------
-% Read the file
-%--------------
-
-if exist('header','var')==0
-  header = analyze75info(filename);
-end
-
-data = READ_img(fileprefix,header);
-
-end %function
-%--------------------------------------------------------------------------
-
-
-%--------------------------------------------------------------------------
-function [data] = READ_img(fileprefix,header)
-
-%----------------------------
-% Read the .img file
-%----------------------------
-
-fidI = fopen([fileprefix,'.img']);
-
-fseek(fidI,0,-1);
-
-if strcmp(header.ImgDataType,'DT_FLOAT')==1
-  datatype = 'single';
-else
-  datatype = 'double';
-end
-
-data    = zeros(header.Dimensions,datatype);
-data(:) = fread(fidI,datatype,header.ByteOrder);
-
-fclose(fidI);
-
-%----------------------------
-% Rearrange the data
-%----------------------------
-
-data = permute(data,[2,1,3]);
-
-end %function
-%--------------------------------------------------------------------------
-
-
