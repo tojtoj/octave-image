@@ -50,3 +50,6 @@ function iptcheckmap (in, func_name, var_name, pos)
   endif
 
 endfunction
+
+%!test ("iptcheckmap (jet(64), 'func', 'var', 2)");                 # simple must work
+%!fail ("iptcheckconn (3, 'func', 'var', 2)");                      # not a colormap
