@@ -14,37 +14,41 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} @var{total}= bwarea(@var{bw})
-## Estimates the area of the "on" pixels of @var{bw}.
-## If @var{bw} is a binary image "on" pixels are defined as pixels
-## valued 1. If @var{bw} is a grayscale image "on" pixels is defined
-## as pixels with values larger than zero.
-## This algorithm is not the same as counting the number of "on"
-## pixels as it tries to estimate the area of the original object
-## and not the image object.
+## @deftypefn {Function File} {@var{total} =} bwarea (@var{bw})
+## Estimate total area of objects on the image @var{bw}.
+##
+## The image @var{bw} can be of any class, even non-logical, in which case non
+## zero valued pixels are considered to be an object.
+##
+## This algorithm is not the same as counting the number of pixels belonging to
+## an object as it tries to estimate the area of the original object.  The value
+## of each pixel to the total area is weighted in relation to its neighbour
+## pixels.
+##
+## @seealso{im2bw, bweuler, bwperim, regionprops}
 ## @end deftypefn
 
-function total = bwarea(bw)
-  if (isgray(bw))
-    bw = (bw > 0);
-  endif
-
-  if (!isbw(bw))
-    error("input image muste be either binary or gray scale.\n");
+function total = bwarea (bw)
+  if (nargin != 1)
+    print_usage;
+  elseif (!isimage (bw) || ndims (bw) != 2)
+    error("bwarea: input image must be a 2D image");
+  elseif (!islogical (bw))
+    bw = (bw != 0)
   endif
   
-  four = ones(2);
-  two  = diag([1 1]);
+  four = ones (2);
+  two  = diag ([1 1]);
 
-  fours = conv2(bw, four);
-  twos  = conv2(bw, two);
+  fours = conv2 (bw, four);
+  twos  = conv2 (bw, two);
 
-  nQ1 = sum(fours(:) == 1);
-  nQ3 = sum(fours(:) == 3);
-  nQ4 = sum(fours(:) == 4);
-  nQD = sum(fours(:) == 2 & twos(:) != 1);
-  nQ2 = sum(fours(:) == 2 & twos(:) == 1);
+  nQ1 = sum (fours(:) == 1);
+  nQ3 = sum (fours(:) == 3);
+  nQ4 = sum (fours(:) == 4);
+  nQD = sum (fours(:) == 2 & twos(:) != 1);
+  nQ2 = sum (fours(:) == 2 & twos(:) == 1);
 
   total = 0.25*nQ1 + 0.5*nQ2 + 0.875*nQ3 + nQ4 + 0.75*nQD;
-  
+
 endfunction

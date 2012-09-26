@@ -49,6 +49,7 @@ Summary of important user-visible changes for image 1.1.0:
  ** The following functions have had been changed for bug fixes and/or
     improved matlab compatibility
 
+      bwarea
       bweuler
       bwfill
       imhist
@@ -63,6 +64,9 @@ Summary of important user-visible changes for image 1.1.0:
       isind
       mat2gray
       rgb2gray
+
+ ** `bwarea' now supports all image classes and considers objects all non
+    zero pixels (not all pixels higher than zero).
 
  ** `rgb2gray' now also supports images of the class single and performs a
     weighted conversion to keep the image luminance instead of a the mean
