@@ -1,4 +1,5 @@
 ## Copyright (C) 2012 Pablo Rossi <prossi@ing.unrc.edu.ar>
+## Copyright (C) 2012 Carnë Draug <carandraug+dev@gmail.com>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -14,50 +15,36 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} @var{col} = imcrop (@var{Img})
+## @deftypefn {Function File} @var{cropped} = imcrop (@var{Img})
 ## Crop image.
 ##
-## Displays the image @var{Img} in a figure window and creates a
-## cropping tool associated with that image. Pick: first the top left
-## corner, second bottom right. The cropped image returned, @var{col}.
+## Displays the image @var{Img} in a figure window and waits for user to select
+## two points to define the bounding box.  First click on the top left and then
+## on the bottom right corner of the region.  The function will not return until
+## two valid points in the correct order are selected.
+##
+## Returns the @var{cropped} image.
+##
+## @seealso{imshow}
 ## @end deftypefn
-
-## Author:  Pablo Rossi <prossi@ing.unrc.edu.ar>
-## Date:    13 March 2012
 
 function col = imcrop (Img)
 
-  imshow(Img);
-  [a,b]=size(Img);
-  [hl,rd]=ginput;
+  handle = imshow (Img);
+  [a, b] = size (Img);
 
-  if hl(1)<=1; hl(1)=1; endif
+  do
+    [hl, rd] = ginput(2);
+    if (hl(1) <= 1), hl(1) = 1; endif
+    if (rd(1) <= 1), rd(1) = 1; endif
+    if (hl(2) >= b), hl(2) = b; endif
+    if (rd(2) >= a), rd(2) = a; endif
+  until (hl(1) < hl(2) || rd(1) < rd(2))
+  ## should we close the image after? Anyway, close does not accept the handle
+  ## since the handle from imshow is not a figure handle
+#  close (handle); 
 
-  if rd(1)<=1; rd(1)=1; endif
-
-  if hl(2)>=b; hl(2)=b; endif
-
-  if rd(2)>=a; rd(2)=a; endif
-
-  while hl(1) > hl(2) || rd(1) > rd(2)
-
-    display ("Pick: first the top left corner, second bottom right","Error Procedure");
-
-    [hl,rd]=ginput;
-
-    if hl(1)<=1; hl(1)=1; endif
-
-    if rd(1)<=1; rd(1)=1; endif
-
-    if hl(2)>=b; hl(2)=b; endif
-
-    if rd(2)>=a; rd(2)=a; endif
-
-  endwhile
-
-  hl=floor(hl);
-  rd=floor(rd);
-  col=[];
-  col=Img(rd(1):rd(2),hl(1):hl(2));
-
+  hl  = floor (hl);
+  rd  = floor (rd);
+  col = Img(rd(1):rd(2), hl(1):hl(2));
 endfunction
