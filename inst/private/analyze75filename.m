@@ -16,7 +16,7 @@
 
 %% private function with common code for the analyze75info and read functions
 
-function filename = analyze75check (filename)
+function filename = analyze75filename (filename)
 
   %% Check filename
   if (exist (filename, 'dir'))
@@ -28,8 +28,8 @@ function filename = analyze75check (filename)
     else
       error ('analyze75: `filename'' is a directory with no hdr files.')
     end
-  elseif (~exist (filename,'file')
-      error ('analyze75info: no file `%s''', filename)
+  elseif (~exist (filename, 'file'))
+      error ('analyze75: no file `%s''', filename)
   end
 
   %% Strip the filename of the extension
