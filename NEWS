@@ -74,6 +74,8 @@ Summary of important user-visible changes for image 1.1.0:
 
  ** `im2bw' now supports input images of the int16 class and deals better with
     RGB images since it uses `rgb2gray' internally (see changes to rgb2gray).
+    Threshold is performed on all values greater than value instead of greater
+    than or equal.
 
  ** `imhist' is much more compatible with matlab and among other changes,
     it now uses the whole range of the class for the histogram rather than
