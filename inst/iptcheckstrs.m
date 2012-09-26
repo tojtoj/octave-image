@@ -25,7 +25,7 @@
 ## @var{var_name} the name of the argument being checked (for the error message),
 ## and @var{pos} the position of the argument in the input.
 ##
-## @seealso{strcmp, strcmpi, find}
+## @seealso{strcmp, strcmpi, find, validatestring}
 ## @end deftypefn
 
 function out = iptcheckstrs (in, valid_str, func_name, var_name, pos)
