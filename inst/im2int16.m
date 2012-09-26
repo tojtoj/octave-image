@@ -39,20 +39,22 @@ function im = im2int16 (im)
   ## Input checking (private function that is used for all im2class functions)
   im_class = imconversion (nargin, "im2int16", false, im);
 
-  switch im_class
+  ## for those who may wonder, 32767 = intmax ("int16")
+  ## for those who may wonder, 65535 = intmax ("uint16")
+    switch im_class
     case "int16"
       ## do nothing, return the same
     case {"single", "double"}
-      im = int16 (double (im * intmax ("uint16")) - double (intmax ("int16")) - 1);
+      im = int16 (double (im * uint16(65535)) - 32767 - 1);
     case "logical"
       im(im)  = intmax ("int16");
       im(!im) = intmin ("int16");
     case "uint8"
         ## 257 is the ratio between the max of uint8 and uint16
         ## double (intmax ("uint16")) / double (intmax ("uint8")) == 257
-        im = int16 (double (257 * uint16 (im)) - double (intmax ("int16")) - 1);
+        im = int16 (double (257 * uint16 (im)) - 32767 - 1);
     case "uint16"
-      im = int16 (double (im) - double (intmax ("int16")) - 1);
+      im = int16 (double (im) - 32767 - 1);
     otherwise
       error ("unsupported image class %s", im_class);
   endswitch

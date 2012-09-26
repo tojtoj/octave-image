@@ -40,21 +40,22 @@ function im = im2uint16 (im, indexed = false)
   ## Input checking (private function that is used for all im2class functions)
   im_class = imconversion (nargin, "im2uint16", indexed, im);
 
+  ## for those who may wonder, 65535 = intmax ("uint16")
   switch im_class
     case "uint16"
       ## do nothing, return the same
     case {"single", "double"}
       if (indexed)
         imax = max (im(:));
-        if ( imax > intmax ("uint16"))
+        if ( imax > 65535)
           error ("Too many colors '%d' for an indexed uint16 image", imax);
         endif
         im = uint16 (im) - 1;
       else
-        im = uint16 (im * double (intmax ("uint16")));
+        im = uint16 (im * 65535);
       endif
     case "logical"
-      im = uint16 (im) * intmax ("uint16");
+      im = uint16 (im) * uint16 (65535);
     case "uint8"
       if (indexed)
         im = uint16 (im);

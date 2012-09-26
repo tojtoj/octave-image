@@ -42,11 +42,12 @@ function im = im2uint8 (im, indexed = false)
 
   if (indexed)
     imax = max (im(:));
-    if (imax > intmax ("uint8"))
+    if (imax > 255)
       error ("Too many colors '%d' for an indexed uint8 image", imax);
     endif
   endif
 
+  ## for those who may wonder, 255 = intmax ("uint8")
   switch im_class
     case "uint8"
       ## do nothing, return the same
@@ -54,10 +55,10 @@ function im = im2uint8 (im, indexed = false)
       if (indexed)
         im = uint8 (im) - 1;
       else
-        im = uint8 (im * double (intmax ("uint8")));
+        im = uint8 (im * 255);
       endif
     case "logical"
-      im = uint8 (im) * intmax ("uint8");
+      im = uint8 (im) * uint8 (255);
     case "uint16"
       if (indexed)
         im = uint8 (im);
