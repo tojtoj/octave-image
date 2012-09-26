@@ -14,24 +14,35 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} rgbplot (@var{map})
-## @deftypefnx{Function File} @var{h} = rgbplot (@var{map})
+## @deftypefn {Function File} {@var{h} =} rgbplot (@var{cmap})
 ## Plot a given color map.
-## The matrix @var{map} must be a @math{M} by 3 matrix. The three columns of the
-## colormap matrix are plotted in red, green, and blue lines.
 ##
-## If an output is requested, a graphics handle to the plot is returned.
+## The plot will display 3 lines, red, green and blue, showing the variation of
+## RGB values on @var{cmap}.  While input matrix must be a color map (see
+## @code{iscolormap}), it can also be used to see a colored line profile
+## (intensity values will have to be converted to class double with
+## @code{im2double}).
+##
+## If an output is requested, the graphics handle @var{h} to the plot is returned.
+##
+## @seealso{colormap, iscolormap}
 ## @end deftypefn
 
 function h_out = rgbplot(map)
-  ## Check input
-  if (!ismatrix(map) || ndims(map) != 2 || columns(map) != 3)
-    error("rgbplot: input must be a M by 3 matrix");
+
+  if (nargin != 1)
+    print_usage;
+  elseif (!iscolormap (map))
+    error("rgbplot: input must be a colormap");
   endif
 
-  ## Plot
-  h = plot(map(:,1), "-r", map(:,2), "g-", map(:,3), "b-");
+  h = plot (map(:,1), "-r", map(:,2), "g-", map(:,3), "b-");
   if (nargout > 0)
     h_out = h;
   endif
 endfunction
+
+%!demo
+%! ## look at the distribution of RGB values for the jet colormap
+%! cmap = jet (64);
+%! rgbplot (cmap);

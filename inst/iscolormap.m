@@ -21,7 +21,7 @@
 ## green, and blue intensities respectively.  All entries should be between 0
 ## and 1 inclusive.
 ##
-## @seealso{colormap}
+## @seealso{colormap, rgbplot}
 ## @end deftypefn
 
 function bool = iscolormap (cm)
