@@ -14,21 +14,21 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} @var{m}= mean2 (@var{I})
-## Returns the mean value for a 2d real type matrix.
-## Uses @code{mean(I(:))}
-## @seealso{std2,mean}
+## @deftypefn {Function File} {@var{m}=} mean2 (@var{I})
+## Compute the mean value of the 2D image @var{I}.
+##
+## Note that @var{m} will be of class double, independently of the input class.
+## This is equivalent to @code{mean (I(:))}.
+##
+## @seealso{mean, std2}
 ## @end deftypefn
 
 function m = mean2 (I)
 
-  if !(nargin == 1)
+  if (nargin != 1)
     print_usage();
+  elseif (!isimage (I) || ndims (I) != 2)
+    error("mean2: argument must be a 2D image");
   endif
-
-  if !(ismatrix(I) && isreal(I))
-    error("mean2: argument must be a real type matrix");
-  endif
-
   m = mean (I(:));
 endfunction
