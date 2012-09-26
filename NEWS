@@ -78,6 +78,8 @@ Summary of important user-visible changes for image 1.1.0:
     used as input, `isbw' will still return true but a warning will be
     issued since this will deprecated later.
 
+ ** `isgray' now also returns true for matrices of the int16 class.
+
  ** `isrgb' now returns false for logical matrix.
 
  ** `tiff_tag_read' had several bug fixes and can now check IFDs beyond

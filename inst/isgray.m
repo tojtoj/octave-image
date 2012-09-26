@@ -22,7 +22,7 @@
 ## non-sparse matrix, and:
 ## @itemize @bullet
 ## @item is of class double and all values are in the range [0, 1];
-## @item is of class uint8 or uint16.
+## @item is of class uint8, uint16 or int16.
 ## @end itemize
 ##
 ## Note that grayscale time-series image have 4 dimensions (NxMx1xtime) but
@@ -44,7 +44,7 @@ function bool = isgray (img)
     switch (class (img))
       case "double"
         bool = ispart (@is_double_image, img);
-      case {"uint8", "uint16"}
+      case {"uint8", "uint16", "int16"}
         bool = true;
     endswitch
   endif
