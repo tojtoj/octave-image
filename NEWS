@@ -41,8 +41,17 @@ Summary of important user-visible changes for image 1.1.0:
     GPL license. Currently, the following algorithms have been implemented
     (see graythresh for notes and references):
 
+      concavity
+      intermeans
+      intermodes
+      MaxEntropy
+      MaxLikelihood
+      mean
+      minimum
+      MinError
       moments
       otsu
+      percentile
 
  ** The following functions have been deprecated (see their help text
     for the recommended alternatives):
@@ -108,5 +117,7 @@ Summary of important user-visible changes for image 1.1.0:
     expanded (as well as an explanation of TIFF structure on the source)
 
  ** Package is now dependent on GNU Octave version 3.6.0 or later.
+
+ ** Package is now dependent on the signal package version 1.2.0 or later..
 
  ** Package is no longer automatically loaded.
