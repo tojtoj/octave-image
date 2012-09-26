@@ -35,6 +35,15 @@ Summary of important user-visible changes for image 1.1.0:
  ** The function `graythresh' now returns a second value representing the
     ``goodness'' of the computed threshold value.
 
+ ** Alternative algorithms for automatic threshold have been implemented in
+    `graythresh' (thanks to Antti Niemistö for releasing HistThresh toolbox 
+    http://www.cs.tut.fi/~ant/histthresh/ from where many were ported, under a
+    GPL license. Currently, the following algorithms have been implemented
+    (see graythresh for notes and references):
+
+      moments
+      otsu
+
  ** The following functions have been deprecated (see their help text
     for the recommended alternatives):
 

@@ -1,3 +1,4 @@
+## Copyright (C) 2004 Antti Niemistö <antti.niemisto@tut.fi>
 ## Copyright (C) 2005 Barre-Piquot
 ## Copyright (C) 2007 Søren Hauberg
 ## Copyright (C) 2012 Carnë Draug <carandraug+dev@gmail.com>
@@ -64,7 +65,9 @@
 ## Not yet implemented.
 ##
 ## @item moments
-## Not yet implemented.
+## Find a global threshold for a grayscale image using moment preserving
+## thresholding method @cite{W. Tsai (1985), "Moment-preserving thresholding:
+## a new approach," Computer Vision, Graphics, and Image Processing, 29: 377-393}
 ##
 ## @item percentile
 ## Not yet implemented.
@@ -89,8 +92,9 @@
 ##  * Otsu's method is a function taken from
 ##    http://www.irit.fr/~Philippe.Joly/Teaching/M2IRR/IRR05/ Søren Hauberg
 ##    added texinfo documentation, error checking and sanitised the code.
+##  * Moment's algorithm was adapted from http://www.cs.tut.fi/~ant/histthresh/
 
-function [level, goodness] = graythresh (img, algo = "otsu")
+function [level, good] = graythresh (img, algo = "otsu")
   ## Input checking
   if (nargin < 1 || nargin > 2)
     print_usage();
@@ -104,45 +108,98 @@ function [level, goodness] = graythresh (img, algo = "otsu")
   endif
 
   switch tolower (algo)
-    case {"otsu"}
-      ## Calculation of the normalized histogram
-      n = double (intmax (class (img))) + 1;
-      h = hist (img(:), 1:n);
-      h = h / (length (img(:)) + 1);
-
-      ## Calculation of the cumulated histogram and the mean values
-      w  = cumsum (h);
-      mu = zeros (n, 1);
-      mu(1) = h(1);
-      for i = 2:n
-        mu(i) = mu(i-1) + i * h(i);
-      endfor
-
-      ## Initialisation of the values used for the threshold calculation
-      level = find (h > 0, 1);
-      w0  = w(level);
-      w1  = 1 - w0;
-      mu0 = mu(level) / w0;
-      mu1 = (mu(end) - mu(level)) / w1;
-      goodness = w0 * w1 * (mu1 - mu0) * (mu1 - mu0);
-      
-      ## For each step of the histogram, calculation of the threshold
-      ## and storing of the maximum
-      for i = find (h > 0)
-        w0 = w(i);
-        w1 = 1 - w0;
-        mu0 = mu(i) / w0;
-        mu1 = (mu(end) - mu(i)) / w1;
-        s = w0 * w1 * (mu1 - mu0) * (mu1 - mu0);
-        if (s > goodness)
-          goodness = s;
-          level    = i;
-        endif
-      endfor
-
-      ## Normalisation of the threshold
-      level /= n;
-    otherwise
-      error ("graythresh: unknown method '%s'", algo);
+    case {"otsu"},    [level, good] = otsu (img);
+    case {"moments"}, [level]       = moments (img);
+    otherwise, error ("graythresh: unknown method '%s'", algo);
   endswitch
+endfunction
+
+function [level, good] = otsu (img)
+  ## Calculation of the normalized histogram
+  n = double (intmax (class (img))) + 1;
+  h = hist (img(:), 1:n);
+  h = h / (length (img(:)) + 1);
+
+  ## Calculation of the cumulated histogram and the mean values
+  w  = cumsum (h);
+  mu = zeros (n, 1);
+  mu(1) = h(1);
+  for i = 2:n
+
+    mu(i) = mu(i-1) + i * h(i);
+  endfor
+
+  ## Initialisation of the values used for the threshold calculation
+  level = find (h > 0, 1);
+  w0  = w(level);
+  w1  = 1 - w0;
+  mu0 = mu(level) / w0;
+  mu1 = (mu(end) - mu(level)) / w1;
+  good = w0 * w1 * (mu1 - mu0) * (mu1 - mu0);
+  
+  ## For each step of the histogram, calculation of the threshold
+  ## and storing of the maximum
+  for i = find (h > 0)
+    w0 = w(i);
+    w1 = 1 - w0;
+    mu0 = mu(i) / w0;
+    mu1 = (mu(end) - mu(i)) / w1;
+    s = w0 * w1 * (mu1 - mu0) * (mu1 - mu0);
+    if (s > good)
+      good  = s;
+      level = i;
+    endif
+  endfor
+
+  ## Normalisation of the threshold
+  level /= n;
+endfunction
+
+function level = moments (I, n)
+
+  if nargin == 1
+    n = 255;
+  end
+
+  I = double(I);
+
+  % Calculate the histogram.
+  y = hist (I(:), 0:n);
+
+  % The threshold is chosen such that A(y,t)/A(y,n) is closest to x0.
+  Avec = zeros (1, n+1);
+
+  for t = 0:n
+    Avec(t+1) = partial_sumA (y, t) / partial_sumA (y, n);
+  end
+
+  % The following finds x0.
+  x2 = (partial_sumB(y,n)*partial_sumC(y,n) - partial_sumA(y,n)*partial_sumD(y,n)) / (partial_sumA(y,n)*partial_sumC(y,n) - partial_sumB(y,n)^2);
+  x1 = (partial_sumB(y,n)*partial_sumD(y,n) - partial_sumC(y,n)^2) / (partial_sumA (y,n)*partial_sumC(y,n) - partial_sumB(y,n)^2);
+  x0 = .5 - (partial_sumB(y,n)/partial_sumA(y,n) + x2/2) / sqrt (x2^2 - 4*x1);
+
+  % And finally the threshold.
+  [minimum, ind] = min (abs (Avec-x0));
+  level = ind-1;
+
+  ## Normalisation of the threshold
+  level /= n;
+endfunction
+
+## partial sums from C. A. Glasbey, "An analysis of histogram-based thresholding
+## algorithms," CVGIP: Graphical Models and Image Processing, vol. 55, pp. 532-537, 1993.
+function x = partial_sumA (y, j)
+  x = sum (y(1:j+1));
+endfunction
+function x = partial_sumB (y, j)
+  ind = 0:j;
+  x   = ind*y(1:j+1)';
+endfunction
+function x = partial_sumC (y, j)
+  ind = 0:j;
+  x = ind.^2*y(1:j+1)';
+endfunction
+function x = partial_sumD (y, j)
+  ind = 0:j;
+  x = ind.^3*y(1:j+1)';
 endfunction
