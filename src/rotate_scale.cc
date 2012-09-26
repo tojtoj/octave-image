@@ -1,13 +1,11 @@
+//Copyright (C) 2003 Andy Adler
+//
+// This code has no warrany whatsover. Do what you like with this code 
+// as long as you leave this copyright in place.
+
 /*
  * ROTATE_SCALE: rotate and scale a matrix using bilinear interpolation
  * imo= block(im, xregs, yregs);
- *
- * Copyright (C) 2003 Andy Adler
- * This code has no warrany whatsoever.
- * Do what you like with this code as long as you
- *     leave this copyright in place.
- *
- * $Id$
  */
 
 #include <octave/oct.h>
