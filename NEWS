@@ -79,7 +79,8 @@ Summary of important user-visible changes for image 1.1.0:
 
  ** `imhist' is much more compatible with matlab and among other changes,
     it now uses the whole range of the class for the histogram rather than
-    the minimum and maximum of the input image.
+    the minimum and maximum of the input image and displays a colorbar under
+    the histogram.
 
  ** `isbw' now defines a black-and-white image as a binary non-sparse
     matrix. This is compatible with matlab. To use the old behaviour,

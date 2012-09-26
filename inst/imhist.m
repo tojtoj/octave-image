@@ -145,10 +145,11 @@ function [varargout] = imhist (img, b)
     varargout{1} = nn;
     varargout{2} = bins;
   else
+    hold on;
     stem (bins, nn);
-    ## would be cool if we managed to have the colormap showed under the
-    ## histogram like matlab does. Should look into the code of waitfor and
-    ## colormap to check how to do it
+    colormap (gray (b));
+    colorbar ("SouthOutside", "xticklabel", []);
+    hold off;
   endif
 endfunction
 
