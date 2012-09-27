@@ -57,7 +57,7 @@
 ## Mendelsohn (1966). "The analysis of cell images", Annals of the New York
 ## Academy of Sciences, 128: 1035-1053}.
 ##
-## Images with histograms having extremely unequal peaks or a broad and ﬂat
+## Images with histograms having extremely unequal peaks or a broad and flat
 ## valley are unsuitable for this method.
 ##
 ## @item intermeans
@@ -106,7 +106,7 @@
 ## method @cite{J. M. S. Prewitt, and M. L. Mendelsohn (1966). "The analysis of
 ## cell images", Annals of the New York Academy of Sciences, 128: 1035-1053}.
 ##
-## Images with histograms having extremely unequal peaks or a broad and ﬂat
+## Images with histograms having extremely unequal peaks or a broad and flat
 ## valley are unsuitable for this method.
 ##
 ## @item moments
@@ -197,7 +197,7 @@ function [level, good] = otsu (img)
   mu0 = mu(level) / w0;
   mu1 = (mu(end) - mu(level)) / w1;
   good = w0 * w1 * (mu1 - mu0) * (mu1 - mu0);
-  
+
   ## For each step of the histogram, calculation of the threshold
   ## and storing of the maximum
   for i = find (h > 0)
@@ -404,7 +404,7 @@ function [T] = minerror_iter (I,n)
   Tprev = NaN;
 
   while T ~= Tprev
-    
+
     % Calculate some statistics.
     mu = partial_sumB(y,T)/partial_sumA(y,T);
     nu = (partial_sumB(y,n)-partial_sumB(y,T))/(partial_sumA(y,n)-partial_sumA(y,T));
@@ -417,7 +417,7 @@ function [T] = minerror_iter (I,n)
     w0 = 1/sigma2-1/tau2;
     w1 = mu/sigma2-nu/tau2;
     w2 = mu^2/sigma2 - nu^2/tau2 + log10((sigma2*q^2)/(tau2*p^2));
-    
+
     % If the next threshold would be imaginary, return with the current one.
     sqterm = w1^2-w0*w2;
     if sqterm < 0
@@ -435,7 +435,7 @@ function [T] = minerror_iter (I,n)
       warning('MINERROR:NaN','Warning: th_minerror_iter did not converge.')
       T = Tprev;
     end
-    
+
   end
 endfunction
 #{
@@ -505,7 +505,7 @@ function T = maxlikelihood (I,n)
         abs(sigma2-sigma2_prev) > eps || abs(tau2-tau2_prev) > eps
     for i = 0:n
       phi(i+1) = p/q * exp(-((i-mu)^2) / (2*sigma2)) / ...
-          (p/sqrt(sigma2) * exp(-((i-mu)^2) / (2*sigma2)) + ... 
+          (p/sqrt(sigma2) * exp(-((i-mu)^2) / (2*sigma2)) + ...
            (q/sqrt(tau2)) * exp(-((i-nu)^2) / (2*tau2)));
     end
     ind = 0:n;
@@ -530,7 +530,7 @@ function T = maxlikelihood (I,n)
   w0 = 1/sigma2-1/tau2;
   w1 = mu/sigma2-nu/tau2;
   w2 = mu^2/sigma2 - nu^2/tau2 + log10((sigma2*q^2)/(tau2*p^2));
-    
+
   % If the threshold would be imaginary, return with threshold set to zero.
   sqterm = w1^2-w0*w2;
   if sqterm < 0;
@@ -661,7 +661,7 @@ function E = hbalance(y,ind)
 % Out:
 %  E    balance measure
 %
-% References: 
+% References:
 %
 % A. Rosenfeld and P. De La Torre, "Histogram concavity analysis as an aid
 % in threhold selection," IEEE Transactions on Systems, Man, and
@@ -683,7 +683,7 @@ function H = hconvhull(h)
   % Out:
   %  H    convex hull of histogram
   %
-  % References: 
+  % References:
   %
   % A. Rosenfeld and P. De La Torre, "Histogram concavity analysis as an aid
   % in threhold selection," IEEE Transactions on Systems, Man, and
@@ -707,7 +707,7 @@ function H = hconvhull(h)
     maxloc = find(theta==maximum);
     k = k+1;
     K(k) = maxloc(end)+K(k-1);
-    
+
   end
 
   % Form the convex hull.
