@@ -50,7 +50,7 @@ Summary of important user-visible changes for image 1.1.0:
       minimum
       MinError
       moments
-      otsu
+      Otsu
       percentile
 
  ** The following functions have been deprecated (see their help text

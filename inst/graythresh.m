@@ -150,6 +150,8 @@ function [level, good] = graythresh (img, algo = "otsu", varargin)
   ## Input checking
   if (nargin < 1 || nargin > 3)
     print_usage();
+  elseif (nargin > 2 && !any (strcmpi (varargin{1}, {"percentile"})))
+    error ("graythresh: algorithm `%s' does not accept any options.", algo);
   elseif (!isgray (img) && !isrgb (img))
     error ("graythresh: input must be an image");
   endif
