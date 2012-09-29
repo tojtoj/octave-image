@@ -116,6 +116,13 @@ Summary of important user-visible changes for image 1.1.0:
     and return a matrix of the values found. Its documentation has been
     expanded (as well as an explanation of TIFF structure on the source)
 
+ ** For sake of matlab compatibility, the behaviour of `mat2gray' has been
+    greatly changed. Among the changes, it will no longer swap the minimum and
+    maximum options if the first is larger than the later. Instead, will return
+    the image complement after truncation. Also, when the maximum and minimum
+    values are equal, `mat2gray' will truncate all values between 0 and 1. See
+    the help text (or source) for a detailed description of cautions.
+
  ** Package is now dependent on GNU Octave version 3.6.0 or later.
 
  ** Package is now dependent on the signal package version 1.2.0 or later..
