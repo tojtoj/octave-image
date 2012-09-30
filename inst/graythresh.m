@@ -149,7 +149,7 @@
 ##  * Carnë Draug implemented and vectorized the Otsu's method
 
 function [varargout] = graythresh (img, algo = "otsu", varargin)
-  # Input checking
+  ## Input checking
   if (nargin < 1 || nargin > 3)
     print_usage();
   elseif (nargin > 2 && !any (strcmpi (varargin{1}, {"percentile"})))
@@ -278,13 +278,11 @@ endfunction
 function T = maxentropy(y)
   n = numel (y) - 1;
 
-  warning off
   % The threshold is chosen such that the following expression is minimized.
   for j = 0:n
     vec(j+1) = negativeE(y,j)/partial_sumA(y,j) - log10(partial_sumA(y,j)) + ...
         (negativeE(y,n)-negativeE(y,j))/(partial_sumA(y,n)-partial_sumA(y,j)) - log10(partial_sumA(y,n)-partial_sumA(y,j));
   end
-  warning on
 
   [minimum,ind] = min(vec);
   T{1} = ind-1;
@@ -396,8 +394,8 @@ function [T] = minerror_iter (y, T)
   end
 endfunction
 #{
-  ## this was not an implementatino of the original minerror algorithm but seems
-  ## to converg more often than the original. The original is (also from the
+  ## this is an implementation of the original minerror algorithm but seems
+  ## to converge less often than the iterative version. This one is also from the
   ## HistThresh toolbox
   function T = th_minerror(I,n)
     if nargin == 1
@@ -409,7 +407,6 @@ endfunction
     % Calculate the histogram.
     y = hist(I(:),0:n);
 
-    warning off
     % The threshold is chosen such that the following expression is minimized.
     for j = 0:n
       mu = partial_sumB(y,j)/partial_sumA(y,j);
@@ -420,7 +417,6 @@ endfunction
       tau2 = (partial_sumC(y,n)-partial_sumC(y,j)) / (partial_sumA(y,n)-partial_sumA(y,j)) - nu^2;
       vec(j+1) = p*log10(sqrt(sigma2)/p) + q*log10(sqrt(tau2)/q);
     end
-    warning on
 
     vec(vec==-inf) = NaN;
     [minimum,ind] = min(vec);
