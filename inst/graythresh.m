@@ -159,9 +159,9 @@ function [varargout] = graythresh (img, algo = "otsu", varargin)
       img = rgb2gray (img);
     elseif (isgray (img))
       ## do nothing
-    elseif (isvector (img) && !issparse (img) && isreal (img) && any (img < 0))
+    elseif (isvector (img) && !issparse (img) && isreal (img) && all (img >= 0))
       hist_in = true;
-      ihist  = img;
+      ihist   = img;
     else
       error ("graythresh: input must be an image or an histogram.");
     endif
