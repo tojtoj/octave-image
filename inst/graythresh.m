@@ -231,18 +231,29 @@ function [thresh] = otsu (ihist, compute_wcv)
   w_weights = w_totals / total;
   w_means   = (cumsum (bins(end:-1:1) .* ihist(end:-1:1)) ./ w_totals(end:-1:1))(end:-1:1);
 
-  ## the original method is to find the minimum within class variance. However
-  ## this is more intensive and can be replaced by finding the maximum of the
-  ## between class variance (unless the user asks for the variance value)
-  if (compute_wcv)
-    ## within class variance
-  else
-    ## between class variance
-    bcv       = b_weights .* w_weights .* (b_means - w_means).^2;
-    thresh{1} = find (bcv == max (bcv), 1) - 2;
-    ## we subtract 2, once for the 1 based indexes and another for the greater
-    ## than or equal problem
-  endif
+  ## between class variance (its maximum is the best threshold)
+  bcv       = b_weights .* w_weights .* (b_means - w_means).^2;
+  thresh{1} = find (bcv == max (bcv), 1) - 2;
+  ## we subtract 2, once for the 1 based indexes and another for the greater
+  ## than or equal problem
+
+  #{
+    the original method is to find the minimum within class variance (not the
+     maximum of between class variance). The following vectorized code does it
+     as well but is more intensive, specially for images with long histograms.
+     However, it may be necessary to find the goodness of the threshold...
+    
+     Maybe not. Since we already found out the best threshold, we can calculate
+     the variance, and goodness of threshold, *only* for the value that we care
+     about.
+
+      b_means(isnan (b_means)) = 0;
+      w_means(isnan (w_means)) = 0;
+      b_variance = sum ((tril (bins .- b_means', -1) .^2) .* ihist, 2)' ./ b_totals;
+      w_variance = sum ((triu (bins .- w_means')     .^2) .* ihist, 2)' ./ w_totals;
+      ## within class variance
+      wcv        = (b_weights .* b_variance) + (w_weights .* w_variance);
+  #}
 endfunction
 
 function level = moments (y)
