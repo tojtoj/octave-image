@@ -1,5 +1,4 @@
 ## Copyright (C) 2004 Antti Niemistö <antti.niemisto@tut.fi>
-## Copyright (C) 2005 Barre-Piquot
 ## Copyright (C) 2007 Søren Hauberg
 ## Copyright (C) 2012 Carnë Draug <carandraug+dev@gmail.com>
 ##
@@ -18,23 +17,27 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {[@var{level}, @var{sep}] =} graythresh (@var{img})
-## @deftypefnx {Function File} {[@var{level}, @var{sep}] =} graythresh (@var{img}, @var{algo})
-## @deftypefnx {Function File} {[@var{level}] =} graythresh (@var{img}, "percentile", @var{fraction})
+## @deftypefnx {Function File} {[@var{level}, @var{sep}] =} graythresh (@var{img}, @var{algo}, @var{options})
+## @deftypefnx {Function File} {[@var{level}] =} graythresh (@var{hist}, @dots{})
 ## Compute global image threshold.
 ##
 ## Given an image @var{img} finds the optimal threshold value @var{level} for
-## conversion to a binary image with @code{im2bw}. Color images are converted
+## conversion to a binary image with @code{im2bw}.  Color images are converted
 ## to grayscale before @var{level} is computed.
 ##
+## An image histogram @var{hist} can also be used.  This allows for a previous
+## preprocessing of the histogram.
+##
 ## The optional argument @var{method} is the algorithm to be used (default's to
-## Otsu). The available algorithms are:
+## Otsu).  Some methods may have other options (see each entry for details).
+## The available methods are:
 ##
 ## @table @asis
 ## @item Otsu (default)
 ## Implements Otsu's method as described in @cite{Nobuyuki Otsu (1979). "A
 ## threshold selection method from gray-level histograms", IEEE Trans. Sys.,
 ## Man., Cyber. 9 (1): 62-66}. This algorithm chooses the threshold to minimize
-## the intraclass variance of the black and white pixels. The second output,
+## the intraclass variance of the black and white pixels.  The second output,
 ## @var{sep} represents the ``goodness'' (or separability) of the threshold at
 ## @var{level}.
 ##
@@ -137,13 +140,11 @@
 ## @end deftypefn
 
 ## Notes:
-##  * Otsu's method is a function taken from
-##    http://www.irit.fr/~Philippe.Joly/Teaching/M2IRR/IRR05/ Søren Hauberg
-##    added texinfo documentation, error checking and sanitised the code.
 ##  * The following methods were adapted from http://www.cs.tut.fi/~ant/histthresh/
 ##      intermodes    percentile      minimum
 ##      MaxEntropy    MaxLikelihood   intermeans
 ##      moments       minerror        concavity
+##  * Carnë Draug implemented and vectorized the Otsu's method
 
 function [varargout] = graythresh (img, algo = "otsu", varargin)
   # Input checking
@@ -151,13 +152,19 @@ function [varargout] = graythresh (img, algo = "otsu", varargin)
     print_usage();
   elseif (nargin > 2 && !any (strcmpi (varargin{1}, {"percentile"})))
     error ("graythresh: algorithm `%s' does not accept any options.", algo);
-  elseif (!isgray (img) && !isrgb (img))
-    error ("graythresh: input must be an image");
-  endif
-
-  ## If the image is RGB convert it to grayscale
-  if (isrgb (img))
-    img = rgb2gray (img);
+  else
+    hist_in = false;
+    ## If the image is RGB convert it to grayscale
+    if (isrgb (img))
+      img = rgb2gray (img);
+    elseif (isgray (img))
+      ## do nothing
+    elseif (isvector (img) && !issparse (img) && isreal (img) && any (img < 0))
+      hist_in = true;
+      ihist  = img;
+    else
+      error ("graythresh: input must be an image or an histogram.");
+    endif
   endif
 
   ## the "mean" is the simplest of all, we can get rid of it right here
@@ -166,22 +173,22 @@ function [varargout] = graythresh (img, algo = "otsu", varargin)
     return
   endif
 
-  ## if image is uint we do nothing. If it's int, then we convert to uint since
-  ## it may mess up calculations later. If it's double we need some bins so we
-  ## choose uint8 by default... but should we adjust the histogram before?
-  if (isa (img, "uint16") || isa (img, "uint8"))
-    ## do nothing
-  elseif (isa (img, "int16"))
-    img     = im2uint16 (img);
-    img_max = 65535;
-  else
-    img = im2uint8 (img);
+  ## we only need to do this if the input is an image. If an histogram, is
+  ## supplieed, no need to do any of this
+  if (!hist_in)
+    ## if image is uint we do nothing. If it's int, then we convert to uint since
+    ## it may mess up calculations later. If it's double we need some bins so we
+    ## choose uint8 by default... but should we adjust the histogram before?
+    if (isa (img, "uint16") || isa (img, "uint8"))
+      ## do nothing
+    elseif (isa (img, "int16"))
+      img     = im2uint16 (img);
+      img_max = 65535;
+    else
+      img = im2uint8 (img);
+    endif
+    ihist = hist (img(:), 0:intmax (class (img)));
   endif
-  img_max = double (intmax (class (img)));
-
-  ## all of this methods are based on the image histogram we can prepare it here
-  ## and avoid a lot of repeated code
-  ihist = hist (img(:), 0:img_max);
 
   switch tolower (algo)
     case {"concavity"},     thresh = concavity      (ihist);
@@ -197,7 +204,7 @@ function [varargout] = graythresh (img, algo = "otsu", varargin)
     otherwise, error ("graythresh: unknown method '%s'", algo);
   endswitch
   ## normalize the threshold value to the [0 1] range
-  thresh{1} = double (thresh{1}) / img_max;
+  thresh{1} = double (thresh{1}) / (numel (ihist) - 1);
 
   ## some algorithms may return more than one value...
   for i = 1:numel (thresh)
