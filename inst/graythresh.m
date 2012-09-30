@@ -145,7 +145,6 @@
 ##      MaxEntropy    MaxLikelihood   intermeans
 ##      moments       minerror        concavity
 
-
 function [varargout] = graythresh (img, algo = "otsu", varargin)
   # Input checking
   if (nargin < 1 || nargin > 3)
@@ -161,44 +160,69 @@ function [varargout] = graythresh (img, algo = "otsu", varargin)
     img = rgb2gray (img);
   endif
 
+  ## the "mean" is the simplest of all, we can get rid of it right here
+  if (strcmpi (algo, "mean"))
+    varargout{i} = mean (im2double(img)(:));
+    return
+  endif
+
+  ## if image is uint we do nothing. If it's int, then we convert to uint since
+  ## it may mess up calculations later. If it's double we need some bins so we
+  ## choose uint8 by default... but should we adjust the histogram before?
+  if (isa (img, "uint16") || isa (img, "uint8"))
+    ## do nothing
+  elseif (isa (img, "int16"))
+    img     = im2uint16 (img);
+    img_max = 65535;
+  else
+    img = im2uint8 (img);
+  endif
+  img_max = double (intmax (class (img)));
+
+  ## all of this methods are based on the image histogram we can prepare it here
+  ## and avoid a lot of repeated code
+  ihist = hist (img(:), 0:img_max);
+
   switch tolower (algo)
-    case {"concavity"},     thresh = concavity (img);
-    case {"intermeans"},    thresh = intermeans (img);
-    case {"intermodes"},    thresh = intermodes (img);
-    case {"maxlikelihood"}, thresh = maxlikelihood (img);
-    case {"maxentropy"},    thresh = maxentropy (img);
-    case {"mean"},          thresh = mean (img(:));
-    case {"minimum"},       thresh = minimum (img);
-    case {"minerror"},      thresh = minerror_iter (img);
-    case {"moments"},       thresh = moments (img);
-    case {"otsu"},          thresh = otsu (img, nargout > 1);
-    case {"percentile"},    thresh = percentile (img, varargin{1});
+    case {"concavity"},     thresh = concavity      (ihist);
+    case {"intermeans"},    thresh = intermeans     (ihist, floor (mean (img (:))));
+    case {"intermodes"},    thresh = intermodes     (ihist);
+    case {"maxentropy"},    thresh = maxentropy     (ihist);
+    case {"maxlikelihood"}, thresh = maxlikelihood  (ihist);
+    case {"minerror"},      thresh = minerror_iter  (ihist, floor (mean (img (:))));
+    case {"minimum"},       thresh = minimum        (ihist);
+    case {"moments"},       thresh = moments        (ihist);
+    case {"otsu"},          thresh = otsu           (ihist, nargout > 1);
+    case {"percentile"},    thresh = percentile     (ihist, varargin{1});
     otherwise, error ("graythresh: unknown method '%s'", algo);
   endswitch
-  
+  ## normalize the threshold value to the [0 1] range
+  thresh{1} = double (thresh{1}) / img_max;
+
+  ## some algorithms may return more than one value...
   for i = 1:numel (thresh)
     varargout{i} = thresh{i};
   endfor
 endfunction
 
-function [thresh] = otsu (img, compute_wcv)
+function [thresh] = otsu (ihist, compute_wcv)
   ## this method is quite well explained at
   ## http://www.labbookpages.co.uk/software/imgProc/otsuThreshold.html
   ##
   ## The implemententation on the link above assumes that threshold is to be
   ## made for values "greater or equal than" but that is not the case (in im2bw
   ## and also not ImageJ) so we subtract 1 at the end.
-  bins = 0:255;
-  xx   = hist (img(:), bins);
 
+  bins  = 0:(numel (ihist) - 1);
+  total = sum (ihist);
   ## b = black, w = white
-  b_totals  = cumsum ([0 xx(1:end-1)]);
-  b_weights = b_totals / sum (xx);
-  b_means   = [0 cumsum(bins(1:end-1) .* xx(1:end-1))] ./ b_totals;
+  b_totals  = cumsum ([0 ihist(1:end-1)]);
+  b_weights = b_totals / total;
+  b_means   = [0 cumsum(bins(1:end-1) .* ihist(1:end-1))] ./ b_totals;
 
-  w_totals  = sum (xx) - b_totals;
-  w_weights = w_totals / sum (xx);
-  w_means   = (cumsum (bins(end:-1:1) .* xx(end:-1:1)) ./ w_totals(end:-1:1))(end:-1:1);
+  w_totals  = total - b_totals;
+  w_weights = w_totals / total;
+  w_means   = (cumsum (bins(end:-1:1) .* ihist(end:-1:1)) ./ w_totals(end:-1:1))(end:-1:1);
 
   ## the original method is to find the minimum within class variance. However
   ## this is more intensive and can be replaced by finding the maximum of the
@@ -214,16 +238,8 @@ function [thresh] = otsu (img, compute_wcv)
   endif
 endfunction
 
-function level = moments (I, n)
-
-  if nargin == 1
-    n = 255;
-  end
-
-  I = double(I);
-
-  % Calculate the histogram.
-  y = hist (I(:), 0:n);
+function level = moments (y)
+  n = numel (y) - 1;
 
   % The threshold is chosen such that partial_sumA(y,t)/partial_sumA(y,n) is closest to x0.
   Avec = zeros (1, n+1);
@@ -239,21 +255,11 @@ function level = moments (I, n)
 
   % And finally the threshold.
   [minimum, ind] = min (abs (Avec-x0));
-  level = ind-1;
-
-  ## Normalisation of the threshold
-  level /= n;
+  level{1} = ind-1;
 endfunction
 
-function T = maxentropy(I,n)
-  if nargin == 1
-    n = 255;
-  end
-
-  I = double(I);
-
-  % Calculate the histogram.
-  y = hist(I(:),0:n);
+function T = maxentropy(y)
+  n = numel (y) - 1;
 
   warning off
   % The threshold is chosen such that the following expression is minimized.
@@ -264,18 +270,11 @@ function T = maxentropy(I,n)
   warning on
 
   [minimum,ind] = min(vec);
-  T = ind-1;
+  T{1} = ind-1;
 endfunction
 
-function [T] = intermodes (I,n)
-  if nargin == 1
-    n = 255;
-  end
-
-  I = double(I);
-
-  % Calculate the histogram.
-  y = hist(I(:),0:n);
+function [T] = intermodes (y)
+  n = numel (y) - 1;
 
   % Smooth the histogram by iterative three point mean filtering.
   iter = 0;
@@ -298,21 +297,11 @@ function [T] = intermodes (I,n)
       TT(ind) = k-1;
     end
   end
-  T = floor(mean(TT));
+  T{1} = floor(mean(TT));
 endfunction
 
-function [T] = percentile (I, p, n)
-  if nargin == 1
-    p = 0.5;
-    n = 255;
-  elseif nargin == 2
-    n = 255;
-  end
-
-  I = double(I);
-
-  % Calculate the histogram.
-  y = hist(I(:),0:n);
+function [T] = percentile (y, p)
+  n = numel (y) - 1;
 
   % The threshold is chosen such that 50% of pixels lie in each category.
   Avec = zeros(1,n+1);
@@ -321,19 +310,12 @@ function [T] = percentile (I, p, n)
   end
 
   [minimum,ind] = min(abs(Avec-p));
-  T = ind-1;
+  T{1} = ind-1;
 endfunction
 
 
-function T = minimum(I,n);
-  if nargin == 1
-    n = 255;
-  end
-
-  I = double(I);
-
-  % Calculate the histogram.
-  y = hist(I(:),0:n);
+function T = minimum(y)
+  n = numel (y) - 1;
 
   % Smooth the histogram by iterative three point mean filtering.
   iter = 0;
@@ -343,7 +325,7 @@ function T = minimum(I,n);
     iter = iter+1;
     % If the histogram turns out not to be bimodal, set T to zero.
     if iter > 10000;
-      T = 0;
+      T{1} = 0;
       return
     end
   end
@@ -351,23 +333,14 @@ function T = minimum(I,n);
   % The threshold is the minimum between the two peaks.
   for k = 2:n
     if y(k-1) > y(k) && y(k+1) > y(k)
-      T = k-1;
+      T{1} = k-1;
     end
   end
 endfunction
 
-function [T] = minerror_iter (I,n)
-  if nargin == 1
-    n = 255;
-  end
+function [T] = minerror_iter (y, T)
+  n = numel (y) - 1;
 
-  I = double(I);
-
-  % Calculate the histogram.
-  y = hist(I(:),0:n);
-
-  % The initial estimate for the threshold is found with the MEAN algorithm.
-  T = floor (mean (I, img(:)));
   Tprev = NaN;
 
   while T ~= Tprev
@@ -395,12 +368,12 @@ function [T] = minerror_iter (I,n)
     % The updated threshold is the integer part of the solution of the
     % quadratic equation.
     Tprev = T;
-    T = floor((w1+sqrt(sqterm))/w0);
+    T{1} = floor((w1+sqrt(sqterm))/w0);
 
     % If the threshold turns out to be NaN, return with the previous threshold.
     if isnan(T)
       warning('MINERROR:NaN','Warning: th_minerror_iter did not converge.')
-      T = Tprev;
+      T{1} = Tprev;
     end
 
   end
@@ -438,19 +411,12 @@ endfunction
   endfunction
 #}
 
-function T = maxlikelihood (I,n)
-  if nargin == 1
-    n = 255;
-  end
-
-  I = double(I);
-
-  % Calculate the histogram.
-  y = hist(I(:),0:n);
+function T = maxlikelihood (y)
+  n = numel (y) - 1;
 
   % The initial estimate for the threshold is found with the MINIMUM
   % algorithm.
-  T = th_minimum(I,n);
+  T = minimum (y);
 
   % Calculate initial values for the statistics.
   mu = partial_sumB(y,T)/partial_sumA(y,T);
@@ -507,21 +473,12 @@ function T = maxlikelihood (I,n)
 
   % The threshold is the integer part of the solution of the quadratic
   % equation.
-  T = floor((w1+sqrt(sqterm))/w0);
+  T{1} = floor((w1+sqrt(sqterm))/w0);
 endfunction
 
-function T = intermeans (I,n)
-  if nargin == 1
-    n = 255;
-  end
+function T = intermeans (y, T)
+  n = numel (y) - 1;
 
-  I = double(I);
-
-  % Calculate the histogram.
-  y = hist(I(:),0:n);
-
-  % The initial estimate for the threshold is found with the MEAN algorithm.
-  T = floor (mean (I, img(:)));
   Tprev = NaN;
 
   % The threshold is found iteratively. In each iteration, the means of the
@@ -533,17 +490,11 @@ function T = intermeans (I,n)
     Tprev = T;
     T = floor((mu+nu)/2);
   end
+  T{1} = T;
 endfunction
 
-function T = concavity (I,n)
-  if nargin == 1
-    n = 255;
-  end
-
-  I = double(I);
-
-  % Calculate the histogram and its convex hull.
-  h = hist(I(:),0:n);
+function T = concavity (h)
+  n = numel (y) - 1;
   H = hconvhull(h);
 
   % Find the local maxima of the difference H-h.
@@ -557,7 +508,7 @@ function T = concavity (I,n)
   % The threshold is the local maximum with highest balance.
   E = E.*lmax;
   [dummy ind] = max(E);
-  T = ind-1;
+  T{1} = ind-1;
 endfunction
 
 ################################################################################
