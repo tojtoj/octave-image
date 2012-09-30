@@ -17,29 +17,31 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {[@var{level}, @var{sep}] =} graythresh (@var{img})
-## @deftypefnx {Function File} {[@var{level}, @var{sep}] =} graythresh (@var{img}, @var{algo}, @var{options})
-## @deftypefnx {Function File} {[@var{level}] =} graythresh (@var{hist}, @dots{})
+## @deftypefnx {Function File} {[@var{level}, @var{sep}] =} graythresh (@var{img}, @var{method}, @var{options})
+## @deftypefnx {Function File} {[@var{level}, @var{sep}] =} graythresh (@var{hist}, @dots{})
 ## Compute global image threshold.
 ##
 ## Given an image @var{img} finds the optimal threshold value @var{level} for
 ## conversion to a binary image with @code{im2bw}.  Color images are converted
-## to grayscale before @var{level} is computed.
-##
-## An image histogram @var{hist} can also be used.  This allows for a previous
-## preprocessing of the histogram.
+## to grayscale before @var{level} is computed.  An image histogram @var{hist}
+## can also be used to allow for preprocessing of the histogram.
 ##
 ## The optional argument @var{method} is the algorithm to be used (default's to
-## Otsu).  Some methods may have other options (see each entry for details).
-## The available methods are:
+## Otsu).  Some methods may have other @var{options} and/or return an extra
+## value @var{sep} (see each entry for details).  The available @var{method}s are:
 ##
 ## @table @asis
 ## @item Otsu (default)
 ## Implements Otsu's method as described in @cite{Nobuyuki Otsu (1979). "A
 ## threshold selection method from gray-level histograms", IEEE Trans. Sys.,
 ## Man., Cyber. 9 (1): 62-66}. This algorithm chooses the threshold to minimize
-## the intraclass variance of the black and white pixels.  The second output,
-## @var{sep} represents the ``goodness'' (or separability) of the threshold at
-## @var{level}.
+## the intraclass variance of the black and white pixels.
+##
+## The second output, @var{sep} represents the ``goodness'' (or separability) of
+## the threshold at @var{level}.  It is a value within the range [0 1], the
+## lower bound (zero) being attainable by, and only by, histograms having a
+## single constant gray level, and the upper bound being attainable by, and only
+## by, two-valued pictures.
 ##
 ## @item concavity
 ## Find a global threshold for a grayscale image by choosing the threshold to
@@ -212,9 +214,13 @@ function [varargout] = graythresh (img, algo = "otsu", varargin)
   endfor
 endfunction
 
-function [thresh] = otsu (ihist, compute_wcv)
+function [thresh] = otsu (ihist, compute_good)
   ## this method is quite well explained at
   ## http://www.labbookpages.co.uk/software/imgProc/otsuThreshold.html
+  ##
+  ## It does not, however, explain how to compute the goodness of threshold and
+  ## there's not many pages explaining it either. For that, one really needs to
+  ## check the paper.
   ##
   ## The implemententation on the link above assumes that threshold is to be
   ## made for values "greater or equal than" but that is not the case (in im2bw
@@ -237,23 +243,16 @@ function [thresh] = otsu (ihist, compute_wcv)
   ## we subtract 2, once for the 1 based indexes and another for the greater
   ## than or equal problem
 
-  #{
-    the original method is to find the minimum within class variance (not the
-     maximum of between class variance). The following vectorized code does it
-     as well but is more intensive, specially for images with long histograms.
-     However, it may be necessary to find the goodness of the threshold...
-    
-     Maybe not. Since we already found out the best threshold, we can calculate
-     the variance, and goodness of threshold, *only* for the value that we care
-     about.
-
-      b_means(isnan (b_means)) = 0;
-      w_means(isnan (w_means)) = 0;
-      b_variance = sum ((tril (bins .- b_means', -1) .^2) .* ihist, 2)' ./ b_totals;
-      w_variance = sum ((triu (bins .- w_means')     .^2) .* ihist, 2)' ./ w_totals;
-      ## within class variance
-      wcv        = (b_weights .* b_variance) + (w_weights .* w_variance);
-  #}
+  if (compute_good)
+    ## basically we need to divide the between class variance by the total
+    ## variance which is a single value, independent of the threshold. From the
+    ## paper, last of the equation 12, eta = sigma²b / sigma²t
+    ##(where b = between and t = total)
+    norm_hist      = ihist / total;
+    total_mean     = sum (bins .* norm_hist);
+    total_variance = sum (((bins - total_mean).^2) .* norm_hist);
+    thresh{2}      = max (bcv) / total_variance;
+  endif
 endfunction
 
 function level = moments (y)
