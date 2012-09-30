@@ -146,8 +146,8 @@
 ##      moments       minerror        concavity
 
 
-function [level, good] = graythresh (img, algo = "otsu", varargin)
-  ## Input checking
+function [varargout] = graythresh (img, algo = "otsu", varargin)
+  # Input checking
   if (nargin < 1 || nargin > 3)
     print_usage();
   elseif (nargin > 2 && !any (strcmpi (varargin{1}, {"percentile"})))
@@ -162,92 +162,57 @@ function [level, good] = graythresh (img, algo = "otsu", varargin)
   endif
 
   switch tolower (algo)
-    case {"concavity"},     [level]       = concavity (img);
-    case {"intermeans"},    [level]       = intermeans (img);
-    case {"intermodes"},    [level]       = intermodes (img);
-    case {"maxlikelihood"}, [level]       = maxlikelihood (img);
-    case {"maxentropy"},    [level]       = maxentropy (img);
-    case {"mean"},          [level]       = mean (img(:));
-    case {"minimum"},       [level]       = minimum (img);
-    case {"minerror"},      [level]       = minerror_iter (img);
-    case {"moments"},       [level]       = moments (img);
-    case {"otsu"},          [level, good] = otsu (img);
-    case {"percentile"},    [level]       = percentile (img, varargin{1});
+    case {"concavity"},     thresh = concavity (img);
+    case {"intermeans"},    thresh = intermeans (img);
+    case {"intermodes"},    thresh = intermodes (img);
+    case {"maxlikelihood"}, thresh = maxlikelihood (img);
+    case {"maxentropy"},    thresh = maxentropy (img);
+    case {"mean"},          thresh = mean (img(:));
+    case {"minimum"},       thresh = minimum (img);
+    case {"minerror"},      thresh = minerror_iter (img);
+    case {"moments"},       thresh = moments (img);
+    case {"otsu"},          thresh = otsu (img, nargout > 1);
+    case {"percentile"},    thresh = percentile (img, varargin{1});
     otherwise, error ("graythresh: unknown method '%s'", algo);
   endswitch
+  
+  for i = 1:numel (thresh)
+    varargout{i} = thresh{i};
+  endfor
 endfunction
 
-function [level, good] = otsu (img)
-  ## Calculation of the normalized histogram
-  n = double (intmax (class (img))) + 1;
-  h = hist (img(:), 1:n);
-  h = h / (length (img(:)) + 1);
+function [thresh] = otsu (img, compute_wcv)
+  ## this method is quite well explained at
+  ## http://www.labbookpages.co.uk/software/imgProc/otsuThreshold.html
+  ##
+  ## The implemententation on the link above assumes that threshold is to be
+  ## made for values "greater or equal than" but that is not the case (in im2bw
+  ## and also not ImageJ) so we subtract 1 at the end.
+  bins = 0:255;
+  xx   = hist (img(:), bins);
 
-  ## Calculation of the cumulated histogram and the mean values
-  w  = cumsum (h);
-  mu = zeros (n, 1);
-  mu(1) = h(1);
-  for i = 2:n
+  ## b = black, w = white
+  b_totals  = cumsum ([0 xx(1:end-1)]);
+  b_weights = b_totals / sum (xx);
+  b_means   = [0 cumsum(bins(1:end-1) .* xx(1:end-1))] ./ b_totals;
 
-    mu(i) = mu(i-1) + i * h(i);
-  endfor
+  w_totals  = sum (xx) - b_totals;
+  w_weights = w_totals / sum (xx);
+  w_means   = (cumsum (bins(end:-1:1) .* xx(end:-1:1)) ./ w_totals(end:-1:1))(end:-1:1);
 
-  ## Initialisation of the values used for the threshold calculation
-  level = find (h > 0, 1);
-  w0  = w(level);
-  w1  = 1 - w0;
-  mu0 = mu(level) / w0;
-  mu1 = (mu(end) - mu(level)) / w1;
-  good = w0 * w1 * (mu1 - mu0) * (mu1 - mu0);
-
-  ## For each step of the histogram, calculation of the threshold
-  ## and storing of the maximum
-  for i = find (h > 0)
-    w0 = w(i);
-    w1 = 1 - w0;
-    mu0 = mu(i) / w0;
-    mu1 = (mu(end) - mu(i)) / w1;
-    s = w0 * w1 * (mu1 - mu0) * (mu1 - mu0);
-    if (s > good)
-      good  = s;
-      level = i;
-    endif
-  endfor
-
-  ## Normalisation of the threshold
-  level /= n;
+  ## the original method is to find the minimum within class variance. However
+  ## this is more intensive and can be replaced by finding the maximum of the
+  ## between class variance (unless the user asks for the variance value)
+  if (compute_wcv)
+    ## within class variance
+  else
+    ## between class variance
+    bcv       = b_weights .* w_weights .* (b_means - w_means).^2;
+    thresh{1} = find (bcv == max (bcv), 1) - 2;
+    ## we subtract 2, once for the 1 based indexes and another for the greater
+    ## than or equal problem
+  endif
 endfunction
-
-#{
-  ##The following is another implementation of Otsu's method from the HistThresh
-  ##toolbox
-  if nargin == 1
-    n = 255;
-  end
-
-  % This algorithm is implemented in the Image Processing Toolbox.
-  %I = uint8(I);
-  %T = n*graythresh(I);
-
-  % The implementation below uses the notations from the paper, but is
-  % significantly slower.
-
-  I = double(I);
-
-  % Calculate the histogram.
-  y = hist(I(:),0:n);
-
-  warning off MATLAB:divideByZero
-  for j = 0:n
-    mu = partial_sumB(y,j)/partial_sumA(y,j);
-    nu = (partial_sumB(y,n)-partial_sumB(y,j))/(partial_sumA(y,n)-partial_sumA(y,j));
-    vec(j+1) = partial_sumA(y,j)*(partial_sumA(y,n)-partial_sumA(y,j))*(mu-nu)^2;
-  end
-  warning on MATLAB:divideByZero
-
-  [maximum,ind] = max(vec);
-  T = ind-1;
-#}
 
 function level = moments (I, n)
 
