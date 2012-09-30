@@ -120,8 +120,8 @@
 ## a new approach", Computer Vision, Graphics, and Image Processing, 29: 377-393}
 ##
 ## @item percentile
-## Assumes a specific @var{fraction} of pixels to be background.  If no value is
-## given, assumes a value of 0.5 (equal distribution of background and foreground)
+## Assumes a specific fraction of pixels (set at @var{options}) to be background.
+## If no value is given, assumes 0.5 (equal distribution of background and foreground)
 ## @cite{W Doyle (1962). "Operation useful for similarity-invariant pattern
 ## recognition", Journal of the Association for Computing Machinery 9: 259-267}
 ##
@@ -152,7 +152,7 @@ function [varargout] = graythresh (img, algo = "otsu", varargin)
   ## Input checking
   if (nargin < 1 || nargin > 3)
     print_usage();
-  elseif (nargin > 2 && !any (strcmpi (varargin{1}, {"percentile"})))
+  elseif (nargin > 2 && !any (strcmpi (algo, {"percentile"})))
     error ("graythresh: algorithm `%s' does not accept any options.", algo);
   else
     hist_in = false;
@@ -278,17 +278,25 @@ endfunction
 function T = maxentropy(y)
   n = numel (y) - 1;
 
-  % The threshold is chosen such that the following expression is minimized.
-  for j = 0:n
-    vec(j+1) = negativeE(y,j)/partial_sumA(y,j) - log10(partial_sumA(y,j)) + ...
-        (negativeE(y,n)-negativeE(y,j))/(partial_sumA(y,n)-partial_sumA(y,j)) - log10(partial_sumA(y,n)-partial_sumA(y,j));
-  end
+  dz_warn = warning ("query", "divide-by-zero");
+  unwind_protect
+    warning ("off", "Octave:divide-by-zero");
+    % The threshold is chosen such that the following expression is minimized.
+    for j = 0:n
+      vec(j+1) = negativeE(y,j)/partial_sumA(y,j) - log10(partial_sumA(y,j)) + ...
+          (negativeE(y,n)-negativeE(y,j))/(partial_sumA(y,n)-partial_sumA(y,j)) - log10(partial_sumA(y,n)-partial_sumA(y,j));
+    end
+  unwind_protect_cleanup
+    ## restore broadcats warning status
+    warning (dz_warn.state, "Octave:divide-by-zero");
+  end_unwind_protect
 
   [minimum,ind] = min(vec);
   T{1} = ind-1;
 endfunction
 
 function [T] = intermodes (y)
+  ## checked with ImageJ and is slightly different but not by much
   n = numel (y) - 1;
 
   % Smooth the histogram by iterative three point mean filtering.
@@ -353,45 +361,51 @@ function T = minimum(y)
   end
 endfunction
 
-function [T] = minerror_iter (y, T)
+function [Tout] = minerror_iter (y, T)
   n = numel (y) - 1;
 
   Tprev = NaN;
 
-  while T ~= Tprev
+  dz_warn = warning ("query", "divide-by-zero");
+  unwind_protect
+    warning ("off", "Octave:divide-by-zero");
+    while T ~= Tprev
+      % Calculate some statistics.
+      mu = partial_sumB(y,T)/partial_sumA(y,T);
+      nu = (partial_sumB(y,n)-partial_sumB(y,T))/(partial_sumA(y,n)-partial_sumA(y,T));
+      p = partial_sumA(y,T)/partial_sumA(y,n);
+      q = (partial_sumA(y,n)-partial_sumA(y,T)) / partial_sumA(y,n);
+      sigma2 = partial_sumC(y,T)/partial_sumA(y,T)-mu^2;
+      tau2 = (partial_sumC(y,n)-partial_sumC(y,T)) / (partial_sumA(y,n)-partial_sumA(y,T)) - nu^2;
 
-    % Calculate some statistics.
-    mu = partial_sumB(y,T)/partial_sumA(y,T);
-    nu = (partial_sumB(y,n)-partial_sumB(y,T))/(partial_sumA(y,n)-partial_sumA(y,T));
-    p = partial_sumA(y,T)/partial_sumA(y,n);
-    q = (partial_sumA(y,n)-partial_sumA(y,T)) / partial_sumA(y,n);
-    sigma2 = partial_sumC(y,T)/partial_sumA(y,T)-mu^2;
-    tau2 = (partial_sumC(y,n)-partial_sumC(y,T)) / (partial_sumA(y,n)-partial_sumA(y,T)) - nu^2;
+      % The terms of the quadratic equation to be solved.
+      w0 = 1/sigma2-1/tau2;
+      w1 = mu/sigma2-nu/tau2;
+      w2 = mu^2/sigma2 - nu^2/tau2 + log10((sigma2*q^2)/(tau2*p^2));
 
-    % The terms of the quadratic equation to be solved.
-    w0 = 1/sigma2-1/tau2;
-    w1 = mu/sigma2-nu/tau2;
-    w2 = mu^2/sigma2 - nu^2/tau2 + log10((sigma2*q^2)/(tau2*p^2));
+      % If the next threshold would be imaginary, return with the current one.
+      sqterm = w1^2-w0*w2;
+      if sqterm < 0
+        warning('MINERROR:NaN','Warning: th_minerror_iter did not converge.')
+        break
+      endif
 
-    % If the next threshold would be imaginary, return with the current one.
-    sqterm = w1^2-w0*w2;
-    if sqterm < 0
-      warning('MINERROR:NaN','Warning: th_minerror_iter did not converge.')
-      return
-    end
+      % The updated threshold is the integer part of the solution of the
+      % quadratic equation.
+      Tprev = T;
+      T = floor((w1+sqrt(sqterm))/w0);
 
-    % The updated threshold is the integer part of the solution of the
-    % quadratic equation.
-    Tprev = T;
-    T{1} = floor((w1+sqrt(sqterm))/w0);
-
-    % If the threshold turns out to be NaN, return with the previous threshold.
-    if isnan(T)
-      warning('MINERROR:NaN','Warning: th_minerror_iter did not converge.')
-      T{1} = Tprev;
-    end
-
-  end
+      % If the threshold turns out to be NaN, return with the previous threshold.
+      if isnan(T)
+        warning('MINERROR:NaN','Warning: th_minerror_iter did not converge.')
+        T = Tprev;
+      end
+    endwhile
+  unwind_protect_cleanup
+    ## restore broadcats warning status
+    warning (dz_warn.state, "Octave:divide-by-zero");
+  end_unwind_protect
+  Tout{1} = T;
 endfunction
 #{
   ## this is an implementation of the original minerror algorithm but seems
@@ -424,12 +438,12 @@ endfunction
   endfunction
 #}
 
-function T = maxlikelihood (y)
+function Tout = maxlikelihood (y)
   n = numel (y) - 1;
 
   % The initial estimate for the threshold is found with the MINIMUM
   % algorithm.
-  T = minimum (y);
+  T = minimum (y){1};
 
   % Calculate initial values for the statistics.
   mu = partial_sumB(y,T)/partial_sumA(y,T);
@@ -480,16 +494,16 @@ function T = maxlikelihood (y)
   % If the threshold would be imaginary, return with threshold set to zero.
   sqterm = w1^2-w0*w2;
   if sqterm < 0;
-    T = 0;
+    Tout{1} = 0;
     return
   end
 
   % The threshold is the integer part of the solution of the quadratic
   % equation.
-  T{1} = floor((w1+sqrt(sqterm))/w0);
+  Tout{1} = floor((w1+sqrt(sqterm))/w0);
 endfunction
 
-function T = intermeans (y, T)
+function Tout = intermeans (y, T)
   n = numel (y) - 1;
 
   Tprev = NaN;
@@ -503,7 +517,7 @@ function T = intermeans (y, T)
     Tprev = T;
     T = floor((mu+nu)/2);
   end
-  T{1} = T;
+  Tout{1} = T;
 endfunction
 
 function T = concavity (h)
