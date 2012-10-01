@@ -439,67 +439,74 @@ endfunction
 #}
 
 function Tout = maxlikelihood (y)
+  ## this method seems to be broken. When we got it from the HistThresh toolbox,
+  ## the author, Antti Niemistö, said:
+  ##
+  ## By the way, there appears to be a bug in my implementation of MAXLIK, and I
+  ## never got around to fixing it. The loop in that function is never actually
+  ## entered so it always returns the first estimate of the threshold. I think
+  ## this would be easy to fix...
+  ##
+  ## Instead of a do-until loop, there was a while loop where the x_prev variables
+  ## were set to NaN. This caused the loop to never start. However, fixing that
+  ## seems to cause the loop to never exit...
+
   n = numel (y) - 1;
 
-  % The initial estimate for the threshold is found with the MINIMUM
-  % algorithm.
+  ## initial estimate for the threshold is found with the minimum algorithm
   T = minimum (y){1};
 
-  % Calculate initial values for the statistics.
-  mu = partial_sumB(y,T)/partial_sumA(y,T);
-  nu = (partial_sumB(y,n)-partial_sumB(y,T))/(partial_sumA(y,n)-partial_sumA(y,T));
-  p = partial_sumA(y,T)/partial_sumA(y,n);
-  q = (partial_sumA(y,n)-partial_sumA(y,T)) / partial_sumA(y,n);
-  sigma2 = partial_sumC(y,T)/partial_sumA(y,T)-mu^2;
-  tau2 = (partial_sumC(y,n)-partial_sumC(y,T)) / (partial_sumA(y,n)-partial_sumA(y,T)) - nu^2;
+  ## initial values for the statistics
+  mu     = partial_sumB (y, T) / partial_sumA (y, T);
+  nu     = (partial_sumB (y, n) - partial_sumB (y, T)) / (partial_sumA (y, n) - partial_sumA (y, T));
+  p      = partial_sumA (y, T) / partial_sumA (y, n);
+  q      = (partial_sumA (y, n) - partial_sumA (y, T)) / partial_sumA (y, n);
+  sigma2 = partial_sumC (y, T) / partial_sumA (y, T) - mu^2;
+  tau2   = (partial_sumC (y, n) - partial_sumC (y, T)) / (partial_sumA (y, n) - partial_sumA (y, T)) - nu^2;
 
-  mu_prev = NaN;
-  nu_prev = NaN;
-  p_prev = NaN;
-  q_prev = NaN;
-  sigma2_prev = NaN;
-  tau2_prev = NaN;
+  do
+    ## we store the previous values for comparison at the end (we will stop when
+    ## they stop changing)
+    mu_prev     = mu;
+    nu_prev     = nu;
+    p_prev      = p;
+    q_prev      = q;
+    sigma2_prev = nu;
+    tau2_prev   = nu;
 
-  while abs(mu-mu_prev) > eps || abs(nu-nu_prev) > eps || ...
-        abs(p-p_prev) > eps || abs(q-q_prev) > eps || ...
-        abs(sigma2-sigma2_prev) > eps || abs(tau2-tau2_prev) > eps
     for i = 0:n
       phi(i+1) = p/q * exp(-((i-mu)^2) / (2*sigma2)) / ...
           (p/sqrt(sigma2) * exp(-((i-mu)^2) / (2*sigma2)) + ...
            (q/sqrt(tau2)) * exp(-((i-nu)^2) / (2*tau2)));
-    end
-    ind = 0:n;
+    endfor
+    ind   = 0:n;
     gamma = 1-phi;
-    F = phi*y';
-    G = gamma*y';
-    p_prev = p;
-    q_prev = q;
-    mu_prev = mu;
-    nu_prev = nu;
-    sigma2_prev = nu;
-    tau2_prev = nu;
-    p = F/partial_sumA(y,n);
-    q = G/partial_sumA(y,n);
-    mu = ind.*phi*y'/F;
-    nu = ind.*gamma*y'/G;
-    sigma2 = ind.^2.*phi*y'/F - mu^2;
-    tau2 = ind.^2.*gamma*y'/G - nu^2;
-  end
+    F     = phi*y';
+    G     = gamma*y';
 
-  % The terms of the quadratic equation to be solved.
+    mu      = ind.*phi*y'/F;
+    nu      = ind.*gamma*y'/G;
+    p       = F / partial_sumA (y,n);
+    q       = G / partial_sumA (y,n);
+    sigma2  = ind.^2.*phi*y'/F - mu^2;
+    tau2    = ind.^2.*gamma*y'/G - nu^2;
+  until (abs (mu - mu_prev)         <= eps && abs (nu - nu_prev)     <= eps && ...
+         abs (p  - p_prev)          <= eps && abs (q - q_prev)       <= eps && ...
+         abs (sigma2 - sigma2_prev) <= eps && abs (tau2 - tau2_prev) <= eps)
+
+  ## the terms of the quadratic equation to be solved
   w0 = 1/sigma2-1/tau2;
   w1 = mu/sigma2-nu/tau2;
   w2 = mu^2/sigma2 - nu^2/tau2 + log10((sigma2*q^2)/(tau2*p^2));
 
-  % If the threshold would be imaginary, return with threshold set to zero.
+  ## If the threshold would be imaginary, return with threshold set to zero
   sqterm = w1^2-w0*w2;
-  if sqterm < 0;
+  if (sqterm < 0)
     Tout{1} = 0;
     return
-  end
+  endif
 
-  % The threshold is the integer part of the solution of the quadratic
-  % equation.
+  ## The threshold is the integer part of the solution of the quadratic equation
   Tout{1} = floor((w1+sqrt(sqterm))/w0);
 endfunction
 
