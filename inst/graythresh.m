@@ -171,7 +171,7 @@ function [varargout] = graythresh (img, algo = "otsu", varargin)
 
   ## the "mean" is the simplest of all, we can get rid of it right here
   if (strcmpi (algo, "mean"))
-    varargout{i} = mean (im2double(img)(:));
+    varargout{1} = mean (im2double(img)(:));
     return
   endif
 
@@ -239,7 +239,9 @@ function [thresh] = otsu (ihist, compute_good)
 
   ## between class variance (its maximum is the best threshold)
   bcv       = b_weights .* w_weights .* (b_means - w_means).^2;
-  thresh{1} = find (bcv == max (bcv), 1) - 2;
+  ## in case there's more than one place with best maximum (for example, a group
+  ## of empty bins, we select the one in the center (this is compatible with ImageJ)
+  thresh{1} = ceil (mean (find (bcv == max (bcv)))) - 2;
   ## we subtract 2, once for the 1 based indexes and another for the greater
   ## than or equal problem
 
@@ -676,3 +678,20 @@ function x = negativeE(y,j)
   y = y(y~=0);
   x = sum(y.*log10(y));
 endfunction
+
+## these were tested with ImageJ
+%!shared img, histo
+%! [img, cmap] = imread ("default.img");
+%! img = im2uint8 (ind2gray (img, cmap));
+%!assert (graythresh (img, "percentile", 0.5), 142/255);
+%!assert (graythresh (img, "moments"),         142/255);
+%!assert (graythresh (img, "minimum"),          93/255);
+%!assert (graythresh (img, "maxentropy"),      150/255);
+%!assert (graythresh (img, "intermodes"),       99/255);
+%!assert (graythresh (img, "otsu"),            115/255);
+%! histo = hist (img(:), 0:255);
+%!assert (graythresh (histo, "otsu"),          115/255);
+
+## for the mean our results differ from matlab because we do not calculate it
+## from the histogram. Our results should be more accurate.
+%!assert (graythresh (img, "mean"), 0.51445615982, 0.000000001);  # here our results differ from ImageJ
