@@ -166,24 +166,24 @@ function analyze75write (varargin);
   fwrite(fidH,repmat(' ',1,10),'char',header.ByteOrder);            % Generated
   fwrite(fidH,repmat(' ',1,10),'char',header.ByteOrder);            % Scannumber
 
-  if (isfield(header,'PatientID')==1)                               % PatientID
-    fwrite(fidH,sprintf('%10s',header.PatientID(1:min([10,numel(header.PatientID)]))),'char',header.ByteOrder);          
+  if (isfield(header,'PatientID'))                                  % PatientID
+    fwrite(fidH,sprintf('%10s',header.PatientID(1:min([10,numel(header.PatientID)]))),'char',header.ByteOrder);
   else
     fwrite(fidH,repmat(' ',1,10),'char',header.ByteOrder);
   end
 
-  if (isfield(header,'ExposureDate')==1)                            % ExposureDate
-    fwrite(fidH,sprintf('%10s',header.ExposureDate(1:min([10,numel(header.ExposureDate)]))),'char',header.ByteOrder);   
-  elseif isfield(header,'StudyDate')==1
-    fwrite(fidH,sprintf('%10s',header.StudyDate(1:min([10,numel(header.StudyDate)]))),'char',header.ByteOrder);          
+  if (isfield(header,'ExposureDate'))                               % ExposureDate
+    fwrite(fidH,sprintf('%10s',header.ExposureDate(1:min([10,numel(header.ExposureDate)]))),'char',header.ByteOrder);
+  elseif isfield(header,'StudyDate')
+    fwrite(fidH,sprintf('%10s',header.StudyDate(1:min([10,numel(header.StudyDate)]))),'char',header.ByteOrder);
   else
     fwrite(fidH,repmat(' ',1,10),'char',header.ByteOrder);
   end
 
-  if (isfield(header,'ExposureTime')==1)                            % ExposureTime
-    fwrite(fidH,sprintf('%10s',header.ExposureTime(1:min([10,numel(header.ExposureTime)]))),'char',header.ByteOrder);   
-  elseif isfield(header,'StudyTime')==1
-    fwrite(fidH,sprintf('%10s',header.StudyTime(1:min([10,numel(header.StudyTime)]))),'char',header.ByteOrder);          
+  if (isfield(header,'ExposureTime'))                               % ExposureTime
+    fwrite(fidH,sprintf('%10s',header.ExposureTime(1:min([10,numel(header.ExposureTime)]))),'char',header.ByteOrder);
+  elseif isfield(header,'StudyTime')
+    fwrite(fidH,sprintf('%10s',header.StudyTime(1:min([10,numel(header.StudyTime)]))),'char',header.ByteOrder);
   else
     fwrite(fidH,repmat(' ',1,10),'char',header.ByteOrder);
   end
