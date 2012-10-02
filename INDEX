@@ -84,6 +84,7 @@ Morhophological Operations
 Read/write
  analyze75info
  analyze75read
+ analyze75write
  bmpwrite
  readexif
  tiff_tag_read
@@ -112,10 +113,13 @@ Types and Type conversions
  graythresh
  im2bw
  im2double
+ im2int16
+ im2single
  im2uint8
  im2uint16
  imdither
  isbw
+ iscolormap
  isgray
  isind
  isrgb

@@ -5,6 +5,7 @@ Summary of important user-visible changes for image 1.1.0:
 
       analyze75info
       analyze75read
+      analyze75write
       blockproc
       bwlabeln
       getrangefromclass
@@ -31,6 +32,9 @@ Summary of important user-visible changes for image 1.1.0:
     of the image package and have now been removed:
 
       imginfo
+
+ ** The complete set of functions to work with Analyze 7.5 files has been
+    implemented. See `analyze75info', `analyze75read' and `analyze75write'.
 
  ** `graythresh' can optionally accept an histogram rather than an image.  This
     allows for preprocessing of the histogram previous to an automatic threshold
