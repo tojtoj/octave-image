@@ -28,7 +28,7 @@
 %%
 %% @var{header} is a structure with the file information.
 %%
-%% @seealso{analyze75read}
+%% @seealso{analyze75read, analyze75write}
 %% @end deftypefn
 
 function header = analyze75info (filename, varargin)

@@ -23,7 +23,7 @@
 %% directory with a single .hdr file can be specified. Alternatively, the file
 %% @var{header} can be specified as returned by @code{analyze75info}.
 %%
-%% @seealso{analyze75info}
+%% @seealso{analyze75info, analyze75write}
 %% @end deftypefn
 
 function data = analyze75read (filename);
