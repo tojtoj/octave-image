@@ -107,11 +107,16 @@ function analyze75write (varargin);
   header.Descriptor(1:numel(origintext)) = origintext;
 
   % Determine the type of data
-  if (isa(data,'short'))
+  if (isa(data,'int16'))
     header.ImgDataType = 'DT_SIGNED_SHORT';
     header.BitDepth    = int16(16);
-    DataTypeLabel      = int16(0);
-    DataTypeString     = 'short';
+    DataTypeLabel      = int16(4);
+    DataTypeString     = 'int16';
+  elseif isa(dataIN,'int32')
+    header.ImgDataType = 'DT_SIGNED_INT';
+    header.BitDepth    = int16(32);
+    DataTypeLabel      = int16(8);
+    DataTypeString     = 'int32';
   elseif (isa(data,'single'))
     header.ImgDataType = 'DT_FLOAT';
     header.BitDepth    = int16(32);
@@ -210,7 +215,7 @@ end
 
 function [datanew,znew] = interpslices(data,x,y,z)
   znew = z(1):min(diff(z)):z(end);
-  datanew = zeros(numel(x),numel(y),numel(znew),'single');
+  datanew = zeros(numel(x),numel(y),numel(znew),class(data));
   for loopN = 1:numel(znew)
     datanew(:,:,loopN) = interpn(x,y,z,data,x,y,znew(loopN));
   end
