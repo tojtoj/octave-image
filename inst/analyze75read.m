@@ -53,9 +53,13 @@ function data = analyze75read (filename);
     error ('analyze75read: unable to fopen `%s'': %s', [fileprefix, '.img'], err);
   end
 
-  if (strcmp (header.ImgDataType, 'DT_FLOAT'))
+  if (strcmp (header.ImgDataType, 'DT_SIGNED_SHORT'));
+    datatype = 'int16';
+  elseif (strcmp (header.ImgDataType, 'DT_SIGNED_INT'));
+    datatype = 'int32';
+  elseif (strcmp (header.ImgDataType, 'DT_FLOAT'));
     datatype = 'single';
-  else
+  elseif (strcmp (header.ImgDataType, 'DT_DOUBLE'));
     datatype = 'double';
   end
 
