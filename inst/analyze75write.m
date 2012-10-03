@@ -112,7 +112,7 @@ function analyze75write (varargin);
     header.BitDepth    = int16(16);
     DataTypeLabel      = int16(4);
     DataTypeString     = 'int16';
-  elseif isa(dataIN,'int32')
+  elseif (isa(data,'int32'))
     header.ImgDataType = 'DT_SIGNED_INT';
     header.BitDepth    = int16(32);
     DataTypeLabel      = int16(8);
