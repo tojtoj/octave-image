@@ -49,7 +49,7 @@ function BW = im2bw (img, cmap, thres)
     thres = cmap;
   endif
 
-  if (!isnumeric || !isscalar (thres) || !isreal (thres) || !isa (thres, "double") || thres < 0 || thres > 1)
+  if (!isnumeric (thres) || !isscalar (thres) || !isreal (thres) || !isa (thres, "double") || thres < 0 || thres > 1)
     error ("im2bw: `threshold' must be a scalar of class double in the interval [0, 1]")
   endif
 
