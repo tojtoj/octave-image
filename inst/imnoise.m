@@ -16,7 +16,8 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{B} =} imnoise (@var{A}, @var{type})
-## Adds noise to image in @var{A}.
+## @deftypefnx {Function File} {@var{B} =} imnoise (@dots{}, @var{options})
+## Add noise to image @var{A}.
 ##
 ## @table @code
 ## @item imnoise (A, 'gaussian' [, mean [, var]])
@@ -29,41 +30,55 @@
 ## multiplicative gaussian noise: @var{B} = @var{A} + @var{A}*noise
 ## defaults to var=0.04
 ## @end table
+##
+## @seealso{rand, randn}
 ## @end deftypefn
 
 function A = imnoise (A, stype, a, b)
+  ## we do not set defaults right at the start because they are different
+  ## depending on the method used to generate noise
 
-  if (nargin < 2 || nargin > 4 || !ismatrix(A) || !ischar(stype))
+  if (nargin < 2 || nargin > 4)
     print_usage;
-  endif
-  
-  valid = (min(A(:)) >= 0 && max(A(:)) <= 1);
-
-  stype = tolower(stype);
-  if (strcmp(stype, 'gaussian'))
-    if (nargin < 3), a = 0.0; endif
-    if (nargin < 4), b = 0.01; endif
-    A = A + (a + randn(size(A)) * sqrt(b));
-    ## Variance of Gaussian data with mean 0 is E[X^2]
-  elseif (strcmp(stype, 'salt & pepper'))
-    if (nargin < 3), a = 0.05; endif
-    noise = rand(size(A));
-    A(noise <= a/2) = 0;
-    A(noise >= 1-a/2) = 1;
-  elseif (strcmp(stype, 'speckle'))
-    if (nargin < 3), a = 0.04; endif
-    A = A .* (1 + randn(size(A))*sqrt(a));
-  else
-    error("imnoise: use type 'gaussian', 'salt & pepper', or 'speckle'");
-  endif
-  
-  if valid
-    A(A>1) = 1;
-    A(A<0) = 0;
-  else
-    warning("Image should be in [0,1]");
+  elseif (!isimage (A))
+    error ("imnoise: first argument must be an image.");
+  elseif (!ischar (stype))
+    error ("imnoise: second argument must be a string with name of noise type.");
   endif
 
+  in_class = class (A);
+  A        = im2double (A);
+  if (!is_double_image (A))
+    ## FIXME we should probably return an error not a warning but may want to keep
+    ## this for backwards compatibility. Maybe temporarily only. What does matlab do?
+    warning ("imnoise: image should be in [0,1] range.")
+  endif
+
+  switch tolower (stype)
+    case {"gaussian"}
+      if (nargin < 3), a = 0.0;  endif
+      if (nargin < 4), b = 0.01; endif
+      A = A + (a + randn (size (A)) * sqrt (b));
+      ## Variance of Gaussian data with mean 0 is E[X^2]
+    case {"salt & pepper", "salt and pepper"}
+      if (nargin < 3), a = 0.05; endif
+      noise = rand (size (A));
+      A(noise <= a/2)   = 0;
+      A(noise >= 1-a/2) = 1;
+    case {"speckle"}
+      if (nargin < 3), a = 0.04; endif
+      A = A .* (1 + randn (size (A)) * sqrt (a));
+    otherwise
+      error ("imnoise: unknown or unimplemented type of noise `%s'", stype);
+  endswitch
+
+  A(A>1) = 1;
+  A(A<0) = 0;
+
+  ## we probably should do this in a safer way... but hardcoding the list of
+  ## im2xxxx functions might not be a good idea since it then it requires to be
+  ## added here if a new im2xxx function is implemented
+  A = feval (["im2" in_class], A);
 endfunction
 
 %!assert(var(imnoise(ones(10)/2,'gaussian')(:)),0.01,0.005) # probabilistic
