@@ -16,7 +16,7 @@
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{E} =} entropyfilt (@var{im})
 ## @deftypefnx{Function File} {@var{E} =} entropyfilt (@var{im}, @var{domain})
-## @deftypefnx{Function File} {@var{E} =} entropyfilt (@var{im}, @var{domain}, @var{padding}, ...)
+## @deftypefnx{Function File} {@var{E} =} entropyfilt (@var{im}, @var{domain}, @var{padding}, @dots{})
 ## Computes the local entropy in a neighbourhood around each pixel in an image.
 ##
 ## The entropy of the elements of the neighbourhood is computed as

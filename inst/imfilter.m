@@ -15,7 +15,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{J} = imfilter(@var{I}, @var{f})
-## @deftypefnx{Function File} @var{J} = imfilter(@var{I}, @var{f}, @var{options}, ...)
+## @deftypefnx{Function File} @var{J} = imfilter(@var{I}, @var{f}, @var{options}, @dots{})
 ## Computes the linear filtering of the image @var{I} and the filter @var{f}.
 ## The computation is performed using double precision floating point numbers,
 ## but the class of the input image is preserved as the following example shows.

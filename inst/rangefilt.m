@@ -16,7 +16,7 @@
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{R} =} rangefilt (@var{im})
 ## @deftypefnx{Function File} {@var{R} =} rangefilt (@var{im}, @var{domain})
-## @deftypefnx{Function File} {@var{R} =} rangefilt (@var{im}, @var{domain}, @var{padding}, ...)
+## @deftypefnx{Function File} {@var{R} =} rangefilt (@var{im}, @var{domain}, @var{padding}, @dots{})
 ## Computes the local intensity range in a neighbourhood around each pixel in
 ## an image.
 ##

@@ -15,7 +15,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{warped} = imperspectivewarp(@var{im}, @var{P}, @var{interp}, @var{bbox}, @var{extrapval})
-## @deftypefnx{Function File} [@var{warped}, @var{valid}] = imperspectivewarp(...)
+## @deftypefnx{Function File} [@var{warped}, @var{valid}] = imperspectivewarp(@dots{})
 ## Applies the spatial perspective homogeneous transformation @var{P} to the image @var{im}.
 ## The transformation matrix @var{P} must be a 3x3 homogeneous matrix, or 2x2 or 2x3
 ## affine transformation matrix.

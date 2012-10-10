@@ -16,7 +16,7 @@
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{warped} = imremap(@var{im}, @var{XI}, @var{YI})
 ## @deftypefnx{Function File} @var{warped} = imremap(@var{im}, @var{XI}, @var{YI}, @var{interp}, @var{extrapval})
-## @deftypefnx{Function File} [@var{warped}, @var{valid} ] = imremap(...)
+## @deftypefnx{Function File} [@var{warped}, @var{valid} ] = imremap(@dots{})
 ## Applies any geometric transformation to the image @var{im}.
 ##
 ## The arguments @var{XI} and @var{YI} are lookup tables that define the resulting

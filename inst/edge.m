@@ -16,7 +16,7 @@
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{bw} =} edge (@var{im}, @var{method})
 ## @deftypefnx{Function File} {@var{bw} =} edge (@var{im}, @var{method}, @var{arg1}, @var{arg2})
-## @deftypefnx{Function File} {[@var{bw}, @var{thresh}] =} edge (...)
+## @deftypefnx{Function File} {[@var{bw}, @var{thresh}] =} edge (@dots{})
 ## Detect edges in the given image using various methods. The first input @var{im}
 ## is the gray scale image in which edges are to be detected. The second argument
 ## controls which method is used for detecting the edges. The rest of the input

@@ -2,15 +2,15 @@
 ## This program is granted to the public domain.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} colfilt(@var{A}, [@var{r}, @var{c}], [@var{m}, @var{n}], 'sliding', @var{f},...)
+## @deftypefn {Function File} colfilt(@var{A}, [@var{r}, @var{c}], [@var{m}, @var{n}], 'sliding', @var{f},@dots{})
 ## Apply filter to matrix blocks
 ##
 ##   For each @var{r} x @var{c} overlapping subblock of @var{A}, add a column in matrix @var{C}
-##   @var{f}(@var{C},...) should return a row vector which is then reshaped into a
+##   @var{f}(@var{C},@dots{}) should return a row vector which is then reshaped into a
 ##   a matrix of size @var{A} and returned. @var{A} is processed in chunks of size @var{m} x @var{n}.
-## @deftypefnx{Function File} colfilt(@var{A}, [@var{r}, @var{c}], [@var{m}, @var{n}], 'distinct', @var{f},...)
+## @deftypefnx{Function File} colfilt(@var{A}, [@var{r}, @var{c}], [@var{m}, @var{n}], 'distinct', @var{f},@dots{})
 ##   For each @var{r} x @var{c} non-overlapping subblock of @var{A}, add a column in matrix @var{C}
-##   @var{f}(@var{C},...) should return a matrix of size @var{C} each column of which is
+##   @var{f}(@var{C},@dots{}) should return a matrix of size @var{C} each column of which is
 ##   placed back into the subblock from whence it came. @var{A} is processed
 ##   in chunks of size @var{m} x @var{n}.
 ##

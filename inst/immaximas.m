@@ -20,8 +20,8 @@
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {[@var{r}, @var{c}] =} immaximas (@var{im}, @var{radius})
 ## @deftypefnx{Function File} {[@var{r}, @var{c}] =} immaximas (@var{im}, @var{radius}, @var{thresh})
-## @deftypefnx{Function File} {[@var{r}, @var{c}, ...] =} immaximas (...)
-## @deftypefnx{Function File} {[..., @var{val}] =} immaximas (...)
+## @deftypefnx{Function File} {[@var{r}, @var{c}, @dots{}] =} immaximas (@dots{})
+## @deftypefnx{Function File} {[@dots{}, @var{val}] =} immaximas (@dots{})
 ## Finds local spatial maximas of the given image. A local spatial maxima is
 ## defined as an image point with a value that is larger than all neighbouring
 ## values in a square region of width 2*@var{radius}+1. By default @var{radius}
