@@ -32,7 +32,7 @@ private:
 
 public:
 
-  union_find (octave_idx_type s) : voxels (s, NULL) {};
+  union_find (octave_idx_type s) : voxels (s) {};
 
   ~union_find ()
   {
