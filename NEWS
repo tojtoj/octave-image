@@ -80,6 +80,8 @@ Summary of important user-visible changes for image 1.1.0:
       bwarea
       bweuler
       bwfill
+      cmpermute
+      cmunique
       imhist
       imnoise
       conndef
