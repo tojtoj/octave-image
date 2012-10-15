@@ -1,48 +1,61 @@
-## Copyright (C) 2005 Berge-Gladel
+## Copyright (C) 2012 Rik Wehbring
 ##
-## This program is free software; you can redistribute it and/or modify it under
-## the terms of the GNU General Public License as published by the Free Software
-## Foundation; either version 3 of the License, or (at your option) any later
-## version.
+## This file is part of Octave.
 ##
-## This program is distributed in the hope that it will be useful, but WITHOUT
-## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
-## details.
+## Octave is free software; you can redistribute it and/or modify it
+## under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 3 of the License, or (at
+## your option) any later version.
 ##
-## You should have received a copy of the GNU General Public License along with
-## this program; if not, see <http://www.gnu.org/licenses/>.
+## Octave is distributed in the hope that it will be useful, but
+## WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+## General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with Octave; see the file COPYING.  If not, see
+## <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {@var{h} =} rgbplot (@var{cmap})
-## Plot a given color map.
+## @deftypefn  {Function File} {} rgbplot (@var{cmap})
+## @deftypefnx {Function File} {@var{h} =} rgbplot (@dots{})
+## Plot the components of a colormap.
 ##
-## The plot will display 3 lines, red, green and blue, showing the variation of
-## RGB values on @var{cmap}.  While input matrix must be a color map (see
-## @code{iscolormap}), it can also be used to see a colored line profile
-## (intensity values will have to be converted to class double with
-## @code{im2double}).
+## The first column is plotted in red, the second column in green, and
+## the third column in blue.  The values are between 0 and 1 and represent
+## the intensity of the RGB components in the given indexed color.
 ##
-## If an output is requested, the graphics handle @var{h} to the plot is returned.
+## The optional return value @var{h} is a graphics handle to the created plot.
 ##
-## @seealso{colormap, iscolormap}
+## @seealso{colormap}
 ## @end deftypefn
 
-function h_out = rgbplot(map)
+function retval = rgbplot (cmap)
 
   if (nargin != 1)
-    print_usage;
-  elseif (!iscolormap (map))
-    error("rgbplot: input must be a colormap");
+    print_usage ();
   endif
 
-  h = plot (map(:,1), "-r", map(:,2), "g-", map(:,3), "b-");
-  if (nargout > 0)
-    h_out = h;
+  if (! iscolormap (cmap))
+    error ("rgbplot: CMAP must be a colormap");
   endif
+
+  h = plot (cmap(:,1),"r", cmap(:,2),"g", cmap(:,3),"b");
+  set (gca, 'ytick', 0:0.1:1);
+  xlabel ("color index");
+
+  if (nargout > 0)
+    retval = h;
+  endif
+
 endfunction
 
+
 %!demo
-%! ## look at the distribution of RGB values for the jet colormap
-%! cmap = jet (64);
-%! rgbplot (cmap);
+%! clf;
+%! rgbplot (ocean);
+
+%%test input validation
+%!error rgbplot ()
+%!error rgbplot (1,2)
+%!error <CMAP must be a colormap> rgbplot ({0 1 0})
