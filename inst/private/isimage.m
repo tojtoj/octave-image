@@ -16,9 +16,6 @@
 ## This a private function for the is... type of functions for the image package
 ## It simply checks if the input really is an image.
 
-function bool = isimage (img)
-  bool = true;
-  if (!ismatrix (img) || issparse (img) || isempty (img) || !isreal (img))
-    bool = false;
-  endif
+function retval = isimage (img)
+  retval = (ismatrix (img) && !issparse (img) && !isempty (img) && isreal (img));
 endfunction
