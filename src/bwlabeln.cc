@@ -275,7 +275,10 @@ DEFUN_DLD(bwlabeln, args, , "\
 @deftypefnx {Loadable Function} {[@var{l}, @var{num}] =} bwlabeln(@var{bw}, @var{n})\n\
 Label foreground objects in the n-dimensional binary image @var{bw}.\n\
 \n\
-The optional argument @var{n} sets the connectivity and defaults 26.\n\
+The optional argument @var{n} sets the connectivity and defaults 26,\n\
+for 26-connectivity in 3-D images. Other possible values are 18 and 6\n\
+for 3-D images, 4 and 8 for 2-D images, or an arbitrary N-dimensional\n\
+binary connectivity mask where each dimension is of size 3.\n\
 \n\
 The output @var{l} is an Nd-array where 0 indicates a background\n\
 pixel, 1 indicates that the pixel belong to object number 1, 2 that\n\
