@@ -1,32 +1,16 @@
-Summary of important user-visible changes for image 1.1.0:
+Summary of important user-visible changes for image 2.0.0:
 -------------------------------------------------------------------
 
  ** The following functions are new:
 
-      analyze75info
-      analyze75read
-      analyze75write
-      blockproc
-      bwlabeln
-      getrangefromclass
-      im2int16
-      im2single
-      imabsdiff
-      imadd
-      imbothat
-      imcrop
-      imdivide
-      imlincomb
-      immultiply
-      imsubtract
-      iptcheckconn
-      iptcheckmap
-      iptchecknargin
-      iptcheckstrs
-      iptnum2ordinal
-      iscolormap
-      normxcorr2
-      wavelength2rgb
+      analyze75info         imabsdiff         iptcheckconn
+      analyze75read         imadd             iptcheckmap
+      analyze75write        imbothat          iptchecknargin
+      blockproc             imcrop            iptcheckstrs
+      bwlabeln              imdivide          iptnum2ordinal
+      getrangefromclass     imlincomb         iscolormap
+      im2int16              immultiply        normxcorr2
+      im2single             imsubtract        wavelength2rgb
 
  ** The following functions have been deprecated in previous releases
     of the image package and have now been removed:
@@ -51,25 +35,14 @@ Summary of important user-visible changes for image 1.1.0:
     GPL license). Currently, the following algorithms have been implemented
     (see graythresh for notes and references):
 
-      concavity
-      intermeans
-      intermodes
-      MaxEntropy
-      MaxLikelihood
-      mean
-      minimum
-      MinError
-      moments
-      Otsu
-      percentile
+      concavity       MaxEntropy        minimum       Otsu
+      intermeans      MaxLikelihood     MinError      percentile
+      intermodes      mean              moments
 
  ** The following functions have been deprecated (see their help text
     for the recommended alternatives):
 
-      blkproc
-      bmpwrite
-      dilate
-      erode
+      blkproc         bmpwrite          dilate        erode
 
  ** With the new function `imbothat' the transform option of
     `imtophat' has been deprecated.
@@ -77,24 +50,11 @@ Summary of important user-visible changes for image 1.1.0:
  ** The following functions have had been changed for bug fixes and/or
     improved matlab compatibility
 
-      bwarea
-      bweuler
-      bwfill
-      cmpermute
-      cmunique
-      imhist
-      imnoise
-      conndef
-      im2bw
-      im2double
-      im2uint8
-      im2uint16
-      isbw
-      isgray
-      isrgb
-      isind
-      mat2gray
-      rgb2gray
+      bwarea          imhist            im2uint8      isind
+      bweuler         imnoise           im2uint16     mat2gray
+      bwfill          conndef           isbw          rgb2gray
+      cmpermute       im2bw             isgray
+      cmunique        im2double         isrgb
 
  ** `bwarea' now supports all image classes and considers objects all non
     zero pixels (not all pixels higher than zero).
