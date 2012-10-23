@@ -16,10 +16,21 @@
 
 // bwlabeln.cc ---
 
+
 #include <oct.h>
 #include <set>
 #include "union-find.h++"
+
+#include "config.h"
+
+#if defined (HAVE_UNORDERED_MAP)
 #include <unordered_map>
+#elif defined (HAVE_TR1_UNORDERED_MAP)
+#include <tr1/unordered_map>
+#else
+#error Must have the TR1 or C++11 unordered_map header
+#endif
+
 
 typedef Array<octave_idx_type> coord;
 
@@ -392,8 +403,13 @@ See, for example, http://en.wikipedia.org/wiki/Union-find\n\
         }
     }
 
+#ifdef USE_UNORDERED_MAP_WITH_TR1
+  using std::tr1::unordered_map;
+#else
+  using std::unordered_map;
+#endif
 
-  std::unordered_map<octave_idx_type, octave_idx_type> ids_to_label;
+  unordered_map<octave_idx_type, octave_idx_type> ids_to_label;
   octave_idx_type next_label = 1;
 
   auto idxs  = u_f.get_ids ();
