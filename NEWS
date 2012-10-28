@@ -96,6 +96,8 @@ Summary of important user-visible changes for image 2.0.0:
     values are equal, `mat2gray' will truncate all values between 0 and 1. See
     the help text (or source) for a detailed description of cautions.
 
+ ** `bwfill' was fixed to always returns a logical matrix.
+
  ** `imnoise' has been expanded to accept images of differente classes instead
     of only double and single.
 
@@ -103,6 +105,6 @@ Summary of important user-visible changes for image 2.0.0:
 
  ** Package is now dependent on GNU Octave version 3.6.0 or later.
 
- ** Package is now dependent on the signal package version 1.2.0 or later..
+ ** Package is now dependent on the signal package version 1.2.0 or later.
 
  ** Package is no longer automatically loaded.
