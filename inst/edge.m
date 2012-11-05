@@ -1,3 +1,4 @@
+## Copyright (C) 1999 Andy Adler <adler@sce.carleton.ca>
 ## Copyright (C) 2008 Søren Hauberg <soren@hauberg.org>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
@@ -134,13 +135,6 @@
 ##
 ## @seealso{fspecial, nonmax_supress}
 ## @end deftypefn
-
-## Note: The implementation and help text for the 'andy' edge detector came with
-## the following notice:
-##   Copyright (C) 1999 Andy Adler
-##   This code has no warrany whatsoever.
-##   Do what you like with this code as long as you
-##   leave this copyright in place.
 
 function [bw, out_threshold, g45_out, g135_out] = edge (im, method, varargin)
   ## Get the image
