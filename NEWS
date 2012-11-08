@@ -17,6 +17,8 @@ Summary of important user-visible changes for image 2.0.0:
 
       imginfo
 
+ ** The function `deriche' has been removed.
+
  ** The complete set of functions to work with Analyze 7.5 files has been
     implemented. See `analyze75info', `analyze75read' and `analyze75write'.
 
