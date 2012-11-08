@@ -84,5 +84,5 @@ function BW = im2bw (img, cmap, thres)
   BW = (img > thres); # matlab compatible (not "greater than or equal")
 endfunction
 
-%!assert(im2bw ([0 0.4 0.5 0.6 1], 0.5), [0 0 0 1 1]);       # basic usage
-%!assert(im2bw (uint8 ([0 100 255], 0.5)), [0 0 1]);         # with a uint8 input
+%!assert(im2bw ([0 0.4 0.5 0.6 1], 0.5), logical([0 0 0 1 1])); # basic usage
+%!assert(im2bw (uint8 ([0 100 255]), 0.5), logical([0 0 1]));   # with a uint8 input
