@@ -55,7 +55,7 @@
 ## @itemize @bullet
 ## @item @uref{http://stackoverflow.com/questions/2374959/algorithm-to-convert-any-positive-integer-to-an-rgb-value}
 ## @item @uref{http://www.midnightkite.com/color.html} per Dan Bruton
-## @end i temize
+## @end itemize
 ## @end deftypefn
 
 function rgb = wavelength2rgb (wavelength, out_class = "double", gamma = 0.8)
