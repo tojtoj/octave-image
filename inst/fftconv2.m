@@ -33,6 +33,8 @@
 ## @end deftypefn
 
 function X = fftconv2(varargin)
+  ## FIXME seems to not work when using a vector for the convolution in the row
+  ## direction and another in the column direction (fftconv2 (v1, v2, m)
     if (nargin < 2)
       print_usage;
     endif
@@ -104,6 +106,7 @@ endfunction
 %!assert(norm(fftconv2(b,a,'valid')-conv2(b,a,'valid')), 0, 1e6*eps)
 
 %!# usage: fftconv2(v1, v2, a[, shape])
+%!##FIXME this usage seems to be broken...
 %!shared x,y,a
 %! x = 1:4; y = 4:-1:1; a = repmat(1:10, 5);
 %!assert(norm(fftconv2(x,y,a)-conv2(x,y,a)), 0, 1e6*eps)
