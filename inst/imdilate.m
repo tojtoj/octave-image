@@ -64,6 +64,12 @@ endfunction
 %! imdilate(eye(5),ones(2,2))
 %! % returns a thick diagonal.
 
-%!assert(imdilate(eye(3),[1])==eye(3));                     # using [1] as a mask returns the same value
-%!assert(imdilate(eye(3),[1,0,0])==[0,0,0;1,0,0;0,1,0]);    # check if it works with non-symmetric SE
-%!assert(imdilate(eye(5),[1,0,0,0])==[0,0,0,0,0;1,0,0,0,0;0,1,0,0,0;0,0,1,0,0;0,0,0,1,0]); # test if center is correctly calculated on even masks
+%!assert(imdilate(eye(3),[1]), eye(3));                     # using [1] as a mask returns the same value
+%!assert(logical(imdilate(eye(3),[1])), logical(eye(3)));   # same with logical matrix
+%!assert(imdilate(eye(3),[1,0,0]), [0,0,0;1,0,0;0,1,0]);                            # check if it works with non-symmetric SE
+%!assert(imdilate(logical(eye(3)),logical([1,0,0])), logical([0,0,0;1,0,0;0,1,0])); # same with logical matrix
+## test if center is correctly calculated on even masks. There's no right way,
+
+## it all depends what is considered the center of the structuring element. The
+## expected answer here is what Matlab does
+%!xtest assert(imdilate(eye(5),[1,0,0,0]), [0,0,0,0,0;1,0,0,0,0;0,1,0,0,0;0,0,1,0,0;0,0,0,1,0]);

@@ -84,12 +84,3 @@ function BW2 = dilate (BW1, SE, a, b)
 
   BW2=BW1;
 endfunction
-
-%!demo
-%! dilate(eye(5),ones(2,2))
-%! % returns a thick diagonal.
-
-## tests
-%!assert(dilate(eye(3),[1])==eye(3));                     # using [1] as a mask returns the same value
-%!assert(dilate(eye(3),[1,0,0])==[0,0,0;1,0,0;0,1,0]);    # check if it works with non-symmetric SE
-%!assert(dilate(eye(3),[1,0,0,0])==[0,0,0;1,0,0;0,1,0]);  # test if center is correctly calculated on even masks
