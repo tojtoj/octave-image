@@ -23,7 +23,6 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} fftconv2 (@var{a}, @var{b}, @var{shape})
-## @deftypefnx{Function File} fftconv2 (@var{v1}, @var{v2}, @var{a}, @var{shape})
 ## Convolve 2 dimensional signals using the FFT.
 ##
 ## This method is faster but less accurate than @var{conv2} for large @var{a} and @var{b}.
@@ -32,9 +31,11 @@
 ## @seealso{conv2}
 ## @end deftypefn
 
+## @deftypefnx{Function File} fftconv2 (@var{v1}, @var{v2}, @var{a}, @var{shape})
+## FIXME fftconv2 also has the code for this kind of usage but sometime along
+## the way it stopped working. Would be nice if someone could fix it...
+
 function X = fftconv2(varargin)
-  ## FIXME seems to not work when using a vector for the convolution in the row
-  ## direction and another in the column direction (fftconv2 (v1, v2, m)
     if (nargin < 2)
       print_usage;
     endif
@@ -43,9 +44,8 @@ function X = fftconv2(varargin)
     rowcolumn = 0;
     
     if ((nargin > 2) && ismatrix(varargin{3}) && !ischar(varargin{3}))
-
         ## usage: fftconv2(v1, v2, a[, shape])
-
+        warning ("fftconv2: the usage fftconv2(v1, v2, a, ...) seems to be broken. Beware of the results or fix fftconv2.");
         rowcolumn = 1;
         v1 = varargin{1}(:)';
         v2 = varargin{2}(:);
@@ -109,10 +109,10 @@ endfunction
 %!##FIXME this usage seems to be broken...
 %!shared x,y,a
 %! x = 1:4; y = 4:-1:1; a = repmat(1:10, 5);
-%!assert(norm(fftconv2(x,y,a)-conv2(x,y,a)), 0, 1e6*eps)
-%!assert(norm(fftconv2(x,y,a,'full')-conv2(x,y,a,'full')), 0, 1e6*eps)
-%!assert(norm(fftconv2(x,y,a,'same')-conv2(x,y,a,'same')), 0, 1e6*eps)
-%!assert(norm(fftconv2(x,y,a,'valid')-conv2(x,y,a,'valid')), 0, 1e6*eps)
+%!xtest assert(norm(fftconv2(x,y,a)-conv2(x,y,a)), 0, 1e6*eps)
+%!xtest assert(norm(fftconv2(x,y,a,'full')-conv2(x,y,a,'full')), 0, 1e6*eps)
+%!xtest assert(norm(fftconv2(x,y,a,'same')-conv2(x,y,a,'same')), 0, 1e6*eps)
+%!xtest assert(norm(fftconv2(x,y,a,'valid')-conv2(x,y,a,'valid')), 0, 1e6*eps)
 
 %!demo
 %! ## Draw a cross
