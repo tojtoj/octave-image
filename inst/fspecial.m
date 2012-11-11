@@ -1,4 +1,4 @@
-## Copyright (C) 2005 Søren Hauberg <soren@hauberg.org>
+## Copyright (C) 2005 SÃ¸ren Hauberg <soren@hauberg.org>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -89,7 +89,7 @@
 ## @end table
 ## @end deftypefn
 
-## Remarks by Søren Hauberg (jan. 2nd 2007)
+## Remarks by SÃ¸ren Hauberg (jan. 2nd 2007)
 ## The motion filter and most of the documentation was taken from Peter Kovesi's
 ## GPL'ed implementation of fspecial from 
 ## http://www.csse.uwa.edu.au/~pk/research/matlabfns/OctaveCode/fspecial.m

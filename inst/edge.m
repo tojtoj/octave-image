@@ -1,5 +1,5 @@
 ## Copyright (C) 1999 Andy Adler <adler@sce.carleton.ca>
-## Copyright (C) 2008 Søren Hauberg <soren@hauberg.org>
+## Copyright (C) 2008 SÃ¸ren Hauberg <soren@hauberg.org>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
