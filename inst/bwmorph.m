@@ -450,17 +450,17 @@ function BW2 = bwmorph (BW, operation, n = 1)
 
     case('skel-lantuejoul')
       ## init values
-      se=ones(3,3);              ## structuring element used everywhere
-      BW2=zeros(size(BW));       ## skeleton result
+      se=true(3,3);              ## structuring element used everywhere
+      BW2=false(size(BW));       ## skeleton result
       eBW=BW;                    ## eBW will hold k-times eroded BW
       i=1;
       while i<=n
         if(!any(eBW))            ## if erosion result is 0-matrix then
           break;                 ## we are over
         endif
-        BW2|=eBW-dilate(erode(eBW, se), se); ## eBW - opening operation on eBW
+        BW2|=eBW-imdilate(imerode(eBW, se), se); ## eBW - opening operation on eBW
                                              ## contributes to skeleton
-        eBW=erode(eBW,se);
+        eBW=imerode(eBW,se);
         i++;
       endwhile
       return;                    ## no general loop in this case
