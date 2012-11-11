@@ -14,7 +14,7 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {} imhist (@var{I})
+## @deftypefn  {Function File} {} imhist (@var{I})
 ## @deftypefnx {Function File} {} imhist (@var{I}, @var{n})
 ## @deftypefnx {Function File} {} imhist (@var{X}, @var{cmap})
 ## @deftypefnx {Function File} {[@var{counts}, @var{x}] =} imhist (@dots{})
@@ -29,16 +29,12 @@
 ## @var{x} is a range for the bins so that @code{stem (@var{x}, @var{counts})} will
 ## show the histogram.
 ##
-## Since a colorbar is not displayed under the histogram, calling this function
-## to visualize the histogram of an indexed image may not be very helpful.
-##
 ## @seealso{hist, histc, histeq}
 ## @end deftypefn
 
 function [varargout] = imhist (img, b)
 
-  ## then img can either be a "normal" or indexed image. We will need to
-  ## check the second argument to find out
+  ## "img" can be a normal or indexed image. We need to check "b" to find out
   indexed = false;
 
   if (nargin < 1 || nargin > 2)
@@ -53,35 +49,30 @@ function [varargout] = imhist (img, b)
 
   elseif (nargin == 2)
     if (iscolormap (b))
-      ## if using a colormap, image must be an indexed image
+      if (!isind(img))
+        error ("imhist: second argument is a colormap but first argument is not an indexed image.");
+      endif
       indexed = true;
-    elseif (isnumeric (b) && isscalar (b) && fix(b) == b)
-      ## do nothing, all is good
+      ## an indexed image reads differently wether it's uint8/16 or double
+      ## If uint8/16, index+1 is the colormap row number (0 on the image
+      ## corresponds to the 1st column on the colormap).
+      ## If double, index is the colormap row number (no offset).
+      ## isind above already checks for double/uint8/uint16 so we can use isinteger
+      ## and isfloat safely
+      if ( (isfloat   (img) && max (img(:)) > rows(b)  ) ||
+           (isinteger (img) && max (img(:)) > rows(b)-1) )
+        warning ("imhist: largest index in image exceeds length of colormap.");
+      endif
+    elseif (isnumeric (b) && isscalar (b) && fix(b) == b && b > 0)
       if (islogical (img) && b != 2)
-        error ("there can only be 2 bins when input image is binary")
+        error ("imhist: there can only be 2 bins when input image is binary")
       endif
     else
-      error ("second argument should either be a positive integer scalar or a colormap");
+      error ("imhist: second argument must be a positive integer scalar or a colormap");
     endif
   endif
 
-  ## check if img is good
-  if (indexed)
-    if (!isind(img))
-      error ("second argument is a colormap but image is not indexed");
-    endif
-    ## an indexed image reads differently wether it's uint8/16 or double
-    ## If uint8/16, index-1 is the colormap row number (there's an offset of 1)
-    ## If double, index is the colormap row number (no offset)
-    ## isind above already checks for double/uint8/uint16 so we can use isinteger
-    ## and isfloat safely
-    if ( (isfloat   (img) && max (img(:)) > rows(b)  ) ||
-         (isinteger (img) && max (img(:)) > rows(b)-1) )
-      warning ("largest index in image exceeds length of colormap");
-    endif
-  endif
-
-  ## prepare bins
+  ## prepare bins and image
   if (indexed)
     if (isinteger (img))
       bins = 0:rows(b)-1;
@@ -97,48 +88,49 @@ function [varargout] = imhist (img, b)
       ## image must be single or double
       bins = linspace (0, 1, b);
     endif
-    ## we will use this bins with histc where they are the edges for each bin
-    ## but in imhist we want them to be the center of each bin. We can't use
-    ## hist either since values right in the middle will go to the bottom
-    ## bin (4.5 will be placed on the bin 4 instead of 5 and this is like
-    ## matlab, not an octave bug). So we still use histc but we decrease their
-    ## values by half of bin width and increase it back in the end to return
-    ## the values (if we did it on the image it would be only one step but
-    ## would be heavier on the system since images are likely to be larger
-    ## than bins)
+    ## we will use this bins with histc() where their values will be edges for
+    ## each bin. However, what we actually want is for their values to be the
+    ## center of each bin. To do this, we decrease their values by half of bin
+    ## width and will increase it back at the end of the function. We could do
+    ## it on the image and it would be a single step but it would be an heavier
+    ## operation since images are likely to be much longer than the bins.
+    ## The use of hist() is also not simple for this since values right in the
+    ## middle of two bins will go to the bottom bin (4.5 will be placed on the
+    ## bin 4 instead of 5 and we must keep matlab compatibility).
+    ## Of course, none of this needed for binary images.
     if (!islogical (img))
-      bins -= ((bins(2) - bins(1))/2);
+      bins_adjustment = ((bins(2) - bins(1))/2);
+      bins -= bins_adjustment;
     endif
     ## matlab returns bins as one column instead of a row but only for non
     ## indexed images
     bins = bins';
-  endif
 
-  ## if not dealing with indexed image, we may need to make sure values are
-  ## between get bin values
-  if (!indexed)
-    ## while integers could in no way have a value below the minium of their
-    ## class, floats can have values below zero which need to be truncated
-    if (isfloat (img))
+    ## histc does not counts values outside the edges of the bins so we need to
+    ## truncate their values.
+
+    ## truncate the minimum... integers could in no way have a value below the
+    ## minimum of their class so truncation on this side is only required for
+    if (isfloat (img) && min (img(:)) < 0)
       img(img < 0) = 0;
     endif
-    ## because we adjusted the bins edge below the max value of the class, and
-    ## because histc will not count values outside the edges, we need to bring
-    ## them down (no need to worry about the min because the min edge is already
-    ## below the mininum of the class). This also adjusts floats above 1
+
+    ## truncating the maximum... also adjusts floats above 1. We might need
     if (max (img(:)) > bins(end))
-      ## in case it's a integer, if we try to assign the non integer values it 
-      ## will fail so we need to make it double. But this means it takes more
-      ## memory so let's first make sure we need to
-      if (fix(bins(end)) != bins(end))
+      ## bins (end) is probably a decimal number. If an image is an int, we
+      ## can't assign the new value since it will be fix(). So we need to change
+      ## the image class to double but that will take more memory so let's
+      ## avoid it if we can
+      if (fix (bins(end)) != bins(end))
         img = double (img);
       endif
       img(img > bins(end)) = bins(end);
     endif
   endif
+
   [nn] = histc (img(:), bins);
   if (!indexed && !islogical(img))
-    bins += ((bins(2) - bins(1))/2);
+    bins += bins_adjustment;
   endif
 
   if (nargout != 0)
@@ -146,8 +138,13 @@ function [varargout] = imhist (img, b)
     varargout{2} = bins;
   else
     hold on;
-    stem (bins, nn);
-    colormap (gray (b));
+    stem (bins, nn, "marker", "none");
+    xlim ([bins(1) bins(end)]);
+    if (indexed)
+      colormap (b);
+    else
+      colormap (gray (b));
+    endif
     colorbar ("SouthOutside", "xticklabel", []);
     hold off;
   endif
