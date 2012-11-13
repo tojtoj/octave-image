@@ -8,8 +8,7 @@ Summary of important user-visible changes for image 2.0.1:
 
  ** The `fftconv2' usage "fftconv2 (v1, v2, a)", for convolution of a matrix by
     one vector in the column direction and another vector in the row direction,
-    will issue a warning as is not working correctly. It has been removed from
-    the documentation.
+    has been removed. Please use conv2 for such cases.
 
 Summary of important user-visible changes for image 2.0.0:
 -------------------------------------------------------------------
