@@ -137,7 +137,6 @@ function [varargout] = imhist (img, b)
     varargout{1} = nn;
     varargout{2} = bins;
   else
-    hold on;
     stem (bins, nn, "marker", "none");
     xlim ([bins(1) bins(end)]);
     if (indexed)
@@ -146,7 +145,6 @@ function [varargout] = imhist (img, b)
       colormap (gray (b));
     endif
     colorbar ("SouthOutside", "xticklabel", []);
-    hold off;
   endif
 endfunction
 
