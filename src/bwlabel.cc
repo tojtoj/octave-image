@@ -35,12 +35,6 @@ static bool any_bad_argument (const octave_value_list& args)
       return true;
     }
 
-  if (!args (0).is_bool_matrix ())
-    {
-      error ("bwlabel: first input argument must be a 'logical' matrix");
-      return true;
-    }
-
   if (nargin == 2)
     {
       if (!args (1).is_real_scalar ())
@@ -82,7 +76,7 @@ The algorithm is derived from  BKP Horn, Robot Vision, MIT Press,\n\
     return rval;
 
   // input arguments
-  boolMatrix BW = args (0).bool_matrix_value ();     // the input binary image
+  boolMatrix BW = args (0).bool_array_value ();     // the input binary image
   int nr = BW.rows ();
   int nc = BW.columns ();
 
