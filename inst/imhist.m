@@ -29,6 +29,10 @@
 ## @var{x} is a range for the bins so that @code{stem (@var{x}, @var{counts})} will
 ## show the histogram.
 ##
+## @emph{Note:} specially high peaks that may prevent an overview of the histogram
+## may not be displayed.  To avoid this, use @code{axis "auto y"} after the call
+## to @code{imhist}.
+##
 ## @seealso{hist, histc, histeq}
 ## @end deftypefn
 
@@ -139,6 +143,16 @@ function [varargout] = imhist (img, b)
   else
     stem (bins, nn, "marker", "none");
     xlim ([bins(1) bins(end)]);
+    ## we remove the box to see values with a value fo 255 (we can't remove the
+    ## line on the right since that wil remove the numbers and tics at the same
+    ## time)
+    box off;
+    ## if values are above this, they are likely outliers and prevent the
+    ## overview of the histogram
+    ylimit = median (nn) * 10;
+    if (ylim()(2) > ylimit)
+      ylim ([0 round(ylimit)]);
+    endif
     if (indexed)
       colormap (b);
     else

@@ -4,7 +4,8 @@ Summary of important user-visible changes for image 2.0.1:
  ** The plot produced by `imhist' is correctly scaled on the X axis so that the
     colorbar corresponds to the actual intensity of the stems; the given
     colormarp is used on the colorbar for indexed images; and the stems no
-    longer display the markers at their top.
+    longer display the markers at their top. The Y axis is also adjusted in case
+    of peaks with high values that prevent a good overview of the histogram.
 
  ** The `fftconv2' usage "fftconv2 (v1, v2, a)", for convolution of a matrix by
     one vector in the column direction and another vector in the row direction,
