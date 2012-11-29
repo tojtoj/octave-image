@@ -1,4 +1,5 @@
 ## Copyright (C) 2012 Carnë Draug <carandraug+dev@gmail.com>
+## Copyright (C) 2012 Pantxo Diribarne <pantxo@dibona>
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -35,25 +36,10 @@ function [board] = checkerboard (side = 10, nRows = 4, nCols = nRows)
   check_checkerboard (nRows, "number of rows");
   check_checkerboard (nCols, "number of columns");
 
-  square = zeros (side * 2);
-  square(1:side, side+1:end) = 1;
-  square(side+1:end, 1:side) = 1;
-
-  greyvalue = 0.7; # matlab compatible
-
-  if (mod (nCols, 2))
-    ## odd number of columns, the central square needs to be split into 2
-    board = repmat (square, [nRows (nCols-1)/2]);
-    board = [board repmat(square(:,1:side), [nRows 1])];
-    square(logical (square)) = greyvalue;
-    board = [board repmat(square(:,side+1:end), [nRows 1])];
-    board = [board repmat(square, [nRows (nCols-1)/2])];
-  else
-    ## even number, it's simpler
-    board = repmat (square, [nRows nCols/2]);
-    square(logical (square)) = greyvalue;
-    board = [board repmat(square, [nRows nCols/2])];
-  endif
+  [xx, yy] = meshgrid (linspace (-1, 1, 2*side));
+  tile     = (xx .* yy) < 0;
+  board    = double (repmat (tile, nRows, nCols));
+  board(:, (end/2+1):end) *= .7; # matlab compatible
 
 endfunction
 
