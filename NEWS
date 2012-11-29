@@ -1,6 +1,10 @@
 Summary of important user-visible changes for image 2.0.1:
 -------------------------------------------------------------------
 
+ ** The following functions are new:
+
+      checkerboard
+
  ** The plot produced by `imhist' is correctly scaled on the X axis so that the
     colorbar corresponds to the actual intensity of the stems; the given
     colormarp is used on the colorbar for indexed images; and the stems no
