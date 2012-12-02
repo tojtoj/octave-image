@@ -170,6 +170,7 @@ endfunction
 
 %!demo
 %!
-%! RGB = wavelength2rgb (350:800); # RGB values for wavelengths between 350 and 800 nm
-%! RGB = RGB .* ones (300, 1, 1);  # make it 300 rows for display
-%! imshow (RGB)
+%! ##draw RGB values for wavelengths between 350 and 800 nm
+%! RGB = wavelength2rgb (350:800);
+%! rgbplot (RGB, "composite");
+%! axis off;
