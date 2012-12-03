@@ -1,5 +1,6 @@
 ## Copyright (C) 2000 Paul Kienzle <pkienzle@users.sf.net>
 ## Copyright (C) 2004 Stefan van der Walt <stefan@sun.ac.za>
+## Copyright (C) 2012 Carlo de Falco
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -47,40 +48,88 @@ function A = imnoise (A, stype, a, b)
   endif
 
   in_class = class (A);
-  A        = im2double (A);
-  if (!is_double_image (A))
-    ## FIXME we should probably return an error not a warning but may want to keep
-    ## this for backwards compatibility. Maybe temporarily only. What does matlab do?
-    warning ("imnoise: image should be in [0,1] range.")
-  endif
-
   switch tolower (stype)
-    case {"gaussian"}
-      if (nargin < 3), a = 0.0;  endif
-      if (nargin < 4), b = 0.01; endif
-      A = A + (a + randn (size (A)) * sqrt (b));
-      ## Variance of Gaussian data with mean 0 is E[X^2]
-    case {"salt & pepper", "salt and pepper"}
-      if (nargin < 3), a = 0.05; endif
-      noise = rand (size (A));
-      A(noise <= a/2)   = 0;
-      A(noise >= 1-a/2) = 1;
-    case {"speckle"}
-      if (nargin < 3), a = 0.04; endif
-      A = A .* (1 + randn (size (A)) * sqrt (a));
+    case {"gaussian", "salt & pepper", "salt and pepper", "speckle"}
+      A        = im2double (A);
+      if (!is_double_image (A))
+        ## FIXME we should probably return an error not a warning but may want to keep
+        ## this for backwards compatibility. Maybe temporarily only. What does matlab do?
+        warning ("imnoise: image should be in [0,1] range.")
+      endif
+      
+      switch tolower (stype)
+        case {"gaussian"}
+          if (nargin < 3), a = 0.0;  endif
+          if (nargin < 4), b = 0.01; endif
+          A = A + (a + randn (size (A)) * sqrt (b));
+          ## Variance of Gaussian data with mean 0 is E[X^2]
+        case {"salt & pepper", "salt and pepper"}
+          if (nargin < 3), a = 0.05; endif
+          noise = rand (size (A));
+          A(noise <= a/2)   = 0;
+          A(noise >= 1-a/2) = 1;
+        case {"speckle"}
+          if (nargin < 3), a = 0.04; endif
+          A = A .* (1 + randn (size (A)) * sqrt (a));
+      endswitch
+      
+      A(A>1) = 1;
+      A(A<0) = 0;
+
+      ## we probably should do this in a safer way... but hardcoding the list of
+      ## im2xxxx functions might not be a good idea since it then it requires to be
+      ## added here if a new im2xxx function is implemented
+      A = feval (["im2" in_class], A);
+
+    case {"poisson"}
+      switch (in_class)
+        case ("double")
+          A = poissrnd (A * 1e12) / 1e12;
+        case ("single")
+          A = single (poissrnd (A * 1e6) / 1e6);
+        case {"uint8", "uint16"}
+          A = cast (poissrnd (A), in_class);
+        otherwise
+          A = imnoise (im2double (A), "poisson");
+      endswitch
+      
     otherwise
       error ("imnoise: unknown or unimplemented type of noise `%s'", stype);
   endswitch
 
-  A(A>1) = 1;
-  A(A<0) = 0;
-
-  ## we probably should do this in a safer way... but hardcoding the list of
-  ## im2xxxx functions might not be a good idea since it then it requires to be
-  ## added here if a new im2xxx function is implemented
-  A = feval (["im2" in_class], A);
 endfunction
 
 %!assert(var(imnoise(ones(10)/2,'gaussian')(:)),0.01,0.005) # probabilistic
 %!assert(length(find(imnoise(ones(10)/2,'salt & pepper')~=0.5)),5,10) # probabilistic
 %!assert(var(imnoise(ones(10)/2,'speckle')(:)),0.01,0.005) # probabilistic
+
+%!test
+%! A = imnoise (.5 * ones (100), 'poisson');
+%! assert (class (A), 'double')
+%!test
+%! A = imnoise (.5 * ones (100, 'single'), 'poisson');
+%! assert (class (A), 'single')
+%!test
+%! A = imnoise (128 * ones (100, 'uint8'), 'poisson');
+%! assert (class (A), 'uint8')
+%!test
+%! A = imnoise (256 * ones (100, 'uint16'), 'poisson');
+%! assert (class (A), 'uint16')
+
+%!demo
+%!  A = imnoise (2^7 * ones (100, 'uint8'), 'poisson');
+%!  subplot (2, 2, 1)
+%!  imshow (A)
+%!  title ('uint8 image with poisson noise')
+%!  A = imnoise (2^15 * ones (100, 'uint16'), 'poisson');
+%!  subplot (2, 2, 2)
+%!  imshow (A)
+%!  title ('uint16 image with poisson noise')
+%!  A = imnoise (.5 * ones (100), 'poisson');
+%!  subplot (2, 2, 3)
+%!  imshow (A)
+%!  title ('double image with poisson noise')
+%!  A = imnoise (.5 * ones (100, 'single'), 'poisson');
+%!  subplot (2, 2, 4)
+%!  imshow (A)
+%!  title ('single image with poisson noise')
