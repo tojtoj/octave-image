@@ -1,6 +1,7 @@
 ## Copyright (C) 2000 Paul Kienzle <pkienzle@users.sf.net>
 ## Copyright (C) 2004 Stefan van der Walt <stefan@sun.ac.za>
 ## Copyright (C) 2012 Carlo de Falco
+## Copyright (C) 2012 Carnë Draug <carandraug@octave.org>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -16,23 +17,27 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {@var{B} =} imnoise (@var{A}, @var{type})
+## @deftypefn  {Function File} {@var{B} =} imnoise (@var{A}, @var{type})
 ## @deftypefnx {Function File} {@var{B} =} imnoise (@dots{}, @var{options})
-## Add noise to image @var{A}.
+## Add noise to image.
 ##
-## @table @code
-## @item imnoise (A, 'gaussian' [, mean [, var]])
-## additive gaussian noise: @var{B} = @var{A} + noise
-## defaults to mean=0, var=0.01
-## @item  imnoise (A, 'salt & pepper' [, density])
-## lost pixels: A = 0 or 1 for density*100% of the pixels
-## defaults to density=0.05, or 5%
-## @item imnoise (A, 'speckle' [, var])
-## multiplicative gaussian noise: @var{B} = @var{A} + @var{A}*noise
-## defaults to var=0.04
-## @end table
+## @deftypefnx {Function File} {@var{B} =} imnoise (@var{A}, "gaussian", @var{mean}, @var{variance})
+## Additive gaussian noise with @var{mean} and @var{variance} defaulting to 0
+## and 0.01.
 ##
-## @seealso{rand, randn}
+## @deftypefnx {Function File} {@var{B} =} imnoise (@var{A}, "poisson")
+## Creates poisson noise in the image using the intensity value of each pixel as
+## mean.
+##
+## @deftypefnx {Function File} {@var{B} =} imnoise (@var{A}, "salt & pepper", @var{density})
+## Create "salt and pepper"/"lost pixels" in @var{density}*100 percent of the
+## image.  @var{density} defaults to 0.05.
+##
+## @deftypefnx {Function File} {@var{B} =} imnoise (@var{A}, "speckle", @var{variance})
+## Multiplicative gaussian noise with @var{B} = @var{A} + @var{A} * noise with
+## mean 0 and @var{variance} defaulting to 0.04.
+##
+## @seealso{rand, randn, randp}
 ## @end deftypefn
 
 function A = imnoise (A, stype, a, b)
@@ -41,61 +46,74 @@ function A = imnoise (A, stype, a, b)
 
   if (nargin < 2 || nargin > 4)
     print_usage;
-  elseif (!isimage (A))
+  elseif (! isimage (A))
     error ("imnoise: first argument must be an image.");
-  elseif (!ischar (stype))
+  elseif (! ischar (stype))
     error ("imnoise: second argument must be a string with name of noise type.");
   endif
 
-  in_class = class (A);
-  switch tolower (stype)
-    case {"gaussian", "salt & pepper", "salt and pepper", "speckle"}
-      A        = im2double (A);
-      if (!is_double_image (A))
-        ## FIXME we should probably return an error not a warning but may want to keep
-        ## this for backwards compatibility. Maybe temporarily only. What does matlab do?
-        warning ("imnoise: image should be in [0,1] range.")
-      endif
-      
-      switch tolower (stype)
-        case {"gaussian"}
-          if (nargin < 3), a = 0.0;  endif
-          if (nargin < 4), b = 0.01; endif
-          A = A + (a + randn (size (A)) * sqrt (b));
-          ## Variance of Gaussian data with mean 0 is E[X^2]
-        case {"salt & pepper", "salt and pepper"}
-          if (nargin < 3), a = 0.05; endif
-          noise = rand (size (A));
-          A(noise <= a/2)   = 0;
-          A(noise >= 1-a/2) = 1;
-        case {"speckle"}
-          if (nargin < 3), a = 0.04; endif
-          A = A .* (1 + randn (size (A)) * sqrt (a));
-      endswitch
-      
-      A(A>1) = 1;
-      A(A<0) = 0;
+  in_class  = class (A);
+  fix_class = false;      # for cases when we need to use im2double
 
-      ## we probably should do this in a safer way... but hardcoding the list of
-      ## im2xxxx functions might not be a good idea since it then it requires to be
-      ## added here if a new im2xxx function is implemented
-      A = feval (["im2" in_class], A);
-
-    case {"poisson"}
+  switch (lower (stype))
+    case "poisson"
       switch (in_class)
         case ("double")
-          A = poissrnd (A * 1e12) / 1e12;
+          A = randp (A * 1e12) / 1e12;
         case ("single")
-          A = single (poissrnd (A * 1e6) / 1e6);
+          A = single (randp (A * 1e6) / 1e6);
         case {"uint8", "uint16"}
-          A = cast (poissrnd (A), in_class);
+          A = cast (randp (A), in_class);
         otherwise
           A = imnoise (im2double (A), "poisson");
+          fix_class = true;
       endswitch
-      
+
+    case "gaussian"
+      A         = im2double (A);
+      fix_class = true;
+      if (nargin < 3), a = 0.00; endif
+      if (nargin < 4), b = 0.01; endif
+      A = A + (a + randn (size (A)) * sqrt (b));
+      ## Variance of Gaussian data with mean 0 is E[X^2]
+
+    case {"salt & pepper", "salt and pepper"}
+      if (nargin < 3), a = 0.05; endif
+      noise = rand (size (A));
+      if (isfloat (A))
+        black = 0;
+        white = 1;
+      else
+        black = intmin (in_class);
+        white = intmax (in_class);
+      endif
+      A(noise <= a/2)   = black;
+      A(noise >= 1-a/2) = white;
+
+    case "speckle"
+      A         = im2double (A);
+      fix_class = true;
+      if (nargin < 3), a = 0.04; endif
+      A = A .* (1 + randn (size (A)) * sqrt (a));
+
     otherwise
       error ("imnoise: unknown or unimplemented type of noise `%s'", stype);
   endswitch
+
+  if (fix_class)
+    ## we probably should do this in a safer way... but hardcoding the list of
+    ## im2xxxx functions might not be a good idea since it then it requires to
+    ## be added here if a new im2xxx function is implemented
+    A = feval (["im2" in_class], A);
+  elseif (isfloat (A))
+    ## this includes not even cases where the noise made it go outside of the
+    ## [0 1] range, but also images that were already originally outside that
+    ## range. This is by design and matlab compatibility. And we do this after
+    ## fixing class because the im2XX functions already take care of such
+    ## adjustemt
+    A(A < 0) = cast (0, class (A));
+    A(A > 1) = cast (1, class (A));
+  endif
 
 endfunction
 
