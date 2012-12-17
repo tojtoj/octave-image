@@ -1,4 +1,5 @@
 ## Copyright (C) 2012 Roberto Metere <roberto@metere.it>
+## Copyright (C) 2012 Carnë Draug <carandraug@octave.org>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -41,187 +42,176 @@
 ## @seealso{imdilate, imerode}
 ## @end deftypefn
 
-function SE = strel (varargin)
+function SE = strel (shape, varargin)
 
-  % Check minimum number of arguments
-  switch (nargin)
-    case 0
-      print_usage();
+  if (nargin < 1 || nargin > 4 || (! ischar (shape) && ! ismatrix (shape)))
+    print_usage;
+  endif
 
-    case 1
-      a = varargin{1}
-      if (isnumeric(varargin{1}))
-        SE = strel('arbitrary', varargin{1});
+  if (! ischar (shape))
+    varargin(2:end+1) = varargin(:);
+    varargin(1) = shape;
+    shape = "arbitrary";
+  endif
+
+  SE        = struct;
+  SE.shape  = tolower (shape);
+
+  switch (SE.shape)
+    case "arbitrary"
+      if (numel (varargin) == 1)
+        nhood = varargin{1};
       else
-        print_usage();
+        ## TODO implement nonflat arbitrary (will take 2 arguments)
+        error ("strel: an arbitrary shape only takes 1 argument");
       endif
+      if (! isbw (nhood, "non-logical"))
+        error ("strel: NHOOD must be a matrix with only 0 and 1 values")
+      endif
+      SE.nhood = logical (nhood);
+      SE.flat  = false;
+
+#    case "ball"
+      ## TODO implement ball shape
+
+    case "diamond"
+      if (numel (varargin) == 1)
+        radius = varargin{1};
+      else
+        error ("strel: no RADIUS specified for diamond shape");
+      endif
+      if (! is_positive_integer (radius))
+        error ("strel: RADIUS must be a positive integer");
+      endif
+
+      [xx, yy]  = meshgrid (-radius:radius);
+      SE.nhood  = (abs (xx) + abs (yy)) <= radius;
+      SE.flat   = true;
+
+    case "disk"
+      if (numel (varargin) == 1)
+        radius = varargin{1};
+      else
+        ## TODO implement second option for number of periodic lines
+        error ("strel: no RADIUS specified for disk shape");
+      endif
+      if (! is_positive_integer (radius))
+        error ("strel: RADIUS must be a positive integer");
+      endif
+
+      SE.nhood = fspecial ("disk", radius) > 0;
+      SE.flat  = true;
+
+#    case "line"
+      ## TODO implement line shape
+
+#    case "octagon"
+      ## TODO implement octagon shape
+
+    case "pair"
+      if (numel (varargin) == 1)
+        offset = varargin{1};
+      else
+        error ("strel: no OFFSET specified for pair shape");
+      endif
+      if (! ismatrix (offset) || numel (offset) != 2 || ! isnumeric (offset))
+        error ("strel: OFFSET must be a 2 element vector");
+      elseif (any (fix (offset) != offset))
+        error ("strel: OFFSET values must be integers");
+      endif
+
+      lengths  = abs (2*offset) + 1;
+      SE.nhood = false (lengths);
+      origin   = (lengths + 1)/2;
+      SE.nhood(origin(1), origin(2)) = true;
+      SE.nhood(origin(1) + offset(1), origin(2) + offset(2)) = true;
+
+      SE.flat = true;
+
+    case "periodicline"
+      ## TODO implement periodicline shape
+
+    case "rectangle"
+      if (numel (varargin) == 1)
+        dimensions = varargin{1};
+      else
+        error ("strel: no DIMENSIONS specified for rectangle shape");
+      endif
+      if (! ismatrix (dimensions) || numel (dimensions) != 2 || ! isnumeric (dimensions))
+        error ("strel: DIMENSIONS must be a 2 element vector");
+      elseif (! is_positive_integer (dimensions(1)) || ! is_positive_integer (dimensions(2)))
+        error ("strel: DIMENSIONS values must be positive integers");
+      endif
+
+      SE.nhood = true (dimensions);
+      SE.flat  = true;
+
+    case "square"
+      if (numel (varargin) == 1)
+        edge = varargin{1};
+      else
+        error ("strel: no EDGE specified for square shape");
+      endif
+      if (! is_positive_integer (edge))
+        error ("strel: EDGE value must be positive integers");
+      endif
+
+      SE.nhood = true (edge);
+      SE.flat  = true;
 
     otherwise
-      if (isnumeric(varargin{1}) && isnumeric(varargin{2}))
-        SE = strel('arbitrary', varargin{1}, varargin{2});
-      else
-        shape = varargin{1};
-      endif
+      error ("strel: unknown SHAPE `%s'", shape);
   endswitch
 
-  % Not yet implemented, sorry (a complete version won't have this switch)
-  switch (shape)
-    case {'octagon', 'line', 'periodicline', 'ball', 'arbitrary'}
-      error ("strel: shape '%s' not yet implemented", shape);
-
-    otherwise % Just for completeness
-  endswitch
-
-
-  % Get shape parameters in arg1, arg2, etc...
-  switch (shape)
-    case {'diamond', 'octagon', 'pair', 'rectangle', 'square'}
-      if (nargin == 2)
-        arg1 = varargin{nargin};
-      else
-        error ("strel: shape '%s' needs 1 parameter", shape);
-      endif
-
-    case {'line', 'periodicline'}
-      if (nargin == 3)
-        arg1 = varargin{nargin - 1};
-        arg2 = varargin{nargin};
-      else
-        error ("strel: shape '%s' needs 2 parameters", shape);
-      endif
-
-    case 'ball'
-      if (nargin == 4)
-        arg1 = varargin{nargin - 2};
-        arg2 = varargin{nargin - 1};
-        arg3 = varargin{nargin};
-      else
-        error ("strel: shape '%s' needs 3 parameters", shape);
-      endif
-
-    case {'arbitrary', 'disk'}
-      if (nargin == 2)
-        arg1 = varargin{nargin};
-      elseif (nargin == 3)
-        arg1 = varargin{nargin - 1};
-        arg2 = varargin{nargin};
-      else
-        error ("strel: shape '%s' needs 2 or 3 parameters", shape);
-      endif
-
-    otherwise
-      error ("strel: unknown shape '%s'", shape);
-  endswitch
-
-
-  % Compute structure element
-  switch (shape)
-    case 'square'
-      if (isscalar(arg1) && isnumeric(arg1) && arg1 > 0 && fix (arg1) == arg1)
-        SE.height = zeros([arg1 arg1], 'double');
-        SE.nhood = true (arg1);
-        SE.flat = true;
-        SE = class (SE, "strel");
-      else
-        error ("strel: square EDGE must be a positive integer");
-      endif
-
-    case 'rectangle'
-      if (!isscalar(arg1) && isvector(arg1) && isnumeric(arg1) && prod(size(arg1)) == 2 && arg1(1) > 0 && arg1(2) > 0 && fix (arg1) == arg1)
-        SE.height = zeros(arg1, 'double');
-        SE.nhood = true (arg1);
-        SE.flat = true;
-        SE = class (SE, "strel");
-      else
-        error("strel: rectangle DIMENSIONS must be a positive integer vector with two elements");
-      endif
-
-    case 'diamond'
-      if (isscalar(arg1) && isnumeric(arg1) && arg1 > 0 && fix (arg1) == arg1)
-        n = int32(2*arg1 + 1);
-        c = (n + 1)/2;
-
-        SE.height = zeros([arg1 arg1], 'double');
-        SE.nhood = false (arg1);
-        SE.flat = true;
-        SE = class (SE, "strel");
-
-        for i = 1:n
-          m = n - abs (2*(i - c));
-          for j = (c - m/2 + 1):(c + m/2 - 1)
-            SE.nhood(i, j) = 1;
-          endfor
-        endfor
-      else
-        error("strel: diamond RADIUS must be a positive integer");
-      endif
-
-    case 'pair'
-      if (!isscalar(arg1) && isvector(arg1) && isnumeric(arg1) && prod(size(arg1)) == 2 && arg1(1) > 0 && arg1(2) > 0 && fix (arg1) == arg1)
-        m = abs(2*arg1(1)) + 1;
-        n = abs(2*arg1(2)) + 1;
-
-        SE.height = zeros([m n], 'double');
-        SE.nhood = false ([m n]);
-        SE.flat = true;
-        SE = class (SE, "strel");
-
-        cy = (m + 1)/2;
-        cx = (n + 1)/2;
-        SE.nhood(cy, cx) = 1;
-        SE.nhood(cy + arg1(1), cx + arg1(2) ) = 1;
-      else
-        error("strel: pair OFFSET must be a positive integer vector with two elements");
-      endif
-
-    case 'disk'
-      if (isscalar(arg1) && isnumeric(arg1) && arg1 > 0 && fix (arg1) == arg1)
-        % Default value of N
-        if (nargin <= 2)
-          arg2 = 4;
-        else
-          allowed_n = [0 4 6 8];
-          if (isscalar(arg2) && isnumeric(arg2) && sum(allowed_n(:) == arg2) == 1 && fix(arg2) == arg2)
-            warning("strel: disk N (number of periodic lines to approximate disk) is ignored");
-          else
-            error("strel: disk N (number of periodic lines to approximate disk) may assume only values: 0, 4, 6 or 8");
-          endif
-        endif
-
-        % Compute disk
-        switch (arg2)
-          % This should be only case 0
-          case {0, 4, 6, 8}
-            radius = arg1;
-            n = 2*radius + 1;
-
-            SE.height = zeros([n n], 'double');
-            SE.nhood = false (n);
-            SE.flat = true;
-            SE = class (SE, "strel");
-
-            radius2 = radius^2;
-            for i = 1:n
-              for j = 1:n
-                pitagora = (i - radius - 1)^2 + (j - radius - 1)^2;
-                if (pitagora <= radius2)
-                  SE.nhood(i, j) = 1;
-                endif
-              endfor
-            endfor
-
-          otherwise
-            error("strel: bug - execution should never reach this line. Please report this bug");
-        endswitch
-      else
-        error("strel: disk RADIUS must be a positive integer");
-      endif
-  endswitch
-
+  SE = class (SE, "strel");
 endfunction
 
-%!demo
-%!assert(gethnood(strel('disk',3)))==[0,0,0,1,0,0,0;0,1,1,1,1,1,0;0,1,1,1,1,1,0;1,1,1,1,1,1,1;0,1,1,1,1,1,0;0,1,1,1,1,1,0;0,0,0,1,0,0,0]);
+function retval = is_positive_integer (val)
+  retval = isscalar(val) && isnumeric(val) && val > 0 && fix (val) == val;
+endfunction
 
+%!shared shape
+%! shape = [0 0 0 1];
+%!assert (getnhood (strel (shape)), logical (shape));
+%!assert (getnhood (strel ("arbitrary", shape)), logical (shape));
+%! shape = [0 0 0 1 0 0 0
+%!          0 0 1 1 1 0 0
+%!          0 1 1 1 1 1 0
+%!          1 1 1 1 1 1 1
+%!          0 1 1 1 1 1 0
+%!          0 0 1 1 1 0 0
+%!          0 0 0 1 0 0 0];
+%!assert (getnhood (strel ("diamond", 3)), logical (shape));
+%! shape = [0 0 0 1 0 0 0
+%!          0 1 1 1 1 1 0
+%!          0 1 1 1 1 1 0
+%!          1 1 1 1 1 1 1
+%!          0 1 1 1 1 1 0
+%!          0 1 1 1 1 1 0
+%!          0 0 0 1 0 0 0];
+%!assert (getnhood (strel ("disk", 3)), logical (shape));
+%! shape = [1;1;0];
+%!assert (getnhood (strel ("pair", [-1 0])), logical (shape));
+%! shape = [1 0 0 0 0 0 0
+%!          0 0 0 1 0 0 0
+%!          0 0 0 0 0 0 0];
+%!assert (getnhood (strel ("pair", [-1 -3])), logical (shape));
+%! shape = [0 0 0 0 0 0 0
+%!          0 0 0 0 0 0 0
+%!          0 0 0 1 0 0 0
+%!          0 0 0 0 0 0 0
+%!          0 0 0 0 0 0 1];
+%!assert (getnhood (strel ("pair", [2 3])), logical (shape));
+%!assert (getnhood (strel ("rectangle", [10 5])), true (10, 5));
+%!assert (getnhood (strel ("square", 5)), true (5));
+
+## test input validation
 %!error strel()
-%!error strel('rectangle', 2)
+%!error strel("nonmethodthing", 2)
+%!error strel("arbitrary", "stuff")
+%!error strel("diamond", -3)
+%!error strel("disk", -3)
+%!error strel("pair", [45 67 90])
+%!error strel("rectangle", 2)
+%!error strel("rectangle", [2 -5])
+%!error strel("square", [34 1-2])

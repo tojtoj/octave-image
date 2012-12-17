@@ -23,6 +23,6 @@
 
 function H = getheight (SE)
 
-  H = SE.height;
+  H = zeros (size (SE.nhood));
 
 endfunction
