@@ -80,6 +80,14 @@ Morhophological Operations
  imopen
  imtophat
  mmgradm
+ @strel/getheight
+ @strel/getneightbors
+ @strel/getnhood
+ @strel/getsequence
+ @strel/isflat
+ @strel/reflect
+ @strel/strel
+ @strel/translate
 Read/write
  analyze75info
  analyze75read
