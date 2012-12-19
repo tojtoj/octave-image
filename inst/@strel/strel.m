@@ -84,7 +84,7 @@ function SE = strel (shape, varargin)
                           all (size (SE.height) == size (nhood))      &&
                           all (isfinite (SE.height(:)))))
         error ("strel: HEIGHT must be a finite real matrix of the same size as NHOOD");
-      elseif (! SE.flat && ! (all (SE.height( SE.nhood)(:) > 0) &&
+      elseif (! SE.flat && ! (all (SE.height( SE.nhood)(:) != 0) &&
                               all (SE.height(!SE.nhood)(:) == 0)))
         error ("strel: HEIGHT must a matrix with values for each non-zero value in NHOOD");
       endif
