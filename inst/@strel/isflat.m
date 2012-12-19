@@ -28,6 +28,6 @@
 ##        strel included.
 function TF = isflat (SE)
 
-  TF = double(SE.flat);
+  TF = double (SE.flat);
 
 endfunction

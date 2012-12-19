@@ -54,22 +54,40 @@ function SE = strel (shape, varargin)
     shape = "arbitrary";
   endif
 
+  ## because the order that these are created matters, we make them all here
   SE        = struct;
   SE.shape  = tolower (shape);
+  SE.nhood  = false;
+  SE.flat   = true;
+  SE.height = [];
 
   switch (SE.shape)
     case "arbitrary"
       if (numel (varargin) == 1)
-        nhood = varargin{1};
+        nhood   = varargin{1};
+        SE.flat = true;
+      elseif (numel (varargin) == 2)
+        nhood     = varargin{1};
+        SE.height = varargin{2};
+        SE.flat   = false;
       else
-        ## TODO implement nonflat arbitrary (will take 2 arguments)
-        error ("strel: an arbitrary shape only takes 1 argument");
+        error ("strel: an arbitrary shape takes 1 or 2 arguments");
       endif
       if (! isbw (nhood, "non-logical"))
         error ("strel: NHOOD must be a matrix with only 0 and 1 values")
       endif
-      SE.nhood = logical (nhood);
-      SE.flat  = false;
+
+      SE.nhood = logical (nhood); # we need this as logical for the height tests
+
+      if (! SE.flat && ! (isnumeric (SE.height) && isreal (SE.height) &&
+                          ndims (SE.height) == ndims (nhood)          &&
+                          all (size (SE.height) == size (nhood))      &&
+                          all (isfinite (SE.height(:)))))
+        error ("strel: HEIGHT must be a finite real matrix of the same size as NHOOD");
+      elseif (! SE.flat && ! (all (SE.height( SE.nhood)(:) > 0) &&
+                              all (SE.height(!SE.nhood)(:) == 0)))
+        error ("strel: HEIGHT must a matrix with values for each non-zero value in NHOOD");
+      endif
 
 #    case "ball"
       ## TODO implement ball shape
@@ -167,13 +185,16 @@ function SE = strel (shape, varargin)
 endfunction
 
 function retval = is_positive_integer (val)
-  retval = isscalar(val) && isnumeric(val) && val > 0 && fix (val) == val;
+  retval = isscalar (val) && isnumeric (val) && val > 0 && fix (val) == val;
 endfunction
 
-%!shared shape
-%! shape = [0 0 0 1];
+%!shared shape, height
+%! shape  = [0 0 0 1];
 %!assert (getnhood (strel (shape)), logical (shape));
 %!assert (getnhood (strel ("arbitrary", shape)), logical (shape));
+%! height = [0 0 0 3];
+%!assert (getnhood (strel ("arbitrary", shape, height)), logical (shape));
+%!assert (getheight (strel ("arbitrary", shape, height)), height);
 %! shape = [0 0 0 1 0 0 0
 %!          0 0 1 1 1 0 0
 %!          0 1 1 1 1 1 0
@@ -209,6 +230,9 @@ endfunction
 %!error strel()
 %!error strel("nonmethodthing", 2)
 %!error strel("arbitrary", "stuff")
+%!error strel("arbitrary", [0 0 1], [2 0 1])
+%!error strel("arbitrary", [0 0 1], [2 0 1; 4 5 1])
+%!error strel("arbitrary", [0 0 1], "stuff")
 %!error strel("diamond", -3)
 %!error strel("disk", -3)
 %!error strel("pair", [45 67 90])

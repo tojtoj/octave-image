@@ -23,6 +23,10 @@
 
 function H = getheight (SE)
 
-  H = zeros (size (SE.nhood));
+  if (SE.flat)
+    H = zeros (size (SE.nhood));
+  else
+    H = SE.height;
+  endif
 
 endfunction
