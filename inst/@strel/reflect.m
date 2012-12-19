@@ -27,9 +27,7 @@
 function SE2 = reflect (SE)
 
   SE2 = SE;
-  SE2.nhood = rotdim(SE.nhood, 2);
-  if (!SE2.flat)
-    SE2.height = rotdim(SE.height, 2);
-  endif
+  SE2.nhood  = rotdim (SE.nhood, 2);
+  SE2.height = rotdim (SE.height, 2);
 
 endfunction

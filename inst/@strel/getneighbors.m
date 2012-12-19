@@ -29,6 +29,6 @@
 function [offsets, heights] = getneighbors (SE)
 
   error ("getneighbors: not yet implemented");
-  P = sum(SE.nhood(:) == 1);
+  P = nnz (SE.nhood);
 
 endfunction

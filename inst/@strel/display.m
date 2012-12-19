@@ -22,8 +22,7 @@
 
 function display (SE)
 
-  % Some elaborations
-  P = sum(SE.nhood(:) == 1);
+  P = nnz (SE.nhood);
   if (SE.flat)
     flatstr = "Flat";
   else
@@ -35,13 +34,15 @@ function display (SE)
     plural_p = "";
   endif
 
-  % Output
-  fprintf ("%s = \n", inputname(1));
-  fprintf ("  %s strel object with %d neighbor%s\n\n", flatstr, P, plural_p);
-  fprintf ("  Neighborhood:\n");
+  ## FIXME using inputname won't work when SE is a field in a struct or in a
+  ##       cell array. Not only won't get the correct name sometimes, it may
+  ##       also mess up the display of nested structures.
+  printf ("%s = \n", inputname (1));
+  printf ("  %s STREL object with %d neighbor%s\n\n", flatstr, P, plural_p);
+  printf ("  Neighborhood:\n");
   display (SE.nhood);
   if (!SE.flat)
-    fprintf ("  Height:\n");
+    printf ("  Height:\n");
     display (SE.height);
   endif
 
