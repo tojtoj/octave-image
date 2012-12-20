@@ -104,9 +104,10 @@ function SE = strel (shape, varargin)
         error ("strel: RADIUS must be a positive integer");
       endif
 
-      [xx, yy]  = meshgrid (-radius:radius);
-      SE.nhood  = (abs (xx) + abs (yy)) <= radius;
-      SE.flat   = true;
+      corner   = tril (true (radius+1, radius), -1);
+      SE.nhood = [rot90(tril(true(radius+1))) corner;
+                  corner' rot90(triu(true(radius),1))];
+      SE.flat  = true;
 
     case "disk"
       if (numel (varargin) == 1)
