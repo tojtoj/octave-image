@@ -23,21 +23,23 @@
 ## Available shapes at the moment are: 'square', 'rectangle', 'diamond', 'pair',
 ## 'disk' (partially)
 ##
-## Argument @var{shape} can be = 'diamond', 'octagon', 'pair', 'rectangle', 'square', 'line',
-## 'periodicline', 'ball', 'arbitrary', 'disk'
+## Argument @var{shape} can be = 'arbitrary' (default), 'ball', 'diamond', 'disk',
+## 'line', 'octagon', 'pair', 'periodicline', 'rectangle', 'square'.
+##
 ## Argument @var{parameters} may vary for number, type and meaning, depending on @var{shape}.
-##           'diamond' - RADIUS = integer radius greater than 0
-##           'octagon' - NYI
-##           'pair' - OFFSET = 2-element positive integer vector [X Y] or [X; Y]
-##           'rectangle' - DIMENSIONS = 2-element positive integer vector [X Y] or [X; Y]
-##           'square' - EDGE = integer edge greater than 0
-##           'line' - NYI
-##           'periodicline' - NYI
+##           'arbitrary' - NHOOD = neighborhood logical matrix
+##                         HEIGHT = real matrix of heights (for non-flat strel) (optional)
 ##           'ball' - NYI
-##           'arbitrary' - NYI
-##           'disk' - RADIUS = integer radius greater than 0
+##           'diamond' - RADIUS = positive integer
+##           'disk' - RADIUS = positive integer
 ##                  - N = use 0, 4, 6 or 8 periodic lines (default 0) (NYI)
 ##                        (default will be 4, for now 0: it works 'slower')
+##           'line' - NYI
+##           'octagon' - APOTHEM = distance from the origin to the sides of the octagon
+##           'pair' - OFFSET = 2-element positive integer vector [X Y] or [X; Y]
+##           'periodicline' - NYI
+##           'rectangle' - DIMENSIONS = 2-element positive integer vector [X Y] or [X; Y]
+##           'square' - EDGE = positive integer
 ##
 ## @seealso{imdilate, imerode}
 ## @end deftypefn
@@ -86,7 +88,7 @@ function SE = strel (shape, varargin)
         error ("strel: HEIGHT must be a finite real matrix of the same size as NHOOD");
       elseif (! SE.flat && ! (all (SE.height( SE.nhood)(:) != 0) &&
                               all (SE.height(!SE.nhood)(:) == 0)))
-        error ("strel: HEIGHT must a matrix with values for each non-zero value in NHOOD");
+        error ("strel: HEIGHT must be a matrix with values for each non-zero value in NHOOD");
       endif
 
 #    case "ball"
@@ -123,8 +125,27 @@ function SE = strel (shape, varargin)
 #    case "line"
       ## TODO implement line shape
 
-#    case "octagon"
-      ## TODO implement octagon shape
+   case "octagon"
+      if (numel (varargin) == 1)
+        apothem = varargin{1};
+      else
+        error ("strel: no APOTHEM specified for octagon shape");
+      endif
+      if (! is_positive_integer (apothem) || mod (apothem, 3) != 0)
+        error ("strel: APOTHEM must be a positive integer multiple of 3");
+      endif
+
+      ## we look at it as 9 blocks. North AND South are the same and West TO
+      ## East as well. We make the corner for NorthEast and rotate it for the
+      ## other corners
+      cwide    = apothem/3*2 + 1;
+      iwide    = apothem/3*2 - 1;
+      N_and_S  = true ([cwide iwide]);
+      corner   = tril (true (cwide));
+      SE.nhood = [rotdim(corner), N_and_S, corner;
+                  true([iwide (2*apothem + 1)]);
+                  transpose(corner), N_and_S, rotdim(corner, -1)];
+      SE.flat  = true;
 
     case "pair"
       if (numel (varargin) == 1)
@@ -211,6 +232,14 @@ endfunction
 %!          0 1 1 1 1 1 0
 %!          0 0 0 1 0 0 0];
 %!assert (getnhood (strel ("disk", 3)), logical (shape));
+%! shape = [0 0 1 1 1 0 0
+%!          0 1 1 1 1 1 0
+%!          1 1 1 1 1 1 1
+%!          1 1 1 1 1 1 1
+%!          1 1 1 1 1 1 1
+%!          0 1 1 1 1 1 0
+%!          0 0 1 1 1 0 0];
+%!assert (getnhood (strel ("octagon", 3)), logical (shape));
 %! shape = [1;1;0];
 %!assert (getnhood (strel ("pair", [-1 0])), logical (shape));
 %! shape = [1 0 0 0 0 0 0
@@ -235,6 +264,7 @@ endfunction
 %!error strel("arbitrary", [0 0 1], "stuff")
 %!error strel("diamond", -3)
 %!error strel("disk", -3)
+%!error strel("octagon", 4)
 %!error strel("pair", [45 67 90])
 %!error strel("rectangle", 2)
 %!error strel("rectangle", [2 -5])
