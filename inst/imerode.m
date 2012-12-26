@@ -21,8 +21,9 @@
 ##
 ## The image @var{im} must be a black and white image.
 ##
-## @var{se} is the structuring element used for the erosion.  It can either be
-## a matrix of 0 and 1, or a strel object.
+## @var{se} is the structuring element used for the erosion.  It can be a single
+## strel object, a cell array of strel objects as returned by
+## @code{@@strel/getsequence}, or a matrix of 0's and 1's.
 ##
 ## The center of @var{SE} is calculated using floor((size(@var{SE})+1)/2).
 ##
@@ -39,32 +40,34 @@ function im = imerode (im, se)
     print_usage();
   endif
 
-  ## it's easier to create a strel object than to have conditions later on,
-  ## specially once we implement structuring element decomposition
-  if (! isa (se, "strel"))
-    se = strel ("arbitrary", se);
+  ## it's easier to just get the sequence of strel objects now than to have a
+  ## bunch of conditions later on
+  if (! (iscell (se) && all (cellfun ("isclass", se, "strel"))))
+    if (ismatrix (se))
+      se = strel ("arbitrary", se);
+    elseif (! isa (se, "strel"))
+      error("imerode: SE must a strel object, or a matrix of 0's and 1's");
+    endif
+    se = getsequence (se);
   endif
 
   cl = class (im);
   if (isbw (im, "non-logical"))
-    if (isflat (se))
-      nhood = getnhood (se);
-    else
-      nhood = getheight (SE);
-    endif
-    ## this is the same as nhood(end:-1:1, end:-1:1) but should work for any
-    ## number of dimensions since the SE needs to be reversed for the convolution
-    nhood = rotdim (nhood, 2, [1 ndims(nhood)]);
-    im    = convn (im, nhood, "same") == nnz (nhood);
 
     ## once we do implement getsequence for strel objects we should do
     ## something like:
-#    seq = getsequence (se);
-#    for ii = 1:numel (seq)
-#      nhood = getnhood (seq(ii));
-#      nhood = rotdim (nhood, 2, [1 ndims(nhood)]);
-#      im    = convn (im, nhood, "same") == nnz (nhood);
-#    endfor
+    for k = 1:numel (se)
+      if (isflat (se{k}))
+        nhood = getnhood (se{k});
+      else
+        nhood = getheight (se{k});
+      endif
+      ## this call to rotdim is the same as nhood(end:-1:1, end:-1:1) but should
+      ## work for any number of dimensions since the SE needs to be reversed for
+      ## the convolution
+      nhood = rotdim (nhood, 2, [1 ndims(nhood)]);
+      im    = convn (im, nhood, "same") == nnz (nhood);
+    endfor
 
   elseif (isgray (im))
     error ("imerode: grayscale erosion not yet implemented");
@@ -103,3 +106,7 @@ endfunction
 %!assert (imerode (logical (im), se), logical (out));
 %!assert (imerode (im, logical (se)), out);
 %!assert (imerode (logical (im), logical (se)), logical (out));
+
+%!error imerode (ones (10), "some text")
+%!error imerode (ones (10), 45)
+%!error imerode (ones (10), {23, 45})
