@@ -63,6 +63,7 @@ function SE = strel (shape, varargin)
   SE.flat   = true;
   SE.height = [];
   SE.seq    = cell;
+  SE.opt    = struct;
 
   switch (SE.shape)
     case "arbitrary"
@@ -174,30 +175,32 @@ function SE = strel (shape, varargin)
 
     case "rectangle"
       if (numel (varargin) == 1)
-        dimensions = varargin{1};
+        SE.opt.dimensions = varargin{1};
       else
         error ("strel: no DIMENSIONS specified for rectangle shape");
       endif
-      if (! ismatrix (dimensions) || numel (dimensions) != 2 || ! isnumeric (dimensions))
+      if (! ismatrix (SE.opt.dimensions) || numel (SE.opt.dimensions) != 2 ||
+          ! isnumeric (SE.opt.dimensions))
         error ("strel: DIMENSIONS must be a 2 element vector");
-      elseif (! is_positive_integer (dimensions(1)) || ! is_positive_integer (dimensions(2)))
+      elseif (! is_positive_integer (SE.opt.dimensions(1)) ||
+              ! is_positive_integer (SE.opt.dimensions(2)))
         error ("strel: DIMENSIONS values must be positive integers");
       endif
 
-      SE.nhood = true (dimensions);
+      SE.nhood = true (SE.opt.dimensions);
       SE.flat  = true;
 
     case "square"
       if (numel (varargin) == 1)
-        edge = varargin{1};
+        SE.opt.edge = varargin{1};
       else
         error ("strel: no EDGE specified for square shape");
       endif
-      if (! is_positive_integer (edge))
+      if (! is_positive_integer (SE.opt.edge))
         error ("strel: EDGE value must be positive integers");
       endif
 
-      SE.nhood = true (edge);
+      SE.nhood = true (SE.opt.edge);
       SE.flat  = true;
 
     otherwise
