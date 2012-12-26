@@ -20,6 +20,11 @@ Summary of important user-visible changes for image 2.0.1:
 
  ** The option to create poisson noise to an image has been added to `imnoise'. 
 
+ ** With the addition of the strel class, the following functions are now able
+    to handle strel objects:
+
+      imerode
+
 Summary of important user-visible changes for image 2.0.0:
 -------------------------------------------------------------------
 
