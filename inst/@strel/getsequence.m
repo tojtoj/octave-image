@@ -20,8 +20,18 @@
 ## @seealso{imdilate, imerode, strel}
 ## @end deftypefn
 
-function SEQ = getsequence (SE)
+function seq = getsequence (se)
 
-  error ("getsequence: not yet implemented");
+  ## We can do this in 2 ways:
+  ##   1. calculate this when creating the object and this only returns it
+  ##   2. have strel keep the options and calculate the sequence (and store it )
+  ##      only if requested (probably this is better)
+  if (isempty (se.seq))
+    ## this is just a sequence of SEs that can be used instead of a larger one,
+    ## so it's still valid to have a single element same as nhood. While we
+    ## don't implement this properly...
+    se.seq{1} = se;
+  endif
+  seq = se.seq;
 
 endfunction

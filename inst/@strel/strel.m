@@ -62,6 +62,7 @@ function SE = strel (shape, varargin)
   SE.nhood  = false;
   SE.flat   = true;
   SE.height = [];
+  SE.seq    = cell;
 
   switch (SE.shape)
     case "arbitrary"
