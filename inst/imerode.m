@@ -47,13 +47,23 @@ function im = imerode (im, se)
 
   cl = class (im);
   if (isbw (im, "non-logical"))
-    se = getnhood (se);
-    im = filter2 (se, im) == nnz (se);
-    ## once we do implement getsequence for strel objects we should do:
+    if (isflat (se))
+      nhood = getnhood (se);
+    else
+      nhood = getheight (SE);
+    endif
+    ## this is the same as nhood(end:-1:1, end:-1:1) but should work for any
+    ## number of dimensions since the SE needs to be reversed for the convolution
+    nhood = rotdim (nhood, 2, [1 ndims(nhood)]);
+    im    = convn (im, nhood, "same") == nnz (nhood);
+
+    ## once we do implement getsequence for strel objects we should do
+    ## something like:
 #    seq = getsequence (se);
 #    for ii = 1:numel (seq)
-#      cse = getnhood (seq(ii));
-#      im  = filter2 (cse, im) == nnz (cse);
+#      nhood = getnhood (seq(ii));
+#      nhood = rotdim (nhood, 2, [1 ndims(nhood)]);
+#      im    = convn (im, nhood, "same") == nnz (nhood);
 #    endfor
 
   elseif (isgray (im))
