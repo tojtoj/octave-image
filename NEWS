@@ -3,7 +3,12 @@ Summary of important user-visible changes for image 2.0.1:
 
  ** The following functions are new:
 
-      checkerboard    strel
+      checkerboard
+      cp2tform
+      maketform
+      strel
+      tformfwd
+      tforminv
 
  ** The plot produced by `imhist' is correctly scaled on the X axis so that the
     colorbar corresponds to the actual intensity of the stems; the given
@@ -18,7 +23,7 @@ Summary of important user-visible changes for image 2.0.1:
  ** The function `rgbplot' accepts a style option which alows for a composite
     display of a colormap.
 
- ** The option to create poisson noise to an image has been added to `imnoise'. 
+ ** The option to create poisson noise to an image has been added to `imnoise'.
 
  ** With the addition of the strel class, the following functions are now able
     to handle strel objects:

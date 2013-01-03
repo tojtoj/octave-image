@@ -105,6 +105,7 @@ Region-based and block processing
  poly2mask
  roicolor
 Spatial transformations
+ cp2tform
  imcrop
  impad
  imperspectivewarp
@@ -114,7 +115,10 @@ Spatial transformations
  imrotate_Fourier
  imshear
  imtranslate
+ maketform
  rotate_scale
+ tformfwd
+ tforminv
 Types and Type conversions
  grayslice
  graythresh
