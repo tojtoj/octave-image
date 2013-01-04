@@ -318,7 +318,7 @@ Computes the largest value in a local neighbourheed.\n\
 @item \"encoded sign of difference\"\n\
 NOT IMPLEMENTED (local binary patterns style)\n\
 @end table\n\
-@seealso{cordflt2, ordfilt2}\n\
+@seealso{ordfilt2}\n\
 @end deftypefn\n\
 ")
 {
