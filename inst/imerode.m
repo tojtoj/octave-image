@@ -19,7 +19,8 @@
 ## @deftypefn {Function File} {@var{im2} =} imerode (@var{im}, @var{se})
 ## Perform morphological erosion on image.
 ##
-## The image @var{im} must be a black and white image.
+## The image @var{im} must be black and white or grayscale image, with any number
+## of dimensions.
 ##
 ## @var{se} is the structuring element used for the erosion.  It can be a single
 ## strel object, a cell array of strel objects as returned by
@@ -27,12 +28,8 @@
 ##
 ## The center of @var{SE} is calculated using floor((size(@var{SE})+1)/2).
 ##
-## Pixels outside the image are considered to be 0.
-##
 ## @seealso{imdilate, imopen, imclose, strel}
 ## @end deftypefn
-
-## TODO: we need to get grayscale erosion working again.
 
 function im = imerode (im, se)
 
@@ -53,9 +50,6 @@ function im = imerode (im, se)
 
   cl = class (im);
   if (isbw (im, "non-logical"))
-
-    ## once we do implement getsequence for strel objects we should do
-    ## something like:
     for k = 1:numel (se)
       if (isflat (se{k}))
         nhood = getnhood (se{k});
@@ -69,10 +63,13 @@ function im = imerode (im, se)
       im    = convn (im, nhood, "same") == nnz (nhood);
     endfor
 
-  elseif (isgray (im))
-    error ("imerode: grayscale erosion not yet implemented");
-    ## the following code used to do this but is incorrect (checked with ImageJ)
-    ## im = ordfiltn (im, 1, se, 0);
+  elseif (isimage (im))
+    for k = 1:numel (se)
+      ## this is just like a minimum filter so we need to have the outside of
+      ## the image above all possible values (hence Inf)
+      ## FIXME what to do with non-flat se?
+      im = ordfiltn (im, 1, getnhood (se{k}), Inf);
+    endfor
   else
     error("imerode: IM must be a grayscale or black and white matrix");
   endif
