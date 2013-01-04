@@ -16,7 +16,8 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {@var{im2} =} imerode (@var{im}, @var{se})
+## @deftypefn  {Function File} {@var{im2} =} imerode (@var{im}, @var{se})
+## @deftypefnx {Function File} {@var{im2} =} imerode (@var{im}, @var{se}, @var{shape})
 ## Perform morphological erosion on image.
 ##
 ## The image @var{im} must be black and white or grayscale image, with any number
@@ -26,15 +27,29 @@
 ## strel object, a cell array of strel objects as returned by
 ## @code{@@strel/getsequence}, or a matrix of 0's and 1's.
 ##
-## The center of @var{SE} is calculated using floor((size(@var{SE})+1)/2).
+## The size of the result is determined by the optional @var{shape} argument
+## which takes the following values:
+##
+## @table @asis
+## @item "same" (default)
+## Return image of the same size as input @var{im}.
+## 
+## @item "full"
+## Return the full erosion (image is padded to accomodate @var{se} near the
+## borders). Not implemented for grayscale images.
+## @end table
+##
+## The center of @var{SE} is at the indices @code{floor ([size(@var{B})/2] + 1)}.
 ##
 ## @seealso{imdilate, imopen, imclose, strel}
 ## @end deftypefn
 
-function im = imerode (im, se)
+function im = imerode (im, se, shape = "same")
 
-  if (nargin != 2)
+  if (nargin < 2 || nargin > 3)
     print_usage();
+  elseif (! ischar (shape) || ! any (strcmpi (shape, {"same", "full"})))
+    error ("imerode: SHAPE must be `same' or `full'")
   endif
 
   ## it's easier to just get the sequence of strel objects now than to have a
@@ -60,7 +75,7 @@ function im = imerode (im, se)
       ## work for any number of dimensions since the SE needs to be reversed for
       ## the convolution
       nhood = rotdim (nhood, 2, [1 ndims(nhood)]);
-      im    = convn (im, nhood, "same") == nnz (nhood);
+      im    = convn (im, nhood, shape) == nnz (nhood);
     endfor
 
   elseif (isimage (im))
@@ -68,6 +83,9 @@ function im = imerode (im, se)
       ## this is just like a minimum filter so we need to have the outside of
       ## the image above all possible values (hence Inf)
       ## FIXME what to do with non-flat se?
+      ## FIXME needs to implement the shape optino here. Most likely requires a
+      ##       to be padded first (padarray), and use of __spatial_filtering__
+      ##       directly (that's what ordfiltn does) with the "min" method
       im = ordfiltn (im, 1, getnhood (se{k}), Inf);
     endfor
   else
