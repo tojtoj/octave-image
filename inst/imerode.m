@@ -58,7 +58,7 @@ function im = imerode (im, se, shape = "same")
     if (ismatrix (se))
       se = strel ("arbitrary", se);
     elseif (! isa (se, "strel"))
-      error("imerode: SE must a strel object, or a matrix of 0's and 1's");
+      error ("imerode: SE must a strel object, or a matrix of 0's and 1's");
     endif
     se = getsequence (se);
   endif
@@ -83,13 +83,14 @@ function im = imerode (im, se, shape = "same")
       ## this is just like a minimum filter so we need to have the outside of
       ## the image above all possible values (hence Inf)
       ## FIXME what to do with non-flat se?
-      ## FIXME needs to implement the shape optino here. Most likely requires a
-      ##       to be padded first (padarray), and use of __spatial_filtering__
-      ##       directly (that's what ordfiltn does) with the "min" method
+      ## TODO needs to implement the shape optino here. Most likely requires a
+      ##      to be padded first (padarray), and use of __spatial_filtering__
+      ##      directly (that's what ordfiltn does) with the "min" method. The
+      ##      same needs to be done for imdilate
       im = ordfiltn (im, 1, getnhood (se{k}), Inf);
     endfor
   else
-    error("imerode: IM must be a grayscale or black and white matrix");
+    error ("imerode: IM must be a grayscale or black and white matrix");
   endif
 
   ## we return image on same class as input

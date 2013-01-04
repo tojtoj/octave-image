@@ -16,48 +16,60 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {@var{B} =} imdilate (@var{A}, @var{se})
+## @deftypefn  {Function File} {@var{im2} =} imdilate (@var{im}, @var{se})
+## @deftypefnx {Function File} {@var{im2} =} imdilate (@var{im}, @var{se}, @var{shape})
 ## Perform morphological dilation on a given image.
 ##
-## The image @var{A} must be a grayscale or binary image, and @var{se} a
-## structuring element. Both must have the same class, e.g., if @var{A} is a
-## logical matrix, @var{se} must also be logical. Note that the erosion
-## algorithm is different for each class, being much faster for logical
-## matrices. As such, if you have a binary matrix, you should use @code{logical}
-## first. This will also reduce the memory usage of your code.
+## The image @var{im} must be black and white or grayscale image, with any number
+## of dimensions.
 ##
-## The center of @var{SE} is calculated using floor((size(@var{SE})+1)/2).
+## @var{se} is the structuring element used for the erosion and must be a matrix
+## of 0's and 1's.
 ##
-## Pixels outside the image are considered to be 0.
+## The size of the result is determined by the optional @var{shape} argument
+## which takes the following values:
+##
+## @table @asis
+## @item "same" (default)
+## Return image of the same size as input @var{im}.
+## 
+## @item "full"
+## Return the full erosion (image is padded to accomodate @var{se} near the
+## borders). Not implemented for grayscale images.
+## @end table
+##
+## The center of @var{SE} is at the indices @code{floor ([size(@var{B})/2] + 1)}.
 ##
 ## @seealso{imerode, imopen, imclose}
 ## @end deftypefn
 
-function retval = imdilate(im, se)
-  ## Checkinput
-  if (nargin != 2)
+function im = imdilate (im, se, shape = "same")
+
+  if (nargin < 2 || nargin > 3)
     print_usage();
-  endif
-  if (!ismatrix(im) || !isreal(im))
-    error("imdilate: first input argument must be a real matrix");
-  elseif (!ismatrix(se) || !isreal(se))
-    error("imdilate: second input argument must be a real matrix");
-  elseif ( !strcmp(class(im), class(se)) )
-    error("imdilate: image and structuring element must have the same class");
+  elseif (! ischar (shape) || ! any (strcmpi (shape, {"same", "full"})))
+    error ("imdilate: SHAPE must be `same' or `full'")
   endif
 
-  ## Perform filtering
-  ## Filtering must be done with the reflection of the structuring element (they
-  ## are not always symmetrical)
-  se      = imrotate(se, 180);
+  if (! isbw (im, "non-logical"))
+    error ("imerode: SE must be a matrix of 0's and 1's");
+  endif
 
-  ## If image is binary/logical, try to use filter2 (much faster)
-  if (islogical(im))
-    retval  = filter2(se,im)>0;
+  cl = class (im);
+  if (isbw (im, "non-logical"))
+    im = convn (im, se, shape) > 0;
+  elseif (isimage (im))
+    ## TODO needs to implement the shape option here. Most likely requires a
+    ##      to be padded first (padarray), and use of __spatial_filtering__
+    ##      directly (that's what ordfiltn does) with the "max" method. The
+    ##      same needs to be done for imerode
+    im = ordfiltn (im, nnz (se), se, -Inf);
   else
-    retval  = ordfiltn(im, sum(se(:)!=0), se, 0);
+    error ("imdilate: IM must be a grayscale or black and white matrix");
   endif
 
+  ## we return image on same class as input
+  im = cast (im, cl);
 endfunction
 
 %!demo
