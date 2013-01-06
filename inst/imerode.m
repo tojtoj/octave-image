@@ -1,6 +1,6 @@
 ## Copyright (C) 2004 Josep Mones i Teixidor <jmones@puntbarra.com>
 ## Copyright (C) 2008 Soren Hauberg <soren@hauberg.org>
-## Copyright (C) 2011 Carnë Draug <carandraug+dev@gmail.com>
+## Copyright (C) 2011-2012 Carnë Draug <carandraug+dev@gmail.com>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -20,12 +20,19 @@
 ## @deftypefnx {Function File} {@var{im2} =} imerode (@var{im}, @var{se}, @var{shape})
 ## Perform morphological erosion on image.
 ##
-## The image @var{im} must be black and white or grayscale image, with any number
-## of dimensions.
+## The image @var{im} must be black and white or grayscale image.  The erosion
+## is performed with the structuring element @var{se} which can be a:
 ##
-## @var{se} is the structuring element used for the erosion.  It can be a single
-## strel object, a cell array of strel objects as returned by
-## @code{@@strel/getsequence}, or a matrix of 0's and 1's.
+## @itemize @bullet
+## @item strel object;
+## @item cell array of strel objects as returned by @code{@@strel/getsequence};
+## @item matrix of 0's and 1's.
+## @end itemize
+##
+## The erosion is performed in all dimensions, and both @var{im} and @var{se}
+## can have any number of dimensions.
+##
+## To perform a non-flat erosion, @var{se} must be a strel object.
 ##
 ## The size of the result is determined by the optional @var{shape} argument
 ## which takes the following values:
@@ -36,7 +43,7 @@
 ## 
 ## @item "full"
 ## Return the full erosion (image is padded to accomodate @var{se} near the
-## borders). Not implemented for grayscale images.
+## borders).
 ## @end table
 ##
 ## The center of @var{SE} is at the indices @code{floor ([size(@var{B})/2] + 1)}.
@@ -50,6 +57,8 @@ function im = imerode (im, se, shape = "same")
     print_usage();
   elseif (! ischar (shape) || ! any (strcmpi (shape, {"same", "full"})))
     error ("imerode: SHAPE must be `same' or `full'")
+  elseif (any (strcmpi (shape, {"ispacked", "notpacked"})))
+    error ("imerode: packed images are not yet implemented. See http://www.octave.org/missing.html")
   endif
 
   ## it's easier to just get the sequence of strel objects now than to have a
@@ -60,35 +69,28 @@ function im = imerode (im, se, shape = "same")
     elseif (! isa (se, "strel"))
       error ("imerode: SE must a strel object, or a matrix of 0's and 1's");
     endif
-    se = getsequence (se);
+    seq = getsequence (se);
   endif
 
   cl = class (im);
   if (isbw (im, "non-logical"))
-    for k = 1:numel (se)
-      if (isflat (se{k}))
-        nhood = getnhood (se{k});
-      else
-        nhood = getheight (se{k});
-      endif
-      ## this call to rotdim is the same as nhood(end:-1:1, end:-1:1) but should
-      ## work for any number of dimensions since the SE needs to be reversed for
-      ## the convolution
-      nhood = rotdim (nhood, 2, [1 ndims(nhood)]);
+    for k = 1:numel (seq)
+      nhood = getnhood (seq{k});
+      nhood = reshape (nhood(end:-1:1), size (nhood)); # N-dimensional rotation
       im    = convn (im, nhood, shape) == nnz (nhood);
     endfor
 
   elseif (isimage (im))
-    for k = 1:numel (se)
-      ## this is just like a minimum filter so we need to have the outside of
-      ## the image above all possible values (hence Inf)
-      ## FIXME what to do with non-flat se?
-      ## TODO needs to implement the shape optino here. Most likely requires a
-      ##      to be padded first (padarray), and use of __spatial_filtering__
-      ##      directly (that's what ordfiltn does) with the "min" method. The
-      ##      same needs to be done for imdilate
-      im = ordfiltn (im, 1, getnhood (se{k}), Inf);
-    endfor
+    ## this is just like a minimum filter so we need to have the outside of
+    ## the image above all possible values (hence Inf)
+    im = pad_for_spatial_filter (im, getnhood (se), Inf)
+    ## TODO we should implement the shape options in the __spatial_filtering__
+    ##      code. The alternative is to perform the padding twice (ugly hack).
+    ##      It also means we can't use SE decomposition...
+    if (strcmpi (shape, "full"))
+      im = pad_for_spatial_filter (im, getnhood (se), Inf)
+    endif
+    im = __spatial_filtering__ (im, logical (getnhood (se)), "min", getheight (se));
   else
     error ("imerode: IM must be a grayscale or black and white matrix");
   endif

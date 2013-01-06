@@ -41,6 +41,3 @@ function im = pad_for_spatial_filter (im, domain, padval)
   endif
 
 endfunction
-
-
-

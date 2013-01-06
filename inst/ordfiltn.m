@@ -79,6 +79,5 @@ function retval = ordfiltn (A, nth, domain, varargin)
 
   ## Perform the filtering
   retval = __spatial_filtering__ (A, logical (domain), "ordered", S, nth);
+
 endfunction
-
-
