@@ -33,10 +33,12 @@ Summary of important user-visible changes for image 2.0.1:
  ** The functions `imerode' and `imdilate' no longer require that image and
     structuring element be of same class. They now perform faster for all black
     and white images, independently of their class, and always return an image
-    of same class as the input image.
+    of same class as the input image. The shape option has also been implemented.
 
- ** The shape option has been implemented for `imerode' and `imdilate' for black
-    and white images.
+ ** Non flat grayscale erosion can now be performed by creating an appropriate
+    structuring element with `strel'.
+
+ ** The shape option has been implemented for `imerode' and `imdilate'.
 
  ** With the increased performance in `imerode' and `imdilate', all other
     functions that use them, such `imopen' and `imclose', also get a performance

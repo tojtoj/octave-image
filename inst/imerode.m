@@ -83,12 +83,12 @@ function im = imerode (im, se, shape = "same")
   elseif (isimage (im))
     ## this is just like a minimum filter so we need to have the outside of
     ## the image above all possible values (hence Inf)
-    im = pad_for_spatial_filter (im, getnhood (se), Inf)
+    im = pad_for_spatial_filter (im, getnhood (se), Inf);
     ## TODO we should implement the shape options in the __spatial_filtering__
     ##      code. The alternative is to perform the padding twice (ugly hack).
     ##      It also means we can't use SE decomposition...
     if (strcmpi (shape, "full"))
-      im = pad_for_spatial_filter (im, getnhood (se), Inf)
+      im = pad_for_spatial_filter (im, getnhood (se), Inf);
     endif
     im = __spatial_filtering__ (im, logical (getnhood (se)), "min", getheight (se));
   else
