@@ -474,7 +474,7 @@ endfunction
 
 ## The 'andy' edge detector that was present in older versions of 'edge'.
 ## The function body has simply been copied from the old implementation.
-##   -- Soren Hauberg, march 11th, 2008
+##   -- Søren Hauberg, march 11th, 2008
 function [imout, thresh] = andy(im, method, thresh, param2)
    [n,m]= size(im);
    xx= 2:m-1;

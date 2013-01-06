@@ -1,4 +1,4 @@
-## Copyright (C) 2010 Soren Hauberg <soren@hauberg.org>
+## Copyright (C) 2010 Søren Hauberg <soren@hauberg.org>
 ## Copyright (C) Andrew Kelly, IPS Radio & Space Services
 ##
 ## This program is free software; you can redistribute it and/or modify it under

@@ -1,4 +1,4 @@
-// Copyright (C) 2008 Soren Hauberg <soren@hauberg.org>
+// Copyright (C) 2008 Søren Hauberg <soren@hauberg.org>
 //
 // This program is free software; you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -15,7 +15,7 @@
 
 // The 'compare' and 'selnth' functions are copied from the 'cordflt2' function
 // developed by Teemu Ikonen. This work was released under GPLv2 or later.
-//      -- Soren Hauberg, March 21st, 2008
+//      -- Søren Hauberg, March 21st, 2008
 
 #include <octave/oct.h>
 

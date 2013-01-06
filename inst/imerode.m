@@ -1,5 +1,5 @@
 ## Copyright (C) 2004 Josep Mones i Teixidor <jmones@puntbarra.com>
-## Copyright (C) 2008 Soren Hauberg <soren@hauberg.org>
+## Copyright (C) 2008 Søren Hauberg <soren@hauberg.org>
 ## Copyright (C) 2011-2012 Carnë Draug <carandraug+dev@gmail.com>
 ##
 ## This program is free software; you can redistribute it and/or modify it under

@@ -1,4 +1,4 @@
-## Copyright (C) 2008 Soren Hauberg <soren@hauberg.org>
+## Copyright (C) 2008 Søren Hauberg <soren@hauberg.org>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
