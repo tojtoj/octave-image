@@ -14,50 +14,25 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {} ordfilt2(@var{A}, @var{nth}, @var{domain}, [@var{S}, @var{padding}])
+## @deftypefn  {Function File} {} ordfilt2 (@var{A}, @var{nth}, @var{domain})
+## @deftypefnx {Function File} {} ordfilt2 (@var{A}, @var{nth}, @var{domain}, @var{S})
+## @deftypefnx {Function File} {} ordfilt2 (@dots{}, @var{padding})
 ## Two dimensional ordered filtering.
 ##
-## Ordered filter replaces an element of @var{A} with the @var{nth} 
-## element of the sorted set of neighbours defined by the logical 
-## (boolean) matrix @var{domain}.
-## Neighbour elements are selected to the sort if the corresponding 
-## element in the @var{domain} matrix is true.
-## 
-## The optional variable @var{S} is a matrix of size(@var{domain}). 
-## Values of @var{S} corresponding to nonzero values of domain are 
-## added to values obtained from @var{A} when doing the sorting.
+## This function exists only for @sc{matlab} compatibility as is just a wrapper
+## to the @code{ordfiltn} which performs the same function on N dimensions.  See
+## @code{ordfiltn} help text for usage explanation.
 ##
-## Optional variable @var{padding} determines how the matrix @var{A} 
-## is padded from the edges. See impad for details.
-## 
-## @seealso{medfilt2}
+## @seealso{medfilt2, padarray, ordfiltn}
 ## @end deftypefn
 
-function retval = ordfilt2(A, nth, domain, varargin)
+function A = ordfilt2 (A, nth, domain, varargin)
 
-S = zeros(size(domain));
-padding = "zeros";
-for i=1:length(varargin)
-  a = varargin{:};
-  if(ischar(a))
-    padding = a;
-  elseif(ismatrix(a) && size(a) == size(domain))
-    S = a;
+  if (nargin < 3)
+    print_usage ();
+  elseif (ndims (A) > 2 || ndims (domain) > 2 )
+    error ("ordfilt2: A and DOMAIN are limited to 2 dimensinos. Use `ordfiltn' for more")
   endif
-endfor
-
-domain = logical(domain);
-
-xpad(1) = floor((size(domain, 2)+1)/2) - 1;
-xpad(2) = size(domain,2) - xpad(1) - 1;
-ypad(1) = floor((size(domain, 1)+1)/2) - 1;
-ypad(2) = size(domain,1) - ypad(1) - 1;
-
-if(ypad(1) >= size(A,1) || xpad(1) >= size(A,2))
-  error("domain matrix too large");
-endif;
-
-A = impad(A, xpad, ypad, padding);
-retval = __spatial_filtering__ (A, domain, "ordered", S, nth);
+  A = ordfiltn (A, nth, domain, varargin{:})
 
 endfunction

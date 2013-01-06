@@ -14,10 +14,12 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {} ordfiltn(@var{A}, @var{nth}, @var{domain}, [@var{S}, @var{padding}])
-## Two dimensional ordered filtering.
+## @deftypefn  {Function File} {} ordfiltn (@var{A}, @var{nth}, @var{domain})
+## @deftypefnx {Function File} {} ordfiltn (@var{A}, @var{nth}, @var{domain}, @var{S})
+## @deftypefnx {Function File} {} ordfiltn (@dots{}, @var{padding})
+## N dimensional ordered filtering.
 ##
-## Ordered filter replaces an element of @var{A} with the @var{nth} 
+## Ordered filter replaces an element of @var{A} with the @var{nth} element 
 ## element of the sorted set of neighbours defined by the logical 
 ## (boolean) matrix @var{domain}.
 ## Neighbour elements are selected to the sort if the corresponding 
@@ -30,39 +32,36 @@
 ## Optional variable @var{padding} determines how the matrix @var{A} 
 ## is padded from the edges. See @code{padarray} for details.
 ## 
-## @seealso{ordfilt2, padarray}
+## @seealso{medfilt2, padarray, ordfilt2}
 ## @end deftypefn
 
 ## This function is based on 'ordfilt2' by Teemu Ikonen <tpikonen@pcu.helsinki.fi>
 ## which is released under GPLv2 or later.
 
-function retval = ordfiltn(A, nth, domain, varargin)
+function retval = ordfiltn (A, nth, domain, varargin)
+
   ## Check input
   if (nargin < 3)
-    error("ordfiltn: not enough input arguments");
+    print_usage ();
+  elseif (! ismatrix (A))
+    error ("ordfiltn: first input must be an array");
+  elseif (! isscalar (nth) || nth <= 0 || fix (nth) != nth)
+    error ("ordfiltn: second input argument must be a positive integer");
+  elseif (! ismatrix (domain) && ! isscalar (domain))
+    error ("ordfiltn: third input argument must be an array or a scalar");
+  elseif (isscalar (domain) && (domain <= 0 || fix (domain) != domain))
+    error ("ordfiltn: third input argument must be a positive integer, when it is a scalar");
   endif
-  if (!ismatrix(A))
-    error("ordfiltn: first input must be an array");
-  endif
-  if (!isscalar(nth) || nth <= 0 || nth != round(nth))
-    error("ordfiltn: second input argument must be a positive integer");
-  endif
-  if (!ismatrix(domain) && !isscalar(domain))
-    error("ordfiltn: third input argument must be an array or a scalar");
-  endif
-  if (isscalar(domain) && (domain <= 0 || domain != round(domain)))
-    error("ordfiltn: third input argument must be a positive integer, when it is a scalar");
-  endif
-  if (isscalar(domain))
-    domain = ones(repmat(domain, 1, ndims(A)), "logical");
+
+  if (isscalar (domain))
+    domain = true (repmat (domain, 1, ndims (A)));
   endif
   
-  if (ndims(A) != ndims(domain))
+  if (ndims (A) != ndims (domain))
     error("ordfiltn: first and second argument must have same dimensionality");
+  elseif (any (size (A) < size (domain)))
+    error ("ordfiltn: domain array cannot be larger than the data array");
   endif
-  if (any(size(A) < size(domain)))
-    error("ordfiltn: domain array cannot be larger than the data array");
-  endif    
 
   ## Parse varargin
   S = zeros(size(domain));
@@ -76,19 +75,10 @@ function retval = ordfiltn(A, nth, domain, varargin)
     endif
   endfor
 
-  ## Make sure 'domain' is logical. The C++ code assumes this.
-  domain = logical(domain);
+  A = pad_for_spatial_filter (A, domain, padding);
 
-  ## Pad array
-  pad = floor(size(domain)/2);
-  A = padarray(A, pad, padding);
-  even = ( round(size(domain)/2) == size(domain)/2 );
-  idx = cell(1, ndims(A));
-  for k = 1:ndims(A)
-    idx{k} = (even(k)+1):size(A,k);
-  endfor
-  A = A(idx{:});
-  
   ## Perform the filtering
-  retval = __spatial_filtering__ (A, domain, "ordered", S, nth);
+  retval = __spatial_filtering__ (A, logical (domain), "ordered", S, nth);
 endfunction
+
+
