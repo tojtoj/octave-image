@@ -26,6 +26,10 @@ function seq = getsequence (se)
 
   if (isempty (se.seq))
     switch (se.shape)
+      case "cube"
+        se.seq{1} = strel ("arbitrary", true (se.opt.edge, 1));
+        se.seq{2} = strel ("arbitrary", true (1, se.opt.edge));
+        se.seq{3} = strel ("arbitrary", true (1, 1, se.opt.edge));
       case "rectangle"
         se.seq{1} = strel ("arbitrary", true (se.opt.dimensions(1), 1));
         se.seq{2} = strel ("arbitrary", true (1, se.opt.dimensions(2)));

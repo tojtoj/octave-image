@@ -30,6 +30,7 @@
 ##           'arbitrary' - NHOOD = neighborhood logical matrix
 ##                         HEIGHT = real matrix of heights (for non-flat strel) (optional)
 ##           'ball' - NYI
+##           'cube' - EDGE = positive integer
 ##           'diamond' - RADIUS = positive integer
 ##           'disk' - RADIUS = positive integer
 ##                  - N = use 0, 4, 6 or 8 periodic lines (default 0) (NYI)
@@ -95,6 +96,19 @@ function SE = strel (shape, varargin)
 
 #    case "ball"
       ## TODO implement ball shape
+
+    case "square"
+      if (numel (varargin) == 1)
+        SE.opt.edge = varargin{1};
+      else
+        error ("strel: no EDGE specified for cube shape");
+      endif
+      if (! is_positive_integer (SE.opt.edge))
+        error ("strel: EDGE value must be positive integers");
+      endif
+
+      SE.nhood = true (SE.opt.edge, SE.opt.edge, SE.opt.edge);
+      SE.flat  = true;
 
     case "diamond"
       if (numel (varargin) == 1)
