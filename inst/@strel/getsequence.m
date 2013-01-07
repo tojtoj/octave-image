@@ -17,29 +17,29 @@
 ## @deftypefn {Function File} {@var{seq} =} getsequence (@var{se})
 ## Decompose structuring element.
 ##
-## Returns a cell array of @code{strel} objects that compose @var{se}.
+## Returns a strel object @var{se} that can be indexed with @code{()} to obtain
+## the decomposed structuring elements that can be used to "rebuild" @var{se}.
 ##
 ## @seealso{imdilate, imerode, strel}
 ## @end deftypefn
 
-function seq = getsequence (se)
+function se = getsequence (se)
 
   if (isempty (se.seq))
     switch (se.shape)
       case "cube"
-        se.seq{1} = strel ("arbitrary", true (se.opt.edge, 1));
-        se.seq{2} = strel ("arbitrary", true (1, se.opt.edge));
-        se.seq{3} = strel ("arbitrary", true (1, 1, se.opt.edge));
+        se.seq{1,1} = strel ("arbitrary", true (se.opt.edge, 1));
+        se.seq{2,1} = strel ("arbitrary", true (1, se.opt.edge));
+        se.seq{3,1} = strel ("arbitrary", true (1, 1, se.opt.edge));
       case "rectangle"
-        se.seq{1} = strel ("arbitrary", true (se.opt.dimensions(1), 1));
-        se.seq{2} = strel ("arbitrary", true (1, se.opt.dimensions(2)));
+        se.seq{1,1} = strel ("arbitrary", true (se.opt.dimensions(1), 1));
+        se.seq{2,1} = strel ("arbitrary", true (1, se.opt.dimensions(2)));
       case "square"
-        se.seq{1} = strel ("arbitrary", true (se.opt.edge, 1));
-        se.seq{2} = strel ("arbitrary", true (1, se.opt.edge));
+        se.seq{1,1} = strel ("arbitrary", true (se.opt.edge, 1));
+        se.seq{2,1} = strel ("arbitrary", true (1, se.opt.edge));
       otherwise
-        se.seq{1} = se;
+        se.seq{1,1} = se;
     endswitch
   endif
-  seq = se.seq;
 
 endfunction

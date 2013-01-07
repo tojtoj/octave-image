@@ -97,7 +97,7 @@ function SE = strel (shape, varargin)
 #    case "ball"
       ## TODO implement ball shape
 
-    case "square"
+    case "cube"
       if (numel (varargin) == 1)
         SE.opt.edge = varargin{1};
       else
@@ -273,6 +273,20 @@ endfunction
 %!assert (getnhood (strel ("pair", [2 3])), logical (shape));
 %!assert (getnhood (strel ("rectangle", [10 5])), true (10, 5));
 %!assert (getnhood (strel ("square", 5)), true (5));
+
+## test how @strel/getsequence and indexing works fine
+%!shared se, seq
+%! se = strel ("square", 5);
+%! seq = getsequence (se);
+%!assert (class (se(1)),  "strel")
+%!assert (class (se(1,1)),"strel")
+%!assert (class (seq),    "strel")
+%!assert (class (seq(1)), "strel")
+%!assert (class (seq(2)), "strel")
+%!assert (numel (se), 1)
+%!assert (numel (seq), 2)
+%!error se(2);
+%!error seq(3);
 
 ## test input validation
 %!error strel()
