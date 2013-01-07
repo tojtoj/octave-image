@@ -16,31 +16,86 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {} strel (@var{shape}, @var{parameters})
-## Generate a morphological structuring element.
+## Create a strel (structuring element) object for morphology operations.
 ##
-## @code{strel} creates a logical matrix/array with the shape @var{shape} tuned
-## with parameters @var{parameters}.
-## Available shapes at the moment are: 'square', 'rectangle', 'diamond', 'pair',
-## 'disk' (partially)
+## The structuring element can have any type of shape as specified by
+## @var{shape}, each one with its @var{parameters}.
 ##
-## Argument @var{shape} can be = 'arbitrary' (default), 'ball', 'diamond', 'disk',
-## 'line', 'octagon', 'pair', 'periodicline', 'rectangle', 'square'.
+## @deftypefnx {Function File} {} strel ("arbitrary", @var{nhood})
+## @deftypefnx {Function File} {} strel ("arbitrary", @var{nhood}, @var{height})
+## Create arbitrary shaped structuring elements.
 ##
-## Argument @var{parameters} may vary for number, type and meaning, depending on @var{shape}.
-##           'arbitrary' - NHOOD = neighborhood logical matrix
-##                         HEIGHT = real matrix of heights (for non-flat strel) (optional)
-##           'ball' - NYI
-##           'cube' - EDGE = positive integer
-##           'diamond' - RADIUS = positive integer
-##           'disk' - RADIUS = positive integer
-##                  - N = use 0, 4, 6 or 8 periodic lines (default 0) (NYI)
-##                        (default will be 4, for now 0: it works 'slower')
-##           'line' - NYI
-##           'octagon' - APOTHEM = distance from the origin to the sides of the octagon
-##           'pair' - OFFSET = 2-element positive integer vector [X Y] or [X; Y]
-##           'periodicline' - NYI
-##           'rectangle' - DIMENSIONS = 2-element positive integer vector [X Y] or [X; Y]
-##           'square' - EDGE = positive integer
+## @var{nhood} must be a matrix of 0's and 1's.  Any number with of dimensions
+## are possible.  To create a non-flat SE, the @var{height} can be specified.
+## See individual functions that use the strel object for an interpretation of
+## non-flat SEs.
+##
+## Note that if an arbitrary shape is used, it will not be possible to perform
+## structuring element decomposition which may have a performance hit in some
+## cases.  See for example the difference for a square shape:
+## @example
+## @group
+## im = randp (5, 2000) > 15;
+## se = strel ("square", 20);
+## t = cputime (); imdilate (im, se); cputime () - t
+##     @result{} 0.77605
+## se = strel (ones (20));
+## t = cputime (); imdilate (im, se); cputime () - t
+##     @result{} 2.9082
+## @end group
+## @end example
+##
+## @deftypefnx {Function File} {} strel ("cube", @var{edge})
+## Create cube shaped @var{flat} structuring element.  @var{edge} must be a
+## positive integer that specifies the length of its edges.  This shape meant to
+## perform morphology operations in volumes, see the square shape for 2
+## dimensional images.
+##
+## @deftypefnx {Function File} {} strel ("diamond", @var{radius})
+## Create diamond shaped flat structuring element.  @var{radius} must be a
+## positive integer.
+##
+## @deftypefnx {Function File} {} strel ("disk", @var{radius})
+## Create disk shaped flat structuring element.  @var{radius} must be a positive
+## integer.
+##
+## @deftypefnx {Function File} {} strel ("octagon", @var{apothem})
+## Create octagon shaped flat structuring element.  @var{apothem} must be a
+## positive integer that specifies the distance from the origin to the sides of
+## the octagon.
+##
+## @deftypefnx {Function File} {} strel ("pair", @var{offset})
+## Creates a flat structuring element with two members.  One member is placed
+## at the origin while the other is placed with @var{offset} in relation to the
+## origin.  @var{offset} must then be a 2 element vector for the coordinates.
+##
+## @deftypefnx {Function File} {} strel ("rectangle", @var{dimensions})
+## Creates a rectangular shaped flat structuring element.  @var{dimensions} must
+## be a two element vector of positive integers with the number of rows and
+## columns of the rectangle.
+##
+## @deftypefnx {Function File} {} strel ("square", @var{edge})
+## Create square shaped flat structuring element.  @var{edge} must be a positive
+## integer that specifies the length of its edges.  For use in volumes, see the
+## cube shape.
+##
+## The actual structuring element neighborhood, the logical matrix used for the
+## operations, can be accessed with the @code{getnhood} method.  However, most
+## morphology functions in the image package will have an improved performance
+## if the actual strel object is used, and not its element neighborhood.
+##
+## @example
+## @group
+## se = strel ("square", 5);
+## getnhood (se)
+##     @result{}
+##         1  1  1  1  1
+##         1  1  1  1  1
+##         1  1  1  1  1
+##         1  1  1  1  1
+##         1  1  1  1  1
+## @end group
+## @end example
 ##
 ## @seealso{imdilate, imerode}
 ## @end deftypefn
@@ -89,9 +144,6 @@ function SE = strel (shape, varargin)
                           all (size (SE.height) == size (nhood))      &&
                           all (isfinite (SE.height(:)))))
         error ("strel: HEIGHT must be a finite real matrix of the same size as NHOOD");
-      elseif (! SE.flat && ! (all (SE.height( SE.nhood)(:) != 0) &&
-                              all (SE.height(!SE.nhood)(:) == 0)))
-        error ("strel: HEIGHT must be a matrix with values for each non-zero value in NHOOD");
       endif
 
 #    case "ball"
@@ -235,6 +287,10 @@ endfunction
 %! height = [0 0 0 3];
 %!assert (getnhood (strel ("arbitrary", shape, height)), logical (shape));
 %!assert (getheight (strel ("arbitrary", shape, height)), height);
+%! shape = [0 0 1];
+%! height = [-2 1 3];  ## this works for matlab compatibility
+%!assert (getnhood (strel ("arbitrary", shape, height)), logical (shape));
+%!assert (getheight (strel ("arbitrary", shape, height)), height);
 %! shape = [0 0 0 1 0 0 0
 %!          0 0 1 1 1 0 0
 %!          0 1 1 1 1 1 0
@@ -299,7 +355,6 @@ endfunction
 %!error strel()
 %!error strel("nonmethodthing", 2)
 %!error strel("arbitrary", "stuff")
-%!error strel("arbitrary", [0 0 1], [2 0 1])
 %!error strel("arbitrary", [0 0 1], [2 0 1; 4 5 1])
 %!error strel("arbitrary", [0 0 1], "stuff")
 %!error strel("diamond", -3)

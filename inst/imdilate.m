@@ -49,21 +49,38 @@ function im = imdilate (im, se, shape = "same")
     print_usage();
   elseif (! ischar (shape) || ! any (strcmpi (shape, {"same", "full"})))
     error ("imdilate: SHAPE must be `same' or `full'")
+  elseif (any (strcmpi (shape, {"ispacked", "notpacked"})))
+    error ("imdilate: packed images are not yet implemented. See http://www.octave.org/missing.html")
   endif
 
-  if (! isbw (im, "non-logical"))
-    error ("imerode: SE must be a matrix of 0's and 1's");
+  ## it's easier to just get the sequence of strel objects now than to have a
+  ## bunch of conditions later on
+  if (! isa (se, "strel"))
+    if (ismatrix (se))
+      ## let strel do the rest of input check...
+      se = strel ("arbitrary", se);
+    else
+      error ("imdilate: SE must be a strel object, or a matrix of 0's and 1's");
+    endif
   endif
+  se = getsequence (se);
 
   cl = class (im);
   if (isbw (im, "non-logical"))
-    im = convn (im, se, shape) > 0;
+    for k = 1:numel (se)
+      im = convn (im, getnhood (se(k)), shape) > 0;
+    endfor
+
   elseif (isimage (im))
-    ## TODO needs to implement the shape option here. Most likely requires a
-    ##      to be padded first (padarray), and use of __spatial_filtering__
-    ##      directly (that's what ordfiltn does) with the "max" method. The
-    ##      same needs to be done for imerode
-    im = ordfiltn (im, nnz (se), se, -Inf);
+    im = pad_for_spatial_filter (im, getnhood (se), -Inf);
+    ## TODO we should implement the shape options in the __spatial_filtering__
+    ##      code. The alternative is to perform the padding twice (ugly hack).
+    ##      It also means we can't use SE decomposition...
+    if (strcmpi (shape, "full"))
+      im = pad_for_spatial_filter (im, getnhood (se), -Inf);
+    endif
+    im = __spatial_filtering__ (im, getnhood (se), "max", getheight (se));
+
   else
     error ("imdilate: IM must be a grayscale or black and white matrix");
   endif

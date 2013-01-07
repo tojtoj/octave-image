@@ -63,20 +63,21 @@ function im = imerode (im, se, shape = "same")
 
   ## it's easier to just get the sequence of strel objects now than to have a
   ## bunch of conditions later on
-  if (! (iscell (se) && all (cellfun ("isclass", se, "strel"))))
+  if (! isa (se, "strel"))
     if (ismatrix (se))
+      ## let strel do the rest of input check...
       se = strel ("arbitrary", se);
-    elseif (! isa (se, "strel"))
-      error ("imerode: SE must a strel object, or a matrix of 0's and 1's");
+    else
+      error ("imerode: SE must be a strel object, or a matrix of 0's and 1's");
     endif
-    seq = getsequence (se);
   endif
+  se = getsequence (se);
 
   cl = class (im);
   if (isbw (im, "non-logical"))
-    for k = 1:numel (seq)
-      nhood = getnhood (seq{k});
-      nhood = reshape (nhood(end:-1:1), size (nhood)); # N-dimensional rotation
+    se = reflect (se);
+    for k = 1:numel (se)
+      nhood = getnhood (se(k));
       im    = convn (im, nhood, shape) == nnz (nhood);
     endfor
 
@@ -90,7 +91,7 @@ function im = imerode (im, se, shape = "same")
     if (strcmpi (shape, "full"))
       im = pad_for_spatial_filter (im, getnhood (se), Inf);
     endif
-    im = __spatial_filtering__ (im, logical (getnhood (se)), "min", getheight (se));
+    im = __spatial_filtering__ (im, getnhood (se), "min", getheight (se));
   else
     error ("imerode: IM must be a grayscale or black and white matrix");
   endif
