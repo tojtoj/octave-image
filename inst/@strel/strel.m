@@ -288,6 +288,13 @@ endfunction
 %!error se(2);
 %!error seq(3);
 
+## test reflection
+%!shared se, ref
+%! se = strel ("arbitrary", [1 0 0; 1 1 0; 0 1 0], [2 0 0; 3 1 0; 0 3 0]);
+%! ref = reflect (se);
+%!assert (getnhood (ref), logical([0 1 0; 0 1 1; 0 0 1]));
+%!assert (getheight (ref), [0 3 0; 0 1 3; 0 0 2]);
+
 ## test input validation
 %!error strel()
 %!error strel("nonmethodthing", 2)
