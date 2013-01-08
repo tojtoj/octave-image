@@ -1,16 +1,19 @@
 AC_PREREQ([2.67])
-AC_INIT
+AC_INIT([Octave-Forge image package], [2.1.0+])
+
 AH_BOTTOM([#include "undef_unordered_map.h"])
-
-AC_CONFIG_HEADERS(config.h)
-
-
+AC_CONFIG_HEADERS([config.h])
 
 CXXFLAGS="-std=c++0x"
 CPPFLAGS="-std=c++0x"
 
 AC_PROG_CXX
 AC_LANG(C++)
+
+AC_CHECK_PROG([HAVE_MKOCTFILE], [mkoctfile], [yes], [no])
+if [test $HAVE_MKOCTFILE = "no"]; then
+  AC_MSG_ERROR([mkoctfile required to install $PACKAGE_NAME])
+fi
 
 dnl
 dnl Check for unordered map headers and whether tr1 namespace is
@@ -46,6 +49,5 @@ AC_DEFUN([OCTAVE_UNORDERED_MAP_HEADERS], [
 ])
 
 OCTAVE_UNORDERED_MAP_HEADERS
-
 
 AC_OUTPUT
