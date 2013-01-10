@@ -56,17 +56,3 @@ function varargout = tforminv (T, varargin)
   endif
 endfunction
 
-function out = istform (T)
-  out = true;
-  if (!isstruct (T))
-    out = false;
-  else
-    required = {"ndims_in";"ndims_out"; ...
-                "forward_fcn"; "inverse_fcn"; ...
-                "tdata"};
-    fields = fieldnames (T);
-    if (!all (strcmp (fields, required)))
-      out = false
-    endif
-  endif 
-endfunction

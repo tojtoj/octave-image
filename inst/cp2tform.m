@@ -262,3 +262,90 @@ function out = inv_polynomial (x, pst)
     endif
   endfor
 endfunction
+
+%!function [crw, cap] = coords (npt = 1000, scale = 2, dtheta = pi/3, dx = 2, dy = -6, sig2noise = 1e32)
+%!  theta = (rand(npt, 1)*2-1)*2*pi;
+%!  R = rand(npt,1);
+%!  y = R.*sin(theta);
+%!  x = R.*cos(theta);
+%!  crw = [y x];
+%!
+%!  thetap = theta + dtheta; 
+%!  Rap = R * scale;
+%!
+%!  yap = Rap.*sin(thetap);
+%!  yap = yap + dy;
+%!  yap = yap + rand (size (yap)) * norm (yap) / sig2noise;
+%!
+%!  xap = Rap.*cos(thetap);
+%!  xap = xap + dx;
+%!  xap = xap + rand (size (xap)) * norm (xap) / sig2noise;
+%!  cap = [yap xap];
+%!endfunction
+
+%!test
+%! npt = 10000;
+%! [crw, cap] = coords (npt);
+%! ttype = 'projective';
+%! T = cp2tform (crw, cap, ttype);
+%! crw2 = tforminv (T, cap);
+%! finalerr = norm (crw - crw2)/npt;
+%! assert (finalerr < eps, "norm = %3.2e ( > eps)", finalerr)
+
+%!test
+%! npt = 100000;
+%! [crw, cap] = coords (npt);
+%! ttype = 'affine';
+%! T = cp2tform (crw, cap, ttype);
+%! crw2 = tforminv (T, cap);
+%! finalerr = norm (crw - crw2)/npt;
+%! assert (finalerr < eps, "norm = %3.2e ( > eps)", finalerr)
+
+%!test
+%! npt = 100000;
+%! [crw, cap] = coords (npt);
+%! ttype = 'nonreflective similarity';
+%! T = cp2tform (crw, cap, ttype);
+%! crw2 = tforminv (T, cap);
+%! finalerr = norm (crw - crw2)/npt;
+%! assert (finalerr < eps, "norm = %3.2e ( > eps)", finalerr)
+
+%!test
+%! npt = 100000;
+%! [crw, cap] = coords (npt);
+%! cap(:,2) *= -1; 	% reflection around y axis
+%! ttype = 'similarity';
+%! T = cp2tform (crw, cap, ttype);
+%! crw2 = tforminv (T, cap);
+%! finalerr = norm (crw - crw2)/npt;
+%! assert (finalerr < eps, "norm = %3.2e ( > eps)", finalerr)
+
+%!xtest
+%! npt = 100000;
+%! [crw, cap] = coords (npt);
+%! ttype = 'polynomial';
+%! ord = 2;
+%! T = cp2tform (crw, cap, ttype, ord);
+%! crw2 = tforminv (T, cap);
+%! finalerr = norm (crw - crw2)/npt;
+%! assert (finalerr < eps, "norm = %3.2e ( > eps)", finalerr)
+
+%!xtest
+%! npt = 100000;
+%! [crw, cap] = coords (npt);
+%! ttype = 'polynomial';
+%! ord = 3;
+%! T = cp2tform (crw, cap, ttype, ord);
+%! crw2 = tforminv (T, cap);
+%! finalerr = norm (crw - crw2)/npt;
+%! assert (finalerr < eps, "norm = %3.2e ( > eps)", finalerr)
+
+%!xtest
+%! npt = 100000;
+%! [crw, cap] = coords (npt);
+%! ttype = 'polynomial';
+%! ord = 4;
+%! T = cp2tform (crw, cap, ttype, ord);
+%! crw2 = tforminv (T, cap);
+%! finalerr = norm (crw - crw2)/npt;
+%! assert (finalerr < eps, "norm = %3.2e ( > eps)", finalerr)

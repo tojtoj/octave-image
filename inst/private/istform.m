@@ -16,7 +16,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn  {Function File} {[@var{UV}] =} tformfwd (@var{T}, @var{XY})
-## @deftypefnx {Function File} {[@var{U}, @var{V}] =} tformfwd (@var{T}, @var{X}, @var{Y})
+## @deftypefnx {Function File} {[@var{U} @var{V}] =} tformfwd (@var{T}, @var{X},@var{Y})
 ## 
 ## Given to dimensionnal coordinates from one space, returns two 
 ## dimensionnal coordinates in the other space, as defined in 
@@ -27,32 +27,19 @@
 
 ## Author: Pantxo Diribarne <pantxo@dibona>
 
-function varargout = tformfwd (T, varargin)
-
-  if (nargin > 3 || nargin < 2)
-    print_usage ();
-  elseif (! istform (T))
-    error ("tformfwd: expect a transform structure as first argument")
-  elseif (nargin == 2)
-    XX = varargin{1};
-    if (columns (XX) != 2)
-      error ("tformfwd: expect n-by-2 array as second argument")
-    endif
+function out = istform (T)
+  out = true;
+  if (!isstruct (T))
+    out = false;
   else
-    if (!isvector (varargin{1}) || !isvector (varargin{2}))
-      error ("tformfwd: expect vectors as coordinates")
-    elseif (!all (size (varargin{1}) == size (varargin{2})))
-      error ("tformfwd: expect two vectors the same size")
-    elseif (columns (varargin{1}) != 1)
-      error ("tformfwd: expect column vectors")
+    required = {"ndims_in";"ndims_out"; ...
+                "forward_fcn"; "inverse_fcn"; ...
+                "tdata"};
+  
+    fields = fieldnames (T);
+    tst = cellfun (@(x) any (strcmp (fields, x)), required);
+    if (! all (tst))
+      out = false
     endif
-    XX = [varargin{1} varargin{2}];
-  endif
-  UU = T.forward_fcn(XX, T);
-  if (nargin == 3)
-    varargout{1} = UU(:,1);
-    varargout{2} = UU(:,2);
-  else
-    varargout{1} = UU;
-  endif
+  endif 
 endfunction
