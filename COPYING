@@ -5,6 +5,18 @@ inst/private/imconversion.m             GPLv3+
 inst/private/is_double_image.m          GPLv3+
 inst/private/isimage.m                  GPLv3+
 inst/private/ispart.m                   GPLv3+
+inst/private/istform.m                  GPLv3+
+inst/@strel/display.m                   GPLv3+
+inst/@strel/getheight.m                 GPLv3+
+inst/@strel/getneighbors.m              GPLv3+
+inst/@strel/getnhood.m                  GPLv3+
+inst/@strel/getsequence.m               GPLv3+
+inst/@strel/isflat.m                    GPLv3+
+inst/@strel/numel.m                     GPLv3+
+inst/@strel/reflect.m                   GPLv3+
+inst/@strel/strel.m                     GPLv3+
+inst/@strel/subsref.m                   GPLv3+
+inst/@strel/translate.m                 GPLv3+
 inst/analyze75info.m                    GPLv3+
 inst/analyze75read.m                    GPLv3+
 inst/analyze75write.m                   GPLv3+
@@ -30,6 +42,7 @@ inst/colfilt.m                          public domain
 inst/colorgradient.m                    public domain
 inst/conndef.m                          GPLv3+
 inst/corr2.m                            GPLv3+
+inst/cp2tform.m                         GPLv3+
 inst/dilate.m                           GPLv3+
 inst/edge.m                             GPLv3+
 inst/entropyfilt.m                      GPLv3+
@@ -93,6 +106,7 @@ inst/isind.m                            GPLv3+
 inst/isrgb.m                            GPLv3+
 inst/label2rgb.m                        GPLv3+
 inst/makelut.m                          GPLv3+
+inst/maketform.m                        GPLv3+
 inst/mat2gray.m                         GPLv3+
 inst/mean2.m                            GPLv3+
 inst/medfilt2.m                         GPLv3+
@@ -121,6 +135,8 @@ inst/std2.m                             GPLv3+
 inst/stdfilt.m                          GPLv3+
 inst/stretchlim.m                       GPLv3+
 inst/tiff_tag_read.m                    GPLv3+
+inst/tformfwd.m                         GPLv3+
+inst/tforminv.m                         GPLv3+
 inst/uintlut.m                          GPLv3+
 inst/wavelength2rgb.m                   GPLv3+
 src/__bilateral__.cc                    GPLv3+
