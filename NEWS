@@ -156,3 +156,166 @@ Summary of important user-visible changes for image 2.0.0:
  ** Package is now dependent on the signal package version 1.2.0 or later.
 
  ** Package is no longer automatically loaded.
+
+
+********************************************************************************
+**                                                                            **
+**  NEWS below this point were written after their releases for history       **
+**  purposes and extracted from the Octave Forge general NEWS.  Previous to   **
+**  the image package version 1.0.11, all Octave Forge packages would be      **
+**  released at the same time.  Previous to the package version 1.0.0 there   **
+**  were monolithic releases with no actual packages.  This means that some   **
+**  releases actually had no changes in the image package itself or changes   **
+**  were small compared to the whole Octave Forge project and so, not         **
+**  mentioned on the NEWS file.  Inspection of the actual log in the          **
+**  repository should be used if exact details are required.                  **
+**                                                                            **
+********************************************************************************
+
+ Summary of important user-visible changes for image 1.0.10 (2009/06/07):
+-----------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image 1.0.9 (2009/05/08):
+-----------------------------------------------------------------------------
+
+ ** The following functions are new:
+
+      entropyfilt  ordfiltn     rangefilt    stdfilt
+
+ ** The following functions have been removed as they are now part of
+    Octave core:
+
+      imread   imwrite
+
+ Summary of important user-visible changes for image 1.0.8 (2008/08/31):
+-----------------------------------------------------------------------------
+
+ ** Fix build issues with the last release.
+
+ Summary of important user-visible changes for image 1.0.7 (2008/08/24):
+-----------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image 1.0.6 (2008/04/29):
+-----------------------------------------------------------------------------
+
+ ** The following functions are new:
+
+      imcomplement  rgbplot
+
+ ** Implemented support for bilateral filtering.
+
+ ** Build fixes for new versions of ImageMagick.
+
+ Summary of important user-visible changes for image 1.0.5 (2008/02/16):
+-----------------------------------------------------------------------------
+
+ ** The following functions are new:
+
+      imfilter  imsmooth
+
+ Summary of important user-visible changes for image 1.0.4 (2007/12/12):
+------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image 1.0.3 (2007/10/14):
+------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image 1.0.2 (2007/07/26):
+------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image 1.0.1 (2007/05/26):
+------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image 1.0.0 (2007/03/28):
+------------------------------------------------------------------------
+
+ ** First non-monolithic release.
+
+ ** The following functions are new:
+
+      __bwarea            fspecial            impersepectivewap
+      apply               graythresh          imremap
+      bwarea              im2double           label2rgb
+      bwperim             im2uint8            __magick_read__
+      deriche             im2uint16
+
+ ** Fixex for non 8bit images.
+
+ ** Quantum sizes in imagemagick.
+
+ ** Compatiability changes to imwrite, isgray and rgb2gray.
+
+ ** imread, probe depth from bits rather than Red field, allows loading of gray
+    scale images.
+
+ ** Convert all functions to use texinfo help.
+
+ Summary of important user-visible changes for image (Octave Forge 20060708):
+-----------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image (Octave Forge 20060316):
+-----------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image (Octave Forge 20060128):
+-----------------------------------------------------------------------------
+
+ ** imread() now return the appropriate numeric class. Colour images are of size
+    MxNx3, gray images MxN.
+
+ Summary of important user-visible changes for image (Octave Forge 20050613):
+-----------------------------------------------------------------------------
+
+ ** The following functions are new:
+
+      bwarea      imresize
+
+ Summary of important user-visible changes for image (Octave Forge 20041116):
+-----------------------------------------------------------------------------
+
+ ** No important changes to the image package in this Octave Forge release.
+
+ Summary of important user-visible changes for image (Octave Forge 20040907):
+-----------------------------------------------------------------------------
+
+ ** The following functions are new:
+
+      applylut      cmunique      houghtf       poly2mask     uintlut
+      bestblk       col2im        im2col        qtdecomp
+      blkproc       conndef       isrgb         qtgetblk
+      bweuler       dilate        makelut       qtsetblk
+      bwmorph       erode         nlfilter      roicolor
+      cmpermute     graycomatrix  padarray      stretchlim
+
+ ** Implemented initial support for int* types.
+
+ Summary of important user-visible changes for image (Octave Forge 20040707):
+-----------------------------------------------------------------------------
+
+ ** No important changes to the image package in this Octave Forge release.
+
+ Summary of important user-visible changes for image (Octave Forge 20040211):
+-----------------------------------------------------------------------------
+
+ ** `imread' now supports 16-bit grayscale images.
+
+ Summary of important user-visible changes for image (Octave Forge 20030602):
+-----------------------------------------------------------------------------
+
+ ** The following functions are new:
+
+      rotate_scale
+
+ Summary of important user-visible changes for image (Octave Forge 20030222):
+-----------------------------------------------------------------------------
+
+ ** No important changes to the image package in this Octave Forge release.
+
+ Summary of important user-visible changes for image (Octave Forge 20021130):
+-----------------------------------------------------------------------------
+
+ ** The following functions are new:
+
+      colfilt      imginfo      imrotate     imshear      imtranslate
+
+ ** The `colorgradient' function now allow instantaneous transitions (weight 0)
+
+ ** The `bwlabel' function has been implemented in C++ and may behave different.
