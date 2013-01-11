@@ -28,18 +28,11 @@
 ## by interpolation. Note that the image @var{im} is expressed in a (X, Y)-coordinate
 ## system and not a (row, column) system.
 ##
-## The argument @var{interp} selects the used interpolation method, and most be one
-## of the following strings
-## @table @code
-## @item "nearest"
-## Nearest neighbor interpolation.
-## @item "linear"
-## @itemx "bilinear"
-## Bilinear interpolation. This is the default behavior.
-## @item "cubic"
-## @itemx "bicubic"
-## Bicubic interpolation.
-## @end table
+## The optional argument @var{interp} defines the interpolation method to be
+## used.  All methods supported by @code{interp2} can be used.  In
+## addition, the methods @code{bicubic} (same as @code{cubic}), and
+## @code{bilinear} (same as @code{linear}) are supported for @sc{matlab}
+## compatibility.  By default, the @code{linear} method is used.
 ##
 ## All values of the result that fall outside the original image will
 ## be set to @var{extrapval}. For images of class @code{double} @var{extrapval}
@@ -51,7 +44,7 @@
 ## @seealso{imperspectivewarp, imrotate, imresize, imshear, interp2}
 ## @end deftypefn
 
-function [warped, valid] = imremap(im, XI, YI, interp = "bilinear", extrapval = NA)
+function [warped, valid] = imremap(im, XI, YI, interp = "linear", extrapval = NA)
   ## Check input
   if (nargin < 3)
     print_usage();
@@ -66,13 +59,14 @@ function [warped, valid] = imremap(im, XI, YI, interp = "bilinear", extrapval = 
     error("imremap: XI and YI must be matrices of the same size");
   endif
   
-  if (!any(strcmpi(interp, {"nearest", "linear", "bilinear", "cubic", "bicubic", "spline"})))
-    error("imremap: unsupported interpolation method");
-  endif
-  if (any(strcmpi(interp, {"bilinear", "bicubic"})))
-    interp = interp(3:end); # Remove "bi"
-  endif
-  interp = lower(interp);
+  ## Handle the interp argument. We do not check for the actual value. We leave
+  ## that to interp2 so we don't have to keep updating this when interp2
+  ## gets new methods
+  interp = tolower (interp);
+  switch interp
+    case "bicubic",   interp = "cubic";
+    case "bilinear",  interp = "linear";
+  endswitch
   
   if (!isscalar(extrapval))
     error("imremap: extrapolation value must be a scalar");

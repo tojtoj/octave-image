@@ -33,9 +33,11 @@
 ## @end group
 ## @end example
 ##
-## The optional argument @var{method} defines the method to use for the
-## interpolation.  All methods supported by @code{interp2} can be used.  In
-## addition, the following methods can be used for @sc{matlab} compatibility:
+## The optional argument @var{method} defines the interpolation method to be
+## used.  All methods supported by @code{interp2} can be used.  In
+## addition, the methods @code{bicubic} (same as @code{cubic}), @code{bilinear}
+## and @code{triangle} (both, the same as @code{linear}) are supported for
+## @sc{matlab} compatibility.  By default, the @code{cubic} method is used.
 ##
 ## @table @asis
 ## @item bicubic (default)
@@ -51,7 +53,7 @@
 ## @seealso{imremap, imrotate, interp2}
 ## @end deftypefn
 
-function im = imresize (im, scale, method = "bicubic")
+function im = imresize (im, scale, method = "cubic")
   if (nargin < 2 || nargin > 3)
     print_usage
   elseif (! isimage (im) || (! isrgb (im) && ! isgray (im)))

@@ -47,9 +47,12 @@ Summary of important user-visible changes for image 2.0.1:
  ** The performance of `imresize()' has been greatly improved when using the
     nearest neighbor method for N or 1/N scale factors (e.g.: 2, 50, 1/4, 1/7).
 
- ** The `imresize' function will now accept any interpolation method available
-    in `interp2()'.  At the moment, means that the `spline' method is new.  The
-    `triangle' method has also been added (same as the `linear' method).
+ ** The `imresize' function will now accept any interpolation method from
+    `interp2()' thus extending the available methods to `spline' and `pchip'.
+     The `triangle' method has also been added (same as the `linear' method).
+
+ ** The `imremap' function will now accept any interpolation method from
+    `interp2()' thus extending the available methods to `pchip'.
 
 Summary of important user-visible changes for image 2.0.0:
 -------------------------------------------------------------------

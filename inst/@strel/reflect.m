@@ -48,7 +48,3 @@ function se = rotate_strel (se)
   rotate = @(x) reshape (x(end:-1:1), size (x));
   se     = strel ("arbitrary", rotate (nhood), rotate (height));
 endfunction
-
-
-
-
