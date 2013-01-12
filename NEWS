@@ -10,6 +10,11 @@ Summary of important user-visible changes for image 2.0.1:
       tformfwd
       tforminv
 
+ ** The following functions have been deprecated (see their help text
+    for the recommended alternatives):
+
+      imrotate_Fourier
+
  ** The plot produced by `imhist' is correctly scaled on the X axis so that the
     colorbar corresponds to the actual intensity of the stems; the given
     colormarp is used on the colorbar for indexed images; and the stems no
