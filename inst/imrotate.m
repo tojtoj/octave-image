@@ -64,28 +64,25 @@
 
 function [imgPost, H, valid] = imrotate (imgPre, thetaDeg, interp = "nearest", bbox = "loose", extrapval = NA)
 
-  ## Check input
   if (nargin < 2)
-    error("imrotate: not enough input arguments");
+    print_usage();
+  elseif (! isimage (imgPre) || (! isrgb (imgPre) && ! isgray (imgPre)))
+    error ("imrotate: IMGPRE must be a grayscale or RGB image.")
+  elseif (! isscalar (thetaDeg))
+    error("imrotate: THETA must be a scalar");
+  elseif (! ischar (interp))
+    error("imrotate: interpolation METHOD must be a character array");
+  elseif (! any (strcmpi (interp, {"nearest", "linear", "bilinear", "cubic", "bicubic", "Fourier"})))
+    error("imrotate: unsupported METHOD interpolation method");
+  elseif (! isscalar (extrapval))
+    error("imrotate: EXTRAPVAL must be a scalar");
   endif
-  [imrows, imcols, imchannels, tmp] = size(imgPre);
-  if (tmp != 1 || (imchannels != 1 && imchannels != 3))
-    error("imrotate: first input argument must be an image");
-  endif
-  if (!isscalar(thetaDeg))
-    error("imrotate: the angle must be given as a scalar");
-  endif
-  if (!any(strcmpi(interp, {"nearest", "linear", "bilinear", "cubic", "bicubic", "Fourier"})))
-    error("imrotate: unsupported interpolation method");
-  endif
+
   if (any(strcmpi(interp, {"bilinear", "bicubic"})))
     interp = interp(3:end); # Remove "bi"
   endif
   if (!any(strcmpi(bbox, {"loose", "crop"})))
     error("imrotate: bounding box must be either 'loose' or 'crop'");
-  endif
-  if (!isscalar(extrapval))
-    error("imrotate: extrapolation value must be a scalar");
   endif
 
   ## Input checking done. Start working
