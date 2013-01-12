@@ -24,20 +24,15 @@
 ##
 ##   @var{theta}    the rotation angle in degrees counterclockwise
 ##
-##   @var{method}
-##     @itemize @w
-##       @item "nearest" neighbor: fast, but produces aliasing effects (default).
-##       @item "bilinear" interpolation: does anti-aliasing, but is slightly slower.
-##       @item "bicubic" interpolation: does anti-aliasing, preserves edges better
-## than bilinear interpolation, but gray levels may slightly overshoot at sharp
-## edges. This is probably the best method for most purposes, but also the slowest.
-##       @item "Fourier" uses Fourier interpolation, decomposing the rotation
-## matrix into 3 shears. This method often results in different artifacts than
-## homography-based methods.  Instead of slightly blurry edges, this method can
-## result in ringing artifacts (little waves near high-contrast edges).  However,
-## Fourier interpolation is better at maintaining the image information, so that
-## unrotating will result in an image closer to the original than the other methods.
-##     @end itemize
+## The optional argument @var{method} defines the interpolation method to be
+## used.  All methods supported by @code{interp2} can be used.  In addition,
+## Fourier interpolation by decomposing the rotation matrix into 3 shears can
+## be used with the @code{fourier} method. By default, the @code{nearest} method
+## is used.
+##
+## For @sc{matlab} compatibility, the methods @code{bicubic} (same as
+## @code{cubic}), @code{bilinear} and @code{triangle} (both the same as
+## @code{linear}) are also supported.
 ##
 ##   @var{bbox}
 ##     @itemize @w
@@ -64,26 +59,20 @@
 
 function [imgPost, H, valid] = imrotate (imgPre, thetaDeg, interp = "nearest", bbox = "loose", extrapval = NA)
 
-  if (nargin < 2)
-    print_usage();
+  if (nargin < 2 || nargin > 5)
+    print_usage ();
   elseif (! isimage (imgPre) || (! isrgb (imgPre) && ! isgray (imgPre)))
     error ("imrotate: IMGPRE must be a grayscale or RGB image.")
   elseif (! isscalar (thetaDeg))
     error("imrotate: THETA must be a scalar");
   elseif (! ischar (interp))
     error("imrotate: interpolation METHOD must be a character array");
-  elseif (! any (strcmpi (interp, {"nearest", "linear", "bilinear", "cubic", "bicubic", "Fourier"})))
-    error("imrotate: unsupported METHOD interpolation method");
   elseif (! isscalar (extrapval))
     error("imrotate: EXTRAPVAL must be a scalar");
+  elseif (! ischar (bbox) || ! any (strcmpi (bbox, {"loose", "crop"})))
+    error("imrotate: BBOX must be 'loose' or 'crop'");
   endif
-
-  if (any(strcmpi(interp, {"bilinear", "bicubic"})))
-    interp = interp(3:end); # Remove "bi"
-  endif
-  if (!any(strcmpi(bbox, {"loose", "crop"})))
-    error("imrotate: bounding box must be either 'loose' or 'crop'");
-  endif
+  interp = interp_method (interp);
 
   ## Input checking done. Start working
   thetaDeg = mod(thetaDeg, 360); # some code below relies on positive angles
@@ -97,7 +86,7 @@ function [imgPost, H, valid] = imrotate (imgPre, thetaDeg, interp = "nearest", b
 
   R = [cos(theta) sin(theta); -sin(theta) cos(theta)];
 
-  if (nargin >= 4 && strcmp(bbox, "crop"))
+  if (nargin >= 4 && strcmpi(bbox, "crop"))
     sizePost = sizePre;
   else
     ## Compute new size by projecting zero-base image corner pixel
@@ -153,8 +142,8 @@ function [imgPost, H, valid] = imrotate (imgPre, thetaDeg, interp = "nearest", b
   end
 
   ## Now the actual rotations happen
-  if (strcmpi(interp, "Fourier"))
-    c = class (imgPre);
+  if (strcmpi (interp, "fourier"))
+    in_class = class (imgPre);
     imgPre = im2double (imgPre);
     if (isgray(imgPre))
       imgPost = imrotate_Fourier(imgPre, thetaDeg, interp, bbox);
@@ -165,14 +154,10 @@ function [imgPost, H, valid] = imrotate (imgPre, thetaDeg, interp = "nearest", b
     endif
     valid = NA;
     
-    switch (c)
-      case "uint8"
-        imgPost = im2uint8 (imgPost);
-      case "uint16"
-        imgPost = im2uint16 (imgPost);
-      case "single"
-        imgPost = single (imgPost);
-    endswitch
+    ## we probably should do this in a safer way... but hardcoding the list of
+    ## im2xxxx functions might not be a good idea since it then it requires to
+    ## be added here if a new im2xxx function is implemented
+    imgPost = feval (["im2" in_class], imgPost);
   else
     [imgPost, valid] = imperspectivewarp(imgPre, H, interp, bbox, extrapval);
   endif
@@ -180,10 +165,6 @@ endfunction
 
 
 function fs = imrotate_Fourier (f, theta, method, bbox)
-
-    if (size (f, 3) != 1)
-      error("imrotate_Fourier: image argument must be a gray-scale image");
-    endif
 
     # Get original dimensions.
     [ydim_orig, xdim_orig] = size(f);

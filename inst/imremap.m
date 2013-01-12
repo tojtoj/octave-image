@@ -28,11 +28,14 @@
 ## by interpolation. Note that the image @var{im} is expressed in a (X, Y)-coordinate
 ## system and not a (row, column) system.
 ##
-## The optional argument @var{interp} defines the interpolation method to be
-## used.  All methods supported by @code{interp2} can be used.  In
-## addition, the methods @code{bicubic} (same as @code{cubic}), and
-## @code{bilinear} (same as @code{linear}) are supported for @sc{matlab}
-## compatibility.  By default, the @code{linear} method is used.
+## The optional argument @var{method} defines the interpolation method to be
+## used.  All methods supported by @code{interp2} can be used.  By default, the
+## @code{linear} method is used.
+##
+## For @sc{matlab} compatibility, the methods @code{bicubic} (same as
+## @code{cubic}), @code{bilinear} and @code{triangle} (both the same as
+## @code{linear}) are also supported.
+
 ##
 ## All values of the result that fall outside the original image will
 ## be set to @var{extrapval}. For images of class @code{double} @var{extrapval}
@@ -45,35 +48,22 @@
 ## @end deftypefn
 
 function [warped, valid] = imremap(im, XI, YI, interp = "linear", extrapval = NA)
-  ## Check input
-  if (nargin < 3)
-    print_usage();
+
+  if (nargin < 3 || nargin > 5)
+    print_usage ();
+  elseif (! isimage (im) || (! isrgb (im) && ! isgray (im)))
+    error ("imremap: IM must be a grayscale or RGB image.")
+  elseif (! size_equal (XI, YI) || ! ismatrix (XI) || ndims (XI) != 2)
+    error ("imremap: XI and YI must be matrices of the same size");
+  elseif (! ischar (interp))
+    error ("imremap: INTERP must be a string with interpolation method")
+  elseif (! isscalar (extrapval))
+    error ("imremap: EXTRAPVAL must be a scalar");
   endif
-  
-  [imrows, imcols, imchannels, tmp] = size(im);
-  if (tmp != 1 || (imchannels != 1 && imchannels != 3))
-    error("imremap: first input argument must be an image");
-  endif
-  
-  if (!size_equal(XI, YI) || !ismatrix(XI) || ndims(XI) != 2)
-    error("imremap: XI and YI must be matrices of the same size");
-  endif
-  
-  ## Handle the interp argument. We do not check for the actual value. We leave
-  ## that to interp2 so we don't have to keep updating this when interp2
-  ## gets new methods
-  interp = tolower (interp);
-  switch interp
-    case "bicubic",   interp = "cubic";
-    case "bilinear",  interp = "linear";
-  endswitch
-  
-  if (!isscalar(extrapval))
-    error("imremap: extrapolation value must be a scalar");
-  endif
+  interp = interp_method (interp);
   
   ## Interpolate
-  if (imchannels == 1) # Gray
+  if (size (im, 3) == 1) # Gray
     warped = grayinterp(im, XI, YI, interp, NA);
   else # rgb image
     for i = 3:-1:1
@@ -83,13 +73,8 @@ function [warped, valid] = imremap(im, XI, YI, interp = "linear", extrapval = NA
   valid = !isna(warped);
   warped(!valid) = extrapval;
 
-  ## Change the class of the results according to the class of the image
-  c = class(im);
-  if (strcmpi(c, "uint8"))
-    warped = uint8(warped);
-  elseif (strcmpi(c, "uint16"))
-    warped = uint16(warped);
-  endif
+  ## we return image on same class as input
+  warped = cast (warped, class (im));
 
 endfunction
 

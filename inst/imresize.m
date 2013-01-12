@@ -34,10 +34,12 @@
 ## @end example
 ##
 ## The optional argument @var{method} defines the interpolation method to be
-## used.  All methods supported by @code{interp2} can be used.  In
-## addition, the methods @code{bicubic} (same as @code{cubic}), @code{bilinear}
-## and @code{triangle} (both, the same as @code{linear}) are supported for
-## @sc{matlab} compatibility.  By default, the @code{cubic} method is used.
+## used.  All methods supported by @code{interp2} can be used.  By default, the
+## @code{cubic} method is used.
+##
+## For @sc{matlab} compatibility, the methods @code{bicubic} (same as
+## @code{cubic}), @code{bilinear} and @code{triangle} (both the same as
+## @code{linear}) are also supported.
 ##
 ## @table @asis
 ## @item bicubic (default)
@@ -54,15 +56,17 @@
 ## @end deftypefn
 
 function im = imresize (im, scale, method = "cubic")
+
   if (nargin < 2 || nargin > 3)
-    print_usage
+    print_usage ();
   elseif (! isimage (im) || (! isrgb (im) && ! isgray (im)))
-    error ("imerode: IM must be a grayscale or RGB image.")
+    error ("imresize: IM must be a grayscale or RGB image.")
   elseif (! isnumeric (scale) || any (scale <= 0))
-    error ("imerode: SCALE or [M N] must be numeric positive values")
+    error ("imresize: SCALE or [M N] must be numeric positive values")
   elseif (! ischar (method))
-    error ("imerode: METHOD must be a string with interpolation method")
+    error ("imresize: METHOD must be a string with interpolation method")
   endif
+  method = interp_method (method);
 
   inRows = rows (im);
   inCols = columns (im);
@@ -91,16 +95,6 @@ function im = imresize (im, scale, method = "cubic")
   else
     error ("imresize: SCALE argument must be a scalar or a 2 element vector");
   end
-
-  ## Handle the method argument. We do not check for the actual value. We leave
-  ## that to interp2 so we don't have to keep updating this when interp2
-  ## gets new methods
-  method = tolower (method);
-  switch method
-    case "bicubic",   method = "cubic";
-    case "bilinear",  method = "linear";
-    case "triangle",  method = "linear";
-  endswitch
 
   ## Perform the actual resizing
   if (inRows == outRows && inCols == outCols)

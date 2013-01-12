@@ -20,19 +20,13 @@
 ## The transformation matrix @var{P} must be a 3x3 homogeneous matrix, or 2x2 or 2x3
 ## affine transformation matrix.
 ## 
-## The resulting image @var{warped} is computed using an interpolation method that
-## can be selected through the @var{interp} argument. This must be one
-## of the following strings
-## @table @code
-## @item "nearest"
-## Nearest neighbor interpolation.
-## @item "linear"
-## @itemx "bilinear"
-## Bilinear interpolation. This is the default behavior.
-## @item "cubic"
-## @itemx "bicubic"
-## Bicubic interpolation.
-## @end table
+## The optional argument @var{method} defines the interpolation method to be
+## used.  All methods supported by @code{interp2} can be used.  By default, the
+## @code{linear} method is used.
+##
+## For @sc{matlab} compatibility, the methods @code{bicubic} (same as
+## @code{cubic}), @code{bilinear} and @code{triangle} (both the same as
+## @code{linear}) are also supported.
 ##
 ## By default the resulting image contains the entire warped image. In some situation
 ## you only parts of the warped image. The argument @var{bbox} controls this, and can
@@ -56,47 +50,35 @@
 ## @seealso{imremap, imrotate, imresize, imshear, interp2}
 ## @end deftypefn
 
-function [warped, valid] = imperspectivewarp(im, P, interp = "bilinear", bbox = "loose", extrapolation_value = NA)
-  ## Check input
-  if (nargin < 2)
-    print_usage();
+function [warped, valid] = imperspectivewarp(im, P, interp = "linear", bbox = "loose", extrapolation_value = NA)
+
+  if (nargin < 2 || nargin > 5)
+    print_usage ();
+  elseif (! isimage (im) || (! isrgb (im) && ! isgray (im)))
+    error ("imperspectivewarp: IM must be a grayscale or RGB image.")
+  elseif (! ischar (interp))
+    error ("imperspectivewarp: INTERP must be a string with interpolation method")
+  elseif (! ischar (bbox) || ! any (strcmpi (bbox, {"loose", "crop", "same"})))
+    error ("imperspectivewarp: BBOX must be 'loose', 'crop' or 'same'");
+  elseif (! isscalar (extrapolation_value))
+    error ("imperspectivewarp: EXTRAPVAL must be a scalar");
   endif
-  
-  [imrows, imcols, imchannels, tmp] = size(im);
-  if (tmp != 1 || (imchannels != 1 && imchannels != 3))
-    error("imperspectivewarp: first input argument must be an image");
-  endif
+  interp = interp_method (interp);
   
   if (ismatrix(P) && ndims(P) == 2)
     if (issquare(P) && rows(P) == 3) # 3x3 matrix
       if (P(3,3) != 0)
         P /= P(3,3);
       else
-        error("imperspectivewarp: P(3,3) must be non-zero");
+        error ("imperspectivewarp: P(3,3) must be non-zero");
       endif
     elseif (rows(P) == 2 && (columns(P) == 2 || columns(P) == 3)) # 2x2 or 2x3 matrix
       P(3,3) = 1;
     else # unsupported matrix size
-      error("imperspectivewarp: transformation matrix must be 2x2, 2x3, or 3x3");
+      error ("imperspectivewarp: transformation matrix must be 2x2, 2x3, or 3x3");
     endif
   else
-    error("imperspectivewarp: transformation matrix not valid");
-  endif
-  
-  if (!any(strcmpi(interp, {"nearest", "linear", "bilinear", "cubic", "bicubic"})))
-    error("imperspectivewarp: unsupported interpolation method");
-  endif
-  if (any(strcmpi(interp, {"bilinear", "bicubic"})))
-    interp = interp(3:end); # Remove "bi"
-  endif
-  interp = lower(interp);
-  
-  if (!any(strcmpi(bbox, {"loose", "crop", "same"})))
-    error("imperspectivewarp: bounding box must be either 'loose', 'crop', or 'same'");
-  endif
-  
-  if (!isscalar(extrapolation_value))
-    error("imperspective: extrapolation value must be a scalar");
+    error ("imperspectivewarp: transformation matrix not valid");
   endif
   
   ## Do the transformation
@@ -140,8 +122,7 @@ function [warped, valid] = imperspectivewarp(im, P, interp = "bilinear", bbox = 
 
   clear X Y D PD;
   
-  ## Interpolate
-  [warped, valid] = imremap(im, XI, YI, interp, extrapolation_value);
+  [warped, valid] = imremap (im, XI, YI, interp, extrapolation_value);
 
 endfunction
 
