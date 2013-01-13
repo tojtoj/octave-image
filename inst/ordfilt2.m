@@ -33,6 +33,6 @@ function A = ordfilt2 (A, nth, domain, varargin)
   elseif (ndims (A) > 2 || ndims (domain) > 2 )
     error ("ordfilt2: A and DOMAIN are limited to 2 dimensinos. Use `ordfiltn' for more")
   endif
-  A = ordfiltn (A, nth, domain, varargin{:})
+  A = ordfiltn (A, nth, domain, varargin{:});
 
 endfunction
