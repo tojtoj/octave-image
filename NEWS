@@ -15,6 +15,10 @@ Summary of important user-visible changes for image 2.0.1:
 
       imrotate_Fourier
 
+ ** The use of non logical matrices to specify the neighborhood for the medfilt2
+    function has been deprecated.  If using a vector to specify the size of the
+    neighborhood, the elements are no longer swapped.
+
  ** The plot produced by `imhist' is correctly scaled on the X axis so that the
     colorbar corresponds to the actual intensity of the stems; the given
     colormarp is used on the colorbar for indexed images; and the stems no
