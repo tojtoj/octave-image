@@ -84,6 +84,8 @@ function retval = medfilt2 (A, varargin)
     endif
   endfor
 
+  ## TODO this should probably be implemented as an option of
+  ##      __spatial_filtering__ where median() cold be called directly
   n = nnz (domain);
   if ((n - 2*floor(n/2)) == 0) % n even - more work
     nth = floor (n/2);
@@ -92,7 +94,7 @@ function retval = medfilt2 (A, varargin)
     retval = a./2 + b./2; # split into two divisions to avoid overflow on integer data
   else
     nth = floor (n/2) + 1;
-    retval = ordfilt2 (A, nth, domain, padding);
+    retval = ordfiltn (A, nth, domain, padding);
   endif
 
 endfunction
