@@ -102,6 +102,12 @@ endfunction
 %!      20 24 24 24];
 %!assert (ordfiltn (b, 8, true (3)), f);
 %!
+%! f = [ 1  2  8 12
+%!       4 12 20 21
+%!       8 22 22 21
+%!      20 24 24 24];
+%!assert (ordfiltn (b, 7, true (3), "symmetric"), f);
+%!
 %! f = [ 1  8 12 12
 %!       4 20 24 21
 %!       7 22 25 21
