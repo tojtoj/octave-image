@@ -33,19 +33,19 @@
 ## values are:
 ##
 ## @table @asis
-## @item 0
+## @item 0 or "zeros" (default)
 ## Pads with 0 as described above. This is the default behaviour.
-## @item Scalar
+## @item scalar value
 ## Pads using @var{padval} as a padding value.
-## @item "Circular"
+## @item "circular"
 ## Pads with a circular repetition of elements in @var{A} (similar to
 ## tiling @var{A}).
-## @item "Replicate"
+## @item "replicate"
 ## Pads replicating values of @var{A} which are at the border of the
 ## array.
-## @item "Symmetric"
+## @item "symmetric"
 ## Pads with a mirror reflection of @var{A}.
-## @item "Reflect"
+## @item "reflect"
 ## Same as "symmetric", but the borders are not used in the padding.
 ## @end table
 ##
@@ -53,14 +53,14 @@
 ## direction of the pad. Possible values are:
 ##
 ## @table @asis
-## @item "Both"
+## @item "both"
 ## For each dimension it pads before the first element the number
 ## of elements defined by @var{padsize} and the same number again after
 ## the last element. This is the default value.
-## @item "Pre"
+## @item "pre"
 ## For each dimension it pads before the first element the number of
 ## elements defined by @var{padsize}.
-## @item "Post"
+## @item "post"
 ## For each dimension it pads after the last element the number of
 ## elements defined by @var{padsize}.
 ## @end table
@@ -99,6 +99,10 @@ function B = padarray(A, padsize, padval = 0, direction = "both")
       ps = ds;
       ps(dim) = s;                       # padding size
 
+      if (strcmpi (padval, "zeros"))
+        padval = 0;
+      endif
+
       if (ischar(padval))
         # Init a "index all" cell array. All cases need it.
         idx = cell(1, length(ds));
@@ -106,7 +110,7 @@ function B = padarray(A, padsize, padval = 0, direction = "both")
           idx{i} = 1:ds(i);
         endfor
 
-        switch (padval)
+        switch (tolower (padval))
           case ("circular")
             complete = 0;
             D = B;
