@@ -14,18 +14,25 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {@var{cc} =} normxcorr2 (@var{template}, @var{img})
-## @deftypefnx {Function File} {@var{cc} =} normxcorr2 (@var{template}, @var{img})
-## Compute the normalized 2D cross correlation.
+## @deftypefn  {Function File} {} normxcorr2 (@var{template}, @var{img})
+## @deftypefnx {Function File} {} normxcorr2 (@var{template}, @var{img})
+## Compute the normalized 2D cross-correlation.
 ##
-## The output matrix @var{cc} shows the correlation coefficients of @var{template}
-## for each position in @var{img}.
+## Returns the normalized cross correlation matrix of @var{template} and
+## @var{img} so that a value of 1 corresponds to the positions of @var{img} that
+## match @var{template} perfectly.
+##
+## @emph{Note}: this function exists only for @sc{matlab} compatibility and is
+## just a wrapper to the @code{coeff} option of @code{xcorr2} with the arguments
+## inverted.  See the @code{xcorr2} documentation for more details. Same results
+## can be obtained with @code{xcorr2 (img, template, "coeff")}
+##
 ## @seealso{conv2, corr2, xcorr2}
 ## @end deftypefn
 
 function cc = normxcorr2 (temp, img)
   if (nargin != 2)
-    print_usage;
+    print_usage ();
   elseif (rows (temp) > rows (img) || columns (temp) > columns (img))
     error ("normxcorr2: template must be same size or smaller than image");
   endif
