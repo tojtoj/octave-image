@@ -147,7 +147,7 @@ function trans = cp2tform (crw, cap, ttype, opt)
 endfunction
 
 function trans = gettrans (ttype, cap, crw, ord = 0)
-  switch (tolower (ttype))
+  switch ttype
     case "nonreflective similarity"
       x = cap(:,1);
       y = cap(:,2);
