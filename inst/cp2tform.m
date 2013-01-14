@@ -41,14 +41,14 @@
 ## @end group
 ## @end example
 ## This transformation is well suited when parallel lines in one space
-## are still parallel in the other space (e.g. shear, translation, ...).
+## are still parallel in the other space (e.g. shear, translation, @dots{}).
 ## 
 ## @item "nonreflective similarity"
 ## Same as "affine" except that the transform matrices T and Tinv have
 ## the form
 ## @example
 ## @group
-## Tcoefs = [a -b;                
+## Tcoefs = [a -b;
 ##           b  a;
 ##           c  d]
 ## @end group
@@ -61,7 +61,7 @@
 ## the form
 ## @example
 ## @group
-## Tcoefs = [a  b;                
+## Tcoefs = [a  b;
 ##           b -a;
 ##           c  d]
 ## @end group
@@ -124,8 +124,7 @@ function trans = cp2tform (crw, cap, ttype, opt)
     print_usage ();
   endif
 
-  if (! all (size (crw) == size (cap)) ||
-      columns (crw) != 2)
+  if (! all (size (crw) == size (cap)) || columns (crw) != 2)
     error ("cp2tform: expect the 2 first input arguments to be (m x 2) matrices")
   elseif (! ischar (ttype))
     error ("cp2tform: expect a string as third input argument")
@@ -148,94 +147,99 @@ function trans = cp2tform (crw, cap, ttype, opt)
 endfunction
 
 function trans = gettrans (ttype, cap, crw, ord = 0)
-  if (strcmp (ttype, 'nonreflective similarity'))
-    x = cap(:,1);
-    y = cap(:,2);
-    u = crw(:,1);
-    v = crw(:,2);
-    tmp0 = zeros(size(x));
-    tmp1 = ones(size(x));
-    
-    A = [x y tmp1 tmp0 ; y -x tmp0 tmp1];
-    B = [u; v];
-    tmat = A\B;
-    tmat = [tmat(1) -tmat(2);
-            tmat(2)  tmat(1);
-            tmat(3)  tmat(4)];
-    trans = maketform ("affine", tmat);
-  elseif (strcmp (ttype, 'similarity'))
-    #error ("cp2tform: similarity not implemented yet.")
-    x = cap(:,1);
-    y = cap(:,2);
-    u = crw(:,1);
-    v = crw(:,2);
-    tmp0 = zeros(size(x));
-    tmp1 = ones(size(x));
+  switch (tolower (ttype))
+    case "nonreflective similarity"
+      x = cap(:,1);
+      y = cap(:,2);
+      u = crw(:,1);
+      v = crw(:,2);
+      tmp0 = zeros(size(u));
+      tmp1 = ones(size(u));
+      
+      A = [u v tmp1 tmp0 ; v -u tmp0 tmp1];
+      B = [x; y];
+      tmat = A\B;
+      tmat = [tmat(1) -tmat(2);
+              tmat(2)  tmat(1);
+              tmat(3)  tmat(4)];
+      trans = maketform ("affine", tmat);
 
-    #without reflection
-    A = [x y tmp1 tmp0 ; y -x tmp0 tmp1];
-    B = [u; v];
-    tmat1 = A\B;
-    resid = norm (A*tmat1 - B);
-    #with reflection
-    A = [x y tmp1 tmp0 ; -y x tmp0 tmp1];
-    B = [u; v];
-    tmat2 = A\B;
-    if (norm (A*tmat2 - B) < resid)
-      tmat = [tmat2(1)  tmat2(2); 
-              tmat2(2) -tmat2(1); 
-              tmat2(3)  tmat2(4)];
-    else
-      tmat = [tmat1(1) -tmat1(2); 
-              tmat1(2)  tmat1(1); 
-              tmat1(3)  tmat1(4)];
-      warning ("cp2tform: reflection not included.")
-    endif
-    trans = maketform ("affine", tmat);
-  elseif (strcmp (ttype, 'affine'))
-    tmat =[cap ones(rows(cap), 1)]\crw;
-    trans = maketform ("affine", tmat);
-  elseif (strcmp (ttype, "projective"))
-    x = cap(:,1);
-    y = cap(:,2);
-    u = crw(:,1);
-    v = crw(:,2);
-    tmp0 = zeros(size(x));
-    tmp1 = ones(size(x));
-    A = [-x -y -tmp1 tmp0 tmp0 tmp0 u.*x u.*y u;
-         tmp0 tmp0 tmp0 -x -y -tmp1 v.*x v.*y v];
-    [U S V] = svd (A);
-    tmat = V(:,end);
-    tmat = reshape (tmat, 3, 3);
-    tmat = tmat./tmat(end,end);
-    trans = maketform ("projective", tmat);
-  elseif (strcmp (ttype, 'polynomial'))
-    x = cap(:,1);
-    y = cap(:,2);
-    u = crw(:,1);
-    v = crw(:,2);
-    tmp1 = ones(size(x));
-    
-    ndims_in = 2;
-    ndims_out = 2;
-    forward_fcn = [];
-    inverse_fcn = @inv_polynomial;
-    A = [tmp1, x, y, x.*y, x.^2, y.^2]; 
-    B = [u v];
-    switch ord
-      case 2
-      case 3
-        A = [A, y.*x.^2 x.*y.^2 x.^3 y.^3]; 
-      case 4
-        A = [A, y.*x.^2 x.*y.^2 x.^3 y.^3];
-        A = [A, x.^3.*y x.^2.*y.^2 x.*y.^3 x.^4 y.^4];
-      otherwise
-        error ("cp2tform: supported polynomial orders are 2, 3 and 4.")
+    case "similarity"
+      x = cap(:,1);
+      y = cap(:,2);
+      u = crw(:,1);
+      v = crw(:,2);
+      tmp0 = zeros(size(u));
+      tmp1 = ones(size(u));
+
+      #without reflection
+      A = [u v tmp1 tmp0 ; v -u tmp0 tmp1];
+      B = [x; y];
+      tmat1 = A\B;
+      resid = norm (A*tmat1 - B);
+      #with reflection
+      A = [u v tmp1 tmp0 ; -v u tmp0 tmp1];
+      tmat2 = A\B;
+      if (norm (A*tmat2 - B) < resid)
+        tmat = [tmat2(1)  tmat2(2); 
+                tmat2(2) -tmat2(1); 
+                tmat2(3)  tmat2(4)];
+      else
+        tmat = [tmat1(1) -tmat1(2); 
+                tmat1(2)  tmat1(1); 
+                tmat1(3)  tmat1(4)];
+        warning ("cp2tform: reflection not included.")
+      endif
+      trans = maketform ("affine", tmat);
+
+    case "affine"
+      tmat  = [crw ones(rows(crw), 1)]\cap;
+      trans = maketform ("affine", tmat);
+
+    case "projective"
+      x = cap(:,1);
+      y = cap(:,2);
+      u = crw(:,1);
+      v = crw(:,2);
+      tmp0 = zeros(size(u));
+      tmp1 = ones(size(u));
+      A = [-u -v -tmp1 tmp0 tmp0 tmp0 x.*u x.*v x;
+           tmp0 tmp0 tmp0 -u -v -tmp1 y.*u y.*v y];
+      [U S V] = svd (A);
+      tmat = V(:,end);
+      tmat = reshape (tmat, 3, 3);
+      tmat = tmat./tmat(end,end);
+      trans = maketform ("projective", tmat);
+
+    case "polynomial"
+      x = cap(:,1);
+      y = cap(:,2);
+      u = crw(:,1);
+      v = crw(:,2);
+      tmp1 = ones(size(x));
+      
+      ndims_in = 2;
+      ndims_out = 2;
+      forward_fcn = [];
+      inverse_fcn = @inv_polynomial;
+      A = [tmp1, x, y, x.*y, x.^2, y.^2]; 
+      B = [u v];
+      switch ord
+        case 2
+        case 3
+          A = [A, y.*x.^2 x.*y.^2 x.^3 y.^3]; 
+        case 4
+          A = [A, y.*x.^2 x.*y.^2 x.^3 y.^3];
+          A = [A, x.^3.*y x.^2.*y.^2 x.*y.^3 x.^4 y.^4];
+        otherwise
+          error ("cp2tform: supported polynomial orders are 2, 3 and 4.")
+      endswitch
+      tmat = A\B;
+      trans = maketform ("custom", ndims_in, ndims_out, ...
+                         forward_fcn, inverse_fcn, tmat);
+    otherwise
+      error ("cp2tform: invalid TRANSTYPE %s.", ttype);
     endswitch
-    tmat = A\B;
-    trans = maketform ("custom", ndims_in, ndims_out, ...
-                       forward_fcn, inverse_fcn, tmat);
-  endif
 endfunction
 
 function out = inv_polynomial (x, pst)
@@ -282,6 +286,7 @@ endfunction
 %!  xap = xap + rand (size (xap)) * norm (xap) / sig2noise;
 %!  cap = [yap xap];
 %!endfunction
+
 
 %!test
 %! npt = 10000;

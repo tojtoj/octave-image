@@ -71,13 +71,13 @@ function T = maketform (ttype, varargin)
       print_usage ();
     endif
 
-    switch ttype
+    switch (tolower (ttype))
       case "affine"
         if ((ndin - ndout) == 1)
           tmat = [tmat [zeros(ndin, 1); 1]];
           ndout += 1;
         elseif (!all (tmat(:,end) == [zeros(ndin, 1); 1]))
-          error ("maketform: \"affine\" expect [zeros(N,1); 1] as (N+1)th column");
+          error ("maketform: \"%s\" expect [zeros(N,1); 1] as (N+1)th column", ttype);
         endif
         forward_fcn = @fwd_affine; 
         inverse_fcn = @inv_affine;
@@ -92,9 +92,9 @@ function T = maketform (ttype, varargin)
     T.ndims_out = ndout;
     T.forward_fcn = forward_fcn;
     T.inverse_fcn = inverse_fcn;
-    T.tdata.T = inv (tmat);
-    T.tdata.Tinv = tmat;
-  elseif (numel (varargin) == 5 && strcmp (ttype, "custom"))
+    T.tdata.T = tmat;
+    T.tdata.Tinv = inv (tmat);
+  elseif (numel (varargin) == 5 && strcmpi (ttype, "custom"))
     if (isscalar (varargin{1}) && isscalar (varargin{2})
         && varargin{1} > 0 && varargin{2} > 0)
       T.ndims_in = varargin{1};
