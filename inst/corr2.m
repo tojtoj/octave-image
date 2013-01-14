@@ -15,21 +15,22 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{r} = corr2 (@var{I},@var{J})
-## Returns the correlation coefficient between @var{I} and @var{j}.
-## @var{I}, @var{J} must be real type matrices or vectors of same size.
-## @seealso{cov, std2}
+## Compute correlation coefficients of images.
 ##
+## The two images @var{I} and @var{J} must be real type matrices or vectors of
+## same size.
+## @seealso{corr, cov, std2}
 ## @end deftypefn
 
 function r = corr2 (I, J)
 
   if (nargin != 2)
     print_usage ();
-  elseif (!ismage (I) || !isimage (J))
-    error ("corr2: argument must be real matrices");
-  elseif (!size_equal (I, J))
-    error ("corr2: arguments must be of same size")
+  elseif (! isimage (I) || ! isimage (J))
+    error ("corr2: I and J must be real matrices");
+  elseif (! size_equal (I, J))
+    error ("corr2: I and J must be of same size");
   endif
-  r = cov (I (:), J (:)) / (std2 (I) * std2 (J));
+  r = corr (I(:), J(:));
 
 endfunction
