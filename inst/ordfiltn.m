@@ -58,20 +58,22 @@ function retval = ordfiltn (A, nth, domain, varargin)
   endif
   
   if (ndims (A) != ndims (domain))
-    error("ordfiltn: first and second argument must have same dimensionality");
+    error ("ordfiltn: first and second argument must have same dimensionality");
   elseif (any (size (A) < size (domain)))
     error ("ordfiltn: domain array cannot be larger than the data array");
   endif
 
   ## Parse varargin
-  S = zeros(size(domain));
+  S = zeros (size (domain));
   padding = 0;
-  for i=1:length(varargin)
-    a = varargin{:};
-    if (ischar(a) || isscalar(a))
-      padding = a;
-    elseif (ismatrix(a) && size_equal(a, domain))
-      S = a;
+  for idx = 1:length(varargin)
+    opt = varargin{idx};
+    if (ischar (opt) || isscalar (opt))
+      padding = opt;
+    elseif (ismatrix (opt) && size_equal (opt, domain))
+      S = opt;
+    else
+      error ("ordfiltn: unrecognized option from input argument #%i and class %s", 3 + idx, class (opt));
     endif
   endfor
 
@@ -81,3 +83,64 @@ function retval = ordfiltn (A, nth, domain, varargin)
   retval = __spatial_filtering__ (A, logical (domain), "ordered", S, nth);
 
 endfunction
+
+%!shared b, f, s
+%! b = [ 0  1  2  3
+%!       1  8 12 12
+%!       4 20 24 21
+%!       7 22 25 18];
+%!
+%! f = [ 8 12 12 12
+%!      20 24 24 24
+%!      22 25 25 25
+%!      22 25 25 25];
+%!assert (ordfiltn (b, 9, true (3)), f);
+%!
+%! f = [ 1  8 12 12
+%!       8 20 21 21
+%!      20 24 24 24
+%!      20 24 24 24];
+%!assert (ordfiltn (b, 8, true (3)), f);
+%!
+%! f = [ 1  8 12 12
+%!       4 20 24 21
+%!       7 22 25 21
+%!       7 22 25 21];
+%!assert (ordfiltn (b, 3, true (3, 1)), f);
+%!
+%! f = [ 1  8 12 12
+%!       4 20 24 18
+%!       4 20 24 18
+%!       4 20 24 18];
+%!assert (ordfiltn (b, 3, true (4, 1)), f);
+%!
+%! f = [ 4 20 24 21
+%!       7 22 25 21
+%!       7 22 25 21
+%!       7 22 25 21];
+%!assert (ordfiltn (b, 4, true (4, 1)), f);
+%!
+%! s = [0 0 1
+%!      0 0 1
+%!      0 0 1];
+%! f = [ 2  8 12 12
+%!       9 20 22 21
+%!      21 25 24 24
+%!      21 25 24 24];
+%!assert (ordfiltn (b, 8, true (3), s), f);
+%!
+%! b(:,:,2) = b(:,:,1) - 1;
+%! b(:,:,3) = b(:,:,2) - 1;
+%! f(:,:,1) = [ 1  8 11 11
+%!              8 20 21 21
+%!              20 24 24 24
+%!              20 24 24 24];
+%! f(:,:,2) = [ 6 10 11 11
+%!             18 22 22 22
+%!             20 24 24 24
+%!             20 24 24 24];
+%! f(:,:,3) = [ 0  7 10 10
+%!              7 19 20 20
+%!             19 23 23 23
+%!             19 23 23 23];
+%!assert (ordfiltn (b, 25, true (3, 3, 3)), f);
