@@ -54,13 +54,13 @@ bool operator< (const coord& a, const coord& b)
   if (na > nb)
     return false;
   octave_idx_type i = 0;
-  while (a(i) == b(i) and i < na)
+  while (a(i) == b(i) && i < na)
     {
       i++;
     }
 
   if (i == na          //They're equal, but this is strict order
-      or a(i) > b(i) )
+      || a(i) > b(i) )
     return false;
 
   return true;
@@ -145,7 +145,7 @@ populate_neighbours(const boolNDArray& conn_mask,
           //The zero coordinates are the centre, and the negative ones
           //are the ones reflected about the centre, and we don't need
           //to consider those.
-          if( aidx == zero or neighbours.find(-aidx) != neighbours.end() )
+          if( aidx == zero || neighbours.find(-aidx) != neighbours.end() )
             continue;
 
           neighbours.insert (aidx);
