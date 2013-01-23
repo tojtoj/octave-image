@@ -154,6 +154,8 @@ function [varargout] = graythresh (img, algo = "otsu", varargin)
     print_usage();
   elseif (nargin > 2 && !any (strcmpi (algo, {"percentile"})))
     error ("graythresh: algorithm `%s' does not accept any options.", algo);
+  elseif (strcmpi (algo, "percentile") && (nargin != 3 || ! isscalar (varargin{1})))
+    error ("graythresh: algorithm `%s' requires a scalar value.", algo);
   else
     hist_in = false;
     ## If the image is RGB convert it to grayscale
@@ -309,7 +311,7 @@ function [T] = intermodes (y)
     iter = iter+1;
     % If the histogram turns out not to be bimodal, set T to zero.
     if iter > 10000;
-      T = 0;
+      T{1} = 0;
       return
     end
   end
@@ -530,7 +532,7 @@ function Tout = intermeans (y, T)
 endfunction
 
 function T = concavity (h)
-  n = numel (y) - 1;
+  n = numel (h) - 1;
   H = hconvhull(h);
 
   % Find the local maxima of the difference H-h.
