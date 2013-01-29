@@ -205,10 +205,11 @@ function trans = gettrans (ttype, cap, crw, ord = 0)
       tmp1 = ones(size(u));
       A = [-u -v -tmp1 tmp0 tmp0 tmp0 x.*u x.*v x;
            tmp0 tmp0 tmp0 -u -v -tmp1 y.*u y.*v y];
-      [U S V] = svd (A);
-      tmat = V(:,end);
+      B = - A(:,end);
+      A(:,end) = [];
+      tmat = A\B;
+      tmat(9) = 1;
       tmat = reshape (tmat, 3, 3);
-      tmat = tmat./tmat(end,end);
       trans = maketform ("projective", tmat);
 
     case "polynomial"
@@ -289,7 +290,7 @@ endfunction
 
 
 %!test
-%! npt = 10000;
+%! npt = 100000;
 %! [crw, cap] = coords (npt);
 %! ttype = 'projective';
 %! T = cp2tform (crw, cap, ttype);
