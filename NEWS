@@ -68,7 +68,8 @@ Summary of important user-visible changes for image 2.0.1:
     "triangle" method (interpolation kernel) has also been added (which is the
     same as "linear" method).
 
- ** Bug fixes on the concavity and intermodes methods of graythresh.
+ ** Bug fixes on the concavity, intermodes, maxlikelihood, and minimum methods
+    of graythresh.
 
 Summary of important user-visible changes for image 2.0.0:
 -------------------------------------------------------------------

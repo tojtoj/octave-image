@@ -16,7 +16,7 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {[@var{level}, @var{sep}] =} graythresh (@var{img})
+## @deftypefn  {Function File} {[@var{level}, @var{sep}] =} graythresh (@var{img})
 ## @deftypefnx {Function File} {[@var{level}, @var{sep}] =} graythresh (@var{img}, @var{method}, @var{options})
 ## @deftypefnx {Function File} {[@var{level}, @var{sep}] =} graythresh (@var{hist}, @dots{})
 ## Compute global image threshold.
@@ -357,10 +357,14 @@ function T = minimum(y)
     end
   end
 
-  % The threshold is the minimum between the two peaks.
+  peakfound = false;
   for k = 2:n
-    if y(k-1) > y(k) && y(k+1) > y(k)
-      T{1} = k-1;
+    if y(k-1) < y(k) && y(k+1) < y(k)
+      peakfound = true;
+    end
+    if peakfound && y(k-1) >= y(k) && y(k+1) >= y(k)
+      T = k-1;
+      return
     end
   end
 endfunction
@@ -443,17 +447,6 @@ endfunction
 #}
 
 function Tout = maxlikelihood (y)
-  ## this method seems to be broken. When we got it from the HistThresh toolbox,
-  ## the author, Antti Niemistö, said:
-  ##
-  ## By the way, there appears to be a bug in my implementation of MAXLIK, and I
-  ## never got around to fixing it. The loop in that function is never actually
-  ## entered so it always returns the first estimate of the threshold. I think
-  ## this would be easy to fix...
-  ##
-  ## Instead of a do-until loop, there was a while loop where the x_prev variables
-  ## were set to NaN. This caused the loop to never start. However, fixing that
-  ## seems to cause the loop to never exit...
 
   n = numel (y) - 1;
 
@@ -468,6 +461,12 @@ function Tout = maxlikelihood (y)
   sigma2 = partial_sumC (y, T) / partial_sumA (y, T) - mu^2;
   tau2   = (partial_sumC (y, n) - partial_sumC (y, T)) / (partial_sumA (y, n) - partial_sumA (y, T)) - nu^2;
 
+  ## Return if sigma2 or tau2 are zero, to avoid division by zero
+  if sigma2 == 0 | tau2 == 0
+    Tout{1} = T;
+    return
+  endif
+
   do
     ## we store the previous values for comparison at the end (we will stop when
     ## they stop changing)
@@ -479,9 +478,9 @@ function Tout = maxlikelihood (y)
     tau2_prev   = nu;
 
     for i = 0:n
-      phi(i+1) = p/q * exp(-((i-mu)^2) / (2*sigma2)) / ...
-          (p/sqrt(sigma2) * exp(-((i-mu)^2) / (2*sigma2)) + ...
-           (q/sqrt(tau2)) * exp(-((i-nu)^2) / (2*tau2)));
+      phi(i+1) = p/sqrt((sigma2)) * exp(-((i-mu)^2) / (2*sigma2)) / ...
+                (p/sqrt(sigma2)   * exp(-((i-mu)^2) / (2*sigma2)) + ...
+                (q/sqrt(tau2))    * exp(-((i-nu)^2) / (2*tau2)));
     endfor
     ind   = 0:n;
     gamma = 1-phi;
@@ -494,9 +493,10 @@ function Tout = maxlikelihood (y)
     q       = G / partial_sumA (y,n);
     sigma2  = ind.^2.*phi*y'/F - mu^2;
     tau2    = ind.^2.*gamma*y'/G - nu^2;
-  until (abs (mu - mu_prev)         <= eps && abs (nu - nu_prev)     <= eps && ...
-         abs (p  - p_prev)          <= eps && abs (q - q_prev)       <= eps && ...
-         abs (sigma2 - sigma2_prev) <= eps && abs (tau2 - tau2_prev) <= eps)
+
+  until (abs (mu - mu_prev)         <= eps || abs (nu - nu_prev)     <= eps || ...
+         abs (p  - p_prev)          <= eps || abs (q - q_prev)       <= eps || ...
+         abs (sigma2 - sigma2_prev) <= eps || abs (tau2 - tau2_prev) <= eps)
 
   ## the terms of the quadratic equation to be solved
   w0 = 1/sigma2-1/tau2;
