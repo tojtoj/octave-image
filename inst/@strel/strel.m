@@ -1,4 +1,4 @@
-## Copyright (C) 2012 Roberto Metere <roberto@metere.it>
+## Copyright (C) 2012,2013 Roberto Metere <roberto@metere.it>
 ## Copyright (C) 2012 Carnë Draug <carandraug@octave.org>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
@@ -59,6 +59,10 @@
 ## Create disk shaped flat structuring element.  @var{radius} must be a positive
 ## integer.
 ##
+## @deftypefnx {Function File} {} strel ("line", @var{len}, @var{deg})
+## Create line shaped flat structuring element.  @var{len} must be a positive
+## real number.  @var{deg} must be a real number.
+##
 ## @deftypefnx {Function File} {} strel ("octagon", @var{apothem})
 ## Create octagon shaped flat structuring element.  @var{apothem} must be a
 ## positive integer that specifies the distance from the origin to the sides of
@@ -68,6 +72,13 @@
 ## Creates a flat structuring element with two members.  One member is placed
 ## at the origin while the other is placed with @var{offset} in relation to the
 ## origin.  @var{offset} must then be a 2 element vector for the coordinates.
+##
+## @deftypefnx {Function File} {} strel ("periodicline", @var{p}, @var{v})
+## Create periodic line shaped flat structuring element.  A periodic line will
+## be built with 2*@var{p}+1 points around the origin included. These points will
+## be displaced in accordance with the offset @var{v} at distances: 1*@var{v},
+## -1*@var{v}, 2*@var{v}, -2*@var{v}, ..., @var{p}*@var{v}, -@var{p}*@var{v}.
+##   Therefore @var{v} must be a 2 element vector for the coordinates.
 ##
 ## @deftypefnx {Function File} {} strel ("rectangle", @var{dimensions})
 ## Creates a rectangular shaped flat structuring element.  @var{dimensions} must
@@ -191,8 +202,68 @@ function SE = strel (shape, varargin)
       SE.nhood = fspecial ("disk", radius) > 0;
       SE.flat  = true;
 
-#    case "line"
-      ## TODO implement line shape
+
+    case "line"
+      if (numel (varargin) == 2)
+        linelen = varargin{1};
+        degrees = varargin{2};
+      else
+        error ("strel: a line shape needs 2 arguments");
+      endif
+      if (! (isscalar (linelen) && isnumeric (linelen) && linelen > 0))
+        error ("strel: LEN must be a positive real number");
+      elseif (! (isscalar (degrees) && isnumeric (degrees)))
+        error ("strel: DEG must be a real number");
+      endif
+
+      ## Line length are always odd, to center strel at the middle of the line.
+      ## We look it as a diameter of a circle with given slope
+      # It computes only lines with angles between 0 and 44.9999
+      deg90 = mod (degrees, 90);
+      if (deg90 > 45)
+        alpha = pi * (90 - deg90) / 180;
+      else
+        alpha = pi * deg90 / 180;
+      endif
+      ray = (linelen - 1)/2;
+
+      ## We are interested only in the discrete rectangle which contains the diameter
+      ## However we focus our attention to the bottom left quarter of the circle,
+      ## because of the central symmetry.
+      c = round (ray * cos (alpha)) + 1;
+      r = round (ray * sin (alpha)) + 1;
+
+      ## Line rasterization
+      line = false (r, c);
+      m = tan (alpha);
+      x = [1:c];
+      y = r - fix (m .* (x - 0.5));
+      indexes = sub2ind ([r c], y, x);
+      line(indexes) = true;
+
+      ## We view the result as 9 blocks.
+      # Preparing blocks
+      linestrip = line(1, 1:c - 1);
+      linerest = line(2:r, 1:c - 1);
+      z = false (r - 1, c);
+
+      # Assemblying blocks
+      SE.nhood =  vertcat (
+                    horzcat (z, linerest(end:-1:1,end:-1:1)),
+                    horzcat (linestrip, true, linestrip(end:-1:1,end:-1:1)),
+                    horzcat (linerest, z(end:-1:1,end:-1:1))
+                  );
+
+      # Rotate/transpose/flip?
+      sect = fix (mod (degrees, 180) / 45);
+      switch (sect)
+        case 1, SE.nhood = transpose (SE.nhood);
+        case 2, SE.nhood = rot90 (SE.nhood, 1);
+        case 3, SE.nhood = fliplr (SE.nhood);
+        otherwise, # do nothing
+      endswitch
+
+      SE.flat = true;
 
    case "octagon"
       if (numel (varargin) == 1)
@@ -237,7 +308,27 @@ function SE = strel (shape, varargin)
       SE.flat = true;
 
     case "periodicline"
-      ## TODO implement periodicline shape
+      if (numel (varargin) == 2)
+        p = varargin{1};
+        v = varargin{2};
+      else
+        error ("strel: a periodic line shape needs 2 arguments");
+      endif
+      if (! is_positive_integer (p))
+        error ("strel: P must be a positive integer");
+      elseif (! ismatrix (v) || numel (v) != 2 || ! isnumeric (v))
+        error ("strel: V must be a 2 element vector");
+      elseif (any (fix (v) != v))
+        error ("strel: values of V must be integers");
+      endif
+
+      lengths  = abs (2*p*v) + 1;
+      SE.nhood = false (lengths);
+      origin   = (lengths + 1)/2;
+      for i = -p:p
+        point = i*v + origin;
+        SE.nhood(point(1), point(2)) = true;
+      endfor
 
     case "rectangle"
       if (numel (varargin) == 1)
@@ -307,6 +398,24 @@ endfunction
 %!          0 1 1 1 1 1 0
 %!          0 0 0 1 0 0 0];
 %!assert (getnhood (strel ("disk", 3)), logical (shape));
+%! shape = [1 1 1];
+%!assert (getnhood (strel ("line", 3.9, 20.17)), logical (shape));
+%! shape = [0 0 1
+%!          0 1 0
+%!          1 0 0];
+%!assert (getnhood (strel ("line", 3.9, 20.18)), logical (shape));
+%! shape = [1 0 0 0 0 0 0 0 0
+%!          0 1 0 0 0 0 0 0 0
+%!          0 0 1 0 0 0 0 0 0
+%!          0 0 1 0 0 0 0 0 0
+%!          0 0 0 1 0 0 0 0 0
+%!          0 0 0 0 1 0 0 0 0
+%!          0 0 0 0 0 1 0 0 0
+%!          0 0 0 0 0 0 1 0 0
+%!          0 0 0 0 0 0 1 0 0
+%!          0 0 0 0 0 0 0 1 0
+%!          0 0 0 0 0 0 0 0 1];
+%!assert (getnhood (strel ("line", 14, 130)), logical (shape));
 %! shape = [0 0 1 1 1 0 0
 %!          0 1 1 1 1 1 0
 %!          1 1 1 1 1 1 1
@@ -359,6 +468,7 @@ endfunction
 %!error strel("arbitrary", [0 0 1], "stuff")
 %!error strel("diamond", -3)
 %!error strel("disk", -3)
+%!error strel("line", 0, 45)
 %!error strel("octagon", 4)
 %!error strel("pair", [45 67 90])
 %!error strel("rectangle", 2)
