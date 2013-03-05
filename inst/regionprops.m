@@ -212,7 +212,7 @@ function retval = regionprops (bw, varargin)
 
       case "centroid"
         for k = 1:num_labels
-          C = all_coords (L == k);
+          C = all_coords (L == k, true);
           retval (k).Centroid = [mean(C)];
         endfor
 
