@@ -101,10 +101,9 @@ function analyze75write (varargin);
   header.GlobalMax       = int32(max(data(:)));
   header.FileName        = [fileprefix,'.hdr'];
 
-  % Generate a string containing the coordinates of the first voxel (stored in the header for information only)
-  header.Descriptor = repmat(' ',1,80);
-  origintext = ['Coordinates of first voxel (mm):  ',num2str( 10* [x(1),y(1),z(1)] ,' %07.2f' )];
-  header.Descriptor(1:numel(origintext)) = origintext;
+  % Descriptor: Generate a string containing the coordinates of the first voxel (stored in the header for information only)
+  origintext = ['Coordinates of first voxel:  ',num2str( 10* [x(1),y(1),z(1)] ,' %07.2f' )];
+  header.Descriptor = sprintf('%-80s',origintext);
 
   % Determine the type of data
   if (isa(data,'int16'))
@@ -146,7 +145,13 @@ function analyze75write (varargin);
   fwrite(fidH,header.Dimensions(4),'int16',header.ByteOrder);       % Dimensions(4)
   fwrite(fidH,zeros(1,3,'int16'),'int16',header.ByteOrder);         % unused
   fwrite(fidH,header.VoxelUnits,'char',header.ByteOrder);           % VoxelUnits
-  fwrite(fidH,repmat(' ',1,8),'char',header.ByteOrder);             % CalibrationUnits
+  
+  if (isfield(header,'CalibrationUnits'))                           % CalibrationUnits
+    fwrite(fidH,sprintf('%-8s',header.CalibrationUnits(1:min([8,numel(header.CalibrationUnits)]))),'char',header.ByteOrder);
+  else
+    fwrite(fidH,repmat(' ',1,8),'char',header.ByteOrder);
+  end
+  
   fwrite(fidH,zeros(1,1,'int16'),'int16',header.ByteOrder);         % unused
   fwrite(fidH,DataTypeLabel,'int16',header.ByteOrder);              % ImgDataType
   fwrite(fidH,header.BitDepth,'int16',header.ByteOrder);            % BitDepth
@@ -172,23 +177,23 @@ function analyze75write (varargin);
   fwrite(fidH,repmat(' ',1,10),'char',header.ByteOrder);            % Scannumber
 
   if (isfield(header,'PatientID'))                                  % PatientID
-    fwrite(fidH,sprintf('%10s',header.PatientID(1:min([10,numel(header.PatientID)]))),'char',header.ByteOrder);
+    fwrite(fidH,sprintf('%-10s',header.PatientID(1:min([10,numel(header.PatientID)]))),'char',header.ByteOrder);
   else
     fwrite(fidH,repmat(' ',1,10),'char',header.ByteOrder);
   end
 
   if (isfield(header,'ExposureDate'))                               % ExposureDate
-    fwrite(fidH,sprintf('%10s',header.ExposureDate(1:min([10,numel(header.ExposureDate)]))),'char',header.ByteOrder);
-  elseif isfield(header,'StudyDate')
-    fwrite(fidH,sprintf('%10s',header.StudyDate(1:min([10,numel(header.StudyDate)]))),'char',header.ByteOrder);
+    fwrite(fidH,sprintf('%-10s',header.ExposureDate(1:min([10,numel(header.ExposureDate)]))),'char',header.ByteOrder);
+  elseif (isfield(header,'StudyDate'))
+    fwrite(fidH,sprintf('%-10s',header.StudyDate(1:min([10,numel(header.StudyDate)]))),'char',header.ByteOrder);
   else
     fwrite(fidH,repmat(' ',1,10),'char',header.ByteOrder);
   end
 
   if (isfield(header,'ExposureTime'))                               % ExposureTime
-    fwrite(fidH,sprintf('%10s',header.ExposureTime(1:min([10,numel(header.ExposureTime)]))),'char',header.ByteOrder);
-  elseif isfield(header,'StudyTime')
-    fwrite(fidH,sprintf('%10s',header.StudyTime(1:min([10,numel(header.StudyTime)]))),'char',header.ByteOrder);
+    fwrite(fidH,sprintf('%-10s',header.ExposureTime(1:min([10,numel(header.ExposureTime)]))),'char',header.ByteOrder);
+  elseif (isfield(header,'StudyTime'))
+    fwrite(fidH,sprintf('%-10s',header.StudyTime(1:min([10,numel(header.StudyTime)]))),'char',header.ByteOrder);
   else
     fwrite(fidH,repmat(' ',1,10),'char',header.ByteOrder);
   end
