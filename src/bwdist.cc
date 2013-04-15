@@ -1,4 +1,5 @@
 // Copyright (C) 2009 Stefan Gustavson <stefan.gustavson@gmail.com>
+// Copyright (C) 2013 Carnë Draug <carandraug@octave.org>
 //
 // This program is free software; you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -13,18 +14,16 @@
 // You should have received a copy of the GNU General Public License along with
 // this program; if not, see <http://www.gnu.org/licenses/>.
 
-// __bwdist__.cc - OCT file, implements the BWDIST function
 // Depends on "edtfunc.c" for the actual computations
 
 #include <octave/oct.h>
-
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#define DIST_EUCLIDEAN(x,y) ((int)(x)*(x) + (y)*(y))
+#define DIST_EUCLIDEAN(x,y) sqrt((int)(x)*(x) + (y)*(y))
 #define MAX(x,y) ((x)>(y) ? (x) : (y))
 #define DIST_CHESSBOARD(x,y) (MAX(abs(x), abs(y)))
 #define DIST_CITYBLOCK(x,y) (abs(x) + abs(y))
@@ -59,131 +58,128 @@ extern "C"
 }  /* end extern "C" */
 #endif
 
-DEFUN_DLD ( __bwdist__, args, nargout,
-"-*- texinfo -*-\n\
-@deftypefn {Loadable Function} {@var{D} =} __bwdist__(@var{bw})\n\
-Computes the distance transform of the image @var{bw}.\n\
-@var{bw} should be a binary 2D array, either a Boolean array or a\n\
-numeric array containing only the values 0 and 1.\n\
-The return value @var{D} is a double matrix of the same size as @var{bw}.\n\
-Elements with value 0 are considered background pixels, elements\n\
-with value 1 are considered object pixels. The return value\n\
-for each background pixel is the distance (according to the chosen\n\
-metric) to the closest object pixel. For each object pixel the\n\
-return value is 0.\n\
+DEFUN_DLD (bwdist, args, nargout,
+  "-*- texinfo -*-\n\
+@deftypefn  {Loadable Function} {@var{dist} =} bwdist (@var{bw})\n\
+@deftypefnx {Loadable Function} {@var{dist} =} bwdist (@var{bw}, @var{method})\n\
+@deftypefnx {Loadable Function} {[@var{dist}, @var{idx}] =} bwdist (@dots{})\n\
+Compute distance transform in binary image.\n\
 \n\
-@deftypefnx{Loadable Function} {@var{D} =} __bwdist__(@var{bw}, @var{method})\n\
+The image @var{bw} must be a binary matrix  For @sc{matlab} compatibility, no\n\
+check is performed, all non-zero values are considered true, or object pixels.\n\
+The return value @var{dist}, is the distance of each background pixel to the\n\
+closest object pixel.\n\
 \n\
-@var{method} is a string to choose the distance metric. Currently\n\
-available metrics are 'euclidean', 'chessboard', 'cityblock' and\n\
-'quasi-euclidean', which may each be abbreviated\n\
-to any string starting with 'e', 'ch', 'ci' and 'q', respectively.\n\
-If @var{method} is not specified, 'euclidean' is the default.\n\
+@var{idx} is the linear index for the closest object, used to calculate the\n\
+distance for each of the pixels.\n\
 \n\
-@deftypefnx {Loadable Function} {[@var{D},@var{C}] =} __bwdist__(@var{bw}, @var{method})\n\
+The distance can be measured through different @var{method}s:\n\
 \n\
-If a second output argument is given, the linear index for the\n\
-closest object pixel is returned for each pixel. (For object\n\
-pixels, the index points to the pixel itself.) The return value\n\
-@var{C} is a matrix the same size as @var{bw}.\n\n\
+@table @asis\n\
+@item euclidean (default)\n\
+\n\
+@item chessboard\n\
+\n\
+@item cityblock\n\
+\n\
+@item quasi-euclidean\n\
+\n\
+@end table\n\
+\n\
+Currently, only 2D images are supported.\n\
+\n\
 @end deftypefn")
 {
-  const int nargin = args.length();
   octave_value_list retval;
 
-  /* Check for proper number of input and output arguments */
-  if ((nargin < 1) || (nargin>2)) {
-    error ("bwdist accepts only one or two input parameters.");
-  }
-  else if (nargout > 2) {
-    error ("bwdist returns at most 2 output parameters.");
-  }
-  else {
-    /* Make sure input is a matrix */
-    const Matrix bw = args(0).matrix_value();
-    if (error_state) {
-      error ("bwdist input argument must be a matrix");
+  const int nargin = args.length ();
+  if (nargin < 1 || nargin > 2)
+    {
+      print_usage ();
       return retval;
     }
-    /* Warn if input is not a binary image */
-    if(bw.any_element_not_one_or_zero()) {
-      warning ("bwdist input contains values other than 1 and 0.");
+
+  // for matlab compatibility, we do not actually check if the values are all
+  // 0 and 1, any non-zero value is considered true
+
+  // FIXME const boolMatrix bw = args (0).bool_matrix_value();
+
+  const Matrix bw = args (0).matrix_value ();
+  if (error_state)
+    {
+      error ("bwdist: BW must be a matrix");
+      return retval;
     }
 
-    /* Everything seems to be OK to proceed */
-    dim_vector dims = bw.dims();
-    int rows = dims(0);
-    int cols = dims(1);
-    int caseMethod = 0; // Default 0 means Euclidean
-    if(nargin > 1) {
-      charMatrix method = args(1).char_matrix_value();
-      if(method(0) == 'e') caseMethod = 0; // Euclidean;
-      else if (method(0) == 'c') {
-        if(method(1) == 'h') caseMethod = 1; // chessboard
-        else if(method(1) == 'i') caseMethod = 2; // cityblock
-      }
-      else if(method(0) == 'q') caseMethod = 3; // quasi-Euclidean
-      else {
-        warning ("unknown metric, using 'euclidean'");
-        caseMethod = 0;
-      }
+  std::string method = (nargin > 1) ? args (1).string_value () : "euclidean";
+  if (error_state)
+    {
+      error ("bwdist: METHOD must be a string");
+      return retval;
     }
+  for (int q = 0; q < method.length (); q++)
+    method[q] = tolower (method[q]);
 
-    if (!error_state) {
-      /* Allocate two arrays for temporary output values */
-      OCTAVE_LOCAL_BUFFER (short, xdist, dims.numel());
-      OCTAVE_LOCAL_BUFFER (short, ydist, dims.numel());
-
-      /* Create final output array */
-      Matrix D (rows, cols);
-
-      /* Call the appropriate C subroutine and compute output */
-      switch(caseMethod) {
-
-      case 1:
-        chessboard(bw, rows, cols, xdist, ydist);
-        for(int i=0; i<rows*cols; i++) {
-          D(i) = DIST_CHESSBOARD(xdist[i], ydist[i]);
-        }
-        break;
-
-      case 2:
-        cityblock(bw, rows, cols, xdist, ydist);
-        for(int i=0; i<rows*cols; i++) {
-          D(i) = DIST_CITYBLOCK(xdist[i], ydist[i]);
-        }
-        break;
-
-      case 3:
-        quasi_euclidean(bw, rows, cols, xdist, ydist);
-        for(int i=0; i<rows*cols; i++) {
-          D(i) = DIST_QUASI_EUCLIDEAN(xdist[i], ydist[i]);
-        }
-        break;
-
-      case 0:
-      default:
-        euclidean(bw, rows, cols, xdist, ydist);
-        /* Remember sqrt() for the final output */
-        for(int i=0; i<rows*cols; i++) {
-          D(i) = sqrt((double)DIST_EUCLIDEAN(xdist[i], ydist[i]));
-        }
-        break;
+  if (method.length () <= 2) {
+    static bool warned = false;
+    if (! warned )
+      {
+        warning ("bwdist: specifying METHOD with abbreviation is deprecated");
+        warned = true;
       }
-
-      retval(0) = D;
-
-      if(nargout > 1) {
-        /* Create a second output array */
-        Matrix C (rows, cols);
-        /* Compute optional 'index to closest object pixel' */
-        for(int i=0; i<rows*cols; i++) {
-          C (i) = i+1 - xdist[i] - ydist[i]*rows;
-        }
-        retval(1) = C;
-      }
-    }
   }
+
+  const int cols  = bw.cols  ();
+  const int rows  = bw.rows  ();
+  const int numel = bw.numel ();
+
+  // Allocate two arrays for temporary output values
+  OCTAVE_LOCAL_BUFFER (short, xdist, numel);
+  OCTAVE_LOCAL_BUFFER (short, ydist, numel);
+
+  Matrix dist (rows, cols); // the output distance matrix
+
+  if (! method.compare ("euclidean") || ! method.compare ("e"))
+    {
+      euclidean (bw, rows, cols, xdist, ydist);
+      for (int i = 0; i < numel; i++)
+        dist(i) = DIST_EUCLIDEAN (xdist[i], ydist[i]);
+    }
+  else if (! method.compare ("chessboard") || ! method.compare ("ch"))
+    {
+      chessboard (bw, rows, cols, xdist, ydist);
+      for (int i = 0; i < numel; i++)
+        dist(i) = DIST_CHESSBOARD (xdist[i], ydist[i]);
+    }
+  else if (! method.compare ("cityblock") || ! method.compare ("ci"))
+    {
+      cityblock (bw, rows, cols, xdist, ydist);
+      for (int i = 0; i < numel; i++)
+        dist(i) = DIST_CITYBLOCK (xdist[i], ydist[i]);
+    }
+  else if (! method.compare ("quasi-euclidean") || ! method.compare ("q"))
+    {
+      quasi_euclidean (bw, rows, cols, xdist, ydist);
+      for (int i = 0; i < numel; i++)
+        dist(i) = DIST_QUASI_EUCLIDEAN (xdist[i], ydist[i]);
+    }
+  else
+    {
+      error ("bwdist: unknown METHOD '%s'", method.c_str ());
+    }
+
+  retval(0) = dist;
+
+  if (nargout > 1)  // only compute IDX, if requested
+    {
+      Matrix idx (rows, cols);
+      // Compute optional 'index to closest object pixel'
+      for(int i = 0; i < numel; i++)
+        idx (i) = i+1 - xdist[i] - ydist[i]*rows;
+
+      retval(1) = idx;
+    }
+
   return retval;
 }
 
@@ -208,6 +204,7 @@ pixels, the index points to the pixel itself.) The return value\n\
 %!         0.00000   0.00000   0.00000   1.00000   1.41421   1.00000   0.00000   1.00000
 %!         1.00000   1.00000   0.00000   1.00000   2.00000   1.00000   0.00000   0.00000];
 %!
+%!assert (bwdist (bw), out, 0.0001);  # default is euclidean
 %!assert (bwdist (bw, "euclidean"), out, 0.0001);
 %!assert (bwdist (logical (bw), "euclidean"), out, 0.0001);
 %!
@@ -244,6 +241,8 @@ pixels, the index points to the pixel itself.) The return value\n\
 %!
 %!assert (bwdist (bw, "quasi-euclidean"), out, 0.0001);
 %!
-%!error bwdist (magic (5));
-%!error bwdist (magic (5), "euclidean");
+%! bw(logical (bw)) = 3; # there is no actual check if matrix is binary or 0 and 1
+%!assert (bwdist (bw, "quasi-euclidean"), out, 0.0001);
+%!
+%!error bwdist (bw, "not a valid method");
 */
