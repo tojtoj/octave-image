@@ -14,49 +14,416 @@
 // You should have received a copy of the GNU General Public License along with
 // this program; if not, see <http://www.gnu.org/licenses/>.
 
-// Depends on "edtfunc.c" for the actual computations
+// TODO output Matrix must be single class
+//      class of IDX is uint32 for numel () <= 2^32 - 1
+//                      uint64 for numel () >= 2^32
+//      check for any improvement in using boolean matrix
 
 #include <octave/oct.h>
 
-#ifdef __cplusplus
-extern "C"
+/*
+ edtfunc - Euclidean distance transform of a binary image
+ 
+ This is a sweep-and-update Euclidean distance transform of
+ a binary image. All positive pixels are considered object
+ pixels, zero or negative pixels are treated as background.
+ 
+ By Stefan Gustavson (stefan.gustavson@gmail.com).
+ 
+ Originally written in 1994, based on paper-only descriptions
+ of the SSED8 algorithm, invented by Per-Erik Danielsson
+ and improved by Ingemar Ragnemalm. This is a classic algorithm
+ with roots in the 1980s, still very good for the 2D case.
+ 
+ Updated in 2004 to treat pixels at image edges correctly,
+ and to improve code readability.
+ 
+ Edited in 2009 to form the foundation for Octave BWDIST:
+ added #define-configurable distance measure and function name
+ 
+ Edited in 2013 for C++ and removed the #define stuff
+ */
+
+/*
+  Using template for optimization.
+  Because func is called a lot of times in edtfunc, we instantiate edtfunc
+  multiple times for each of the different distance measuring functions.
+*/
+
+template<typename func>
+void edtfunc (const Matrix &img,
+              short *distx,
+              short *disty)
 {
-#endif
+  const int w     = img.cols  ();
+  const int h     = img.rows  ();
+  const int numel = img.numel ();
 
-#define DIST_EUCLIDEAN(x,y) sqrt((int)(x)*(x) + (y)*(y))
-#define MAX(x,y) ((x)>(y) ? (x) : (y))
-#define DIST_CHESSBOARD(x,y) (MAX(abs(x), abs(y)))
-#define DIST_CITYBLOCK(x,y) (abs(x) + abs(y))
-#define SQRT2_1 0.4142136536
-#define DIST_QUASI_EUCLIDEAN(x,y) (abs(x)>abs(y) ? (abs(x) + SQRT2_1 * abs(y)) : (SQRT2_1 * abs(x) + abs(y)))
+  int x, y, i;
+  double olddist2, newdist2, newdistx, newdisty;
+  bool changed;
 
-#define DIST(x,y) DIST_EUCLIDEAN(x,y)
-#define FUNCNAME euclidean
-#include "edtfunc.c"
-#undef DIST
-#undef FUNCNAME
+  // Initialize index offsets for the current image width
+  const int offset_u  = -w;
+  const int offset_ur = -w+1;
+  const int offset_r  = 1;
+  const int offset_rd = w+1;
+  const int offset_d  = w;
+  const int offset_dl = w-1;
+  const int offset_l  = -1;
+  const int offset_lu = -w-1;
 
-#define DIST(x,y) DIST_CHESSBOARD(x,y)
-#define FUNCNAME chessboard
-#include "edtfunc.c"
-#undef DIST
-#undef FUNCNAME
+  // Initialize the distance images to be all large values
+  for (i = 0; i < numel; i++)
+    {
+      if(img(i) <= 0.0)
+        {
+          distx[i] = 32000; // Large but still representable in a short, and
+          disty[i] = 32000; // 32000^2 + 32000^2 does not overflow an int
+        }
+      else
+        {
+          distx[i] = 0;
+          disty[i] = 0;
+        }
+    }
 
-#define DIST(x,y) DIST_CITYBLOCK(x,y)
-#define FUNCNAME cityblock
-#include "edtfunc.c"
-#undef DIST
-#undef FUNCNAME
+  // Perform the transformation
+  do
+    {
+      changed = false;
 
-#define DIST(x,y) DIST_QUASI_EUCLIDEAN(x,y)
-#define FUNCNAME quasi_euclidean
-#include "edtfunc.c"
-#undef DIST
-#undef FUNCNAME
+      // Scan rows, except first row
+      for (y = 1; y < h; y++)
+        {
 
-#ifdef __cplusplus
-}  /* end extern "C" */
-#endif
+          // move index to leftmost pixel of current row
+          i = y*w;
+
+          /* scan right, propagate distances from above & left */
+
+          /* Leftmost pixel is special, has no left neighbors */
+          olddist2 = func::apply(distx[i], disty[i]);
+          if(olddist2 > 0) // If not already zero distance
+            {
+              newdistx = distx[i+offset_u];
+              newdisty = disty[i+offset_u]+1;
+              newdist2 = func::apply(newdistx, newdisty);
+              if(newdist2 < olddist2)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  olddist2=newdist2;
+                  changed = true;
+                }
+
+              newdistx = distx[i+offset_ur]-1;
+              newdisty = disty[i+offset_ur]+1;
+              newdist2 = func::apply(newdistx, newdisty);
+              if(newdist2 < olddist2)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  changed = true;
+                }
+            }
+          i++;
+
+          /* Middle pixels have all neighbors */
+          for(x=1; x<w-1; x++, i++)
+            {
+              olddist2 = func::apply(distx[i], disty[i]);
+              if(olddist2 == 0) continue; // Already zero distance
+
+              newdistx = distx[i+offset_l]+1;
+              newdisty = disty[i+offset_l];
+              newdist2 = func::apply(newdistx, newdisty);
+              if(newdist2 < olddist2)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  olddist2=newdist2;
+                  changed = true;
+                }
+
+              newdistx = distx[i+offset_lu]+1;
+              newdisty = disty[i+offset_lu]+1;
+              newdist2 = func::apply(newdistx, newdisty);
+              if(newdist2 < olddist2)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  olddist2=newdist2;
+                  changed = true;
+                }
+
+              newdistx = distx[i+offset_u];
+              newdisty = disty[i+offset_u]+1;
+              newdist2 = func::apply(newdistx, newdisty);
+              if(newdist2 < olddist2)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  olddist2=newdist2;
+                  changed = true;
+                }
+
+              newdistx = distx[i+offset_ur]-1;
+              newdisty = disty[i+offset_ur]+1;
+              newdist2 = func::apply(newdistx, newdisty);
+              if(newdist2 < olddist2)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  changed = true;
+                }
+            }
+
+          /* Rightmost pixel of row is special, has no right neighbors */
+          olddist2 = func::apply(distx[i], disty[i]);
+          if(olddist2 > 0) // If not already zero distance
+            {
+              newdistx = distx[i+offset_l]+1;
+              newdisty = disty[i+offset_l];
+              newdist2 = func::apply(newdistx, newdisty);
+              if(newdist2 < olddist2)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  olddist2=newdist2;
+                  changed = true;
+                }
+
+              newdistx = distx[i+offset_lu]+1;
+              newdisty = disty[i+offset_lu]+1;
+              newdist2 = func::apply(newdistx, newdisty);
+              if(newdist2 < olddist2)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  olddist2=newdist2;
+                  changed = true;
+                }
+
+              newdistx = distx[i+offset_u];
+              newdisty = disty[i+offset_u]+1;
+              newdist2 = func::apply(newdistx, newdisty);
+              if(newdist2 < olddist2)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  olddist2=newdist2;
+                  changed = true;
+                }
+            }
+
+          /* Move index to second rightmost pixel of current row. */
+          /* Rightmost pixel is skipped, it has no right neighbor. */
+          i = y*w + w-2;
+
+          /* scan left, propagate distance from right */
+          for(x=w-2; x>=0; x--, i--)
+            {
+              olddist2 = func::apply(distx[i], disty[i]);
+              if(olddist2 == 0) continue; // Already zero distance
+              
+              newdistx = distx[i+offset_r]-1;
+              newdisty = disty[i+offset_r];
+              newdist2 = func::apply(newdistx, newdisty);
+              if(newdist2 < olddist2)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  changed = true;
+                }
+            }
+        }
+      
+      /* Scan rows in reverse order, except last row */
+      for(y=h-2; y>=0; y--)
+        {
+          /* move index to rightmost pixel of current row */
+          i = y*w + w-1;
+
+          /* Scan left, propagate distances from below & right */
+
+          /* Rightmost pixel is special, has no right neighbors */
+          olddist2 = func::apply(distx[i], disty[i]);
+          if(olddist2 > 0) // If not already zero distance
+            {
+              newdistx = distx[i+offset_d];
+              newdisty = disty[i+offset_d]-1;
+              newdist2 = func::apply(newdistx, newdisty);
+              if(newdist2 < olddist2)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  olddist2=newdist2;
+                  changed = true;
+                }
+
+              newdistx = distx[i+offset_dl]+1;
+              newdisty = disty[i+offset_dl]-1;
+              newdist2 = func::apply(newdistx, newdisty);
+              if(newdist2 < olddist2)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  changed = true;
+                }
+            }
+          i--;
+
+          /* Middle pixels have all neighbors */
+          for(x=w-2; x>0; x--, i--)
+            {
+              olddist2 = func::apply(distx[i], disty[i]);
+              if(olddist2 == 0) continue; // Already zero distance
+
+              newdistx = distx[i+offset_r]-1;
+              newdisty = disty[i+offset_r];
+              newdist2 = func::apply(newdistx, newdisty);
+              if(newdist2 < olddist2)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  olddist2=newdist2;
+                  changed = true;
+                }
+
+              newdistx = distx[i+offset_rd]-1;
+              newdisty = disty[i+offset_rd]-1;
+              newdist2 = func::apply(newdistx, newdisty);
+              if(newdist2 < olddist2)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  olddist2=newdist2;
+                  changed = true;
+                }
+
+              newdistx = distx[i+offset_d];
+              newdisty = disty[i+offset_d]-1;
+              newdist2 = func::apply(newdistx, newdisty);
+              if(newdist2 < olddist2)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  olddist2=newdist2;
+                  changed = true;
+                }
+
+              newdistx = distx[i+offset_dl]+1;
+              newdisty = disty[i+offset_dl]-1;
+              newdist2 = func::apply(newdistx, newdisty);
+              if(newdist2 < olddist2)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  changed = true;
+                }
+            }
+          /* Leftmost pixel is special, has no left neighbors */
+          olddist2 = func::apply(distx[i], disty[i]);
+          if(olddist2 > 0) // If not already zero distance
+            {
+              newdistx = distx[i+offset_r]-1;
+              newdisty = disty[i+offset_r];
+              newdist2 = func::apply(newdistx, newdisty);
+              if(newdist2 < olddist2)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  olddist2=newdist2;
+                  changed = true;
+                }
+
+              newdistx = distx[i+offset_rd]-1;
+              newdisty = disty[i+offset_rd]-1;
+              newdist2 = func::apply(newdistx, newdisty);
+              if(newdist2 < olddist2)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  olddist2=newdist2;
+                  changed = true;
+                }
+
+              newdistx = distx[i+offset_d];
+              newdisty = disty[i+offset_d]-1;
+              newdist2 = func::apply(newdistx, newdisty);
+              if(newdist2 < olddist2)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  olddist2=newdist2;
+                  changed = true;
+                }
+            }
+
+          /* Move index to second leftmost pixel of current row. */
+          /* Leftmost pixel is skipped, it has no left neighbor. */
+          i = y*w + 1;
+          for(x=1; x<w; x++, i++)
+            {
+              /* scan right, propagate distance from left */
+              olddist2 = func::apply(distx[i], disty[i]);
+              if(olddist2 == 0) continue; // Already zero distance
+
+              newdistx = distx[i+offset_l]+1;
+              newdisty = disty[i+offset_l];
+              newdist2 = func::apply(newdistx, newdisty);
+              if(newdist2 < olddist2)
+                {
+                  distx[i]=newdistx;
+                  disty[i]=newdisty;
+                  changed = true;
+                }
+            }
+        }
+    }
+  while (changed); // Sweep until no more updates are made
+  // The transformation is completed
+}
+
+// The different functions used to calculate distance, as a
+// class so its typename can be used for edtfunc template
+struct euclidean
+{
+  static double apply(short x, short y)
+  { return sqrt ((int)(x)*(x) + (y)*(y)); }
+};
+struct chessboard
+{
+  static double apply(short x, short y)
+  { return std::max (abs (y), abs (x)); }
+};
+struct cityblock
+{
+  static double apply(short x, short y)
+  { return abs (x) + abs (y); }
+};
+struct quasi_euclidean
+{
+  static double apply(short x, short y)
+    {
+      static const double sqrt2_1 = sqrt (2) - 1;
+      return abs(x)>abs(y) ? (abs(x) + sqrt2_1 * abs(y)) :
+                             (sqrt2_1 * abs(x) + abs(y)) ;
+    }
+};
+
+template<typename func>
+void loop_distance (const Matrix &bw,
+                    Matrix &dist,
+                    short *xdist,
+                    short *ydist)
+{
+  edtfunc<func> (bw, xdist, ydist);
+  const int numel = bw.numel ();
+  for (int i = 0; i < numel; i++)
+    dist(i) = func::apply (xdist[i], ydist[i]);
+}
 
 DEFUN_DLD (bwdist, args, nargout,
   "-*- texinfo -*-\n\
@@ -127,53 +494,36 @@ Currently, only 2D images are supported.\n\
         warning ("bwdist: specifying METHOD with abbreviation is deprecated");
         warned = true;
       }
+    if      (method == "e" ) { method = "euclidean";       }
+    else if (method == "ch") { method = "chessboard";      }
+    else if (method == "ci") { method = "cityblock";       }
+    else if (method == "q" ) { method = "quasi-euclidean"; }
   }
 
-  const int cols  = bw.cols  ();
-  const int rows  = bw.rows  ();
-  const int numel = bw.numel ();
-
   // Allocate two arrays for temporary output values
+  const int numel = bw.numel ();
   OCTAVE_LOCAL_BUFFER (short, xdist, numel);
   OCTAVE_LOCAL_BUFFER (short, ydist, numel);
 
-  Matrix dist (rows, cols); // the output distance matrix
-
-  if (! method.compare ("euclidean") || ! method.compare ("e"))
-    {
-      euclidean (bw, rows, cols, xdist, ydist);
-      for (int i = 0; i < numel; i++)
-        dist(i) = DIST_EUCLIDEAN (xdist[i], ydist[i]);
-    }
-  else if (! method.compare ("chessboard") || ! method.compare ("ch"))
-    {
-      chessboard (bw, rows, cols, xdist, ydist);
-      for (int i = 0; i < numel; i++)
-        dist(i) = DIST_CHESSBOARD (xdist[i], ydist[i]);
-    }
-  else if (! method.compare ("cityblock") || ! method.compare ("ci"))
-    {
-      cityblock (bw, rows, cols, xdist, ydist);
-      for (int i = 0; i < numel; i++)
-        dist(i) = DIST_CITYBLOCK (xdist[i], ydist[i]);
-    }
-  else if (! method.compare ("quasi-euclidean") || ! method.compare ("q"))
-    {
-      quasi_euclidean (bw, rows, cols, xdist, ydist);
-      for (int i = 0; i < numel; i++)
-        dist(i) = DIST_QUASI_EUCLIDEAN (xdist[i], ydist[i]);
-    }
+  Matrix dist (bw.dims ()); // the output distance matrix
+  if (method == "euclidean")
+    loop_distance<euclidean> (bw, dist, xdist, ydist);
+  else if (method == "chessboard")
+    loop_distance<chessboard> (bw, dist, xdist, ydist);
+  else if (method == "cityblock")
+    loop_distance<cityblock> (bw, dist, xdist, ydist);
+  else if (method == "quasi-euclidean")
+    loop_distance<quasi_euclidean> (bw, dist, xdist, ydist);
   else
-    {
-      error ("bwdist: unknown METHOD '%s'", method.c_str ());
-    }
+    error ("bwdist: unknown METHOD '%s'", method.c_str ());
 
   retval(0) = dist;
 
-  if (nargout > 1)  // only compute IDX, if requested
+  // Compute optional 'index to closest object pixel', only if requested
+  if (nargout > 1)
     {
-      Matrix idx (rows, cols);
-      // Compute optional 'index to closest object pixel'
+      Matrix idx (bw.dims ());
+      const int rows = bw.rows ();
       for(int i = 0; i < numel; i++)
         idx (i) = i+1 - xdist[i] - ydist[i]*rows;
 
