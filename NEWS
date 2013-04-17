@@ -71,6 +71,10 @@ Summary of important user-visible changes for image 2.0.1:
  ** Bug fixes on the concavity, intermodes, maxlikelihood, and minimum methods
     of graythresh.
 
+ ** The `bwdist' function will now consider any non zero value as object pixels,
+    the class of the distance matrix has changed to single, and indexes an
+    uint dependent on the matrix size.
+
 Summary of important user-visible changes for image 2.0.0:
 -------------------------------------------------------------------
 
