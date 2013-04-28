@@ -66,13 +66,10 @@
 ##
 ## @deftypefnx {Function File} {} strel ("line", @var{len}, @var{deg})
 ## Create line shaped flat structuring element.  @var{len} must be a positive
-## real number.  @var{deg} must be a real number.
-##
-## @deftypefnx {Function File} {} strel ("3dline", @var{len}, @var{alpha}, @var{phi})
-## Create line shaped flat structuring element in 3D.  @var{len} must be a positive
-## real number.  @var{alpha} is the angle from X-axis to X-Y projection of the line
-## and must be a real number.  @var{phi} is the angle from Z-axis to the line and
-## must be a real number.
+## real number.  @var{deg} must be a 1 or 2 elements real number, for a line in
+## in 2D or 3D space.  The first element of @var{deg} is the angle from X-axis
+## to X-Y projection of the line while the second is the angle from Z-axis to
+## the line.
 ##
 ## @deftypefnx {Function File} {} strel ("octagon", @var{apothem})
 ## Create octagon shaped flat structuring element.  @var{apothem} must be a
@@ -231,7 +228,6 @@ function SE = strel (shape, varargin)
       SE.nhood = fspecial ("disk", radius) > 0;
       SE.flat  = true;
 
-
     case "line"
       if (numel (varargin) == 2)
         linelen = varargin{1};
@@ -241,119 +237,118 @@ function SE = strel (shape, varargin)
       endif
       if (! (isscalar (linelen) && isnumeric (linelen) && linelen > 0))
         error ("strel: LEN must be a positive real number");
-      elseif (! (isscalar (degrees) && isnumeric (degrees)))
-        error ("strel: DEG must be a real number");
+      elseif (! isnumeric (degrees))
+        error ("strel: DEG must be numeric");
       endif
-
-      ## Line length are always odd, to center strel at the middle of the line.
-      ## We look it as a diameter of a circle with given slope
-      # It computes only lines with angles between 0 and 44.9999
-      deg90 = mod (degrees, 90);
-      if (deg90 > 45)
-        alpha = pi * (90 - deg90) / 180;
+      ## 2d or 3d line
+      dimens = numel (degrees) +1;
+      if (dimens == 2)
+        degrees = degrees(1);
+      elseif (dimens == 3)
+        alpha = degrees(1);
+        phi   = degrees(2);
       else
-        alpha = pi * deg90 / 180;
-      endif
-      ray = (linelen - 1)/2;
-
-      ## We are interested only in the discrete rectangle which contains the diameter
-      ## However we focus our attention to the bottom left quarter of the circle,
-      ## because of the central symmetry.
-      c = round (ray * cos (alpha)) + 1;
-      r = round (ray * sin (alpha)) + 1;
-
-      ## Line rasterization
-      line = false (r, c);
-      m = tan (alpha);
-      x = [1:c];
-      y = r - fix (m .* (x - 0.5));
-      indexes = sub2ind ([r c], y, x);
-      line(indexes) = true;
-
-      ## We view the result as 9 blocks.
-      # Preparing blocks
-      linestrip = line(1, 1:c - 1);
-      linerest = line(2:r, 1:c - 1);
-      z = false (r - 1, c);
-
-      # Assemblying blocks
-      SE.nhood =  vertcat (
-                    horzcat (z, linerest(end:-1:1,end:-1:1)),
-                    horzcat (linestrip, true, linestrip(end:-1:1,end:-1:1)),
-                    horzcat (linerest, z(end:-1:1,end:-1:1))
-                  );
-
-      # Rotate/transpose/flip?
-      sect = fix (mod (degrees, 180) / 45);
-      switch (sect)
-        case 1, SE.nhood = transpose (SE.nhood);
-        case 2, SE.nhood = rot90 (SE.nhood, 1);
-        case 3, SE.nhood = fliplr (SE.nhood);
-        otherwise, # do nothing
-      endswitch
-
-      SE.flat = true;
-
-    case "3dline"
-      if (numel (varargin) == 3)
-        linelen = varargin{1};
-        alpha = varargin{2};
-        phi = varargin{3};
-      else
-        error ("strel: a line shape needs 3 arguments");
-      endif
-      if (! (isscalar (linelen) && isnumeric (linelen) && linelen > 0))
-        error ("strel: LEN must be a positive real number");
-      elseif (! (isscalar (alpha) && isnumeric (alpha)))
-        error ("strel: ALPHA must be a real number");
-      elseif (! (isscalar (phi) && isnumeric (phi)))
-        error ("strel: PHI must be a real number");
+        error ("strel: DEG must be a 1 or 2 elements matrix");
       endif
 
-      ## This is a first implementation
-      # Stroke line from cells (x1, y1, z1) to (x2, y2, z2)
-      alpha *= pi / 180;
-      phi *= pi / 180;
-      x1 = y1 = z1 = 0;
-      x2 = round (linelen * sin (phi) * cos (alpha));
-      y2 = round (linelen * sin (phi) * sin (alpha));
-      z2 = round (linelen * cos (phi));
-      # Adjust x2, y2, z2 to have one central cell
-      x2 += (! mod (x2, 2)) * sign0positive (x2);
-      y2 += (! mod (y2, 2)) * sign0positive (y2);
-      z2 += (! mod (z2, 2)) * sign0positive (z2);
-      # Invert x
-      x2 = -x2;
+      ## TODO this was the 3dline and line options, which have separate code
+      ##      but a proper merge should be made.
 
-      # Tanslate parallelepiped to be in positive quadrant
-      if (x2 < 0)
-        x1 -= x2;
-        x2 -= x2;
-      endif
-      if (y2 < 0)
-        y1 -= y2;
-        y2 -= y2;
-      endif
-      if (z2 < 0)
-        z1 -= z2;
-        z2 -= z2;
+      if (dimens == 2)
+        ## Line length are always odd, to center strel at the middle of the line.
+        ## We look it as a diameter of a circle with given slope
+        # It computes only lines with angles between 0 and 44.9999
+        deg90 = mod (degrees, 90);
+        if (deg90 > 45)
+          alpha = pi * (90 - deg90) / 180;
+        else
+          alpha = pi * deg90 / 180;
+        endif
+        ray = (linelen - 1)/2;
+
+        ## We are interested only in the discrete rectangle which contains the diameter
+        ## However we focus our attention to the bottom left quarter of the circle,
+        ## because of the central symmetry.
+        c = round (ray * cos (alpha)) + 1;
+        r = round (ray * sin (alpha)) + 1;
+
+        ## Line rasterization
+        line = false (r, c);
+        m = tan (alpha);
+        x = [1:c];
+        y = r - fix (m .* (x - 0.5));
+        indexes = sub2ind ([r c], y, x);
+        line(indexes) = true;
+
+        ## We view the result as 9 blocks.
+        # Preparing blocks
+        linestrip = line(1, 1:c - 1);
+        linerest = line(2:r, 1:c - 1);
+        z = false (r - 1, c);
+
+        # Assemblying blocks
+        SE.nhood =  vertcat (
+                      horzcat (z, linerest(end:-1:1,end:-1:1)),
+                      horzcat (linestrip, true, linestrip(end:-1:1,end:-1:1)),
+                      horzcat (linerest, z(end:-1:1,end:-1:1))
+                    );
+
+        # Rotate/transpose/flip?
+        sect = fix (mod (degrees, 180) / 45);
+        switch (sect)
+          case 1, SE.nhood = transpose (SE.nhood);
+          case 2, SE.nhood = rot90 (SE.nhood, 1);
+          case 3, SE.nhood = fliplr (SE.nhood);
+          otherwise, # do nothing
+        endswitch
+
+      elseif (dimens == 3)
+        ## This is a first implementation
+        ## Stroke line from cells (x1, y1, z1) to (x2, y2, z2)
+        alpha *= pi / 180;
+        phi *= pi / 180;
+        x1 = y1 = z1 = 0;
+        x2 = round (linelen * sin (phi) * cos (alpha));
+        y2 = round (linelen * sin (phi) * sin (alpha));
+        z2 = round (linelen * cos (phi));
+        # Adjust x2, y2, z2 to have one central cell
+        x2 += (! mod (x2, 2)) * sign0positive (x2);
+        y2 += (! mod (y2, 2)) * sign0positive (y2);
+        z2 += (! mod (z2, 2)) * sign0positive (z2);
+        # Invert x
+        x2 = -x2;
+
+        # Tanslate parallelepiped to be in positive quadrant
+        if (x2 < 0)
+          x1 -= x2;
+          x2 -= x2;
+        endif
+        if (y2 < 0)
+          y1 -= y2;
+          y2 -= y2;
+        endif
+        if (z2 < 0)
+          z1 -= z2;
+          z2 -= z2;
+        endif
+
+        # Compute index2es
+        dim = abs ([(x2 - x1) (y2 - y1) (z2 - z1)]);
+        m = max (dim);
+        base = meshgrid (0:m - 1,1) .+ 0.5;
+        a = floor ((x2 - x1)/m .* base);
+        b = floor ((y2 - y1)/m .* base);
+        c = floor ((z2 - z1)/m .* base);
+        # Adjust indexes to be valid
+        a -= min (a) - 1;
+        b -= min (b) - 1;
+        c -= min (c) - 1;
+        indexes = sub2ind (dim, a, b, c);
+
+        SE.nhood = false (dim);
+        SE.nhood(indexes) = true;
       endif
 
-      # Compute index2es
-      dim = abs ([(x2 - x1) (y2 - y1) (z2 - z1)]);
-      m = max (dim);
-      base = meshgrid (0:m - 1,1) .+ 0.5;
-      a = floor ((x2 - x1)/m .* base);
-      b = floor ((y2 - y1)/m .* base);
-      c = floor ((z2 - z1)/m .* base);
-      # Adjust indexes to be valid
-      a -= min (a) - 1;
-      b -= min (b) - 1;
-      c -= min (c) - 1;
-      indexes = sub2ind (dim, a, b, c);
-
-      SE.nhood = false (dim);
-      SE.nhood(indexes) = true;
       SE.flat = true;
 
     case "octagon"
