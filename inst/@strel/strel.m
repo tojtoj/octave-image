@@ -45,6 +45,11 @@
 ## @end group
 ## @end example
 ##
+## @deftypefnx {Function File} {} strel ("ball", @var{radius}, @var{height})
+## Create ball shaped @var{nonflat} structuring element.  @var{radius} must be a
+## nonnegative integer that specifies the ray of a circle in X-Y plane.  @var{height}
+## is a real number that specifies the height of the center of the circle.
+##
 ## @deftypefnx {Function File} {} strel ("cube", @var{edge})
 ## Create cube shaped @var{flat} structuring element.  @var{edge} must be a
 ## positive integer that specifies the length of its edges.  This shape meant to
@@ -62,6 +67,12 @@
 ## @deftypefnx {Function File} {} strel ("line", @var{len}, @var{deg})
 ## Create line shaped flat structuring element.  @var{len} must be a positive
 ## real number.  @var{deg} must be a real number.
+##
+## @deftypefnx {Function File} {} strel ("3dline", @var{len}, @var{alpha}, @var{phi})
+## Create line shaped flat structuring element in 3D.  @var{len} must be a positive
+## real number.  @var{alpha} is the angle from X-axis to X-Y projection of the line
+## and must be a real number.  @var{phi} is the angle from Z-axis to the line and
+## must be a real number.
 ##
 ## @deftypefnx {Function File} {} strel ("octagon", @var{apothem})
 ## Create octagon shaped flat structuring element.  @var{apothem} must be a
@@ -157,8 +168,26 @@ function SE = strel (shape, varargin)
         error ("strel: HEIGHT must be a finite real matrix of the same size as NHOOD");
       endif
 
-#    case "ball"
-      ## TODO implement ball shape
+    case "ball"
+      if (numel (varargin) == 2)
+        radius = varargin{1};
+        height = varargin{2};
+      else
+        ## TODO implement third option for number of periodic lines approximation
+        error ("strel: a ball shape needs 2 arguments");
+      endif
+      if (! is_positive_integer (radius))
+        error ("strel: RADIUS must be a positive integer");
+      elseif (! (isscalar (height) && isnumeric (height)))
+        error ("strel: HEIGHT must be a real number");
+      endif
+
+      # Ellipsoid: (x/radius)^2 + (y/radius)^2 + (z/height)^2 = 1
+      # We need only the 1 cells of SE.nhood
+      [x, y] = meshgrid (-radius:radius, -radius:radius);
+      SE.nhood = ((x.^2 + y.^2) <= radius^2); # X-Y circle
+      SE.height = height / radius * SE.nhood .* sqrt (radius^2 - x .^2 - y.^2);
+      SE.flat = false;
 
     case "cube"
       if (numel (varargin) == 1)
@@ -167,7 +196,7 @@ function SE = strel (shape, varargin)
         error ("strel: no EDGE specified for cube shape");
       endif
       if (! is_positive_integer (SE.opt.edge))
-        error ("strel: EDGE value must be positive integers");
+        error ("strel: EDGE value must be a positive integer");
       endif
 
       SE.nhood = true (SE.opt.edge, SE.opt.edge, SE.opt.edge);
@@ -192,7 +221,7 @@ function SE = strel (shape, varargin)
       if (numel (varargin) == 1)
         radius = varargin{1};
       else
-        ## TODO implement second option for number of periodic lines
+        ## TODO implement second option for number of periodic lines approximation
         error ("strel: no RADIUS specified for disk shape");
       endif
       if (! is_positive_integer (radius))
@@ -265,7 +294,69 @@ function SE = strel (shape, varargin)
 
       SE.flat = true;
 
-   case "octagon"
+    case "3dline"
+      if (numel (varargin) == 3)
+        linelen = varargin{1};
+        alpha = varargin{2};
+        phi = varargin{3};
+      else
+        error ("strel: a line shape needs 3 arguments");
+      endif
+      if (! (isscalar (linelen) && isnumeric (linelen) && linelen > 0))
+        error ("strel: LEN must be a positive real number");
+      elseif (! (isscalar (alpha) && isnumeric (alpha)))
+        error ("strel: ALPHA must be a real number");
+      elseif (! (isscalar (phi) && isnumeric (phi)))
+        error ("strel: PHI must be a real number");
+      endif
+
+      ## This is a first implementation
+      # Stroke line from cells (x1, y1, z1) to (x2, y2, z2)
+      alpha *= pi / 180;
+      phi *= pi / 180;
+      x1 = y1 = z1 = 0;
+      x2 = round (linelen * sin (phi) * cos (alpha));
+      y2 = round (linelen * sin (phi) * sin (alpha));
+      z2 = round (linelen * cos (phi));
+      # Adjust x2, y2, z2 to have one central cell
+      x2 += (! mod (x2, 2)) * sign0positive (x2);
+      y2 += (! mod (y2, 2)) * sign0positive (y2);
+      z2 += (! mod (z2, 2)) * sign0positive (z2);
+      # Invert x
+      x2 = -x2;
+
+      # Tanslate parallelepiped to be in positive quadrant
+      if (x2 < 0)
+        x1 -= x2;
+        x2 -= x2;
+      endif
+      if (y2 < 0)
+        y1 -= y2;
+        y2 -= y2;
+      endif
+      if (z2 < 0)
+        z1 -= z2;
+        z2 -= z2;
+      endif
+
+      # Compute index2es
+      dim = abs ([(x2 - x1) (y2 - y1) (z2 - z1)]);
+      m = max (dim);
+      base = meshgrid (0:m - 1,1) .+ 0.5;
+      a = floor ((x2 - x1)/m .* base);
+      b = floor ((y2 - y1)/m .* base);
+      c = floor ((z2 - z1)/m .* base);
+      # Adjust indexes to be valid
+      a -= min (a) - 1;
+      b -= min (b) - 1;
+      c -= min (c) - 1;
+      indexes = sub2ind (dim, a, b, c);
+
+      SE.nhood = false (dim);
+      SE.nhood(indexes) = true;
+      SE.flat = true;
+
+    case "octagon"
       if (numel (varargin) == 1)
         apothem = varargin{1};
       else
@@ -371,6 +462,14 @@ function retval = is_positive_integer (val)
   retval = isscalar (val) && isnumeric (val) && val > 0 && fix (val) == val;
 endfunction
 
+function retval = sign0positive (val)
+  if (sign (val) == -1)
+    retval = -1;
+  else
+    retval = 1;
+  endif
+endfunction
+
 %!shared shape, height
 %! shape  = [0 0 0 1];
 %!assert (getnhood (strel (shape)), logical (shape));
@@ -382,6 +481,22 @@ endfunction
 %! height = [-2 1 3];  ## this works for matlab compatibility
 %!assert (getnhood (strel ("arbitrary", shape, height)), logical (shape));
 %!assert (getheight (strel ("arbitrary", shape, height)), height);
+%! shape = [0 0 0 1 0 0 0
+%!          0 1 1 1 1 1 0
+%!          0 1 1 1 1 1 0
+%!          1 1 1 1 1 1 1
+%!          0 1 1 1 1 1 0
+%!          0 1 1 1 1 1 0
+%!          0 0 0 1 0 0 0];
+%! height = [ 0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+%!            0.00000   0.33333   0.66667   0.74536   0.66667   0.33333   0.00000
+%!            0.00000   0.66667   0.88192   0.94281   0.88192   0.66667   0.00000
+%!            0.00000   0.74536   0.94281   1.00000   0.94281   0.74536   0.00000
+%!            0.00000   0.66667   0.88192   0.94281   0.88192   0.66667   0.00000
+%!            0.00000   0.33333   0.66667   0.74536   0.66667   0.33333   0.00000
+%!            0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000]
+%!assert (getnhood (strel ("ball", 3, 1)), logical (shape));
+%!assert (getheight (strel ("ball", 3, 1)), height);
 %! shape = [0 0 0 1 0 0 0
 %!          0 0 1 1 1 0 0
 %!          0 1 1 1 1 1 0
@@ -466,6 +581,7 @@ endfunction
 %!error strel("arbitrary", "stuff")
 %!error strel("arbitrary", [0 0 1], [2 0 1; 4 5 1])
 %!error strel("arbitrary", [0 0 1], "stuff")
+%!error strel("ball", -3, 1)
 %!error strel("diamond", -3)
 %!error strel("disk", -3)
 %!error strel("line", 0, 45)
