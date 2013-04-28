@@ -5,6 +5,8 @@ Summary of important user-visible changes for image 2.0.1:
 
       checkerboard
       cp2tform
+      findbounds
+      imtransform
       maketform
       strel
       tformfwd

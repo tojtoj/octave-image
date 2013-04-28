@@ -1,46 +1,68 @@
 ## Copyright (C) 2012 Pantxo Diribarne
-## 
+##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
 ## the Free Software Foundation; either version 3 of the License, or
 ## (at your option) any later version.
-## 
+##
 ## This program is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
-## 
+##
 ## You should have received a copy of the GNU General Public License
 ## along with Octave; see the file COPYING.  If not, see
 ## <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
 ## @deftypefn  {Function File} {@var{T} =} maketform (@var{ttype}, @var{tmat})
+## @deftypefnx {Function File} {@var{T} =} maketform (@var{ttype}, @var{inc}, @var{outc})
 ## @deftypefnx {Function File} {@var{T} =} maketform ("custom", @var{ndims_in}, @var{ndims_out}, @var{forward_fcn}, @var{inverse_fcn}, @var{tdata})
+## Create structure for spatial transformations.
+##
 ## Returns a transform structure containing fields @var{ndims_in},
-## @var{ndims_out}, @var{forward_fcn}, @var{inverse_fcn} and @var{tdata}. The content
-## of each field depends on the requested transform type @var{ttype}:
+## @var{ndims_out}, @var{forward_fcn}, @var{inverse_fcn} and @var{tdata}.  The
+## content of each field depends on the requested transform type @var{ttype}:
+##
 ## @table @asis
 ## @item "projective"
-## A ndims_in = N -> ndims_out = N projective transformation structure
+## A ndims_in = N -> @var{ndims_out} = N projective transformation structure
 ## is returned.
 ## The second input argument @var{tmat} must be a (N+1)-by-(N+1)
-## transformation matrix. The
-## (N+1)th column must contain projection coefficients. As an example a two
+## transformation matrix.  The
+## (N+1)th column must contain projection coefficients.  As an example a two
 ## dimentionnal transform from [x y] coordinates to [u v] coordinates
 ## is represented by a transformation matrix defined so that:
+##
 ## @example
 ## [xx yy zz] = [u v 1] * [a d g;
 ##                         b e h;
 ##                         c f i]
 ## [x y] =  [xx./zz yy./zz];
 ## @end example
+## 
+## Alternatively the transform can be specified using a quadilateral
+## coordinates (typically the 4 corners of the
+## image) in the input space (@var{inc}, 4-by-ndims_in matrix) and in
+## the output space (@var{outc}, 4-by-ndims_out matrix).  This is
+## equivalent to building the transform using
+## @code{T = cp2tform (@var{inc}, @var{outc}, "projective")}.
+##
 ## @item "affine"
-## Affine is a subset of projective transform (see above). A ndims_in = N ->
-## ndims_out = N  affine transformation structure is returned.
+## Affine is a subset of projective transform (see above).  A
+## @var{ndims_in} = N -> @var{ndims_out} = N affine transformation structure is
+## returned.
 ## The second input argument @var{tmat} must be a (N+1)-by-(N+1) or
 ## (N+1)-by-(N) transformation matrix. If present, the (N+1)th column  must
 ## contain [zeros(N,1); 1] so that projection is suppressed.
+##
+## Alternatively the transform can be specified a using a triangle
+## coordinates (typically the 3 corners of the
+## image)  in the input space (@var{inc}, 3-by-ndims_in matrix) and in
+## the  output space (@var{outc}, 3-by-ndims_out matrix). This is
+## equivalent to building the transform using "T = cp2tform (@var{inc}, @var{outc},
+## 'affine')".
+## 
 ## @item "custom"
 ## For user defined transforms every field of the transform structure
 ## must be supplied. The prototype of the transform functions,
@@ -50,17 +72,18 @@
 ## The argument T is the transformation structure which will contain
 ## the user supplied transformation matrix @var{tdata}. 
 ## @end table
+##
 ## @seealso{tformfwd, tforminv, cp2tform}
 ## @end deftypefn
 
 ## Author: Pantxo Diribarne <pantxo@dibona>
-## Created: 2012-09-05
 
 function T = maketform (ttype, varargin)
 
-  if (nargin < 2 || ! any (strcmp (ttype, {"affine", "projective", "custom"})))
+  if (nargin < 2 || ! any (strcmpi (ttype, {"affine", "projective", "custom"})))
     print_usage ();
   endif
+
   if (numel (varargin) == 1)
     tmat = varargin {1};
     ndin = rows (tmat) - 1;
@@ -94,6 +117,26 @@ function T = maketform (ttype, varargin)
     T.inverse_fcn = inverse_fcn;
     T.tdata.T = tmat;
     T.tdata.Tinv = inv (tmat);
+
+  elseif (numel (varargin) == 2)
+    inc = varargin{1};
+    outc = varargin{2};
+    if (strcmp (ttype, "affine"))
+      if (all (size (inc) == size (outc)) &&
+          all (size (inc) == [3 2]))
+        T = cp2tform (inc, outc, ttype);
+      else
+        error ("maketform: expect INC and OUTC to be 3-by-2 vectors.");
+      endif
+    elseif (strcmp (ttype, "projective"))
+      if (all (size (inc) == size (outc)) &&
+          all (size (inc) == [4 2]))
+        T = cp2tform (inc, outc, ttype);
+      else
+        error ("maketform: expect INC and OUTC to be 4-by-2 vectors.");
+      endif
+    endif
+
   elseif (numel (varargin) == 5 && strcmpi (ttype, "custom"))
     if (isscalar (varargin{1}) && isscalar (varargin{2})
         && varargin{1} > 0 && varargin{2} > 0)
@@ -114,6 +157,7 @@ function T = maketform (ttype, varargin)
     endif
     
     T.tdata = varargin{5};
+
   else
     print_usage ();
   endif
