@@ -140,6 +140,7 @@ Types and Type conversions
  mat2gray
  rgb2gray
 Utilities
+ checkerboard
  getrangefromclass
  iptcheckconn
  iptcheckmap
