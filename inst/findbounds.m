@@ -63,3 +63,15 @@ function [outbnd] = findbounds (T, inbnd)
   endif
   outbnd = [min(outbnd); max(outbnd)];
 endfunction
+
+%!test
+%! im = checkerboard ();
+%! theta = pi/6;
+%! T = maketform ('affine', [cos(theta) -sin(theta); ...
+%!                           sin(theta) cos(theta); 0 0]);
+%! inbnd = [0 0; 1 1];
+%! outbnd = findbounds (T, inbnd);
+%! diag = 2^.5;
+%! ang = pi/4;
+%! assert (diff (outbnd(:,1)), diag * abs (cos (theta - ang)), eps)
+%! assert (diff (outbnd(:,2)), diag * abs (cos (theta - ang)), eps)

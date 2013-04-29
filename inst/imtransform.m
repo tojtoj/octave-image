@@ -18,6 +18,7 @@
 ## @deftypefn  {Function File} {@var{B} =} imtransform (@var{A}, @var{T})
 ## @deftypefnx {Function File} {@var{B} =} imtransform (@var{A}, @var{T}, @var{interp})
 ## @deftypefnx {Function File} {@var{B} =} imtransform (@dots{}, @var{prop}, @var{val})
+## @deftypefnx {Function File} {[@var{B}, @var{xdata}, @var{ydata}] =} imtransform (@dots{})
 ## Transform image.
 ##
 ## Given an image @var{A} in one space, returns an image @var{B}
@@ -66,10 +67,11 @@
 ## the input space. @var{val} must be coherent with the input image
 ## format: for grayscale and indexed images (2D) @var{val} must be
 ## scalar, for RGB (n-by-m-by-3) @var{val} must be a 3 element vector.
-## e.g.:
-##
+## 
 ## @end table
 ##
+## The actual output limits, @var{xdata} and @var{ydata} vectors,
+## are returned respectively as second  and third output variables.
 ## @seealso{maketform, cp2tform, tforminv, tformfwd, findbounds}
 ## @end deftypefn
 
@@ -184,7 +186,6 @@ function [varargout] = imtransform (im, T, varargin)
     else
       xyscale = [(diff (udata) / columns (im)) (diff (vdata) / rows (im))];
     endif
-
     ## Fillvalues
     tst = strcmp ("fillvalues", props);
     if (any (tst))
@@ -198,7 +199,7 @@ function [varargout] = imtransform (im, T, varargin)
       endif
     endif
   endif
-
+  
   ## Ouput/Input pixels
   if (isempty (imsize))
     if (isempty (xyscale))
@@ -348,3 +349,48 @@ endfunction
 %!                                  'vdata', [-1 1], 'fillvalues',
 %!                                  round (length (cmap) / 2));
 %! imh = imshow (im2, cmap);
+
+%!test
+%! im = checkerboard ();
+%! incp = [0 0; 0 1; 1 1];
+%! scl = 10;
+%! outcp = scl * incp;
+%! T = maketform ('affine', incp, outcp);
+%! [im2 xdata ydata] = imtransform (im, T, 'udata', [0 1],
+%!                                  'vdata', [0 1], 'size', [500 500]);
+%! assert (xdata, scl * ([0; 1]))
+%! assert (ydata, scl * ([0; 1]))
+%! assert (size (im2), [500 500])
+
+%!test
+%! im = checkerboard ();
+%! incp = [0 0; 0 1; 1 1];
+%! scl = 10;
+%! outcp = scl * incp;
+%! xyscale = scl;
+%! T = maketform ('affine', incp, outcp);
+%! [im2 xdata ydata] = imtransform (im, T, 'xyscale', xyscale);
+%! assert (size (im2), size (im), 1)
+
+%!test
+%! im = checkerboard (100, 10, 4);
+%! theta = 2 * pi;
+%! T = maketform ('affine', [cos(theta) -sin(theta); ...
+%!                           sin(theta) cos(theta); 0 0]);
+%! im2 = imtransform (im, T, 'nearest');
+%! im = im(2:end-1, 2:end-1); %avoid boundaries 
+%! im2 = im2(2:end-1, 2:end-1);
+%! assert (im, im2)
+
+%!test
+%! im = checkerboard (20, 10, 4);
+%! theta = pi/6;
+%! T = maketform ('affine', [cos(theta) -sin(theta); ...
+%!                           sin(theta) cos(theta); 0 0]);
+%! [im2 xdata ydata] = imtransform (im, T);
+%! udata = [1 columns(im)];
+%! vdata = [1 rows(im)];
+%! diag = sqrt (udata(2)^2 + vdata(2)^2);
+%! ang = atan (vdata(2) / udata(2));
+%! assert (max (abs (xdata)), diag * abs (cos (theta - ang)),
+%!         max (size (im)) * eps)
