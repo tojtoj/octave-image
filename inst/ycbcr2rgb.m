@@ -14,15 +14,16 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn  {Function File} {@var{YCbCrmap} =} rgb2ycbcr (@var{cmap})
-## @deftypefnx {Function File} {@var{YCbCr} =} rgb2ycbcr (@var{RGB})
-## @deftypefnx {Function File} {@dots{} =} rgb2ycbcr (@dots{}, [@var{Kb} @var{Kr}])
-## @deftypefnx {Function File} {@dots{} =} rgb2ycbcr (@dots{}, @var{standard})
-## Convert RGB values to YCbCr.
+## @deftypefn  {Function File} {@var{cmap} =} ycbcr2rgb (@var{YCbCrmap})
+## @deftypefnx {Function File} {@var{RGB} =} ycbcr2rgb (@var{YCbCr})
+## @deftypefnx {Function File} {@dots{} =} ycbcr2rgb (@dots{}, [@var{Kb} @var{Kr}])
+## @deftypefnx {Function File} {@dots{} =} ycbcr2rgb (@dots{}, @var{standard})
+## Convert YCbCr color space to RGB.
 ##
-## The convertion changes the image @var{RGB} or colormap @var{cmap}, from
-## the RGB color model to YCbCr (luminance, chrominance blue, and chrominance
-## red).  @var{RGB} must be of class double, single, uint8, or uint16.
+## The convertion changes the image @var{YCbCr} or colormap @var{YCbCrmap},
+## from the YCbCr (luminance, chrominance blue, and chrominance red)
+## color space to RGB values.  @var{YCbCr} must be of class double, single,
+## uint8, or uint16.
 ##
 ## The formula used for the conversion is dependent on two constants, @var{Kb}
 ## and @var{Kr} which can be specified individually, or according to existing
@@ -37,32 +38,14 @@
 ## @var{Kr} are 0.0722 and 0.2116 respectively.
 ## @end table
 ##
-## @seealso{hsv2rgb, ntsc2rgb, rgb2hsv, rgb2ntsc}
+## @seealso{hsv2rgb, ntsc2rgb, rgb2hsv, rgb2ntsc, rgb2ycbcr}
 ## @end deftypefn
 
-function ycbcr = rgb2ycbcr (rgb, standard = "601")
+function rgb = ycbcr2rgb (ycbcr, standard = "601")
   if (nargin < 1 || nargin > 2)
     print_usage ();
   endif
-  ycbcr = ycbcrfunc ("rgb2ycbcr", rgb, standard);
+  rgb = ycbcrfunc ("ycbcr2rgb", ycbcr, standard);
 endfunction
 
-%!test
-%! in(:,:,1) = magic (5);
-%! in(:,:,2) = magic (5);
-%! in(:,:,3) = magic (5);
-%! out(:,:,1) = [31  37  17  23  29
-%!               36  20  22  28  30
-%!               19  21  27  33  35
-%!               25  26  32  34  19
-%!               25  31  37  18  24];
-%! out(:,:,2) = 128;
-%! out(:,:,3) = 128;
-%! assert (rgb2ycbcr (uint8 (in)), uint8 (out));
-
-%!test
-%! out(1:10, 1)  = linspace (16/255, 235/255, 10);
-%! out(:, [2 3]) = 0.5;
-%! assert (rgb2ycbcr (gray (10)), out, 0.00001);
-
-%!assert (rgb2ycbcr ([1 1 1]), [0.92157 0.5 0.5], 0.0001);
+%!assert (ycbcr2rgb (rgb2ycbcr (jet (10))), jet (10), 0.00001);

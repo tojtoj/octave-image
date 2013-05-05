@@ -51,6 +51,7 @@ Colour maps and Colour controls
  colorgradient
  rgb2ycbcr
  wavelength2rgb
+ ycbcr2rgb
 Display
  rgbplot
 Enhancement and Restoration
