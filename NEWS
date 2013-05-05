@@ -1,4 +1,4 @@
-Summary of important user-visible changes for image 2.0.1:
+Summary of important user-visible changes for image 2.2.0:
 -------------------------------------------------------------------
 
  ** The following functions are new:
@@ -11,6 +11,15 @@ Summary of important user-visible changes for image 2.0.1:
       strel
       tformfwd
       tforminv
+
+ ** The following functions have been moved from the Octave Forge Image package
+    to GNU Octave core:
+
+      cmpermute
+      cmunique
+      iscolormap
+      rgbplot
+
 
  ** The following functions have been deprecated (see their help text
     for the recommended alternatives):
