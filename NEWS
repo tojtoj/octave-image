@@ -30,6 +30,10 @@ Summary of important user-visible changes for image 2.2.0:
 
       imrotate_Fourier
 
+ ** rgb2ycbcr was completely rewritten to accept images of other classes, and
+    colormaps.  A new argument was implemented to convert the RGB values
+    according to different standards.
+
  ** The use of non logical matrices to specify the neighborhood for the medfilt2
     function has been deprecated.  If using a vector to specify the size of the
     neighborhood, the elements are no longer swapped.
