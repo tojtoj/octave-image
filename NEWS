@@ -20,6 +20,10 @@ Summary of important user-visible changes for image 2.2.0:
       iscolormap
       rgbplot
 
+ ** The following functions have been deprecated in the previous release
+    of the Image package and have now been removed:
+
+      blkproc         bmpwrite          dilate        erode
 
  ** The following functions have been deprecated (see their help text
     for the recommended alternatives):
