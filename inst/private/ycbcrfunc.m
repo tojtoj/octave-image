@@ -65,21 +65,29 @@ function out = ycbcrfunc (func, in, standard)
   ## in one will most likely require a change on the other
   if (strcmp (func, "rgb2ycbcr"))
     ## convert to YCbCr colorspace
-    out = (cmat * in')'; # transpose at the end to get back colormap shape
+    out = in * cmat';
     ## rescale Cb and Cr to range [0 1]
     out(:, [2 3]) += 0.5;
-    ## footroom and headroom will take from the range 16/255 each for Cb and Cr,
-    ## and 16/255 and 20/255 for Y. So we have to compress the values of the
-    ## space, and then shift forward
+    ## the actual range of Cb, Cr and Y will be smaller. The values at the
+    ## extremes are named footroom and headroom. Cb, Cr, and Y have different
+    ## ranges for footroom and headroom
+    ##
+    ##    Cb and Cr: footroom -> [0       16/255[
+    ##    Y        : footroom -> [0       16/255[
+    ##    Cb and Cr: headroom -> ]240/255 1     ]
+    ##    Y        : headroom -> ]235/255 1     ]
+    ##
+    ## So we first compress the values to the actual available range (the whole
+    ## [0 1] interval minus headroom and footroom), and then shift forward
     out(:,1)     = (out(:,1) * 219/255) + 16/255;
-    out(:,[2 3]) = (out(:,[2 3]) * 223/255) + 16/255;
+    out(:,[2 3]) = (out(:,[2 3]) * 224/255) + 16/255;
 
   elseif (strcmp (func, "ycbcr2rgb"))
     ## just the inverse of the rgb2ycbcr conversion
-    in(:,[2 3])  = (in(:,[2 3]) - 16/255) / (223/255);
+    in(:,[2 3])  = (in(:,[2 3]) - 16/255) / (224/255);
     in(:,1)      = (in(:,1) - 16/255) / (219/255);
     in(:,[2 3]) -= 0.5;
-    out          = (inv (cmat) * in')';
+    out          = in * inv (cmat');
   else
     error ("internal error for YCbCr conversion. Unknown function %s", func);
   endif

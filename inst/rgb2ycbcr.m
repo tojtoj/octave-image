@@ -60,9 +60,10 @@ endfunction
 %! out(:,:,3) = 128;
 %! assert (rgb2ycbcr (uint8 (in)), uint8 (out));
 
-%!test
+%!shared cbcr
+%! cbcr = 0.5019607843137255;
 %! out(1:10, 1)  = linspace (16/255, 235/255, 10);
-%! out(:, [2 3]) = 0.5;
+%! out(:, [2 3]) = cbcr;
 %! assert (rgb2ycbcr (gray (10)), out, 0.00001);
 
-%!assert (rgb2ycbcr ([1 1 1]), [0.92157 0.5 0.5], 0.0001);
+%!assert (rgb2ycbcr ([1 1 1]), [0.92157 cbcr cbcr], 0.0001);
