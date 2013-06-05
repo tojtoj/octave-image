@@ -1,4 +1,4 @@
-## Copyright (C) 2011 Carnë Draug <carandraug+dev@gmail.com>
+## Copyright (C) 2011-2013 Carnë Draug <carandraug+dev@gmail.com>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -17,12 +17,18 @@
 ## @deftypefn {Function File} {@var{range} =} getrangefromclass (@var{img})
 ## Return display range of image.
 ##
-## For a given image @var{img}, returns @var{range}, a 1x2 matrix with the
-## minimum and maximum values. It supports the same classes as @code{intmax} and
-## @code{intmin}, as well as 'logical', 'single', and 'double'.
+## For a given image @var{img}, returns the 1x2 element matrix @var{range}
+## with the display range (minimum and maximum display values) for an
+## image of that class.
 ##
-## For @sc{matlab} compatibility, if @var{img} is of the class 'single' or
-## 'double', min and max are considered 0 and 1 respectively.
+## Images of different classes have different display ranges, the ranges
+## of values that Octave will interpret between black to white.  For an
+## integer image, the range is from @code{intmin} to @code{intmax} of
+## that class; for images of class logical, single, or double, the range
+## is [0 1].
+##
+## Note that @var{range} will be of class double, independently of the class
+## of @var{img}.
 ##
 ## @example
 ## @group
@@ -41,28 +47,28 @@
 function r = getrangefromclass (img)
 
   if (nargin != 1)
-    print_usage;
-  ## note that isnumeric would return false for logical matrix and ismatrix
-  ## returns true for strings
-  elseif (!ismatrix (img) || ischar (img))
-    error ("Argument 'img' must be an image");
+    print_usage ();
+  elseif (! isimage (img))
+    error ("getrangefromclass: IMG must be an image");
   endif
 
   cl = class (img);
-  if (regexp (cl, "u?int(8|16|32|64)"))
+  if (isinteger (img))
     r = [intmin(cl) intmax(cl)];
   elseif (any (strcmp (cl, {"single", "double", "logical"})))
     r = [0 1];
   else
-    error ("Unknown class '%s'", cl)
+    error ("getrangefromclass: unrecognized image class `%s'", cl)
   endif
-
+  r = double (r);
 endfunction
 
-%!assert (getrangefromclass (double (ones (5))) == [0 1]);      # double returns [0 1]
-%!assert (getrangefromclass (single (ones (5))) == [0 1]);      # single returns [0 1]
-%!assert (getrangefromclass (logical (ones (5))) == [0 1]);     # logical returns [0 1]
-%!assert (getrangefromclass (int8 (ones (5))) == [-128 127]);   # checks int
-%!assert (getrangefromclass (uint8 (ones (5))) == [0 255]);     # checks unit
-%!fail ("getrangefromclass ('string')");                        # fails with strings
-%!fail ("getrangefromclass ({3, 4})");                          # fails with cells
+%!shared img
+%! img = ones (5);
+%!assert (getrangefromclass (double (img)), [0 1]);      # double returns [0 1]
+%!assert (getrangefromclass (single (img)), [0 1]);      # single returns [0 1]
+%!assert (getrangefromclass (logical (img)), [0 1]);     # logical returns [0 1]
+%!assert (getrangefromclass (int8 (img)), [-128 127]);   # checks int
+%!assert (getrangefromclass (uint8 (img)), [0 255]);     # checks unit
+%!fail ("getrangefromclass ('string')");                 # fails with strings
+%!fail ("getrangefromclass ({3, 4})");                   # fails with cells
