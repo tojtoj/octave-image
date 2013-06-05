@@ -252,10 +252,10 @@ function h = montage (images, varargin)
     mRows = linspace (xRows(2,1:end-1) +1, xRows(1,2:end) -1, margin_width) (:);
     mCols = linspace (xCols(2,1:end-1) +1, xCols(1,2:end) -1, margin_width) (:);
 
-    disp_img(mRows,:,:)  = 0;
-    disp_img(mRows,:,:) += margin_color;
-    disp_img(:,mCols,:)  = 0;
-    disp_img(:,mCols,:) += margin_color;
+    ## a function that can be used to brodcast assignment
+    bd_ass = @(x, y) subsasgn (x, struct ("type", "()", "subs", {{":"}}), y);
+    disp_img(mRows,:,:) = bsxfun (bd_ass, disp_img(mRows,:,:), margin_color);
+    disp_img(:,mCols,:) = bsxfun (bd_ass, disp_img(:,mCols,:), margin_color);
   endif
 
   ## 4) display the image
