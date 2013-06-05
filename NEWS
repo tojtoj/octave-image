@@ -8,6 +8,7 @@ Summary of important user-visible changes for image 2.2.0:
       findbounds
       imtransform
       maketform
+      montage
       strel
       tformfwd
       tforminv

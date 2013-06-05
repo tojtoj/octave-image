@@ -53,6 +53,7 @@ Colour maps and Colour controls
  wavelength2rgb
  ycbcr2rgb
 Display
+ montage
  rgbplot
 Enhancement and Restoration
  histeq

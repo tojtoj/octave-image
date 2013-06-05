@@ -111,6 +111,7 @@ inst/mat2gray.m                         GPLv3+
 inst/mean2.m                            GPLv3+
 inst/medfilt2.m                         GPLv3+
 inst/mmgradm.m                          GPLv3+
+inst/montage.m                          GPLv3+
 inst/nlfilter.m                         GPLv3+
 inst/normxcorr2.m                       GPLv3+
 inst/ordfilt2.m                         GPLv3+
