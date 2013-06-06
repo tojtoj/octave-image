@@ -142,10 +142,9 @@ function h = montage (images, varargin)
       page_range = nRead+1-nPages:nRead;
 
       ## we won't be handling the alpha channel, but matlab doesn't either
-      if (size (images, 3) == 1 ||
-          all (strcmp ({img_info(:).ColorType}, "truecolor")))
+      if (size (images, 3) == 1 || all (strcmp ({img_info(:).ColorType}, "truecolor")))
         ## sweet, no problems for sure
-        [images(:,:,:,page_range), map] = imread (img_info.Filename, 1:nPages);
+        [images(:,:,:,page_range), map] = imread (img_info(idx).Filename, 1:nPages);
       else
         [tmp_img, map] = imread (fullpaths(:), 1:nPages);
         if (! isempty (map))
