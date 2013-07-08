@@ -50,10 +50,6 @@ Summary of important user-visible changes for image 2.2.0:
     longer display the markers at their top. The Y axis is also adjusted in case
     of peaks with high values that prevent a good overview of the histogram.
 
- ** The `fftconv2' usage "fftconv2 (v1, v2, a)", for convolution of a matrix by
-    one vector in the column direction and another vector in the row direction,
-    has been removed. Please use conv2 for such cases.
-
  ** The function `rgbplot' accepts a style option which alows for a composite
     display of a colormap.
 

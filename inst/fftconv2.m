@@ -22,7 +22,8 @@
 ## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {} fftconv2 (@var{a}, @var{b}, @var{shape})
+## @deftypefn  {Function File} {} fftconv2 (@var{a}, @var{b}, @var{shape})
+## @deftypefnx {Function File} {} fftconv2 (@var{v1}, @var{v2}, @var{a}, @var{shape})
 ## Convolve 2 dimensional signals using the FFT.
 ##
 ## This method is faster but less accurate than @var{conv2} for large @var{a}
@@ -38,19 +39,13 @@ function X = fftconv2(varargin)
 
     shape = "full";
     rowcolumn = 0;
-    
-    if ((nargin > 2) && ismatrix(varargin{3}) && !ischar(varargin{3}))
-        ## usage: fftconv2(v1, v2, a[, shape])
-        error ("fftconv2: the usage fftconv2(v1, v2, a, ...) Has not been implemented yet. Use conv2 instead");
 
-        ## @deftypefnx{Function File} fftconv2 (@var{v1}, @var{v2}, @var{a}, @var{shape})
-        ## FIXME this type of usage was apparently working back on Octave 3.2.4
-        ## but in truth it was wrong all the time and just looked right because
-        ## conv2 had the same problem. Once conv2 was fixed, it was obvious.
+    if ((nargin > 2) && ismatrix(varargin{3}) && !ischar(varargin{3}))
+        ## usage: fftconv2 (v1, v2, a[, shape])
 
         rowcolumn = 1;
-        v1 = varargin{1}(:)';
-        v2 = varargin{2}(:);
+        v1 = varargin{1}(:);
+        v2 = varargin{2}(:)';
         orig_a = varargin{3};
 
         if (nargin == 4) shape = varargin{4}; endif
@@ -67,7 +62,7 @@ function X = fftconv2(varargin)
         a = fftconv2(orig_a, v2);
         b = v1;
     endif
-    
+
     ra = rows(a);
     ca = columns(a);
     rb = rows(b);
@@ -79,12 +74,12 @@ function X = fftconv2(varargin)
     X = ifft2(A.*B);
 
     if (rowcolumn)
-        rb = rows(v2);
+        rb = rows(v1);
         ra = rows(orig_a);
-        cb = columns(v1);
+        cb = columns(v2);
         ca = columns(orig_a);
     endif
-    
+
     if strcmp(shape,"same")
         r_top = ceil((rb + 1) / 2);
         c_top = ceil((cb + 1) / 2);
@@ -111,10 +106,10 @@ endfunction
 %!##FIXME this usage is broken
 %!shared x,y,a
 %! x = 1:4; y = 4:-1:1; a = repmat(1:10, 5);
-%!xtest assert(norm(fftconv2(x,y,a)-conv2(x,y,a)), 0, 1e6*eps)
-%!xtest assert(norm(fftconv2(x,y,a,'full')-conv2(x,y,a,'full')), 0, 1e6*eps)
-%!xtest assert(norm(fftconv2(x,y,a,'same')-conv2(x,y,a,'same')), 0, 1e6*eps)
-%!xtest assert(norm(fftconv2(x,y,a,'valid')-conv2(x,y,a,'valid')), 0, 1e6*eps)
+%!test assert(norm(fftconv2(x,y,a)-conv2(x,y,a)), 0, 1e6*eps)
+%!test assert(norm(fftconv2(x,y,a,'full')-conv2(x,y,a,'full')), 0, 1e6*eps)
+%!test assert(norm(fftconv2(x,y,a,'same')-conv2(x,y,a,'same')), 0, 1e6*eps)
+%!test assert(norm(fftconv2(x,y,a,'valid')-conv2(x,y,a,'valid')), 0, 1e6*eps)
 
 %!demo
 %! ## Draw a cross
