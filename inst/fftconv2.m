@@ -32,61 +32,73 @@
 ## @seealso{conv2, fftconv, fft, ifft}
 ## @end deftypefn
 
-function X = fftconv2(varargin)
-    if (nargin < 2)
-      print_usage;
+function X = fftconv2 (varargin)
+  if (nargin < 2)
+    print_usage ();
+  endif
+
+  shape     = "full";
+  rowcolumn = false;
+
+  if (nargin > 2 && ismatrix (varargin{3}) && ! ischar (varargin{3}))
+    ## usage: fftconv2 (v1, v2, a[, shape])
+    rowcolumn = true;
+    v1        = varargin{1}(:);
+    v2        = varargin{2}(:)';
+    orig_a    = varargin{3};
+    if (nargin == 4)
+      shape = varargin{4};
     endif
 
-    shape = "full";
-    rowcolumn = 0;
-
-    if ((nargin > 2) && ismatrix(varargin{3}) && !ischar(varargin{3}))
-        ## usage: fftconv2 (v1, v2, a[, shape])
-
-        rowcolumn = 1;
-        v1 = varargin{1}(:);
-        v2 = varargin{2}(:)';
-        orig_a = varargin{3};
-
-        if (nargin == 4) shape = varargin{4}; endif
-    else
-        ## usage: fftconv2(a, b[, shape])
-
-        a = varargin{1};
-        b = varargin{2};
-        if (nargin == 3) shape = varargin{3}; endif
-
+  else
+    ## usage: fftconv2(a, b[, shape])
+    a = varargin{1};
+    b = varargin{2};
+    if (nargin == 3)
+      shape = varargin{3};
     endif
 
-    if (rowcolumn)
-        a = fftconv2(orig_a, v2);
-        b = v1;
-    endif
+  endif
 
-    ra = rows(a);
-    ca = columns(a);
-    rb = rows(b);
-    cb = columns(b);
+  if (! ischar (shape))
+    error ("fftconv2: SHAPE must be a string");
+  endif
 
-    A = fft2(impad(a, [0 cb-1], [0 rb-1]));
-    B = fft2(impad(b, [0 ca-1], [0 ra-1]));
+  if (rowcolumn)
+    a = fftconv2 (orig_a, v2);
+    b = v1;
+  endif
 
-    X = ifft2(A.*B);
+  ra = rows(a);
+  ca = columns(a);
+  rb = rows(b);
+  cb = columns(b);
 
-    if (rowcolumn)
-        rb = rows(v1);
-        ra = rows(orig_a);
-        cb = columns(v2);
-        ca = columns(orig_a);
-    endif
+  A = fft2 (impad (a, [0 cb-1], [0 rb-1]));
+  B = fft2 (impad (b, [0 ca-1], [0 ra-1]));
 
-    if strcmp(shape,"same")
-        r_top = ceil((rb + 1) / 2);
-        c_top = ceil((cb + 1) / 2);
-        X = X(r_top:r_top + ra - 1, c_top:c_top + ca - 1);
-    elseif strcmp(shape, "valid")
-        X = X(rb:ra, cb:ca);
-    endif
+  X = ifft2 (A.*B);
+
+  if (rowcolumn)
+    rb = rows (v1);
+    ra = rows (orig_a);
+    cb = columns (v2);
+    ca = columns (orig_a);
+  endif
+
+  switch (tolower (shape))
+    case "full",
+      ## do nothing
+    case "same",
+      r_top = ceil ((rb + 1) / 2);
+      c_top = ceil ((cb + 1) / 2);
+      X = X(r_top:r_top + ra - 1, c_top:c_top + ca - 1);
+    case "valid",
+      X = X(rb:ra, cb:ca);
+    otherwise
+      error ("fftconv2: unknown convolution SHAPE `%s'", shape);
+  endswitch
+
 endfunction
 
 %!# usage: fftconv2(a,b,[, shape])
