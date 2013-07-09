@@ -25,7 +25,7 @@
 ##
 ## @end deftypefn
 
-function Y = imtranslate (X, a, b, bbox_in = "wrap")
+function Y = imtranslate (X, a, b, bbox = "wrap")
 
   if ( strcmp(bbox, "crop")==1 )
 
