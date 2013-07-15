@@ -105,6 +105,7 @@ Region-based and block processing
  col2im
  colfilt
  im2col
+ impixel
  nlfilter
  poly2mask
  roicolor
