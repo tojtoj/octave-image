@@ -1,5 +1,5 @@
-Summary of important user-visible changes for image 2.2.0:
--------------------------------------------------------------------
+ Summary of important user-visible changes for image 2.2.0 (yyyy/mm/dd):
+-------------------------------------------------------------------------
 
  ** The following functions are new:
 
@@ -93,8 +93,8 @@ Summary of important user-visible changes for image 2.2.0:
     the class of the distance matrix has changed to single, and indexes an
     uint dependent on the matrix size.
 
-Summary of important user-visible changes for image 2.0.0:
--------------------------------------------------------------------
+ Summary of important user-visible changes for image 2.0.0 (2012/11/08):
+-------------------------------------------------------------------------
 
  ** The following functions are new:
 
@@ -221,11 +221,26 @@ Summary of important user-visible changes for image 2.0.0:
 **                                                                            **
 ********************************************************************************
 
+ Summary of important user-visible changes for image 1.0.15 (2011/09/21):
+--------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image 1.0.14 (2011/04/12):
+--------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image 1.0.13 (2010/05/22):
+--------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image 1.0.12 (2010/03/22):
+--------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image 1.0.11 (2010/03/05):
+--------------------------------------------------------------------------
+
  Summary of important user-visible changes for image 1.0.10 (2009/06/07):
------------------------------------------------------------------------------
+--------------------------------------------------------------------------
 
  Summary of important user-visible changes for image 1.0.9 (2009/05/08):
------------------------------------------------------------------------------
+-------------------------------------------------------------------------
 
  ** The following functions are new:
 
@@ -237,15 +252,15 @@ Summary of important user-visible changes for image 2.0.0:
       imread   imwrite
 
  Summary of important user-visible changes for image 1.0.8 (2008/08/31):
------------------------------------------------------------------------------
+-------------------------------------------------------------------------
 
  ** Fix build issues with the last release.
 
  Summary of important user-visible changes for image 1.0.7 (2008/08/24):
------------------------------------------------------------------------------
+-------------------------------------------------------------------------
 
  Summary of important user-visible changes for image 1.0.6 (2008/04/29):
------------------------------------------------------------------------------
+-------------------------------------------------------------------------
 
  ** The following functions are new:
 
@@ -256,26 +271,26 @@ Summary of important user-visible changes for image 2.0.0:
  ** Build fixes for new versions of ImageMagick.
 
  Summary of important user-visible changes for image 1.0.5 (2008/02/16):
------------------------------------------------------------------------------
+-------------------------------------------------------------------------
 
  ** The following functions are new:
 
       imfilter  imsmooth
 
  Summary of important user-visible changes for image 1.0.4 (2007/12/12):
-------------------------------------------------------------------------
+-------------------------------------------------------------------------
 
  Summary of important user-visible changes for image 1.0.3 (2007/10/14):
-------------------------------------------------------------------------
+-------------------------------------------------------------------------
 
  Summary of important user-visible changes for image 1.0.2 (2007/07/26):
-------------------------------------------------------------------------
+-------------------------------------------------------------------------
 
  Summary of important user-visible changes for image 1.0.1 (2007/05/26):
-------------------------------------------------------------------------
+-------------------------------------------------------------------------
 
  Summary of important user-visible changes for image 1.0.0 (2007/03/28):
-------------------------------------------------------------------------
+-------------------------------------------------------------------------
 
  ** First non-monolithic release.
 
@@ -298,32 +313,32 @@ Summary of important user-visible changes for image 2.0.0:
 
  ** Convert all functions to use texinfo help.
 
- Summary of important user-visible changes for image (Octave Forge 20060708):
------------------------------------------------------------------------------
+ Summary of important user-visible changes for image (Octave Forge 2006.07.09):
+--------------------------------------------------------------------------------
 
- Summary of important user-visible changes for image (Octave Forge 20060316):
------------------------------------------------------------------------------
+ Summary of important user-visible changes for image (Octave Forge 2006.03.17):
+--------------------------------------------------------------------------------
 
- Summary of important user-visible changes for image (Octave Forge 20060128):
------------------------------------------------------------------------------
+ Summary of important user-visible changes for image (Octave Forge 2006.01.28):
+--------------------------------------------------------------------------------
 
  ** imread() now return the appropriate numeric class. Colour images are of size
     MxNx3, gray images MxN.
 
- Summary of important user-visible changes for image (Octave Forge 20050613):
------------------------------------------------------------------------------
+ Summary of important user-visible changes for image (Octave Forge 2005.06.13):
+--------------------------------------------------------------------------------
 
  ** The following functions are new:
 
       bwarea      imresize
 
- Summary of important user-visible changes for image (Octave Forge 20041116):
------------------------------------------------------------------------------
+ Summary of important user-visible changes for image (Octave Forge 2004.11.16):
+--------------------------------------------------------------------------------
 
- ** No important changes to the image package in this Octave Forge release.
+   ** No important changes to the image package in this Octave Forge release.
 
- Summary of important user-visible changes for image (Octave Forge 20040907):
------------------------------------------------------------------------------
+ Summary of important user-visible changes for image (Octave Forge 2004.09.09):
+--------------------------------------------------------------------------------
 
  ** The following functions are new:
 
@@ -336,30 +351,30 @@ Summary of important user-visible changes for image 2.0.0:
 
  ** Implemented initial support for int* types.
 
- Summary of important user-visible changes for image (Octave Forge 20040707):
------------------------------------------------------------------------------
+ Summary of important user-visible changes for image (Octave Forge 2004.07.07):
+--------------------------------------------------------------------------------
 
  ** No important changes to the image package in this Octave Forge release.
 
- Summary of important user-visible changes for image (Octave Forge 20040211):
------------------------------------------------------------------------------
+ Summary of important user-visible changes for image (Octave Forge 2004.02.12):
+--------------------------------------------------------------------------------
 
  ** `imread' now supports 16-bit grayscale images.
 
- Summary of important user-visible changes for image (Octave Forge 20030602):
------------------------------------------------------------------------------
+ Summary of important user-visible changes for image (Octave Forge 2003.06.02):
+--------------------------------------------------------------------------------
 
  ** The following functions are new:
 
       rotate_scale
 
- Summary of important user-visible changes for image (Octave Forge 20030222):
------------------------------------------------------------------------------
+ Summary of important user-visible changes for image (Octave Forge 2003.02.22):
+--------------------------------------------------------------------------------
 
  ** No important changes to the image package in this Octave Forge release.
 
- Summary of important user-visible changes for image (Octave Forge 20021130):
------------------------------------------------------------------------------
+ Summary of important user-visible changes for image (Octave Forge 2002.11.30):
+--------------------------------------------------------------------------------
 
  ** The following functions are new:
 
@@ -368,3 +383,18 @@ Summary of important user-visible changes for image 2.0.0:
  ** The `colorgradient' function now allow instantaneous transitions (weight 0)
 
  ** The `bwlabel' function has been implemented in C++ and may behave different.
+
+ Summary of important user-visible changes for image (Octave Forge 2002.05.09):
+--------------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image (Octave Forge 2002.04.20):
+--------------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image (Octave Forge 2002.03.10):
+--------------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image (Octave Forge 2001.11.02):
+--------------------------------------------------------------------------------
+
+ ** First release.
+
