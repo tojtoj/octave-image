@@ -27,16 +27,14 @@ function se = getsequence (se)
 
   if (isempty (se.seq))
     switch (se.shape)
-      case "cube"
-        se.seq{1,1} = strel ("arbitrary", true (se.opt.edge, 1));
-        se.seq{2,1} = strel ("arbitrary", true (1, se.opt.edge));
-        se.seq{3,1} = strel ("arbitrary", true (1, 1, se.opt.edge));
-      case "rectangle"
-        se.seq{1,1} = strel ("arbitrary", true (se.opt.dimensions(1), 1));
-        se.seq{2,1} = strel ("arbitrary", true (1, se.opt.dimensions(2)));
-      case "square"
-        se.seq{1,1} = strel ("arbitrary", true (se.opt.edge, 1));
-        se.seq{2,1} = strel ("arbitrary", true (1, se.opt.edge));
+      case {"square", "cube", "hypercube", "rectangle", "hyperrectangle"}
+        nd = ndims (se.nhood);
+        for idx = 1:nd
+          vec_size      = ones (1, nd);
+          vec_size(idx) = size (se.nhood, idx);
+          se.seq{idx}   = strel ("arbitrary", true (vec_size));
+        endfor
+
       otherwise
         se.seq{1,1} = se;
     endswitch

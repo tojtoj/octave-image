@@ -64,6 +64,16 @@
 ## Create disk shaped flat structuring element.  @var{radius} must be a positive
 ## integer.
 ##
+## @deftypefnx {Function File} {} strel ("hypercube", @var{n}, @var{edge})
+## Create @var{n} dimensional cube (n-cube) shaped @var{flat} structuring
+## element.  @var{edge} must be a positive integer that specifies the length
+## of its edges.
+##
+## @deftypefnx {Function File} {} strel ("hyperrectangle", @var{dimensions})
+## Create @var{n} dimensional hyperrectangle (or orthotope) shaped flat
+## structuring element.  @var{dimensions} must be a vector of positive
+## integers with its lengtht at each of the dimensions.
+
 ## @deftypefnx {Function File} {} strel ("line", @var{len}, @var{deg})
 ## Create line shaped flat structuring element.  @var{len} must be a positive
 ## real number.  @var{deg} must be a 1 or 2 elements real number, for a line in
@@ -77,7 +87,7 @@
 ## the octagon.
 ##
 ## @deftypefnx {Function File} {} strel ("pair", @var{offset})
-## Creates a flat structuring element with two members.  One member is placed
+## Create flat structuring element with two members.  One member is placed
 ## at the origin while the other is placed with @var{offset} in relation to the
 ## origin.  @var{offset} must then be a 2 element vector for the coordinates.
 ##
@@ -89,7 +99,7 @@
 ##   Therefore @var{v} must be a 2 element vector for the coordinates.
 ##
 ## @deftypefnx {Function File} {} strel ("rectangle", @var{dimensions})
-## Creates a rectangular shaped flat structuring element.  @var{dimensions} must
+## Create rectangular shaped flat structuring element.  @var{dimensions} must
 ## be a two element vector of positive integers with the number of rows and
 ## columns of the rectangle.
 ##
@@ -226,6 +236,37 @@ function SE = strel (shape, varargin)
       endif
 
       SE.nhood = fspecial ("disk", radius) > 0;
+      SE.flat  = true;
+
+    case "hypercube"
+      if (numel (varargin) == 2)
+        SE.opt.n    = varargin{1};
+        SE.opt.edge = varargin{2};
+      else
+        error ("strel: an hypercube shape needs 2 arguments");
+      endif
+      if (! is_positive_integer (SE.opt.n))
+        error ("strel: N value must be a positive integer");
+      elseif (! is_positive_integer (SE.opt.edge))
+        error ("strel: EDGE value must be a positive integer");
+      endif
+
+      SE.nhood = true (repmat (SE.opt.edge, 1, SE.opt.n));
+      SE.flat  = true;
+
+    case "hyperrectangle"
+      if (numel (varargin) == 1)
+        SE.opt.dimensions = varargin{1};
+      else
+        error ("strel: no DIMENSIONS specified for rectangle shape");
+      endif
+      if (! isnumeric (SE.opt.dimensions))
+        error ("strel: DIMENSIONS must be a 2 element vector");
+      elseif (! all (arrayfun (@is_positive_integer, SE.opt.dimensions(:))))
+        error ("strel: DIMENSIONS values must be positive integers");
+      endif
+
+      SE.nhood = true (SE.opt.dimensions(:));
       SE.flat  = true;
 
     case "line"
