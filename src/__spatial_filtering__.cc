@@ -1,4 +1,5 @@
 // Copyright (C) 2008 Søren Hauberg <soren@hauberg.org>
+// Copyright (C) 2013 Carnë Draug <carandraug@octave.org>
 //
 // This program is free software; you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -215,72 +216,111 @@ ET_OUT range_filt (MT &vals, octave_idx_type len, int not_used)
   return max_val - min_val;
 }
 
-/**
- * The general function for doing the filtering.
- */
- 
-template <class MT, class ET, class MTout, class ETout> 
-octave_value_list do_filtering (const MT &A, const boolNDArray &dom,
-   ETout (*filter_function) (MT&, octave_idx_type, int), const MT &S, int arg4)
+
+//      The general function for doing the filtering
+//
+// We differentiate between MT and MTout for cases such as std and
+// entropy, where the output will have a different class than the input.
+
+template <class MT, class ET, class MTout, class ETout>
+octave_value do_filtering (const MT &in,
+                           const boolNDArray &se,
+                           ETout (*filter_function) (MT&, octave_idx_type, int),
+                           const MT &S,
+                           int arg4)
 {
-  octave_value_list retval;
+  typedef typename MT::element_type Pin;
 
-  const int ndims = dom.ndims ();
-  const octave_idx_type dom_numel = dom.numel ();
-  const dim_vector dom_size = dom.dims ();
-  const dim_vector A_size = A.dims ();
+  const octave_idx_type ndims     = in.ndims ();
+  const octave_idx_type se_nnz    = se.nnz ();
+  const dim_vector se_size        = se.dims ().redim (ndims);
+  const dim_vector in_size        = in.dims ();
 
-  octave_idx_type len = 0;
-  for (octave_idx_type i = 0; i < dom_numel; i++)
-    len += dom (i);
-
-  // Allocate output
-  dim_vector out_size (dom_size);
-  for (int i = 0; i < ndims; i++)
-    out_size (i) = A_size (i) - dom_size (i) + 1;
-
-  MTout out = MTout (out_size);
-  const octave_idx_type out_numel = out.numel ();
-
-  // Iterate over every element of 'out'.
-  dim_vector idx_dim (ndims, 1);
-  Array<octave_idx_type> dom_idx (idx_dim);
-  Array<octave_idx_type> A_idx (idx_dim);
-  Array<octave_idx_type> out_idx (idx_dim, 0);
-  
-  dim_vector values_size (1, len);
-  MT values (values_size);
-  
-  for (octave_idx_type i = 0; i < out_numel; i++)
+  // Create output matrix
+  dim_vector out_size (in_size);
+  for (octave_idx_type i = 0; i < ndims; i++)
     {
-      // For each neighbour
-      int l = 0;
-      for (int n = 0; n < ndims; n++)
-        dom_idx (n) = 0;
-   
-      for (octave_idx_type j = 0; j < dom_numel; j++)
+      out_size (i) = in_size (i) - se_size (i) + 1;
+    }
+  MTout out (out_size);
+
+  // We will loop for all elements of the output matrix. On each iteration
+  // we collect the values from the input matrix as marked by the
+  // structuring element (SE), and pass them to the filtering function.
+  // The value returned is then assigned assigned to the output matrix.
+  // Using dim_vector's and increment_index() allows us to support matrices
+  // with any number of dimensions.
+
+  // Create a 2D array with the subscript indices for each of the
+  // true elements on the SE. Each column has the subscripts for
+  // each true elements, and the rows are the dimensions.
+  // We also don't need the heights in a matrix. We can extract the
+  // ones that matter for us and place them in a vector to access
+  // them easily during the loop.
+  Array<octave_idx_type> se_sub   (dim_vector (ndims, 1), 0);
+  Array<octave_idx_type> nnz_sub  (dim_vector (ndims, se_nnz));
+  Array<Pin>             heights  (dim_vector (se_nnz, 1));
+  for (octave_idx_type i = 0, found = 0; found < se_nnz; i++)
+    {
+      if (se(se_sub))
         {
-          for (int n = 0; n < ndims; n++)
-            A_idx (n) = out_idx (n) + dom_idx (n);
-       
-          if (dom (dom_idx))
-            values (l++) = A (A_idx) + S (dom_idx);
-       
-          dom.increment_index (dom_idx, dom_size);
+          // insert the coordinate vectors on the next column
+          nnz_sub.insert (se_sub, 0, found);
+          // store new height value
+          heights(found) = S(se_sub);
+          found++;
         }
-            
+      boolNDArray::increment_index (se_sub, se_size);
+    }
+
+  // Create array with subscript indexes for the elements being
+  // evaluated at any given time. We will be using linear indexes
+  // later but need the subscripts to add them.
+  Array<octave_idx_type> in_sub  (dim_vector (ndims, 1));
+  Array<octave_idx_type> out_sub (dim_vector (ndims, 1), 0);
+
+  // For each iteration of the output matrix, will store the values from
+  // the input matrix that will be passed to the filtering function.
+  MT values (dim_vector (1, se_nnz));
+
+  // Get pointers to the fortran vector for good performance.
+  ETout* out_fvec               = out.fortran_vec ();
+  Pin* values_fvec              = values.fortran_vec ();
+  Pin* heights_fvec             = heights.fortran_vec ();
+  octave_idx_type* in_sub_fvec  = in_sub.fortran_vec ();
+  octave_idx_type* out_sub_fvec = out_sub.fortran_vec ();
+  octave_idx_type* nnz_sub_fvec = nnz_sub.fortran_vec ();
+
+  // We iterate for all elements of the output matrix
+  const octave_idx_type out_numel = out.numel ();
+  for (octave_idx_type out_ind = 0; out_ind < out_numel; out_ind++)
+    {
+      // On each iteration we get the subscript indexes for the output
+      // matrix (obtained with increment_index), and add to it the
+      // subscript indexes of each of the nnz elements in the SE. These
+      // are the subscript indexes for the elements in input matrix that
+      // need to be evaluated for that element in the output matrix
+      octave_idx_type nnz_sub_ind = 0;
+      for (octave_idx_type se_ind = 0; se_ind < se_nnz; se_ind++)
+        {
+          nnz_sub_ind = se_ind * ndims; // move to the next column
+          for (octave_idx_type n = 0; n < ndims; n++, nnz_sub_ind++)
+            {
+              // get subcript indexes for the input matrix
+              in_sub_fvec[n] = out_sub_fvec[n] + nnz_sub_fvec[nnz_sub_ind];
+            }
+          values_fvec[se_ind] = in(in_sub) + heights_fvec[se_ind];
+        }
+
       // Compute filter result
-      out (out_idx) = filter_function (values, len, arg4);
+      out_fvec[out_ind] = filter_function (values, se_nnz, arg4);
 
       // Prepare for next iteration
-      out.increment_index (out_idx, out_size);
-       
+      boolNDArray::increment_index (out_sub, out_size);
       OCTAVE_QUIT;
     }
-    
-  retval (0) = octave_value (out);
-    
-  return retval;
+
+  return octave_value (out);
 }
 
 DEFUN_DLD(__spatial_filtering__, args, , "\
@@ -319,7 +359,7 @@ NOT IMPLEMENTED (local binary patterns style)\n\
 ")
 {
   octave_value_list retval;
-  const int nargin = args.length ();
+  const octave_idx_type nargin = args.length ();
   if (nargin < 4)
     {
       print_usage ();
@@ -329,7 +369,7 @@ NOT IMPLEMENTED (local binary patterns style)\n\
   const boolNDArray dom = args (1).bool_array_value ();
   if (error_state)
     {
-      error ("__spatial_filtering__: A must be a matrix");
+      error ("__spatial_filtering__: A must be a logical matrix");
       return retval;
     }
 

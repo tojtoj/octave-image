@@ -1,6 +1,13 @@
  Summary of important user-visible changes for image 2.2.0 (yyyy/mm/dd):
 -------------------------------------------------------------------------
 
+ ** The __spatial_filtering__ function has been mostly rewritten and
+    performs in approximattely 1/5 to 2/5 of the previous time, depending
+    on the filter.  With this change, all functions dependent on it, i.e.,
+    all mathematical morphology functions such as imdilate, imerode,
+    imopen, etc, plus rangefilt, entropyfilt, ordfilt2/n, medfilt2/n, and
+    stdfilt, should also be performing much faster.
+
  ** The following functions are new:
 
       checkerboard
