@@ -346,13 +346,13 @@ endfunction
 function C = all_coords (bw, flip = true, singleton = false)
   N = ndims (bw);
   idx = find (bw);
-  C = cell2mat (nthargout (1:N, @ind2sub, size(bw), idx));
+  C = cell2mat (nthargout (1:N, @ind2sub, size(bw), idx(:)));
 
   ## Coordinate convention for 2d images is to flip the X and Y axes
   ## relative to matrix indexing. Nd images inherit this for the first
   ## two dimensions.
   if (flip)
-    [C(2), C(1)] = deal (C(1), C(2));
+    [C(:, 2), C(:, 1)] = deal (C(:, 1), C(:, 2));
   endif
 
   ## Some functions above expect to work columnwise, so don't return a
@@ -361,3 +361,39 @@ function C = all_coords (bw, flip = true, singleton = false)
     C = [C; C];
   endif
 endfunction
+
+%!test
+%! c = regionprops ([0 0 1], 'centroid');
+%! assert (c.Centroid, [3 1])
+
+%!test
+%! c = regionprops ([0 0 1; 0 0 0], 'centroid');
+%! assert (c.Centroid, [3 1])
+
+%!test
+%! c = regionprops ([0 1 1], 'centroid'); #bug 39701
+%! assert (c.Centroid, [2.5 1])
+ 
+%!test
+%! c = regionprops([0 1 1; 0 0 0], 'centroid'); #bug 39701
+%! assert (c.Centroid, [2.5 1])
+
+%!test
+%! a = zeros (2, 3, 3);
+%! a(:, :, 1) = [0 1 0; 0 0 0];
+%! a(:, :, 3) = a(:, :, 1);
+%! c = regionprops (a, 'centroid');
+%! assert (c.Centroid, [2 1 2])
+
+%!test
+%! d1=2; d2=4; d3=6;
+%! a = ones (d1, d2, d3);
+%! c = regionprops (a, 'centroid');
+%! assert (c.Centroid, [mean(1:d2), mean(1:d1), mean(1:d3)], eps)
+
+%!test
+%! a = [0 0 2 2; 3 3 0 0; 0 1 0 1];
+%! c = regionprops (a, 'centroid');
+%! assert (c(1).Centroid, [3 3], eps)
+%! assert (c(2).Centroid, [3.5 1], eps)
+%! assert (c(3).Centroid, [1.5 2], eps)
