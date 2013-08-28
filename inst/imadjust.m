@@ -126,7 +126,7 @@ function ret = imadjust (image, in = stretchlim (image), out = [0;1], gamma = 1)
     endfor
 
   elseif (length(simage)==2)
-    if(simage(2)==3 && \ 
+    if(simage(2)==3 && ...
        (size(in)==[2,3] || size(out)==[2,3] || size(gamma)==[1,3]) )
       ## image is a colormap
       [in, out, gamma]=__imadjust_check_3d_args__(in, out, gamma);

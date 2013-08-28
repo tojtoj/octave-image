@@ -125,10 +125,10 @@ function retval = regionprops (bw, varargin)
 
   properties = lower (properties);
 
-  all_props = {"Area", "EulerNumber", "BoundingBox", "Extent", "Perimeter",\
-               "Centroid", "PixelIdxList", "FilledArea", "PixelList",\
-               "FilledImage", "Image", "MaxIntensity", "MinIntensity",\
-               "WeightedCentroid", "MeanIntensity", "PixelValues",\
+  all_props = {"Area", "EulerNumber", "BoundingBox", "Extent", "Perimeter",...
+               "Centroid", "PixelIdxList", "FilledArea", "PixelList",...
+               "FilledImage", "Image", "MaxIntensity", "MinIntensity",...
+               "WeightedCentroid", "MeanIntensity", "PixelValues",...
                "Orientation"};
     
   if (ismember ("basic", properties))

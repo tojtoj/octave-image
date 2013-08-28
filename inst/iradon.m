@@ -103,7 +103,7 @@ function [recon, filt] = iradon (proj, theta, interp, filter, scaling, output_si
   if (!isscalar (scaling))
     error ("iradon: Frequency scaling value must be a scalar");
   endif
-  if (!length (find (strcmpi (interp, {'nearest', 'linear', 'spline', \
+  if (!length (find (strcmpi (interp, {'nearest', 'linear', 'spline', ...
                                        'pchip', 'cubic'}))))
     error ("iradon: Invalid interpolation method specified");
   endif

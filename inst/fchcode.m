@@ -54,10 +54,10 @@ function fcc = fchcode (bound)
   n = max (0, rows (bound)-1);
 
   # structure in which to return results
-  fcc = struct (\
-    'x0y0', zeros (1, n), \
-    'fcc',  zeros (1, n), \
-    'diff', zeros (1, n) \
+  fcc = struct (...
+    'x0y0', zeros (1, n), ...
+    'fcc',  zeros (1, n), ...
+    'diff', zeros (1, n) ...
   );
 
   # an empty boundary?
@@ -66,8 +66,8 @@ function fcc = fchcode (bound)
   endif
 
   # direction map
-  dir = [3,  2,  1; \
-         4, NaN, 0; \
+  dir = [3,  2,  1; ...
+         4, NaN, 0; ...
          5,  6,  7];
   
   # coordinates
