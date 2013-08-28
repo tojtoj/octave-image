@@ -52,9 +52,9 @@ function out = iptcheckstrs (in, valid_str, func_name, var_name, pos)
   if (isempty (idx))
     valid_str = cellfun (@(x) cstrcat (x, ", "), valid_str, "UniformOutput", false);
     valid_str = cstrcat (valid_str{:});
-    error("Function %s expected its %s input argument, %s, to match one of these strings:\n...
-         %s\n...
-       The input, '%s', did not match any of the valid strings.\n", ...
+    error("Function %s expected its %s input argument, %s, to match one of these strings:\n\
+         %s\n\
+       The input, '%s', did not match any of the valid strings.\n",
       func_name, iptnum2ordinal (pos), var_name, valid_str(1:end-2), in);
   else
     out = valid_str{idx};

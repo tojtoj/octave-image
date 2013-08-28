@@ -44,8 +44,8 @@ function iptcheckmap (in, func_name, var_name, pos)
   ## purpose since the whole idea of this function is already to give a properly
   ## formatted error message
   if (!iscolormap (in))
-    error ("Function %s expected input number %d, %s, to be a valid colormap.\n...
-       Valid colormaps must be nonempty, double, 2-D matrices with 3 columns.\n", ...
+    error ("Function %s expected input number %d, %s, to be a valid colormap.\n\
+       Valid colormaps must be nonempty, double, 2-D matrices with 3 columns.\n",
       func_name, pos, var_name);
   endif
 
