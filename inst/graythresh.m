@@ -462,7 +462,7 @@ function Tout = maxlikelihood (y)
   tau2   = (partial_sumC (y, n) - partial_sumC (y, T)) / (partial_sumA (y, n) - partial_sumA (y, T)) - nu^2;
 
   ## Return if sigma2 or tau2 are zero, to avoid division by zero
-  if sigma2 == 0 | tau2 == 0
+  if (sigma2 == 0 || tau2 == 0)
     Tout{1} = T;
     return
   endif
