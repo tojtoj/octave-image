@@ -39,6 +39,13 @@ function exif = readexif(file, thumbnail)
   if (nargin < 1 || nargin > 2)
     print_usage;
   endif
+  persistent warned = false;
+  if (! warned)
+    warned = true;
+    warning ("Octave:deprecated-function",
+             "`readexif' has been deprecated in favor of `imfinfo'. This function will be removed from future versions of the `image' package");
+  endif
+
 
   % Enable the debug flag to see more of the JPG sections.
 
