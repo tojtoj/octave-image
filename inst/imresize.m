@@ -78,8 +78,8 @@ function im = imresize (im, scale, method = "cubic")
   int_row_scale = false;
   int_col_scale = false;
   if (isscalar (scale))
-    outRows = round (rows (im) * scale);
-    outCols = round (columns (im) * scale);
+    outRows = ceil (rows (im) * scale);
+    outCols = ceil (columns (im) * scale);
 
     ## check if we can use clever indexing
     scale_rows = scale_cols = scale;
@@ -93,8 +93,8 @@ function im = imresize (im, scale, method = "cubic")
     elseif (isnan (outCols))
       outCols = inCols * (outRows / inRows);
     endif
-    outRows = round (outRows);
-    outCols = round (outCols);
+    outRows = ceil (outRows);
+    outCols = ceil (outCols);
 
     ## we will need this to use clever indexing. In this case, we will also need
     ## to check that we are changing the rows and columns of the image in the
