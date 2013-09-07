@@ -33,6 +33,9 @@
 ## @end group
 ## @end example
 ##
+## If @var{M} or @var{N} is @code{NaN}, it will be determined automatically so
+## as to preserve aspect ratio.
+##
 ## The optional argument @var{method} defines the interpolation method to be
 ## used.  All methods supported by @code{interp2} can be used.  By default, the
 ## @code{cubic} method is used.
@@ -61,7 +64,7 @@ function im = imresize (im, scale, method = "cubic")
     print_usage ();
   elseif (! isimage (im) || (! isrgb (im) && ! isgray (im)))
     error ("imresize: IM must be a grayscale or RGB image.")
-  elseif (! isnumeric (scale) || any (scale <= 0))
+  elseif (! isnumeric (scale) || any (scale <= 0) || all (isnan (scale)))
     error ("imresize: SCALE or [M N] must be numeric positive values")
   elseif (! ischar (method))
     error ("imresize: METHOD must be a string with interpolation method")
@@ -84,6 +87,14 @@ function im = imresize (im, scale, method = "cubic")
   elseif (numel (scale) == 2)
     outRows = scale(1);
     outCols = scale(2);
+    ## maintain aspect ratio if requested
+    if (isnan (outRows))
+      outRows = inRows * (outCols / inCols);
+    elseif (isnan (outCols))
+      outCols = inCols * (outRows / inRows);
+    endif
+    outRows = round (outRows);
+    outCols = round (outCols);
 
     ## we will need this to use clever indexing. In this case, we will also need
     ## to check that we are changing the rows and columns of the image in the
@@ -163,6 +174,8 @@ endfunction
 %!          9    9   47   47  133  133  135  135  130  130  207  207  236  236   43   43   19   19   73   73];
 %!assert (imresize (uint8 (in), 2, "nearest"), uint8 (out))
 %!assert (imresize (uint8 (in), 2, "neAreST"), uint8 (out))
+%!assert (imresize (uint8 (in), [14 NaN], "nearest"), uint8 (out))
+%!assert (imresize (uint8 (in), [NaN 20], "nearest"), uint8 (out))
 %!
 %! out = [116  116  227  227  153  153   69   69  146  146  194  194   59   59  130  130  139  139  106  106
 %!          2    2   47   47  137  137  249  249   90   90   75   75   16   16   24   24  158  158   44   44
@@ -174,6 +187,8 @@ endfunction
 %!assert (imresize (uint8 (in), [7 20], "nearest"), uint8 (out))
 %!
 %!assert (imresize (uint8 (in), 1.5, "bicubic"), imresize (uint8 (in), 1.5, "cubic"))
+%!assert (imresize (uint8 (in), [NaN, size(in,2)*1.5], "bicubic"), imresize (uint8 (in), 1.5, "cubic"))
+%!assert (imresize (uint8 (in), [size(in,1)*1.5, NaN], "bicubic"), imresize (uint8 (in), 1.5, "cubic"))
 %!assert (imresize (uint8 (in), 1.5, "linear"), imresize (uint8 (in), 1.5, "LIneAR"))
 %!assert (imresize (uint8 (in), 1.5, "linear"), imresize (uint8 (in), 1.5, "triangle"))
 %!
