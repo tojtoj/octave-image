@@ -222,7 +222,7 @@ endfunction
 %!         40   96  152  149  117   74   34  108  179  131  175   215  153  177  219
 %!         11   33   73  127  137  125  113  158  212  229  148    55   35   63   96
 %!          4   17   53  121  141  138  133  171  220  253  141    16    7   36   67];
-%!xtest assert (imresize (uint8 (in), 1.5, "bicubic"), uint8 (out1))
+%!xtest assert (imresize (uint8 (in), 1.5, "bicubic"), uint8 (out))
 %!
 %! out = [116  172  215  165  111   82  133  170  171   81   95   132  138  123  106
 %!         59   98  138  144  152  152  125  127  119   54   58    89  137  112   75
@@ -235,33 +235,17 @@ endfunction
 %!         46   93  139  141  114   80   50  109  168  141  166   189  151  171  200
 %!         16   41   77  123  130  123  115  157  204  214  145    69   48   71   98
 %!          9   28   61  119  134  134  131  169  212  231  140    39   23   46   73];
-%!xtest assert (imresize (uint8 (in), 1.5, "bilinear"), uint8 (out2))
+%!xtest assert (imresize (uint8 (in), 1.5, "bilinear"), uint8 (out))
 %!
 %! out = [108  136  125   89  107
 %!        111  132  143  114   99
 %!        106  110  106  127  136
 %!         47  121  163  138   68];
-%!xtest assert (imresize (uint8 (in), 0.5, "bilinear"), uint8 (out3))
+%!xtest assert (imresize (uint8 (in), 0.5, "bilinear"), uint8 (out))
 %!
 %! out = [103  141  124   78  110
 %!        111  134  153  114   91
 %!        115  108   93  128  146
 %!         38  124  175  143   54];
-%!xtest assert (imresize (uint8 (in), 0.5, "bicubic"), uint8 (out4))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+%!xtest assert (imresize (uint8 (in), 0.5, "bicubic"), uint8 (out))
 
