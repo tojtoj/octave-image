@@ -1,4 +1,4 @@
-## Copyright (C) 2012 Roberto Metere <roberto@metere.it>
+## Copyright (C) 2013 Carnë Draug <carandraug+dev@gmail.com>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -14,21 +14,36 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {[@var{offsets}, @var{heights}] =} getneighbors (@var{SE})
-## For each neighbor in structuring element, return the relative position and height.
+## @deftypefn {Function File} {[@var{offsets}, @var{heights}] =} getneighbors (@var{se})
+## Get neighbors relative position and height.
 ##
-## If P is the number of neighbors in SE, @var{offsets} are relative position
-## from the center of the structuring element to them, of which heights are
-## stored in corresponding columns of the array @var{heights}.
-## @var{offsets} is an array with P rows and 2 columns, the first for the row
-## offset, the second for the column offset.
+## For each of the neighbors in the strel object @var{se}, @var{offsets} are
+## their positions relative to the origin (center).  It is a @var{P}x@var{N}
+## matrix, with @var{P} as the number of neighbors, and @var{N} as the number
+## of dimensions.
+##
+## @var{heights} is a vector with the height of each neighbor in @var{se}.
 ##
 ## @seealso{getnhood, getheight, strel}
 ## @end deftypefn
 
-function [offsets, heights] = getneighbors (SE)
+function [offsets, heights] = getneighbors (se)
 
-  error ("getneighbors: not yet implemented");
-  P = nnz (SE.nhood);
+  se_ndims  = ndims (se.nhood);
+  se_size   = size (se.nhood);
+
+  ## To calculate the offsets we get the subscript indexes of all elements
+  ## in a cell array, one cell for each dimension and the that dimension
+  ## indexes in a column. We then just subtract the center position of each
+  ## dimension to the respective column.
+  sub = cell (1, se_ndims);
+  ## The (:) on find(...)(:) is because find() will return a row (instead
+  ## of a column), if the input is just a row vector. We need to make sure
+  ## that we always get a column for ind2sub().
+  [sub{1:se_ndims}] = ind2sub (se_size, find (se.nhood)(:));
+  warning ("off", "Octave:broadcast", "local");
+  offsets = cell2mat (sub) - floor ((se_size + 1) / 2);
+
+  heights = getheight (se)(se.nhood);
 
 endfunction
