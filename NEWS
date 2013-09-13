@@ -1,12 +1,23 @@
  Summary of important user-visible changes for image 2.2.0 (yyyy/mm/dd):
 -------------------------------------------------------------------------
 
+ ** The imerode and imdilate have been completely rewritten for increased
+    performance and many Matlab compatibility fixes. Performance gains between
+    1.5-30X have been demonstrated. Main compatibility changes include the
+    addition of the shape option, support for the strel class, and allowing
+    structuring elements and images of different classes. Non-flat grayscale
+    erosion and dilation has also been implemented by making use of the new
+    strel class.
+
+ ** With the increased performance in imerode and imdilate, all other
+    functions that use them, such imopen and imclose, get an equivalent
+    performance boost.
+
  ** The __spatial_filtering__ function has been mostly rewritten and
     performs in approximattely 1/5 to 2/5 of the previous time, depending
-    on the filter.  With this change, all functions dependent on it, i.e.,
-    all mathematical morphology functions such as imdilate, imerode,
-    imopen, etc, plus rangefilt, entropyfilt, ordfilt2/n, medfilt2/n, and
-    stdfilt, should also be performing much faster.
+    on the filter.  With this change, all functions dependent on it,
+    rangefilt, entropyfilt, ordfilt2/n, medfilt2/n, and stdfilt, will also
+    perform faster.
 
  ** The following functions are new:
 
@@ -66,21 +77,8 @@
  ** With the addition of the strel class, the following functions are now able
     to handle strel objects:
 
+      imdilate
       imerode
-
- ** The functions `imerode' and `imdilate' no longer require that image and
-    structuring element be of same class. They now perform faster for all black
-    and white images, independently of their class, and always return an image
-    of same class as the input image. The shape option has also been implemented.
-
- ** Non flat grayscale erosion can now be performed by creating an appropriate
-    structuring element with `strel'.
-
- ** The shape option has been implemented for `imerode' and `imdilate'.
-
- ** With the increased performance in `imerode' and `imdilate', all other
-    functions that use them, such `imopen' and `imclose', also get a performance
-    boost for black and white images.
 
  ** The performance of `imresize()' has been greatly improved when using the
     nearest neighbor method for N or 1/N scale factors (e.g.: 2, 50, 1/4, 1/7).
