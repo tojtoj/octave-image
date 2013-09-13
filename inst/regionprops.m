@@ -17,11 +17,16 @@
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{props} = } regionprops (@var{BW})
 ## @deftypefnx {Function File} {@var{props} = } regionprops (@var{BW}, @var{properties}, @dots{})
+## @deftypefnx {Function File} {@var{props} = } regionprops (@var{L}, @var{properties}, @dots{})
+## @deftypefnx {Function File} {@var{props} = } regionprops (@dots{}, @var{I}, @var{properties}, @dots{})
 ## Compute object properties in a binary image.
 ##
 ## @code{regionprops} computes various properties of the individual objects (as
 ## identified by @code{bwlabel}) in the binary image @var{BW}. The result is a
 ## structure array containing an entry per property per object.
+##
+## The optional grayscale image @var{I} is used for pixel value measurements
+## (MaxIntensity, MinIntensity, MeanIntensity, PixelValues and WeightedCentroid).
 ##
 ## The following properties can be computed:
 ##
@@ -113,6 +118,17 @@ function retval = regionprops (bw, varargin)
     error ("regionprops: not enough input arguments");
   endif
 
+  prop_start = 1;
+  if (numel (varargin) >= 1 && isnumeric (varargin{1}))
+    if (size_equal (bw, varargin{1}))
+      I = varargin{1};
+      varargin(1) = [];
+    else
+      error ("regionprops: I must have the same size as BW");
+    endif
+  else
+    I = bw;
+  endif
   if (numel (varargin) == 0)
     properties = {"basic"};
   elseif (numel (varargin) == 1 && iscellstr (varargin{1}))
@@ -130,7 +146,7 @@ function retval = regionprops (bw, varargin)
                "FilledImage", "Image", "MaxIntensity", "MinIntensity",...
                "WeightedCentroid", "MeanIntensity", "PixelValues",...
                "Orientation"};
-    
+
   if (ismember ("basic", properties))
     properties = union (properties, {"Area", "Centroid", "BoundingBox"});
     properties = setdiff (properties, "basic");
@@ -139,7 +155,7 @@ function retval = regionprops (bw, varargin)
   if (ismember ("all", properties))
     properties = all_props;
   endif
-  
+
   if (!iscellstr (properties))
     error ("%s %s", "regionprops: properties must be specified as a list of",
            "strings or a cell array of strings");
@@ -154,7 +170,7 @@ function retval = regionprops (bw, varargin)
     endif
     properties(k) = all_props{idx};
   endfor
-    
+
   N = ndims (bw);
 
   ## Get a labelled image
@@ -166,7 +182,7 @@ function retval = regionprops (bw, varargin)
   else
     [L, num_labels] = bwlabel (bw);
   endif
-  
+
   ## Return an empty struct with specified properties if there are no labels
   if num_labels == 0
     retval = struct ([properties; repmat({{}}, size(properties))]{:});
@@ -182,13 +198,13 @@ function retval = regionprops (bw, varargin)
         for k = 1:num_labels
           retval (k).Area = local_area (L == k);
         endfor
-        
-      case {"eulernumber", "euler_number"}
+
+      case "eulernumber"
         for k = 1:num_labels
           retval (k).EulerNumber = bweuler (L == k);
         endfor
 
-      case {"boundingbox", "bounding_box"}
+      case "boundingbox"
         for k = 1:num_labels
           retval (k).BoundingBox = local_boundingbox (L == k);
         endfor
@@ -216,23 +232,23 @@ function retval = regionprops (bw, varargin)
           retval (k).Centroid = [mean(C)];
         endfor
 
-      case {"pixelidxlist", "pixel_idx_list"}
+      case "pixelidxlist"
         for k = 1:num_labels
           retval (k).PixelIdxList = find (L == k);
         endfor
-      
-      case {"filledarea", "filled_area"}
+
+      case "filledarea"
         for k = 1:num_labels
           retval (k).FilledArea = sum (bwfill (L == k, "holes") (:));
         endfor
 
-      case {"pixellist", "pixel_list"}
+      case "pixellist"
         for k = 1:num_labels
           C = all_coords (L == k, true, true);
           retval (k).PixelList = C;
         endfor
 
-      case {"filledimage", "filled_image"}
+      case "filledimage"
         for k = 1:num_labels
           retval (k).FilledImage = bwfill (L == k, "holes");
         endfor
@@ -246,34 +262,34 @@ function retval = regionprops (bw, varargin)
           retval (k).Image = subsref (tmp, idx);
         endfor
 
-      case {"maxintensity", "max_intensity"}
+      case "maxintensity"
         for k = 1:num_labels
-          retval (k).MaxIntensity = max (bw (L == k) (:));
-        endfor
-    
-      case {"minintensity", "min_intensity"}
-        for k = 1:num_labels
-          retval (k).MinIntensity = min (bw (L == k) (:));
-        endfor
-    
-      case {"weightedcentroid", "weighted_centroid"}
-        for k = 1:num_labels
-          C = all_coords (L == k, true, true);
-          vals = bw (L == k) (:);
-          vals /= sum (vals);
-          retval (k).WeightedCentroid = [dot(C, repmat(vals, 1, columns(C)))];
+          retval (k).MaxIntensity = max (I(L == k)(:));
         endfor
 
-      case {"meanintensity", "mean_intensity"}
+      case "minintensity"
         for k = 1:num_labels
-          retval (k).MeanIntensity = mean (bw (L == k) (:));
+          retval (k).MinIntensity = min (I(L == k)(:));
         endfor
-        
-      case {"pixelvalues", "pixel_values"}
+
+      case "weightedcentroid"
         for k = 1:num_labels
-          retval (k).PixelValues = bw (L == k)(:);
+          C = all_coords (L == k, true, true);
+          vals = I(L == k)(:);
+          vals /= sum (vals);
+          retval (k).WeightedCentroid = [dot(C, repmat(vals, 1, columns(C)), 1)];
         endfor
-    
+
+      case "meanintensity"
+        for k = 1:num_labels
+          retval (k).MeanIntensity = mean (I(L == k)(:));
+        endfor
+
+      case "pixelvalues"
+        for k = 1:num_labels
+          retval (k).PixelValues = I(L == k)(:);
+        endfor
+
       case "orientation"
         if (N > 2)
           warning ("regionprops: skipping orientation for Nd image");
@@ -292,7 +308,7 @@ function retval = regionprops (bw, varargin)
             retval (k).Orientation = 0; # XXX: What does the other brand do?
           endif
         endfor
-        
+
       %{
       case "majoraxislength"
         for k = 1:num_labels
@@ -305,7 +321,7 @@ function retval = regionprops (bw, varargin)
             retval (k).MajorAxisLength = 1;
           endif
         endfor
-        
+
       case "minoraxislength"
         for k = 1:num_labels
           [Y, X] = find (L == k);
@@ -318,9 +334,9 @@ function retval = regionprops (bw, varargin)
           endif
         endfor
       %}
-      
+
       #case "extrema"
-      #case "convexarea"      
+      #case "convexarea"
       #case "convexhull"
       #case "solidity"
       #case "conveximage"
@@ -373,7 +389,7 @@ endfunction
 %!test
 %! c = regionprops ([0 1 1], 'centroid'); #bug 39701
 %! assert (c.Centroid, [2.5 1])
- 
+
 %!test
 %! c = regionprops([0 1 1; 0 0 0], 'centroid'); #bug 39701
 %! assert (c.Centroid, [2.5 1])
@@ -397,3 +413,13 @@ endfunction
 %! assert (c(1).Centroid, [3 3], eps)
 %! assert (c(2).Centroid, [3.5 1], eps)
 %! assert (c(3).Centroid, [1.5 2], eps)
+
+%!test
+%! img  = zeros (3, 9);
+%! img(2, 1:9) = 0:0.1:0.8;
+%! bw = im2bw (img, 0.5);
+%! props = regionprops(bw, img, "WeightedCentroid");
+%! ix = 7:9;
+%! x = sum (img(2,ix) .* (ix)) / sum (img(2,ix));
+%! assert (props(1).WeightedCentroid(1), x, 10*eps)
+%! assert (props(1).WeightedCentroid(2), 2, 10*eps)
