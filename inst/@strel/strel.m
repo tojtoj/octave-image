@@ -1,5 +1,5 @@
-## Copyright (C) 2012,2013 Roberto Metere <roberto@metere.it>
-## Copyright (C) 2012 Carnë Draug <carandraug@octave.org>
+## Copyright (C) 2012, 2013 Roberto Metere <roberto@metere.it>
+## Copyright (C) 2012, 2013 Carnë Draug <carandraug@octave.org>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -162,7 +162,9 @@ function SE = strel (shape, varargin)
       else
         error ("strel: an arbitrary shape takes 1 or 2 arguments");
       endif
-      if (! isbw (nhood, "non-logical"))
+      ## isbw returns false in case of an empty matrix but we need
+      ## to support empty strel objects as well.
+      if (! isbw (nhood, "non-logical") && ! isempty (nhood))
         error ("strel: NHOOD must be a matrix with only 0 and 1 values")
       endif
 
