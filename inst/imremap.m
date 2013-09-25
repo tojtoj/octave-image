@@ -35,7 +35,6 @@
 ## For @sc{matlab} compatibility, the methods @code{bicubic} (same as
 ## @code{cubic}), @code{bilinear} and @code{triangle} (both the same as
 ## @code{linear}) are also supported.
-
 ##
 ## All values of the result that fall outside the original image will
 ## be set to @var{extrapval}. For images of class @code{double} @var{extrapval}
