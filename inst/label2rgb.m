@@ -1,4 +1,5 @@
 ## Copyright (C) 2006 Søren Hauberg <soren@hauberg.org>
+## Copyright (C) 2013 Carnë Draug <carandraug@octave.org>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -14,124 +15,141 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} @var{RGB} = label2rgb(@var{L})
-## @deftypefnx{Function File} @var{RGB} = label2rgb(@var{L}, @var{map})
-## @deftypefnx{Function File} @var{RGB} = label2rgb(@var{L}, @var{map}, @var{background})
-## @deftypefnx{Function File} @var{RGB} = label2rgb(@var{L}, @var{map}, @var{background}, @var{order})
-## Converts a labeled image to an RGB image.
+## @deftypefn {Function File} {} label2rgb (@var{L})
+## @deftypefnx{Function File} {} label2rgb (@var{L}, @var{cmap})
+## @deftypefnx{Function File} {} label2rgb (@var{L}, @var{cmap}, @var{background})
+## @deftypefnx{Function File} {} label2rgb (@var{L}, @var{cmap}, @var{background}, @var{order})
+## Convert labeled image into RGB.
 ##
-## label2rgb(@var{L}) returns a color image, where the background color
-## (the background is the zero-labeled pixels) is white, and all other
-## colors come from the @code{jet} colormap.
+## The labeled image @var{L} is converted into an RGB image using the
+## colormap @var{cmap}.  The label number of each region is used to select
+## the color from @var{cmap} which can be specified as:
 ##
-## label2rgb(@var{L}, @var{map}) uses colors from the given colormap.
-## @var{map} can be
-## @itemize
-## @item A string containing the name of a function to be called to
-## produce a colormap. The default value is "jet".
-## @item A handle to a function to be called to produce a colormap.
-## @item A @var{N}-by-3 colormap matrix.
+## @itemize @bullet
+## @item @var{N}-by-3 colormap matrix where N must be larger than or equal
+## to the highest label number;
+## @item name of a function that returns a colormap;
+## @item handle for a function that returns a colormap (defaults to @code{jet}).
 ## @end itemize
 ##
-## label2rgb(@var{L}, @var{map}, @var{background}) sets the background
-## color. @var{background} can be a 3-vector corresponding to the wanted
-## RGB color, or one of the following strings
-## @table @samp
-## @item "b"
-## The background color will be blue.
-## @item "c"
-## The background color will be cyan.
-## @item "g"
-## The background color will be green.
-## @item "k"
-## The background color will be black.
-## @item "m"
-## The background color will be magenta.
-## @item "r"
-## The background color will be red.
-## @item "w"
-## The background color will be white. This is the default behavior.
-## @item "y"
-## The background color will be yellow.
-## @end table
+## In a labeled image, zero valued pixels are considered background and
+## are colored according to the color @var{background}.  It can be specified
+## as an RGB triplet values (3 element vector of values between 0 and 1), or
+## by name:
 ##
-## label2rgb(@var{L}, @var{map}, @var{background}, @var{order}) allows for random
-## permutations of the colormap. @var{order} must be one of the following strings
-## @table @samp
-## @item "noshuffle"
-## The colormap is not permuted in any ways. This is the default.
-## @item "shuffle"
-## The used colormap is permuted randomly.
-## @end table
-## @seealso{bwlabel, ind2rgb}
+## @itemize @bullet
+## @item @qcode{"w"} or @qcode{"white"} (default)
+## @item @qcode{"b"} or @qcode{"blue"}.
+## @item @qcode{"c"} or @qcode{"cyan"}.
+## @item @qcode{"g"} or @qcode{"green"}.
+## @item @qcode{"k"} or @qcode{"black"}.
+## @item @qcode{"m"} or @qcode{"magenta"}.
+## @item @qcode{"r"} or @qcode{"red"}.
+## @item @qcode{"y"} or @qcode{"yellow"}.
+## @end itemize
+##
+## The option @var{order} must be a string with values @qcode{"shuffle"} or
+## @qcode{"noshuffle"} (default). If shuffled, the colors in @var{cmap} are
+## permuted randomly before the image conversion.
+##
+## The output RGB image is always of class uint8.
+##
+## @seealso{bwconncomp, bwlabel, colormap, ind2rgb}
 ## @end deftypefn
 
-function rgb = label2rgb(L, map = "jet", background = "w", order = "noshuffle")
-  ## Input checking
-  if (nargin < 1)
-    print_usage();
+function rgb = label2rgb (L, cmap = @jet, background = "w", order = "noshuffle")
+
+  if (nargin < 1 || nargin > 4)
+    print_usage ();
+  elseif (! isimage (L) || ndims (L) > 4 || size (L, 3) != 1 ||
+          any (L(:) != fix (L(:))) || any (L(:) < 0))
+    error ("label2rgb: L must be a labelled image");
+  elseif (! ischar (cmap) && ! isa (cmap, "function_handle") && ! iscolormap (cmap))
+    error ("label2rgb: CMAP must be a colormap, colormap name, or colormap function");
+  elseif (! ischar (background) && ! iscolormap (background))
+    error("label2rgb: BACKGROUND must be a colorname or a RGB triplet");
+  elseif (! any (strcmpi (order, {"noshuffle", "shuffle"})))
+    error("label2rgb: ORDER must be either 'noshuffle' or 'shuffle'");
   endif
-  if ( !ismatrix(L) || ndims(L) != 2 || any(L(:) != round(L(:))) || any(L(:) < 0) )
-    error("label2rgb: first input argument must be a labelled image");
-  endif
-  if ( !ischar(map) && !isa(map, "function_handle") && !(ismatrix(map) && ndims(map)==2 && columns(map)==3) )
-    error("label2rgb: second input argument must be a color map or a function that can generate a colormap");
-  endif
-  if ( !ischar(background) && !(isreal(background) && numel(background)==3) )
-    error("label2rgb: third input argument must be a color given as a string or a 3-vector");
-  endif
-  if ( !any(strcmpi(order, {"noshuffle", "shuffle"})) )
-    error("label2rgb: fourth input argument must be either 'noshuffle' or 'shuffle'");
-  endif
-  
+
   ## Convert map to a matrix if needed
-  num_objects = max(L(:));
-  if (ischar(map) || isa(map, "function_handle"))
-    map = feval(map, num_objects+1);
+  num_objects = max (L(:));
+  if (ischar (cmap) || isa (cmap, "function_handle"))
+    cmap = feval (cmap, num_objects);
   endif
 
-  num_colors  = rows(map);
+  num_colors = rows (cmap);
   if (num_objects > num_colors)
-    warning("label2rgb: number of objects exceeds number of colors in the colormap");
+    error ("label2rgb: CMAP has not enough colors (%i) for all objects (%i) in L",
+           num_colors, num_objects);
   endif
 
-  ## Handle the background color
-  if (ischar(background))
-    switch (background(1))
-      case 'b' background = [0, 0, 1];
-      case 'c' background = [0, 1, 1];
-      case 'g' background = [0, 1, 0];
-      case 'k' background = [0, 0, 0];
-      case 'm' background = [1, 0, 1];
-      case 'r' background = [1, 0, 0];
-      case 'w' background = [1, 1, 1];
-      case 'y' background = [1, 1, 0];
-      otherwise
-        error("label2rgb: unknown background color '%s'", background);
-    endswitch
-  endif
-  background = background(:)';
-  if (min(background) < 0 || max(background) > 1)
-    error("label2rgb: the background color must be in the interval [0, 1]");
-  endif
-  
+  background = handle_colorspec ("label2rgb", background);
+
   ## Should we shuffle the colormap?
-  if (strcmpi(order, "shuffle"))
-    r = rows(map);
-    map = map(randperm(r),:);
+  if (strcmpi (order, "shuffle"))
+    ## Matlab does the shuffling "pseudorandomly". We don't know how it
+    ## actually does the shuffling since it is not documented but using
+    ## the same labeled image and colormap, Matlab always returns the same.
+    cmap = cmap(randperm (num_colors), :);
   endif
-  
-  ## If the background color is in the color map: remove it
-  idx = find((map(:,1) == background(1)) & (map(:,2) == background(2)) & (map(:,3) == background(3)));
-  if (!isempty(idx))
-    map(idx, :) = [];
+
+  ## Check if the background color is in the colormap
+  idx = find (ismember (cmap, background, "rows"));
+  if (! isempty (idx))
+    if (isscalar (idx))
+      warning ("label2rgb: region %i has the same color as background", idx);
+    else
+      idx_list = sprintf ("%i, ", idx(1:end-1));
+      idx_list = sprintf ("%s, and %i", idx_list, idx(end));
+      warning ("label2rgb: regions %s, have the same color as background",
+               idx_list);
+    endif
   endif
-  
-  ## Insert the background color as the first element in the color map
-  map = [background; map];
-  
-  ## Convert L to an RGB image
-  rgb = ind2rgb(L+1, map);
-  rgb /= max(rgb(:));
-  rgb = uint8(255*rgb);
+
+  ## We will use ind2rgb for the conversion. An indexed image is interpreted
+  ## differently depending if it's an integer or floating point image. We make
+  ## sure we pass an integer image where value of zero is the color in the
+  ## first row of the colormap (if it was a floating point image, the image
+  ## could not have zero values, and a value of 1 is the color in the first
+  ## row of the colormap).
+  if (! isinteger (L))
+    if     (num_objects <= intmax ("uint8")),  L = uint8  (L);
+    elseif (num_objects <= intmax ("uint16")), L = uint16 (L);
+    elseif (num_objects <= intmax ("uint32")), L = uint32 (L);
+    else,                                      L = uint64 (L);
+    endif
+  endif
+
+  ## Insert the background color at the head of the colormap
+  rgb  = ind2rgb (L, [background; cmap]);
+  rgb  = im2uint8 (rgb);
 endfunction
+
+%!function map = test_colormap ()
+%!  map = [0 0 0; 0.5 0.5 0.5; 0.125 0.125 0.125];
+%!endfunction
+
+%!shared in, out, cmap
+%! in  = [  0    1    1    0    2    2    0    3    3
+%!          0    1    1    0    2    2    0    3    3];
+%!
+%! out = [255    0    0  255  128  128  255   32   32
+%!        255    0    0  255  128  128  255   32   32];
+%! out(:,:,2) = out(:,:,3) = out(:,:,1);
+%! out = uint8(out);
+%!
+%! cmap = [0 0 0; 0.5 0.5 0.5; 0.125 0.125 0.125];
+%!assert (label2rgb (in, cmap),            out);
+%!assert (label2rgb (uint8 (in), cmap),    out);
+%!assert (label2rgb (in, "test_colormap"), out);
+%!assert (label2rgb (in, @test_colormap),  out);
+%!
+%! out(find (in == 0)) = 0;
+%!assert (label2rgb (in, cmap, "cyan"),    out);
+%!assert (label2rgb (in, cmap, [0 1 1]),   out);
+%!
+%! in(1) = 10;
+%!error label2rgb (in, cmap);
+%!error label2rgb (in, cmap, 89);
+%!error label2rgb (in, cmap, "g", "wrong");
