@@ -616,6 +616,12 @@ endfunction
 %!assert (class (seq(2)), "strel")
 %!assert (numel (se), 1)
 %!assert (numel (seq), 2)
+%!assert (getnhood (seq(1)), true (5, 1))
+%!assert (getnhood (seq(2)), true (1, 5))
+%!assert (size (se),  [1 1])
+%!assert (size (seq), [2 1])
+%!assert (isscalar (se),  true)
+%!assert (isscalar (seq), false)
 %!error se(2);
 %!error seq(3);
 

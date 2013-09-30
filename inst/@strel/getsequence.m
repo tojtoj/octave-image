@@ -26,18 +26,21 @@
 function se = getsequence (se)
 
   if (isempty (se.seq))
-    switch (se.shape)
-      case {"square", "cube", "hypercube", "rectangle", "hyperrectangle"}
-        nd = ndims (se.nhood);
-        for idx = 1:nd
-          vec_size      = ones (1, nd);
-          vec_size(idx) = size (se.nhood, idx);
-          se.seq{idx}   = strel ("arbitrary", true (vec_size));
-        endfor
-
-      otherwise
+    ## guess a square/cube/rectangle/hyperrectangle shape even if shape
+    ## is arbitrary. There's no need to decompose when it's very small
+    ## hence the no bother if numel > 15
+    if (se.flat && all (se.nhood(:)) && ! isvector (se.nhood) &&
+        numel (se.nhood) > 15)
+      nd = ndims (se.nhood);
+      se.seq = cell (nd, 1);
+      for idx = 1:nd
+        vec_size      = ones (1, nd);
+        vec_size(idx) = size (se.nhood, idx);
+        se.seq{idx}   = strel ("arbitrary", true (vec_size));
+      endfor
+    else
         se.seq{1,1} = se;
-    endswitch
+    endif
   endif
 
 endfunction

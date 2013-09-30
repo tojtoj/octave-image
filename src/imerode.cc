@@ -572,6 +572,17 @@ at indices @code{floor ([size(@var{SE})/2] + 1)}.\n\
 %!assert (imerode (logical (im), se), logical (out));
 %!assert (imerode (im, logical (se)), out);
 %!assert (imerode (logical (im), logical (se)), logical (out));
+%!
+%! # with an even-size SE
+%! se =  [0 0 0 1
+%!        0 1 0 0
+%!        0 1 1 1];
+%! out = [0 0 0 0 0 0 0
+%!        0 0 0 0 0 0 0
+%!        0 0 1 0 0 0 0
+%!        0 0 0 0 0 0 0
+%!        0 0 0 0 0 0 0];
+%!assert (imerode (im, se), out);
 
 ## normal usage for grayscale images
 %!shared a, domain, out
@@ -617,6 +628,23 @@ at indices @code{floor ([size(@var{SE})/2] + 1)}.\n\
 %!## Test for non-flat strel
 %!assert (imdilate (a, strel ("arbitrary", domain, ones (3)), "valid"), out +1);
 %!
+%! ## test while using SE that can be decomposed and an actual sequence
+%! domain = ones (5);
+%! out = [   2   1   1   1   1   1  16  11  11  11
+%!           2   1   1   1   1   1   1   1  11  11
+%!           2   1   1   1   1   1   1   1  11  11
+%!           2   1   1   1   1   1   1   1  10  10
+%!           2   1   1   1   1   1   1   1   4   4
+%!           2   2   2   1   1   1   1   1   4   4
+%!           2   2   2   2   2   3   3   4   4   4
+%!           9   4   3   3   3   3   3   3   3   3
+%!           9   4   4   4   4   4   4   3   3   3
+%!           9   4   4   4   4   4   7   3   3   3];
+%!assert (imerode (a, domain), out);
+%!assert (imerode (a, strel ("square", 5)), out);
+%!assert (imerode (a, getsequence (strel ("square", 5))), out);
+%!
+%! ## using a non-symmetric SE
 %! domain = [ 1 1 0
 %!            0 1 1
 %!            0 1 0];
