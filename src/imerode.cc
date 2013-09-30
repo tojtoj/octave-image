@@ -471,13 +471,14 @@ base_action (const std::string& func, const octave_value_list& args)
   if (error_state)
     return retval;
 
+  retval = args(0);
   for (octave_idx_type idx = 0; idx < octave_idx_type (strel_seq.size ()); idx++)
     {
       strel se = strel_seq[idx];
       if (func == "imerode")
-        retval = act_on_type<filter, true>  (args(0), se, shape);
+        retval = act_on_type<filter, true>  (retval, se, shape);
       else // must be dilation
-        retval = act_on_type<filter, false> (args(0), se, shape);
+        retval = act_on_type<filter, false> (retval, se, shape);
     }
 
   return retval;
@@ -596,6 +597,8 @@ at indices @code{floor ([size(@var{SE})/2] + 1)}.\n\
 %!          9    4    4    4   14   23    7    3];
 %!assert (imerode (a, domain, "valid"), out);
 %!assert (imerode (uint8 (a), domain, "valid"), uint8 (out));
+%!assert (imerode (uint8 (a), strel ("arbitrary", domain), "valid"), uint8 (out));
+%!assert (imerode (uint8 (a), strel ("square", 3), "valid"), uint8 (out));
 %!
 %!## Test for non-flat strel
 %!assert (imerode (a, strel ("arbitrary", domain, ones (3)), "valid"), out -1);
