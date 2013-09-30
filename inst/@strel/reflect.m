@@ -45,6 +45,26 @@ endfunction
 function se = rotate_strel (se)
   nhood  = getnhood (se);
   height = getheight (se);
-  rotate = @(x) reshape (x(end:-1:1), size (x));
-  se     = strel ("arbitrary", rotate (nhood), rotate (height));
+  if (se.flat)
+    se = strel ("arbitrary", rotate (nhood));
+  else
+    se = strel ("arbitrary", rotate (nhood), rotate (height));
+  endif
+endfunction
+
+function rot = rotate (ori)
+  rot = reshape (ori(end:-1:1), size (ori));
+
+  ## For Matlab compatibility:
+  ## Check if any of the sides has an even size. If so, we create a larger
+  ## matrix, all even sized, and place the rotated matrix on the top left
+  ## corner (and whatever top and left means for N dimensions)
+  if (any (mod (size (ori)+1, 2)))
+    ## get subcript indices of the elements that matter
+    ori_ind = find (ori);
+    [subs{1:ndims (ori)}] = ind2sub (size (ori), ori_ind);
+    rot = zeros ((floor (size (ori) /2) *2) +1, class (ori));
+    rot_ind = sub2ind (size (rot), subs{:});
+    rot(rot_ind) = ori(ori_ind);
+  endif
 endfunction
