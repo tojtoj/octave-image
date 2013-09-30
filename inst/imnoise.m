@@ -17,23 +17,27 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn  {Function File} {@var{B} =} imnoise (@var{A}, @var{type})
-## @deftypefnx {Function File} {@var{B} =} imnoise (@dots{}, @var{options})
+## @deftypefn  {Function File} {} imnoise (@var{A}, @var{type})
+## @deftypefnx {Function File} {} imnoise (@dots{}, @var{options})
 ## Add noise to image.
 ##
-## @deftypefnx {Function File} {@var{B} =} imnoise (@var{A}, "gaussian", @var{mean}, @var{variance})
+## @end deftypefn
+## @deftypefn {Function File} {} imnoise (@var{A}, "gaussian", @var{mean}, @var{variance})
 ## Additive gaussian noise with @var{mean} and @var{variance} defaulting to 0
 ## and 0.01.
 ##
-## @deftypefnx {Function File} {@var{B} =} imnoise (@var{A}, "poisson")
+## @end deftypefn
+## @deftypefn {Function File} {} imnoise (@var{A}, "poisson")
 ## Creates poisson noise in the image using the intensity value of each pixel as
 ## mean.
 ##
-## @deftypefnx {Function File} {@var{B} =} imnoise (@var{A}, "salt & pepper", @var{density})
+## @end deftypefn
+## @deftypefn {Function File} {} imnoise (@var{A}, "salt & pepper", @var{density})
 ## Create "salt and pepper"/"lost pixels" in @var{density}*100 percent of the
 ## image.  @var{density} defaults to 0.05.
 ##
-## @deftypefnx {Function File} {@var{B} =} imnoise (@var{A}, "speckle", @var{variance})
+## @end deftypefn
+## @deftypefn {Function File} {} imnoise (@var{A}, "speckle", @var{variance})
 ## Multiplicative gaussian noise with @var{B} = @var{A} + @var{A} * noise with
 ## mean 0 and @var{variance} defaulting to 0.04.
 ##

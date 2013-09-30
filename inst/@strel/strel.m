@@ -21,7 +21,8 @@
 ## The structuring element can have any type of shape as specified by
 ## @var{shape}, each one with its @var{parameters}.
 ##
-## @deftypefnx {Function File} {} strel ("arbitrary", @var{nhood})
+## @end deftypefn
+## @deftypefn  {Function File} {} strel ("arbitrary", @var{nhood})
 ## @deftypefnx {Function File} {} strel ("arbitrary", @var{nhood}, @var{height})
 ## Create arbitrary shaped structuring elements.
 ##
@@ -45,65 +46,77 @@
 ## @end group
 ## @end example
 ##
-## @deftypefnx {Function File} {} strel ("ball", @var{radius}, @var{height})
+## @end deftypefn
+## @deftypefn {Function File} {} strel ("ball", @var{radius}, @var{height})
 ## Create ball shaped @var{nonflat} structuring element.  @var{radius} must be a
 ## nonnegative integer that specifies the ray of a circle in X-Y plane.  @var{height}
 ## is a real number that specifies the height of the center of the circle.
 ##
-## @deftypefnx {Function File} {} strel ("cube", @var{edge})
+## @end deftypefn
+## @deftypefn {Function File} {} strel ("cube", @var{edge})
 ## Create cube shaped @var{flat} structuring element.  @var{edge} must be a
 ## positive integer that specifies the length of its edges.  This shape meant to
 ## perform morphology operations in volumes, see the square shape for 2
 ## dimensional images.
 ##
-## @deftypefnx {Function File} {} strel ("diamond", @var{radius})
+## @end deftypefn
+## @deftypefn {Function File} {} strel ("diamond", @var{radius})
 ## Create diamond shaped flat structuring element.  @var{radius} must be a
 ## positive integer.
 ##
-## @deftypefnx {Function File} {} strel ("disk", @var{radius})
+## @end deftypefn
+## @deftypefn {Function File} {} strel ("disk", @var{radius})
 ## Create disk shaped flat structuring element.  @var{radius} must be a positive
 ## integer.
 ##
-## @deftypefnx {Function File} {} strel ("hypercube", @var{n}, @var{edge})
+## @end deftypefn
+## @deftypefn {Function File} {} strel ("hypercube", @var{n}, @var{edge})
 ## Create @var{n} dimensional cube (n-cube) shaped @var{flat} structuring
 ## element.  @var{edge} must be a positive integer that specifies the length
 ## of its edges.
 ##
-## @deftypefnx {Function File} {} strel ("hyperrectangle", @var{dimensions})
+## @end deftypefn
+## @deftypefn {Function File} {} strel ("hyperrectangle", @var{dimensions})
 ## Create @var{n} dimensional hyperrectangle (or orthotope) shaped flat
 ## structuring element.  @var{dimensions} must be a vector of positive
 ## integers with its lengtht at each of the dimensions.
-
-## @deftypefnx {Function File} {} strel ("line", @var{len}, @var{deg})
+##
+## @end deftypefn
+## @deftypefn {Function File} {} strel ("line", @var{len}, @var{deg})
 ## Create line shaped flat structuring element.  @var{len} must be a positive
 ## real number.  @var{deg} must be a 1 or 2 elements real number, for a line in
 ## in 2D or 3D space.  The first element of @var{deg} is the angle from X-axis
 ## to X-Y projection of the line while the second is the angle from Z-axis to
 ## the line.
 ##
-## @deftypefnx {Function File} {} strel ("octagon", @var{apothem})
+## @end deftypefn
+## @deftypefn {Function File} {} strel ("octagon", @var{apothem})
 ## Create octagon shaped flat structuring element.  @var{apothem} must be a
 ## positive integer that specifies the distance from the origin to the sides of
 ## the octagon.
 ##
-## @deftypefnx {Function File} {} strel ("pair", @var{offset})
+## @end deftypefn
+## @deftypefn {Function File} {} strel ("pair", @var{offset})
 ## Create flat structuring element with two members.  One member is placed
 ## at the origin while the other is placed with @var{offset} in relation to the
 ## origin.  @var{offset} must then be a 2 element vector for the coordinates.
 ##
-## @deftypefnx {Function File} {} strel ("periodicline", @var{p}, @var{v})
+## @end deftypefn
+## @deftypefn {Function File} {} strel ("periodicline", @var{p}, @var{v})
 ## Create periodic line shaped flat structuring element.  A periodic line will
 ## be built with 2*@var{p}+1 points around the origin included. These points will
 ## be displaced in accordance with the offset @var{v} at distances: 1*@var{v},
 ## -1*@var{v}, 2*@var{v}, -2*@var{v}, ..., @var{p}*@var{v}, -@var{p}*@var{v}.
 ##   Therefore @var{v} must be a 2 element vector for the coordinates.
 ##
-## @deftypefnx {Function File} {} strel ("rectangle", @var{dimensions})
+## @end deftypefn
+## @deftypefn {Function File} {} strel ("rectangle", @var{dimensions})
 ## Create rectangular shaped flat structuring element.  @var{dimensions} must
 ## be a two element vector of positive integers with the number of rows and
 ## columns of the rectangle.
 ##
-## @deftypefnx {Function File} {} strel ("square", @var{edge})
+## @end deftypefn
+## @deftypefn {Function File} {} strel ("square", @var{edge})
 ## Create square shaped flat structuring element.  @var{edge} must be a positive
 ## integer that specifies the length of its edges.  For use in volumes, see the
 ## cube shape.
