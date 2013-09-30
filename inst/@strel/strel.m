@@ -190,6 +190,10 @@ function SE = strel (shape, varargin)
         error ("strel: HEIGHT must be a finite real matrix of the same size as NHOOD");
       endif
 
+      if (nnz (SE.height) == 0)
+        SE.flat = true;
+      endif
+
     case "ball"
       if (numel (varargin) == 2)
         radius = varargin{1};
