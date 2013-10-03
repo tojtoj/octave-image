@@ -16,17 +16,7 @@
 #include <octave/oct.h>
 #include <typeinfo>   // for an optimization using logical matrices
 #include <lo-ieee.h>  // gives us octave_Inf
-#include <oct-map.h>
-#include <parse.h>    // gives us feval so we can use the strel class
-#include <utility>    // for std::pair
-
-// This should probably be a class with methods that return the offsets
-// for a specific image size, and heights
-struct strel {
-  boolNDArray     nhood;
-  NDArray         height;
-  octave_idx_type nnz;
-};
+#include "strel.h"
 
 // How this works:
 //
@@ -109,48 +99,6 @@ pad_matrix (const T& mt, const boolNDArray& se,
 
   padded.insert (mt, shift);
   return padded;
-}
-
-// For any given point in the input matrix, calculates the memory offset for
-// all the others that will have an effect on the erosion and dilation with it.
-// How much we need to shift the input matrix to cover the nnz of the SE.
-// That is, how many elements away is each nnz of the SE, for any element
-// of the input matrix. Given a 10x10 input matrix (cumulative dimensions
-// of [10 100]), and a SE with:
-//   [1 0 0
-//    1 1 1
-//    0 0 1]
-// linear shift is [0 1 11 21 22]
-// The second element is the matching height for each.
-template<class P>
-static std::pair<Array<octave_idx_type>, Array<P> >
-se_values (const strel& se, const dim_vector& in_cum_size)
-{
-  const octave_idx_type ndims     = se.nhood.ndims ();
-  const octave_idx_type se_nnz    = se.nhood.nnz ();
-  const dim_vector se_size        = se.nhood.dims ();
-
-  // We start at subscript coordinates (se_sub) 0,0,...,0. We then use
-  // increment_index to get subscript indexes for all the elements in it.
-  // True elements in the SE get their linear distance calculated.
-  Array<octave_idx_type> se_sub (dim_vector (ndims, 1), 0);
-  Array<octave_idx_type> se_offsets (dim_vector (se_nnz, 1));
-  Array<P> se_heights (dim_vector (se_nnz, 1));
-
-  for (octave_idx_type found = 0; found < se_nnz;
-       boolNDArray::increment_index (se_sub, se_size))
-    {
-      if (se.nhood(se_sub))
-        {
-          se_heights(found) = se.height(se_sub);
-          se_offsets(found) = se_sub(0);
-          for (octave_idx_type dim = 1; dim < ndims; dim++)
-            se_offsets(found) += in_cum_size (dim-1) * se_sub(dim);
-          found++;
-        }
-    }
-
-  return std::pair<Array<octave_idx_type>, Array<P> > (se_offsets, se_heights);
 }
 
 // The general idea about the following is to look at each point for the
@@ -266,13 +214,15 @@ erode_nd (const P* in, const dim_vector& in_cd,
 
 template<class T, bool erosion>
 static octave_value
-erode (const T& im, const strel& se, const std::string& shape)
+erode (const T& im, const octave::image::strel& se, const std::string& shape)
 {
   typedef typename T::element_type P;
 
+  const boolNDArray nhood = se.get_nhood ();
+
   // If image is empty, return empty of the same class.
   // If se is empty, return the same image as input.
-  if (im.is_empty () || se.nhood.is_empty ())
+  if (im.is_empty () || nhood.is_empty ())
     return octave_value (im);
 
   // In the case of floating point, complex and integers numbers, both
@@ -281,21 +231,25 @@ erode (const T& im, const strel& se, const std::string& shape)
   // dilation, where we want false, we check the type.
   T padded;
   if (erosion)
-    padded = pad_matrix<T> (im, se.nhood, octave_Inf, shape);
+    padded = pad_matrix<T> (im, nhood, octave_Inf, shape);
   else
     if (typeid (P) == typeid (bool))
-      padded = pad_matrix<T> (im, se.nhood, false, shape);
+      padded = pad_matrix<T> (im, nhood, false, shape);
     else
-      padded = pad_matrix<T> (im, se.nhood, -octave_Inf, shape);
+      padded = pad_matrix<T> (im, nhood, -octave_Inf, shape);
   if (error_state)
     return octave_value ();
 
   const octave_idx_type ndims   = padded.ndims ();
-  const dim_vector nhood_size   = se.nhood.dims ().redim (ndims);
+  const dim_vector nhood_size   = nhood.dims ().redim (ndims);
   const dim_vector padded_size  = padded.dims ();
+
   const dim_vector cum_size = padded_size.cumulative ();
-  const std::pair<Array<octave_idx_type>, Array<P> > se_vals = se_values<P> (se, cum_size);
-  const bool flat = se_vals.second.nnz () == 0 ? true : false;
+  const Array<octave_idx_type> offsets = se.offsets (cum_size);
+
+  const Array<P> heights = se.true_heights<P> ();
+
+  const bool flat = se.flat ();
 
   if (typeid (P) == typeid (bool) && ! flat)
     {
@@ -311,9 +265,9 @@ erode (const T& im, const strel& se, const std::string& shape)
 
   // When there's only a single neighbor on the SE, then we will only shift
   // the matrix by its distance to the origin of the SE.
-  if (se.nnz == 1)
+  if (se.get_nnz () == 1)
     {
-      octave_idx_type ind = se.nhood.find (1)(0);
+      octave_idx_type ind = nhood.find (1)(0);
       Array<idx_vector> sub = ind2sub (nhood_size, idx_vector (ind));
 
       Array<idx_vector> ranges (dim_vector (ndims, 1));
@@ -337,12 +291,12 @@ erode (const T& im, const strel& se, const std::string& shape)
 
       if (flat)
         erode_nd<P, erosion, true> (padded.data (), cum_size, out.fortran_vec (),
-          out_size.cumulative (), out_size, se_vals.first.data (),
-          se_vals.second.data (), se.nnz, ndims -1);
+          out_size.cumulative (), out_size, offsets.data (), heights.data (),
+          offsets.numel (), ndims -1);
       else
         erode_nd<P, erosion, false> (padded.data (), cum_size, out.fortran_vec (),
-          out_size.cumulative (), out_size, se_vals.first.data (),
-          se_vals.second.data (), se.nnz, ndims -1);
+          out_size.cumulative (), out_size, offsets.data (), heights.data (),
+          offsets.numel (), ndims -1);
     }
   return octave_value (out);
 }
@@ -352,13 +306,13 @@ struct filter
 {
   template<class T, bool erosion>
   static octave_value
-  apply (const T& im, const strel& se, const std::string& shape)
+  apply (const T& im, const octave::image::strel& se, const std::string& shape)
   { return erode<T, erosion> (im, se, shape); }
 };
 
 template<class T, bool erosion> // if erosion is false, perform dilation
 static octave_value
-act_on_type (const octave_value& im, const strel& se, const std::string& shape)
+act_on_type (const octave_value& im, const octave::image::strel& se, const std::string& shape)
 {
   if (im.is_bool_matrix ())
     return T::template apply<boolNDArray, erosion> (im.bool_array_value (), se, shape);
@@ -392,62 +346,6 @@ act_on_type (const octave_value& im, const strel& se, const std::string& shape)
     return octave_value ();
 }
 
-// encapsulate dealing with the @strel class here
-static std::vector<strel>
-get_strel_seq (octave_value se, const std::string& func, bool reflect)
-{
-  std::vector<strel> strel_seq;
-
-  // If we don't have a strel object, then make one
-  if (se.class_name () != "strel")
-    {
-      octave_value_list strel_args (2);
-      strel_args(0) = "arbitrary";
-      strel_args(1) = se;
-      // We will let strel do the input check
-      se = feval ("strel", strel_args)(0);
-      if (error_state)
-        {
-          error ("%s: SE must be a strel object, or a matrix of 0's and 1's",
-                 func.c_str ());
-          return strel_seq;
-        }
-     }
-
-  // For some cases (such as imdilate), we may need it reflected
-  if (reflect)
-    se = feval ("reflect", se)(0);
-
-  const octave_value se_seq = feval ("getsequence", se)(0);
-  const octave_idx_type numel = feval ("numel", se_seq)(0).idx_type_value ();
-
-  // This is to emulate the strel_obj(idx) syntax in function form
-  static const char *fields[] = {"type", "subs", 0};
-  octave_scalar_map ref = octave_scalar_map (string_vector (fields));
-  ref.setfield ("type", octave_value ("()"));
-  octave_value_list subsref_args (2);
-  subsref_args(0) = se_seq;
-
-  for (octave_idx_type subs = 0; subs < numel; subs++)
-    {
-      // subs+1 because octave is index base 1
-      ref.setfield ("subs", octave_value (Cell (octave_value (subs+1))));
-      subsref_args(1) = ref;
-      // Equivalent to "se_elem = strel_obj(subs)"
-      const octave_value_list se_elem = feval ("subsref", subsref_args)(0);
-
-      strel elem;
-      elem.nhood  = feval ("getnhood",  se_elem)(0).bool_array_value ();
-      elem.height = feval ("getheight", se_elem)(0).array_value ();
-      elem.nnz    = elem.nhood.nnz ();
-      // We do not use @strel/isflat because it may have height only
-      // on false elements of the SE. We will check it later when
-      // inspecting the SE.
-      strel_seq.push_back (elem);
-    }
-  return strel_seq;
-}
-
 static octave_value
 base_action (const std::string& func, const octave_value_list& args)
 {
@@ -467,18 +365,23 @@ base_action (const std::string& func, const octave_value_list& args)
       return retval;
     }
 
-  const std::vector<strel> strel_seq = get_strel_seq (args(1), func, func == "imdilate");
+  octave::image::strel se (args(1));
   if (error_state)
-    return retval;
+    {
+      error ("%s: SE must be a strel object or matrix of 1's and 0's",
+             func.c_str ());
+      return retval;
+    }
+  if (func == "imdilate")
+    se = se.reflect ();
 
   retval = args(0);
-  for (octave_idx_type idx = 0; idx < octave_idx_type (strel_seq.size ()); idx++)
+  for (octave_idx_type idx = 0; idx < se.numel (); idx++)
     {
-      strel se = strel_seq[idx];
       if (func == "imerode")
-        retval = act_on_type<filter, true>  (retval, se, shape);
+        retval = act_on_type<filter, true>  (retval, se(idx), shape);
       else // must be dilation
-        retval = act_on_type<filter, false> (retval, se, shape);
+        retval = act_on_type<filter, false> (retval, se(idx), shape);
     }
 
   return retval;
@@ -583,6 +486,27 @@ at indices @code{floor ([size(@var{SE})/2] + 1)}.\n\
 %!        0 0 0 0 0 0 0
 %!        0 0 0 0 0 0 0];
 %!assert (imerode (im, se), out);
+%! out = [ 0 0 0 0 1 0 1
+%!        0 0 1 0 1 1 0
+%!        0 0 1 1 1 1 1
+%!        0 0 1 1 1 1 1
+%!        0 0 1 1 1 1 1];
+
+%!xtest
+%! im = [0 0 0 0 0 0 0
+%!       0 0 1 0 1 0 0
+%!       0 0 1 1 0 1 0
+%!       0 0 1 1 1 0 0
+%!       0 0 0 0 0 0 0];
+%! se =  [0 0 0 1
+%!        0 1 0 0
+%!        0 1 1 1];
+%! out = [ 0 0 0 0 1 0 1
+%!        0 0 1 0 1 1 0
+%!        0 0 1 1 1 1 1
+%!        0 0 1 1 1 1 1
+%!        0 0 1 1 1 1 1];
+%! assert (imdilate (im, se), out);
 
 ## normal usage for grayscale images
 %!shared a, domain, out

@@ -10,5 +10,8 @@ all: __spatial_filtering__.oct __bilateral__.oct __custom_gaussian_smoothing__.o
 bwlabeln.oct: bwlabeln.cc union-find.h++
 	CXXFLAGS='-g -O2 -std=c++0x -Wall' $(MKOCTFILE) $<
 
+imerode.oct: imerode.cc strel.cc
+	$(MKOCTFILE) $^ -o $@
+
 clean:
 	rm -f *.o octave-core core *.oct *~
