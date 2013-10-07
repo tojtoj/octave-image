@@ -17,6 +17,7 @@
 #include <typeinfo>   // for an optimization using logical matrices
 #include <lo-ieee.h>  // gives us octave_Inf
 #include "strel.h"
+using namespace octave::image;
 
 // How this works:
 //
@@ -59,45 +60,28 @@
 //        on the SE.
 template <class T>
 static T
-pad_matrix (const T& mt, const boolNDArray& se,
+pad_matrix (const T& mt, const strel& se,
             const double& padval, const std::string& shape)
 {
   // If the shape is valid, we can return the input matrix.
-  octave_idx_type pad_times;
   if (shape == "valid")
     return mt;
-  else if (shape == "same")
-    pad_times = 1;
-  else if (shape == "full")
-    pad_times = 2;
-  else
-    {
-      error ("invalid SHAPE");
-      error_state = 1;
-      return T ();
-    }
-  const octave_idx_type ndims = mt.ndims ();
-  const dim_vector mt_size    = mt.dims ();
-  const dim_vector se_size    = se.dims ().redim (ndims);
 
-  // The final size of the output matrix will be the size of the input
-  // matrix, plus the size of the SE, less its center. Consider a square SE
-  // at the corner of the input matrix. The origin (center) of the SE will be
-  // at coordinates (0,0) of the input matrix and we need enough padding for
-  // it. If the shape is "full", then we add the double.
-  dim_vector padded_size (mt_size);
-  for (octave_idx_type i = 0; i < ndims; i++)
-    padded_size(i) += (se_size(i) -1) * pad_times;
+  const octave_idx_type ndims = mt.ndims ();
+  const Array<octave_idx_type> pre_pad  = se.pre_pad  (ndims, shape);
+  const Array<octave_idx_type> post_pad = se.post_pad (ndims, shape);
+  if (error_state)
+    return T ();
+
+  dim_vector padded_size (mt.dims ());
+  for (octave_idx_type dim = 0; dim < ndims; dim++)
+    padded_size(dim) += pre_pad(dim) + post_pad(dim);
   T padded (padded_size, padval);
 
-  // How much should the input matrix be shifted. Basically, what's the
-  // coordinates in the padded matrix where we will insert our original
-  // input matrix.
-  Array<octave_idx_type> shift (dim_vector (1, ndims));
-  for (octave_idx_type i = 0; i < ndims; i++)
-    shift(i) = (floor (float (se_size(i) - 1) / 2)) * pad_times;
+  // Ammount of pre_pad is also how much the original must be shifted
+  // when inserting into the new padded matrix.
+  padded.insert (mt, pre_pad);
 
-  padded.insert (mt, shift);
   return padded;
 }
 
@@ -214,7 +198,7 @@ erode_nd (const P* in, const dim_vector& in_cd,
 
 template<class T, bool erosion>
 static octave_value
-erode (const T& im, const octave::image::strel& se, const std::string& shape)
+erode (const T& im, const strel& se, const std::string& shape)
 {
   typedef typename T::element_type P;
 
@@ -231,12 +215,12 @@ erode (const T& im, const octave::image::strel& se, const std::string& shape)
   // dilation, where we want false, we check the type.
   T padded;
   if (erosion)
-    padded = pad_matrix<T> (im, nhood, octave_Inf, shape);
+    padded = pad_matrix<T> (im, se, octave_Inf, shape);
   else
     if (typeid (P) == typeid (bool))
-      padded = pad_matrix<T> (im, nhood, false, shape);
+      padded = pad_matrix<T> (im, se, false, shape);
     else
-      padded = pad_matrix<T> (im, nhood, -octave_Inf, shape);
+      padded = pad_matrix<T> (im, se, -octave_Inf, shape);
   if (error_state)
     return octave_value ();
 
@@ -306,13 +290,13 @@ struct filter
 {
   template<class T, bool erosion>
   static octave_value
-  apply (const T& im, const octave::image::strel& se, const std::string& shape)
+  apply (const T& im, const strel& se, const std::string& shape)
   { return erode<T, erosion> (im, se, shape); }
 };
 
 template<class T, bool erosion> // if erosion is false, perform dilation
 static octave_value
-act_on_type (const octave_value& im, const octave::image::strel& se, const std::string& shape)
+act_on_type (const octave_value& im, const strel& se, const std::string& shape)
 {
   if (im.is_bool_matrix ())
     return T::template apply<boolNDArray, erosion> (im.bool_array_value (), se, shape);
@@ -365,7 +349,7 @@ base_action (const std::string& func, const octave_value_list& args)
       return retval;
     }
 
-  octave::image::strel se (args(1));
+  strel se (args(1));
   if (error_state)
     {
       error ("%s: SE must be a strel object or matrix of 1's and 0's",
@@ -491,22 +475,7 @@ at indices @code{floor ([size(@var{SE})/2] + 1)}.\n\
 %!        0 0 1 1 1 1 1
 %!        0 0 1 1 1 1 1
 %!        0 0 1 1 1 1 1];
-
-%!xtest
-%! im = [0 0 0 0 0 0 0
-%!       0 0 1 0 1 0 0
-%!       0 0 1 1 0 1 0
-%!       0 0 1 1 1 0 0
-%!       0 0 0 0 0 0 0];
-%! se =  [0 0 0 1
-%!        0 1 0 0
-%!        0 1 1 1];
-%! out = [ 0 0 0 0 1 0 1
-%!        0 0 1 0 1 1 0
-%!        0 0 1 1 1 1 1
-%!        0 0 1 1 1 1 1
-%!        0 0 1 1 1 1 1];
-%! assert (imdilate (im, se), out);
+%!assert (imdilate (im, se), out);
 
 ## normal usage for grayscale images
 %!shared a, domain, out

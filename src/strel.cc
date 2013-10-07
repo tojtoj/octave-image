@@ -220,6 +220,79 @@ octave::image::strel::offsets (const dim_vector& cum_size) const
   return offsets;
 }
 
+// The final size of the output matrix will be the size of the input
+// matrix, plus the size of the SE, less its center. Consider a square SE
+// at the corner of the input matrix. The origin (center) of the SE will be
+// at coordinates (0,0) of the input matrix and we need enough padding for
+// it. If the shape is "full", then we add the double.
+Array<octave_idx_type>
+octave::image::strel::pre_pad (const octave_idx_type& mt_ndims,
+                               const std::string& shape) const
+{
+  Array<octave_idx_type> pad (dim_vector (mt_ndims, 1), 0);
+
+  octave_idx_type pad_times;
+  if (shape == "valid")
+    return pad;
+  else if (shape == "same")
+    pad_times = 1;
+  else if (shape == "full")
+    pad_times = 2;
+  else
+    {
+      error ("invalid SHAPE");
+      error_state = 1;
+      return Array<octave_idx_type> ();
+    }
+
+  Array<octave_idx_type> resized_origin (origin);
+  dim_vector             resized_size (size);
+  if (ndims < mt_ndims)
+    {
+      resized_origin.resize (dim_vector (mt_ndims, 1), 0);
+      resized_size.redim (mt_ndims);
+    }
+
+  for (octave_idx_type dim = 0; dim < mt_ndims; dim++)
+    pad(dim) = resized_origin(dim) * pad_times;
+
+  return pad;
+}
+
+Array<octave_idx_type>
+octave::image::strel::post_pad (const octave_idx_type& mt_ndims,
+                                const std::string& shape) const
+{
+  Array<octave_idx_type> pad (dim_vector (mt_ndims, 1), 0);
+
+  octave_idx_type pad_times;
+  if (shape == "valid")
+    return pad;
+  else if (shape == "same")
+    pad_times = 1;
+  else if (shape == "full")
+    pad_times = 2;
+  else
+    {
+      error ("invalid SHAPE");
+      error_state = 1;
+      return Array<octave_idx_type> ();
+    }
+
+  Array<octave_idx_type> resized_origin (origin);
+  dim_vector             resized_size (size);
+  if (ndims < mt_ndims)
+    {
+      resized_origin.resize (dim_vector (mt_ndims, 1), 0);
+      resized_size.redim (mt_ndims);
+    }
+
+  for (octave_idx_type dim = 0; dim < mt_ndims; dim++)
+    pad(dim) = (resized_size(dim) - resized_origin(dim) -1) * pad_times;
+
+  return pad;
+}
+
 void
 octave::image::strel::ini_ctor ()
 {

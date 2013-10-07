@@ -18,6 +18,20 @@
 // on purpose. For example, the reflect method behaves kinda weird for
 // matlab compatibility. In here we try to make a bit more sense.
 
+// An important thing about this class is how the origin (defaults to
+// center coordinates which can have different interpretations when
+// sides are of even length) moves when it's reflected. Consider the
+// following (x is the origin)
+//
+//  o o o                   o o o
+//  o x o  -- reflect -->   o x o
+//  o o o                   o o o
+//
+//  o o o o                   o o o o
+//  o o x o  -- reflect -->   o x o o
+//  o o o o                   o o o o
+
+
 #ifndef OCTAVE_IMAGE_STREL
 #define OCTAVE_IMAGE_STREL
 
@@ -50,7 +64,9 @@ namespace octave
         // set origin of the SE to specific coordinates
         void set_origin (const Array<octave_idx_type>& sub);
 
-        // reflect the SE (rotates is 180 degrees in all dimensions)
+        // reflect the SE (rotates is 180 degrees in all dimensions).
+        // Note that when rotating it, the origin coordinates move with it
+        // (this is by design see ratinoal on top of this file).
         strel reflect (void) const;
 
         // given a matrix with a specific cumulative size, what's the offset
@@ -62,6 +78,11 @@ namespace octave
         // as the one returned by offsets).
         template<class P>
         Array<P> true_heights (void) const;
+
+        Array<octave_idx_type> pre_pad  (const octave_idx_type& mt_ndims,
+                                         const std::string& shape) const;
+        Array<octave_idx_type> post_pad (const octave_idx_type& mt_ndims,
+                                         const std::string& shape) const;
 
       private:
         boolNDArray             nhood;
