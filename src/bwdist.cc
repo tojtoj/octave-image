@@ -485,7 +485,7 @@ Currently, only 2D images are supported.\n\
       error ("bwdist: METHOD must be a string");
       return retval;
     }
-  for (int q = 0; q < method.length (); q++)
+  for (octave_idx_type q = 0; q < octave_idx_type (method.length ()); q++)
     method[q] = tolower (method[q]);
 
   if (method.length () <= 2) {
