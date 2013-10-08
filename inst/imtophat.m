@@ -1,5 +1,5 @@
 ## Copyright (C) 2005 Carvalho-Mariel
-## Copyright (C) 2010, 2011 Carnë Draug <carandraug+dev@gmail.com>
+## Copyright (C) 2010-2013 Carnë Draug <carandraug@octave.org>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -28,15 +28,11 @@
 ## @seealso{imerode, imdilate, imopen, imclose, imbothat, mmgradm}
 ## @end deftypefn
 
-function retval = imtophat (im, se, trans)
+function retval = imtophat (im, se)
 
   ## Checkinput
-  if (nargin < 2 || nargin > 3)
-    print_usage();
-  elseif (nargin == 2)
-    trans = "white";
-  elseif (nargin == 3 && ischar (trans))
-    warning ("Use of the 'trans' argument in imtophat to specify a closing or opening top-hat transform has been deprecated in favor of using the functions 'imtophat' or 'imbothat'. This option will be removed from future versions of the 'imtophat' function");
+  if (nargin != 2)
+    print_usage ();
   endif
   if (!ismatrix(im) || !isreal(im))
     error("imtophat: first input argument must be a real matrix");
@@ -44,24 +40,16 @@ function retval = imtophat (im, se, trans)
     error("imtophat: second input argument must be a real matrix");
   elseif ( !strcmp(class(im), class(se)) )
     error("imtophat: image and structuring element must have the same class");
-  elseif (!ischar (trans))
-    error("imtophat: third input argument must be a string with 'white', 'open, 'black', or 'close'");
   endif
 
   ## Perform filtering
   ## Note that in case that the transform is to applied to a logical image,
   ## subtraction must be handled in a different way (x & !y) instead of (x - y)
   ## or it will return a double precision matrix
-  if ( strcmpi(trans, "white") || strcmpi(trans, "open") )
-    if (islogical(im))
-      retval = im & !imopen(im,se);
-    else
-      retval = im - imopen(im, se);
-    endif
-  elseif ( strcmpi(trans, "black") || strcmpi(trans, "close") )
-    retval = imbothat (im, se);
+  if (islogical(im))
+    retval = im & !imopen(im,se);
   else
-    error ("Unexpected type of top-hat transform");
+    retval = im - imopen(im, se);
   endif
 
 endfunction

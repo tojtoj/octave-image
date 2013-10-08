@@ -98,6 +98,9 @@
     the class of the distance matrix has changed to single, and indexes an
     uint dependent on the matrix size.
 
+ ** The transform option of imtophat has been removed (it was deprecated
+    in version 2.0.0) in favour of using imbothat.
+
  Summary of important user-visible changes for image 2.0.0 (2012/11/08):
 -------------------------------------------------------------------------
 
