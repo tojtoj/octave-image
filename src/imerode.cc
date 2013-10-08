@@ -196,9 +196,9 @@ erode_nd (const P* in, const dim_vector& in_cd,
   OCTAVE_QUIT;
 }
 
-template<class T, bool erosion>
+template<class T>
 static octave_value
-erode (const T& im, const strel& se, const std::string& shape)
+erode (const T& im, const strel& se, const std::string& shape, const bool& erosion)
 {
   typedef typename T::element_type P;
 
@@ -274,64 +274,30 @@ erode (const T& im, const strel& se, const std::string& shape)
           out = T (out_size, -octave_Inf);
 
       if (flat)
-        erode_nd<P, erosion, true> (padded.data (), cum_size, out.fortran_vec (),
-          out_size.cumulative (), out_size, offsets.data (), heights.data (),
-          offsets.numel (), ndims -1);
+        if (erosion)
+          erode_nd<P, true, true> (padded.data (), cum_size, out.fortran_vec (),
+            out_size.cumulative (), out_size, offsets.data (), heights.data (),
+            offsets.numel (), ndims -1);
+        else
+          erode_nd<P, false, true> (padded.data (), cum_size, out.fortran_vec (),
+            out_size.cumulative (), out_size, offsets.data (), heights.data (),
+            offsets.numel (), ndims -1);
+
       else
-        erode_nd<P, erosion, false> (padded.data (), cum_size, out.fortran_vec (),
-          out_size.cumulative (), out_size, offsets.data (), heights.data (),
-          offsets.numel (), ndims -1);
+        if (erosion)
+          erode_nd<P, true, false> (padded.data (), cum_size, out.fortran_vec (),
+            out_size.cumulative (), out_size, offsets.data (), heights.data (),
+            offsets.numel (), ndims -1);
+        else
+          erode_nd<P, false, false> (padded.data (), cum_size, out.fortran_vec (),
+            out_size.cumulative (), out_size, offsets.data (), heights.data (),
+            offsets.numel (), ndims -1);
     }
   return octave_value (out);
 }
 
-// Some template magic which may come in handy if we get other functions later
-struct filter
-{
-  template<class T, bool erosion>
-  static octave_value
-  apply (const T& im, const strel& se, const std::string& shape)
-  { return erode<T, erosion> (im, se, shape); }
-};
-
-template<class T, bool erosion> // if erosion is false, perform dilation
 static octave_value
-act_on_type (const octave_value& im, const strel& se, const std::string& shape)
-{
-  if (im.is_bool_matrix ())
-    return T::template apply<boolNDArray, erosion> (im.bool_array_value (), se, shape);
-  else if (im.is_int8_type ())
-    return T::template apply<int8NDArray, erosion> (im.int8_array_value (), se, shape);
-  else if (im.is_int16_type ())
-    return T::template apply<int16NDArray, erosion> (im.int16_array_value (), se, shape);
-  else if (im.is_int32_type ())
-    return T::template apply<int32NDArray, erosion> (im.int32_array_value (), se, shape);
-  else if (im.is_int64_type ())
-    return T::template apply<int64NDArray, erosion> (im.int64_array_value (), se, shape);
-  else if (im.is_uint8_type ())
-    return T::template apply<uint8NDArray, erosion> (im.uint8_array_value (), se, shape);
-  else if (im.is_uint16_type ())
-    return T::template apply<uint16NDArray, erosion> (im.uint16_array_value (), se, shape);
-  else if (im.is_uint32_type ())
-    return T::template apply<uint32NDArray, erosion> (im.uint32_array_value (), se, shape);
-  else if (im.is_uint64_type ())
-    return T::template apply<uint64NDArray, erosion> (im.uint64_array_value (), se, shape);
-  else if (im.is_real_type ())
-    if (im.is_single_type ())
-      return T::template apply<FloatNDArray, erosion> (im.float_array_value (), se, shape);
-    else // must be double
-      return T::template apply<NDArray, erosion> (im.array_value (), se, shape);
-  else if (im.is_complex_type ())
-    if (im.is_single_type ())
-      return T::template apply<FloatComplexNDArray, erosion> (im.float_complex_array_value (), se, shape);
-    else // must be double
-      return T::template apply<ComplexNDArray, erosion> (im.complex_array_value (), se, shape);
-  else
-    return octave_value ();
-}
-
-static octave_value
-base_action (const std::string& func, const octave_value_list& args)
+base_action (const std::string& func, const bool& erosion, const octave_value_list& args)
 {
   octave_value retval;
   const octave_idx_type nargin = args.length ();
@@ -356,19 +322,46 @@ base_action (const std::string& func, const octave_value_list& args)
              func.c_str ());
       return retval;
     }
-  if (func == "imdilate")
+  if (! erosion) // must be dilation, then get the se reflection
     se = se.reflect ();
 
-  retval = args(0);
+  octave_value im = args(0);
   for (octave_idx_type idx = 0; idx < se.numel (); idx++)
     {
-      if (func == "imerode")
-        retval = act_on_type<filter, true>  (retval, se(idx), shape);
-      else // must be dilation
-        retval = act_on_type<filter, false> (retval, se(idx), shape);
+      const strel se_elem = se(idx);
+      if (im.is_bool_matrix ())
+        im = erode<boolNDArray> (im.bool_array_value (), se_elem, shape, erosion);
+      else if (im.is_int8_type ())
+        im = erode<int8NDArray> (im.int8_array_value (), se_elem, shape, erosion);
+      else if (im.is_int16_type ())
+        im = erode<int16NDArray> (im.int16_array_value (), se_elem, shape, erosion);
+      else if (im.is_int32_type ())
+        im = erode<int32NDArray> (im.int32_array_value (), se_elem, shape, erosion);
+      else if (im.is_int64_type ())
+        im = erode<int64NDArray> (im.int64_array_value (), se_elem, shape, erosion);
+      else if (im.is_uint8_type ())
+        im = erode<uint8NDArray> (im.uint8_array_value (), se_elem, shape, erosion);
+      else if (im.is_uint16_type ())
+        im = erode<uint16NDArray> (im.uint16_array_value (), se_elem, shape, erosion);
+      else if (im.is_uint32_type ())
+        im = erode<uint32NDArray> (im.uint32_array_value (), se_elem, shape, erosion);
+      else if (im.is_uint64_type ())
+        im = erode<uint64NDArray> (im.uint64_array_value (), se_elem, shape, erosion);
+      else if (im.is_real_type ())
+        if (im.is_single_type ())
+          im = erode<FloatNDArray> (im.float_array_value (), se_elem, shape, erosion);
+        else // must be double
+          im = erode<NDArray> (im.array_value (), se_elem, shape, erosion);
+      else if (im.is_complex_type ())
+        if (im.is_single_type ())
+          im = erode<FloatComplexNDArray> (im.float_complex_array_value (), se_elem, shape, erosion);
+        else // must be double
+          im = erode<ComplexNDArray> (im.complex_array_value (), se_elem, shape, erosion);
+      else
+        im = octave_value ();
     }
 
-  return retval;
+  return im;
 }
 
 DEFUN_DLD(imerode, args, , "\
@@ -410,7 +403,7 @@ at indices @code{floor ([size(@var{SE})/2] + 1)}.\n\
 @seealso{imdilate, imopen, imclose, strel}\n\
 @end deftypefn")
 {
-  return base_action ("imerode", args);
+  return base_action ("imerode", true, args);
 }
 
 /*
@@ -708,7 +701,7 @@ at indices @code{floor ([size(@var{SE})/2] + 1)}.\n\
 @seealso{imerode, imopen, imclose}\n\
 @end deftypefn")
 {
-  return base_action ("imdilate", args);
+  return base_action ("imdilate", false, args);
 }
 
 /*
