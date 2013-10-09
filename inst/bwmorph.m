@@ -1,4 +1,5 @@
 ## Copyright (C) 2004 Josep Mones i Teixidor <jmones@puntbarra.com>
+## Copyright (C) 2013 Carnë Draug <carandraug@octave.org>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -14,80 +15,79 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {@var{BW2} =} bwmorph (@var{BW}, @var{operation})
-## @deftypefnx {Function File} {@var{BW2} =} bwmorph (@var{BW}, @var{operation}, @var{n})
-## Perform a morphological operation on a binary image.
+## @deftypefn  {Function File} {} bwmorph (@var{bw}, @var{operation})
+## @deftypefnx {Function File} {} bwmorph (@var{bw}, @var{operation}, @var{n})
+## Perform morphological operation on binary image.
 ##
-## BW2=bwmorph(BW,operation) performs a morphological operation
-## specified by @var{operation} on binary image @var{BW}. All possible
-## operations and their meaning are specified in a table below.
+## For a binary image @var{bw}, performs the morphological @var{operation},
+## @var{n} times. All possible values of @var{operation} are listed on the
+## table below. By default, @var{n} is 1.  If @var{n} is @code{Inf}, the
+## operation is continually performed until it no longer changes the image.
 ##
-## BW2=bwmorph(BW,operation,n) performs a morphological operation
-## @var{n} times. Keep in mind that it has no sense to apply some
-## operations more than once, since some of them return the same result
-## regardless how many iterations we request. Those return a warning if
-## are called with n>1 and they compute the result for n=1.
 ##
-## @var{n}>1 is actually used for the following operations: diag,
-## dilate, erode, majority, shrink, skel, spur, thicken and thin.
+## Note that the output will always be of class logical, independently of
+## the class of @var{bw}.
 ##
-## @table @code
-## @item 'bothat'
+## @table @samp
+## @item bothat
 ## Performs a bottom hat operation, a closing operation (which is a
 ## dilation followed by an erosion) and finally substracts the original
-## image.
+## image (see @code{imbothat}).
 ##
-## @item 'bridge'
+## @item bridge
 ## Performs a bridge operation. Sets a pixel to 1 if it has two nonzero
 ## neighbours which are not connected, so it "bridges" them. There are
 ## 119 3-by-3 patterns which trigger setting a pixel to 1.
 ##
-## @item 'clean'
+## @item clean
 ## Performs an isolated pixel remove operation. Sets a pixel to 0 if all
 ## of its eight-connected neighbours are 0.
 ##
-## @item 'close'
+## @item close
 ## Performs closing operation, which is a dilation followed by erosion.
-## It uses a ones(3) matrix as structuring element for both operations.
+## It uses a ones(3) matrix as structuring element for both operations
+## (see @code{imclose}).
 ##
-## @item 'diag'
+## @item diag
 ## Performs a diagonal fill operation. Sets a pixel to 1 if that
 ## eliminates eight-connectivity of the background.
 ##
-## @item 'dilate'
-## Performs a dilation operation. It uses ones(3) as structuring element.
+## @item dilate
+## Performs a dilation operation. It uses ones(3) as structuring element
+## (see @code{imdilate}).
 ##
-## @item 'erode'
-## Performs an erosion operation. It uses ones(3) as structuring element.
+## @item erode
+## Performs an erosion operation. It uses ones(3) as structuring element
+## (see @code{imerode}).
 ##
-## @item 'fill'
+## @item fill
 ## Performs a interior fill operation. Sets a pixel to 1 if all
 ## four-connected pixels are 1.
 ##
-## @item 'hbreak'
+## @item hbreak
 ## Performs a H-break operation. Breaks (sets to 0) pixels that are
 ## H-connected.
 ##
-## @item 'majority'
+## @item majority
 ## Performs a majority black operation. Sets a pixel to 1 if five
 ## or more pixels in a 3-by-3 window are 1. If not it is set to 0.
 ##
-## @item 'open'
+## @item open
 ## Performs an opening operation, which is an erosion followed by a
-## dilation. It uses ones(3) as structuring element.
+## dilation. It uses ones(3) as structuring element (see @code{imopen}).
 ##
-## @item 'remove'
+## @item remove
 ## Performs a iterior pixel remove operation. Sets a pixel to 0 if 
 ## all of its four-connected neighbours are 1.
 ##
-## @item 'shrink'
+## @item shrink
 ## Performs a shrink operation. Sets pixels to 0 such that an object
 ## without holes erodes to a single pixel (set to 1) at or near its
 ## center of mass. An object with holes erodes to a connected ring lying
 ## midway between each hole and its nearest outer boundary. It preserves
 ## Euler number.
 ##
-## @item 'skel'
+## @item skel
 ## Performs a skeletonization operation. It calculates a "median axis
 ## skeleton" so that points of this skeleton are at the same distance of
 ## its nearby borders. It preserver Euler number. Please read
@@ -96,7 +96,7 @@
 ## It uses the same algorithm as skel-pratt but this could change for
 ## compatibility in the future.
 ##
-## @item 'skel-lantuejol'
+## @item skel-lantuejol
 ## Performs a skeletonization operation as described in Gonzalez & Woods
 ## "Digital Image Processing" pp 538-540. The text references Lantuejoul
 ## as authour of this algorithm.
@@ -109,21 +109,21 @@
 ## @var{n} times or number of iterations specified in algorithm
 ## description. It's most useful to run this algorithm with @code{n=Inf}.
 ##
-## @item 'skel-pratt'
+## @item skel-pratt
 ## Performs a skeletonization operation as described by William K. Pratt
 ## in "Digital Image Processing".
 ##
-## @item 'spur'
+## @item spur
 ## Performs a remove spur operation. It sets pixel to 0 if it has only
 ## one eight-connected pixel in its neighbourhood.
 ##
-## @item 'thicken'
+## @item thicken
 ## Performs a thickening operation. This operation "thickens" objects
 ## avoiding their fusion. Its implemented as a thinning of the
 ## background. That is, thinning on negated image. Finally a diagonal
 ## fill operation is performed to avoid "eight-connecting" objects.
 ##
-## @item 'thin'
+## @item thin
 ## Performs a thinning operation. When n=Inf, thinning sets pixels to 0
 ## such that an object without holes is converted to a stroke
 ## equidistant from its nearest outer boundaries. If the object has
@@ -132,10 +132,10 @@
 ## without holes to a single pixels and thin to a stroke. It preserves
 ## Euler number.
 ##
-## @item 'tophat'
+## @item tophat
 ## Performs a top hat operation, a opening operation (which is an
 ## erosion followed by a dilation) and finally substracts the original
-## image.
+## image (see @code{imtophat}).
 ## @end table
 ##
 ## Some useful concepts to understant operators:
@@ -161,11 +161,6 @@
 ## 
 ## @strong{Compatibility notes:}
 ## @table @code
-## @item 'fill'
-## Checking MATLAB behaviour is needed because its documentation doesn't
-## make clear if it creates a black pixel if all eight-connected pixels
-## are black or if four-connected suffice (as we do currently following
-## Pratt's book).
 ## @item 'skel'
 ## Algorithm used here is described in Pratt's book. When applying it to
 ## the "circles" image in MATLAB documentation, results are not the
@@ -187,219 +182,215 @@
 ## @seealso{imdilate, imerode, imtophat, imbothat, makelut, applylut}
 ## @end deftypefn
 
-## TODO: As soon as Octave doesn't segfault when assigning values to a
-## TODO: bool matrix, remove all conversions from lut to logical and
-## TODO: just create it as a logical from the beginning.
-
-## TODO: n behaviour should be tested in all cases for compatibility.
-
-function BW2 = bwmorph (BW, operation, n = 1)
-  if(nargin<2 || nargin>3)
-    print_usage;
-  elseif(n<0)
-    error("bwmorph: n should be > 0");
-  elseif(n==0) ## we'll just return the same matrix (check this!)
-    BW2=BW;
+function bw2 = bwmorph (bw, operation, n = 1)
+  if (nargin < 2 || nargin > 3)
+    print_usage ();
+  elseif (! ismatrix (bw) || ! (isbool (bw) || isnumeric (bw)))
+    ## we can't use isbw because we must accept anything numeric or boolean
+    ## which will then be converted into boolean anyway.
+    error ("bwmorph: BW must be a binary image");
+  elseif (! ischar (operation))
+    error ("bwmorph: OPERATION must be a string");
+  elseif (! isnumeric (n) || ! isscalar (n))
+    error ("bwmorph: N must be a scalar number");
   endif
 
-  ## post processing command
-  postcmd="";
-    
-  switch(operation)
-    case('bothat')
-      se  = ones(3);
-      BW2 = imbothat (BW, se);
-      if(n>1)
-        ## TODO: check if ignoring n>1 is ok. Should I just ignore it
-        ## TODO: without a warning?
-        disp("WARNING: n>1 has no sense here. Using n=1. Please fill a bug if you think this behaviour is not correct");
-      endif
-      return;
+  ## For undocumented Matlab compatibility
+  if (n < 0)
+    n = 1;
+  endif
 
-    case('bridge')
+  ## Matlab will accepts anything numeric or boolean. We can at least
+  ## issue a warning.
+  if (! isbw (bw, "non-logical"))
+    warning ("octave:image:non-bw-conversion",
+             "bwmorph: converting non binary image to binary");
+  endif
+
+  ## Performing on logical matrices is faster. We could do this and
+  ## then revert back to its original class but will NOT for Matlab
+  ## compatibility, who always returns a logical matrix.
+  bw = logical (bw);
+
+  ## Some operations have no effect after being applied the first time.
+  ## Those will set this to true and later set N to 1 (only exception is
+  ## if N is set to 0 but even then we can't skip since we will display
+  ## the image or return it depending on nargout)
+  loop_once = false;
+
+  post_morph = []; # post processing command (only if needed)
+
+  switch (tolower (operation))
+    case "bothat"
+      loop_once = true;
+      se  = strel ("square", 3);
+      morph = @(x) imbothat (x, se);
+
+#    case "branchpoints"
+#      ## not implemented
+
+    case "bridge"
+      loop_once = true;
       ## see __bridge_lut_fun__ for rules
-      ## lut=makelut("__bridge_lut_fun__",3);
-      lut=logical([0;0;0;0;0;0;0;0;0;0;0;0;1;1;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;1;0;0;0;1;0;0;1;1;0;0;1;1;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;0;1;1;1;1;1;1;0;0;0;0;1;1;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   1;1;1;1;1;1;1;1;1;1;0;0;1;1;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;1;1;1;1;1;1;1;0;0;0;0;1;1;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;1;0;0;0;1;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;1;1;1;1;1;1;1;0;0;0;0;1;1;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;1;0;0;0;1;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;1;1;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;1;0;0;0;1;0;0;1;1;0;0;1;1;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   1;1;1;1;1;1;1;1;1;1;0;0;1;1;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;1;1;1;1;1;1;1;0;0;0;0;1;1;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;1;0;0;0;1;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;1;1;1;1;1;1;1;0;0;0;0;1;1;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;1;0;0;0;1;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1]);
-      BW2=applylut(BW, lut);
-      if(n>1)
-        ## TODO: check if ignoring n>1 is ok.
-        disp("WARNING: n>1 has no sense here. Using n=1. Please fill a bug if you think this behaviour is not correct");
-      endif
-      return;
+      ## lut = makelut ("__bridge_lut_fun__", 3);
+      lut = logical ([0;0;0;0;0;0;0;0;0;0;0;0;1;1;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;1;0;0;0;1;0;0;1;1;0;0;1;1;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;0;1;1;1;1;1;1;0;0;0;0;1;1;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      1;1;1;1;1;1;1;1;1;1;0;0;1;1;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;1;1;1;1;1;1;1;0;0;0;0;1;1;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;1;0;0;0;1;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;1;1;1;1;1;1;1;0;0;0;0;1;1;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;1;0;0;0;1;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;1;1;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;1;0;0;0;1;0;0;1;1;0;0;1;1;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      1;1;1;1;1;1;1;1;1;1;0;0;1;1;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;1;1;1;1;1;1;1;0;0;0;0;1;1;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;1;0;0;0;1;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;1;1;1;1;1;1;1;0;0;0;0;1;1;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;1;0;0;0;1;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1]);
+      morph = @(x) applylut (x, lut);
 
-    case('clean')
-      ## BW(j,k)=X&&(X0||X1||...||X7)
-      ## lut=makelut(inline("x(2,2)&&any((x.*[1,1,1;1,0,1;1,1,1])(:))","x"),3);
+    case "clean"
+      loop_once = true;
+      ## BW(j,k) = X && (X0||X1||...||X7)
+      ## lut = makelut (inline ("x(2,2)&&any((x.*[1,1,1;1,0,1;1,1,1])(:))", "x"), 3);
       ## which is the same as...
-      lut=repmat([zeros(16,1);ones(16,1)],16,1);  ## identity
-      lut(17)=0;                                  ## isolated to 0
-      ## I'd prefer to create lut directly as a logical, but assigning a
-      ## value to a logical segfaults 2.1.57. We'll change it as soon as
-      ## it works.
-      BW2=applylut(BW, logical(lut));
-      if(n>1)
-        ## TODO: check if ignoring n>1 is ok.
-        disp("WARNING: n>1 has no sense here. Using n=1. Please fill a bug if you think this behaviour is not correct");
-      endif
-      return;
+      lut = repmat ([false(16, 1); true(16, 1)], 16, 1); # identity
+      lut(17) = false; # isolated to 0
+      morph = @(x) applylut (x, lut);
 
-    case('close')
-      se  = ones(3);
-      BW2 = imclose (BW, se);
-      if(n>1)
-        ## TODO: check if ignoring n>1 is ok.
-        disp("WARNING: n>1 has no sense here. Using n=1. Please fill a bug if you think this behaviour is not correct");
-      endif
-      return;
+    case "close"
+      loop_once = true;
+      se = strel ("square", 3);
+      morph = @(x) imclose (x, se);
 
-    case('diag')
+    case "diag"
       ## see __diagonal_fill_lut_fun__ for rules
-      ## lut=makelut("__diagonal_fill_lut_fun__",3);
-      lut=logical([0;0;0;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;0;1;1;0;0;0;0;0;0;1;1;0;0;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;0;0;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;0;1;1;0;0;0;0;0;0;1;1;0;0;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;0;0;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;0;0;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;0;1;1;0;0;0;0;0;0;1;1;0;0;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;0;0;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;0;1;1;0;0;0;0;0;0;1;1;0;0;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;0;1;1;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;0;0;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;0;1;1;0;0;0;0;0;0;1;1;0;0;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1]);
-      cmd="BW2=applylut(BW, lut);";
-      
+      ## lut = makelut ("__diagonal_fill_lut_fun__", 3);
+      lut = logical ([0;0;0;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;0;1;1;0;0;0;0;0;0;1;1;0;0;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;0;0;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;0;1;1;0;0;0;0;0;0;1;1;0;0;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;0;0;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;0;0;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;0;1;1;0;0;0;0;0;0;1;1;0;0;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;0;0;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;0;1;1;0;0;0;0;0;0;1;1;0;0;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;0;1;1;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;0;0;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;0;1;1;0;0;0;0;0;0;1;1;0;0;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1]);
+      morph = @(x) applylut (x, lut);
 
-    case('dilate')
-      cmd="BW2=imdilate(BW, ones(3));";
+    case "dilate"
+      se = strel ("square", 3);
+      morph = @(x) imdilate (x, se);
 
-    case('erode')
-      cmd="BW2=imerode(BW, ones(3));";
-      
-    case('fill')
-      ## lut=makelut(inline("x(2,2)||(sum((x&[0,1,0;1,0,1;0,1,0])(:))==4)","x"),3);
+#    case "endpoints"
+#      ## not implemented
+
+    case "erode"
+      ## Matlab bwmorph acts different than their imerode. I'm unsure
+      ## the cause of the bug but it seems to manifest on the image border
+      ## only. It may be they have implemented this routines in both the
+      ## im* functions, and in bwmorph. The rest of bwmorph that uses
+      ## erosion (open, close, bothat, and tophat a least), suffer the
+      ## same problem. We do not replicate the bug and use imerode.
+      se = strel ("square", 3);
+      morph = @(x) imerode (x, se);
+
+    case "fill"
+      loop_once = true;
+      ## lut = makelut (inline ("x(2,2)||(sum((x&[0,1,0;1,0,1;0,1,0])(:))==4)", "x"), 3);
       ## which is the same as...
-      lut=repmat([zeros(16,1);ones(16,1)],16,1); ## identity
+      lut = repmat ([false(16, 1); true(16, 1)], 16, 1); # identity
       ## 16 exceptions
-      lut([171,172,175,176,235,236,239,240,427,428,431,432,491,492,495,496])=1;
-      BW2=applylut(BW, logical(lut));
-      if(n>1)
-        ## TODO: check if ignoring n>1 is ok.
-        disp("WARNING: n>1 has no sense here. Using n=1. Please fill a bug if you think this behaviour is not correct");
-      endif
-      return;
+      lut([171 172 175 176 235 236 239 240 427 428 431 432 491 492 495 496]) = true;
+      morph = @(x) applylut (x, lut);
 
-
-    case('hbreak')
-      ## lut=makelut(inline("x(2,2)&&!(all(x==[1,1,1;0,1,0;1,1,1])||all(x==[1,0,1;1,1,1;1,0,1]))","x"),3);
+    case "hbreak"
+      loop_once = true;
+      ## lut = makelut (inline ("x(2,2)&&!(all(x==[1,1,1;0,1,0;1,1,1])||all(x==[1,0,1;1,1,1;1,0,1]))", "x"), 3);
       ## which is the same as
-      lut=repmat([zeros(16,1);ones(16,1)],16,1); ## identity
-      lut([382,472])=0;                          ## the 2 exceptions
-      BW2=applylut(BW, logical(lut));
-      if(n>1)
-        ## TODO: check if ignoring n>1 is ok.
-        disp("WARNING: n>1 has no sense here. Using n=1. Please fill a bug if you think this behaviour is not correct");
-      endif
-      return;
+      lut = repmat ([false(16, 1); true(16, 1)], 16, 1); # identity
+      lut([382 472]) = false; # the 2 exceptions
+      morph = @(x) applylut (x, lut);
 
-    case('majority')
-      ## lut=makelut(inline("sum((x&ones(3,3))(:))>=5"),3);
-      lut=logical([0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;
-                   0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;
-                   0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;
-                   0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;
-                   0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;
-                   0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;
-                   0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;
-                   0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;
-                   0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;
-                   0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;
-                   0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;
-                   0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                   0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1]);
-      cmd="BW2=applylut(BW, lut);";
+    case "majority"
+      ## lut = makelut (inline ("sum((x&ones(3,3))(:))>=5"), 3);
+      lut = logical ([0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;
+                      0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;
+                      0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;
+                      0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;
+                      0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;
+                      0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;
+                      0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;
+                      0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;
+                      0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;
+                      0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;
+                      0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;
+                      0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1]);
+      morph = @(x) applylut (x, lut);
 
-    case('open')
-      se  = ones(3);
-      BW2 = imopen (BW, se);
-      if(n>1)
-        ## TODO: check if ignoring n>1 is ok.
-        disp("WARNING: n>1 has no sense here. Using n=1. Please fill a bug if you think this behaviour is not correct");
-      endif
-      return;
+    case "open"
+      loop_once = true;
+      se = strel ("square", 3);
+      morph = @(x) imopen (x, se);
 
-    case('remove')
-      ## lut=makelut(inline("x(2,2)&&!(sum((x&[0,1,0;1,1,1;0,1,0])(:))==5)","x"),3);
-      lut=repmat([zeros(16,1);ones(16,1)],16,1); ## identity
+    case "remove"
+      loop_once = true;
+      ## lut = makelut (inline ("x(2,2)&&!(sum((x&[0,1,0;1,1,1;0,1,0])(:))==5)", "x"), 3);
+      lut = repmat ([false(16,1); true(16,1)], 16, 1); # identity
       ## 16 qualifying patterns
-      lut([187,188,191,192,251,252,255,256,443,444,447,448,507,508,511,512])=0;
-      BW2=applylut(BW, logical(lut));
-      if(n>1)
-        ## TODO: check if ignoring n>1 is ok.
-        disp("WARNING: n>1 has no sense here. Using n=1. Please fill a bug if you think this behaviour is not correct");
-      endif
-      return;
-      
-    case('shrink')
-      ## lut1=makelut("__conditional_mark_patterns_lut_fun__",3,"S");
-      lut1=logical([0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;0;1;1;1;1;0;1;0;0;1;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;1;1;0;1;1;0;0;0;0;0;0;0;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;1;1;0;1;0;0;0;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;0;0;0;0;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;1;1;0;1;0;0;0;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;0;0;0;0;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;1;1;1;0;1;1;0;0;0;0;0;0;0;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;0;0;0;0;0;0;0;0;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;1;1;0;1;0;0;0;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;1;0;0;1;1;0;0]);
-      ## lut2=makelut(inline("!m(2,2)||__unconditional_mark_patterns_lut_fun__(m,'S')","m"),3);
-      lut2=logical([1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;1;0;1;0;0;0;1;0;0;0;0;0;1;0;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;1;0;0;0;0;0;0;1;1;0;0;1;0;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;0;1;1;1;0;0;0;0;1;1;0;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;0;1;0;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;0;1;0;1;0;0;1;1;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;1;1;0;0;1;1;0;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;1;1;0;1;0;0;1;0;1;1;0;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;0;1;0;1;1;1;0;1;0;1;0;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;1;0;1;0;1;0;1;1;1;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;0;0;1;0;1;0;0;1;0;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;0;0;0;1;0;1;0;0;1;0;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1]);
-      cmd="BW2=BW&applylut(applylut(BW, lut1), lut2);";
+      lut ([187 188 191 192 251 252 255 256 443 444 447 448 507 508 511 512]) = false;
+      morph = @(x) applylut (x, lut);
 
-    case({'skel','skel-pratt'})
+    case "shrink"
+      ## lut1 = makelut ("__conditional_mark_patterns_lut_fun__", 3, "S");
+      lut1 = logical ([0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;0;1;1;1;1;0;1;0;0;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;1;1;0;1;1;0;0;0;0;0;0;0;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;1;1;0;1;0;0;0;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;0;0;0;0;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;1;1;0;1;0;0;0;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;0;0;0;0;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;1;1;1;0;1;1;0;0;0;0;0;0;0;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;0;0;0;0;0;0;0;0;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;1;1;0;1;0;0;0;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;1;0;0;1;1;0;0]);
+      ## lut2 = makelut (inline ("!m(2,2)||__unconditional_mark_patterns_lut_fun__(m,'S')", "m"), 3);
+      lut2 = logical ([1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;1;0;1;0;0;0;1;0;0;0;0;0;1;0;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;1;0;0;0;0;0;0;1;1;0;0;1;0;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;0;1;1;1;0;0;0;0;1;1;0;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;0;1;0;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;0;1;0;1;0;0;1;1;1;1;1;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;1;1;0;0;1;1;0;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;1;1;0;1;0;0;1;0;1;1;0;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;0;1;0;1;1;1;0;1;0;1;0;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;1;0;1;0;1;0;1;1;1;1;1;1;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;0;0;1;0;1;0;0;1;0;1;1;1;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;0;0;0;1;0;1;0;0;1;0;1;1;1;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1]);
+      morph = @(x) x & applylut (applylut (x, lut1), lut2);
+
+    case {"skel", "skel-pratt"}
       ## WARNING: Result doesn't look as MATLAB's sample. It has been
       ## WARNING: coded following Pratt's guidelines for what he calls
       ## WARNING: is a "reasonably close approximation". I couldn't find
@@ -410,173 +401,286 @@ function BW2 = bwmorph (BW, operation, n = 1)
       ## WARNING: for Perception of Speech and Visual Form, W.
       ## WARNING: Whaten-Dunn, Ed. MIT Press, Cambridge, MA, 1967.
 
-      ## lut1=makelut("__conditional_mark_patterns_lut_fun__",3,"K");
-      lut1=logical([0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;1;0;0;0;0;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;1;0;0;0;0;0;0;0;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;1;0;0;0;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;1;0;0;0;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;1;1;0;0;0;0;0;0;0;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;1;1;0;0;0;0;0;0;0;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;1;1;0;1;0;0;0;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;1;0;1;1;1;1;0]);
+      ## lut1 = makelut ("__conditional_mark_patterns_lut_fun__", 3, "K");
+      lut1 = logical ([0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;1;0;0;0;0;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;1;0;0;0;0;0;0;0;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;1;0;0;0;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;1;0;0;0;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;1;1;0;0;0;0;0;0;0;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;1;1;0;0;0;0;0;0;0;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;1;1;0;1;0;0;0;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;1;0;1;1;1;1;0]);
 
-      ## lut2=makelut(inline("!m(2,2)||__unconditional_mark_patterns_lut_fun__(m,'K')","m"),3);
-      lut2=logical([1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;0;1;0;0;0;1;0;1;1;0;0;0;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;0;0;0;1;1;0;0;1;1;0;0;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;1;0;1;0;0;0;1;0;1;0;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;0;1;1;1;0;1;1;1;0;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;1;0;1;1;0;1;1;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;1;1;1;1;1;1;1;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;0;1;0;1;1;1;1;1;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;0;1;1;1;1;1;1;1;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;1;0;1;0;0;1;1;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;0;1;1;1;0;0;1;1;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;0;1;0;1;0;0;1;1;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1]);
-      cmd="BW2=BW&applylut(applylut(BW, lut1), lut2);";
-      postcmd="BW2=bwmorph(BW2,'bridge');";
+      ## lut2 = makelut (inline ("!m(2,2)||__unconditional_mark_patterns_lut_fun__(m,'K')", "m") ,3);
+      lut2 = logical([1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;0;1;0;0;0;1;0;1;1;0;0;0;1;
+                      1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;0;0;0;1;1;0;0;1;1;0;0;1;1;
+                      1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;1;0;1;0;0;0;1;0;1;0;1;
+                      1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;0;1;1;1;0;1;1;1;0;1;1;1;
+                      1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;1;0;1;1;0;1;1;1;1;1;1;
+                      1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;1;1;1;1;1;1;1;1;1;1;1;
+                      1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;0;1;0;1;1;1;1;1;1;1;1;1;
+                      1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;0;1;1;1;1;1;1;1;1;1;1;1;
+                      1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;1;0;1;0;0;1;1;1;1;1;1;
+                      1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;0;1;1;1;0;0;1;1;1;1;1;1;
+                      1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;
+                      1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;
+                      1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;0;1;0;1;0;0;1;1;1;1;1;1;
+                      1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                      1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1]);
+      morph = @(x) x & applylut (applylut (x, lut1), lut2);
+      post_morph = @(x) bwmorph (x, "bridge");
 
-    case('skel-lantuejoul')
-      ## init values
-      se=true(3,3);              ## structuring element used everywhere
-      BW2=false(size(BW));       ## skeleton result
-      eBW=BW;                    ## eBW will hold k-times eroded BW
-      i=1;
-      while i<=n
-        if(!any(eBW))            ## if erosion result is 0-matrix then
-          break;                 ## we are over
-        endif
-        BW2|=eBW-imdilate(imerode(eBW, se), se); ## eBW - opening operation on eBW
-                                             ## contributes to skeleton
-        eBW=imerode(eBW,se);
-        i++;
-      endwhile
-      return;                    ## no general loop in this case
+    case "skel-lantuejoul"
+      ## This transform does not fit well in the same loop as the others,
+      ## since each iteration requires values from the previous one. Because
+      ## of this, we will set n to 0 in the end. However, we must take care
+      ## to not touch the input image if n already is zero.
+      if (n > 0)
+        se  = strel ("square", 3);
+        bw_tmp = false (size (bw)); # skeleton result
+        i = 1;
+        while (i <= n)
+          if (! any (bw(:)))
+            ## If erosion from the previous result is 0-matrix then we are
+            ## over because the top-hat transform below will also be a 0-matrix
+            ## and we will be |= to a 0-matrix.
+            break
+          endif
+          ebw     = imerode (bw, se);
+          ## the right hand side of |= is the top-hat transform. However,
+          ## we are not using imtophat because we will also want the output
+          ## of the erosion for the next iteration. This saves us calling
+          ## imerode twice for the same thing.
+          bw_tmp |= bw & ! imdilate (ebw, se);
+          bw      = ebw;
+          i++;
+        endwhile
+        bw = bw_tmp;
+        n = 0;  # don't do anything else
+      endif
 
-    case('spur')
-      ## lut=makelut(inline("xor(x(2,2),(sum((x&[0,1,0;1,0,1;0,1,0])(:))==0)&&(sum((x&[1,0,1;0,0,0;1,0,1])(:))==1)&&x(2,2))","x"),3);
+    case "spur"
+      ## lut = makelut(inline("xor(x(2,2),(sum((x&[0,1,0;1,0,1;0,1,0])(:))==0)&&(sum((x&[1,0,1;0,0,0;1,0,1])(:))==1)&&x(2,2))","x"),3);
       ## which is the same as
-      lut=repmat([zeros(16,1);ones(16,1)],16,1); ## identity
-      lut([18,21,81,273])=0; ## 4 qualifying patterns
-      lut=logical(lut);
-      cmd="BW2=applylut(BW, lut);";
+      lut = repmat ([false(16, 1); true(16,1)], 16, 1); # identity
+      lut([18, 21, 81, 273]) = false; # 4 qualifying patterns
+      morph = @(x) applylut (x, lut);
 
-    case('thicken')
+    case "thicken"
       ## This implementation also "thickens" the border. To avoid this,
       ## a simple solution could be to add a border of 1 to the reversed
       ## image.
-      BW2=bwmorph(!BW,'thin',n);
-      BW2=bwmorph(BW2,'diag');
-      return;
+      bw = bwmorph (! bw, "thin", n);
+      loop_once = true;
+      morph = @(x) bwmorph (x, "diag");
 
-    case('thin')
-      ## lut1=makelut("__conditional_mark_patterns_lut_fun__",3,"T");
-      lut1=logical([0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;1;1;0;0;1;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;0;0;1;1;0;0;0;0;0;0;0;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;1;0;0;0;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;1;0;0;0;0;0;0;0;0;0;0;0;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;0;1;0;0;0;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;0;0;0;0;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;0;1;1;0;0;0;0;0;0;0;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;0;0;0;0;0;0;0;0;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;1;1;0;1;0;0;0;1;
-                    0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;1;0;0;1;1;0;0]);
-      ## lut2=makelut(inline("!m(2,2)||__unconditional_mark_patterns_lut_fun__(m,'T')","m"),3);
-      lut2=logical([1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;1;1;1;0;1;0;1;1;0;0;0;0;1;0;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;1;1;0;0;0;0;0;1;1;0;0;1;0;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;0;1;1;1;1;0;0;0;1;1;0;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;0;1;0;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;0;1;0;1;0;0;1;1;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;1;1;0;0;1;1;0;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;1;1;0;1;0;0;1;0;1;1;0;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;0;1;0;1;1;1;0;1;0;1;0;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;1;0;1;0;1;0;1;1;1;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;1;0;1;0;0;1;0;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;1;0;1;0;0;1;0;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;
-                    1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1]);
-      cmd="BW2=BW&applylut(applylut(BW, lut1), lut2);";
+    case "thin"
+      ## lut1 = makelut ("__conditional_mark_patterns_lut_fun__", 3, "T");
+      lut1 = logical ([0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;1;1;0;0;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;0;0;1;1;0;0;0;0;0;0;0;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;1;0;0;0;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;1;0;0;0;0;0;0;0;0;0;0;0;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;0;1;0;0;0;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;0;0;0;0;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;0;1;1;0;0;0;0;0;0;0;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;0;0;0;0;0;0;0;0;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;1;1;0;1;0;0;0;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;1;0;0;1;1;0;0]);
+      ## lut2 = makelut (inline ("!m(2,2)||__unconditional_mark_patterns_lut_fun__(m,'T')", "m"), 3);
+      lut2 = logical ([1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;1;1;1;0;1;0;1;1;0;0;0;0;1;0;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;1;1;0;0;0;0;0;1;1;0;0;1;0;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;0;1;1;1;1;0;0;0;1;1;0;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;0;1;0;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;0;0;1;0;1;0;0;1;1;1;1;1;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;1;1;0;0;1;1;0;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;1;1;0;1;0;0;1;0;1;1;0;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;0;1;0;1;1;1;0;1;0;1;0;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;1;0;1;0;1;0;1;1;1;1;1;1;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;1;0;1;0;0;1;0;1;1;1;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;0;0;1;0;1;0;0;1;0;1;1;1;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;
+                       1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1]);
+      morph = @(x) x & applylut (applylut (x, lut1), lut2);
 
-
-    case('tophat')
-      se  = ones(3);
-      BW2 = imtophat (BW, se);
-      if(n>1)
-        ## TODO: check if ignoring n>1 is ok.
-        disp("WARNING: n>1 has no sense here. Using n=1. Please fill a bug if you think this behaviour is not correct");
-      endif
-      return;
-
+    case "tophat"
+      ## top hat filtering has no effect after being performed once
+      ## (inherits this behaviour from closing and opening)
+      loop_once = true;
+      se = strel ("square", 3);
+      morph = @(x) imtophat (x, se);
 
     otherwise
-      error("bwmorph: unknown operation type requested.");
+      error ("bwmorph: unknown OPERATION '%s' requested", operation);
   endswitch
 
-  ## we use this assignment because of the swap operation inside the
-  ## while.
-  BW2=BW;
+  if (loop_once && n > 1)
+    n = 1;
+  endif
 
-  ## if it doesn't change we don't need to process it further
-  i=1;
-  while(i<=n) ## for wouldn't work because n can be Inf
-    [BW,BW2]=swap(BW,BW2);
-    eval(cmd);
-    if(all((BW2==BW)(:)))
+  bw2_tmp = bw; ## make sure bw2_tmp will exist later, even if n == 0
+  i = 1;
+  while (i <= n) ## a for loop wouldn't work because n can be Inf
+    bw2_tmp = morph (bw);
+    if (isequal (bw, bw2_tmp))
+      ## if it doesn't change we don't need to process it further
       break
     endif
-    i+=1;
+    bw = bw2_tmp;
+    i++;
   endwhile
 
   ## process post processing commands if needed
-  if (isempty (postcmd))
-    eval(postcmd);
+  if (! isempty (post_morph) && n > 0)
+    bw2_tmp = post_morph (bw2_tmp);
+  endif
+
+  if (nargout > 0)
+    bw2 = bw2_tmp;
+  else
+    imshow (bw2_tmp);
   endif
 
 endfunction
 
-function [b, a] = swap (a, b)
-endfunction
-
 %!demo
-%! bwmorph(ones(11),'shrink', Inf)
+%! bwmorph (true (11), "shrink", Inf)
 %! # Should return 0 matrix with 1 pixel set to 1 at (6,6)
-
-## TODO: code tests 
-
 
 ## Test skel-lantuejoul using Gozalez&Woods example (fig 8.39)
 %!shared slBW, rslBW
-%! uint8(0); # fail for 2.1.57 or less instead of crashing later
-%! slBW=logical(zeros(12,7));
-%! slBW(2,2)=true;
-%! slBW(3:4,3:4)=true;
-%! rslBW=slBW;
-%! slBW(5:6,3:5)=true;
-%! slBW(7:11,2:6)=true;
-%! rslBW([6,7,9],4)=true;
+%! slBW = logical ([  0   0   0   0   0   0   0
+%!                    0   1   0   0   0   0   0
+%!                    0   0   1   1   0   0   0
+%!                    0   0   1   1   0   0   0
+%!                    0   0   1   1   1   0   0
+%!                    0   0   1   1   1   0   0
+%!                    0   1   1   1   1   1   0
+%!                    0   1   1   1   1   1   0
+%!                    0   1   1   1   1   1   0
+%!                    0   1   1   1   1   1   0
+%!                    0   1   1   1   1   1   0
+%!                    0   0   0   0   0   0   0]);
+%!
+%! rslBW = logical ([ 0   0   0   0   0   0   0
+%!                    0   1   0   0   0   0   0
+%!                    0   0   1   1   0   0   0
+%!                    0   0   1   1   0   0   0
+%!                    0   0   0   0   0   0   0
+%!                    0   0   0   1   0   0   0
+%!                    0   0   0   1   0   0   0
+%!                    0   0   0   0   0   0   0
+%!                    0   0   0   1   0   0   0
+%!                    0   0   0   0   0   0   0
+%!                    0   0   0   0   0   0   0
+%!                    0   0   0   0   0   0   0]);
+%!assert (bwmorph (slBW, "skel-lantuejoul",   1), [rslBW(1:5,:); false(7, 7)]);
+%!assert (bwmorph (slBW, "skel-lantuejoul",   2), [rslBW(1:8,:); false(4, 7)]);
+%!assert (bwmorph (slBW, "skel-lantuejoul",   3), rslBW);
+%!assert (bwmorph (slBW, "skel-lantuejoul", Inf), rslBW);
 
-%!assert(bwmorph(slBW,'skel-lantuejoul',1),[rslBW(1:5,:);logical(zeros(7,7))]);
-%!assert(bwmorph(slBW,'skel-lantuejoul',2),[rslBW(1:8,:);logical(zeros(4,7))]);
-%!assert(bwmorph(slBW,'skel-lantuejoul',3),rslBW);
-%!assert(bwmorph(slBW,'skel-lantuejoul',Inf),rslBW);
+%!error bwmorph ("not a matrix", "dilate")
+
+## this makes sense to be an error but for Matlab compatibility, it is not
+%!assert (bwmorph (magic (10), "dilate"), imdilate (logical (magic (10)), ones (3)));
+
+%!shared in, out, se
+%! in = logical ([1  1  0  0  1  0  1  0  0  0  1  1  1  0  1  1  0  1  0  0
+%!                1  1  1  0  1  0  1  1  1  1  0  1  0  1  0  0  0  0  0  0
+%!                0  1  1  1  0  1  1  0  0  0  1  1  0  0  1  1  0  0  1  0
+%!                0  0  0  0  0  1  1  1  1  0  0  1  1  1  1  1  1  0  0  1
+%!                0  1  0  0  1  1  0  1  1  0  0  0  0  0  1  1  0  0  1  0
+%!                0  0  1  1  1  1  1  0  0  1  0  1  1  1  0  0  1  0  0  1
+%!                0  1  1  1  1  1  1  0  1  1  1  0  0  0  1  0  0  1  0  0
+%!                1  0  1  1  1  0  1  1  0  1  0  0  1  1  1  0  0  1  0  0
+%!                1  0  1  1  1  0  1  0  0  1  0  0  1  1  0  0  1  1  1  0
+%!                1  0  1  1  1  1  0  0  0  1  0  0  0  0  0  0  1  1  0  0
+%!                1  1  1  1  1  1  0  1  0  1  0  0  0  0  0  0  1  0  1  1
+%!                0  1  0  1  1  0  0  1  1  1  0  0  0  0  0  0  0  1  0  0
+%!                0  0  1  1  0  1  1  1  1  0  0  1  0  0  0  0  1  0  1  1
+%!                0  0  1  1  0  0  1  1  1  0  0  0  1  1  1  1  0  0  0  0
+%!                0  0  1  0  0  0  0  0  0  1  0  0  1  1  1  1  0  0  0  0
+%!                0  0  0  0  0  0  1  1  1  0  0  0  1  1  1  1  1  0  0  0
+%!                0  1  0  0  0  1  1  0  1  1  0  0  1  1  1  0  1  1  1  1
+%!                1  0  0  1  0  1  1  0  1  0  0  0  0  0  0  1  0  1  1  1
+%!                0  0  1  1  0  1  1  1  1  0  0  0  0  1  1  0  1  1  1  1
+%!                0  1  1  0  0  1  0  0  1  1  0  0  1  0  0  1  0  0  0  1]);
+%! se = strel ("arbitrary", ones (3));
+%!
+%!assert (bwmorph (in, "dilate"), imdilate (in, se));
+%!assert (bwmorph (in, "dilate", 3), imdilate (imdilate (imdilate (in, se), se), se));
+%!assert (bwmorph (in, "bothat"), imbothat (in, se));
+%!assert (bwmorph (in, "tophat"), imtophat (in, se));
+%!assert (bwmorph (in, "open"), imopen (in, se));
+%!assert (bwmorph (in, "close"), imclose (in, se));
+%!
+%!assert (bwmorph ([1 0 0; 1 0 1; 0 0 1], "bridge"), logical ([1 1 0; 1 1 1; 0 1 1]));
+%!assert (bwmorph ([0 0 0; 1 0 1; 0 0 1], "clean"), logical ([0 0 0; 0 0 1; 0 0 1]));
+%!assert (bwmorph ([0 0 0; 0 1 0; 0 0 0], "clean"), false (3));
+%!assert (bwmorph ([0 1 0; 1 0 0; 0 0 0], "diag"), logical ([1 1 0; 1 1 0; 0 0 0]));
+%!
+%! in  = logical ([0  1  0  1  0
+%!                 1  1  1  0  1
+%!                 1  0  0  1  0
+%!                 1  1  1  0  1
+%!                 1  1  1  1  1]);
+%! out = logical ([0  1  0  1  0
+%!                 1  1  1  1  1
+%!                 1  0  0  1  0
+%!                 1  1  1  1  1
+%!                 1  1  1  1  1]);
+%!assert (bwmorph (in, "fill"), out);
+%!
+%!assert (bwmorph ([1 1 1; 0 1 0; 1 1 1], "hbreak"), logical ([1 1 1; 0 0 0; 1 1 1]));
+%!
+%! in  = logical ([0  1  0  0  0
+%!                 1  0  0  1  0
+%!                 1  0  1  0  0
+%!                 1  1  1  1  1
+%!                 1  1  1  1  1]);
+%!
+%! out = logical ([0  1  0  0   0
+%!                 1  0  0  1  0
+%!                 1  0  1  0  0
+%!                 1  1  0  1  1
+%!                 1  1  1  1  1]);
+%!assert (bwmorph (in, "remove"), out);
+%!
+%! out = logical ([0  1  0  0  0
+%!                 1  0  0  1  0
+%!                 1  0  1  0  0
+%!                 1  1  0  1  1
+%!                 1  1  1  1  1]);
+%!assert (bwmorph (in, "remove", Inf), out);
+%!
+%! ## tests for spur are failing (matlab incompatible)
+%! out = logical ([0  1  0  0  0
+%!                 1  0  0  0  0
+%!                 1  0  1  0  0
+%!                 1  1  1  1  1
+%!                 1  1  1  1  1]);
+%!assert (bwmorph (in, "spur"), out);
+%!
+%! out = logical ([0  1  0  0  0
+%!                 1  0  0  0  0
+%!                 1  0  0  0  0
+%!                 1  1  1  1  1
+%!                 1  1  1  1  1]);
+%!assert (bwmorph (in, "spur", Inf), out);
