@@ -24,6 +24,8 @@
 ## table below. By default, @var{n} is 1.  If @var{n} is @code{Inf}, the
 ## operation is continually performed until it no longer changes the image.
 ##
+## In some operations, @var{bw} can be a binary matrix with any number of
+## dimensions (see details on the table of operations).
 ##
 ## Note that the output will always be of class logical, independently of
 ## the class of @var{bw}.
@@ -32,7 +34,9 @@
 ## @item bothat
 ## Performs a bottom hat operation, a closing operation (which is a
 ## dilation followed by an erosion) and finally substracts the original
-## image (see @code{imbothat}).
+## image (see @code{imbothat}).  @var{bw} can have any number of
+## dimensions, and @code{strel ("hypercube", ndims (@var{bw}), 3)} is
+## used as structuring element.
 ##
 ## @item bridge
 ## Performs a bridge operation. Sets a pixel to 1 if it has two nonzero
@@ -40,45 +44,58 @@
 ## 119 3-by-3 patterns which trigger setting a pixel to 1.
 ##
 ## @item clean
-## Performs an isolated pixel remove operation. Sets a pixel to 0 if all
-## of its eight-connected neighbours are 0.
+## Performs an isolated pixel remove operation.  Sets a pixel to 0 if all
+## of its eight-connected neighbours are 0.  @var{bw} can have any number
+## of dimensions in which case connectivity is @code{(3^ndims(@var{bw})) -1},
+## i.e., all of the elements around it.
 ##
 ## @item close
-## Performs closing operation, which is a dilation followed by erosion.
-## It uses a ones(3) matrix as structuring element for both operations
-## (see @code{imclose}).
+## Performs closing operation, which is a dilation followed by erosion
+## (see @code{imclose}).  @var{bw} can have any number of dimensions,
+## and @code{strel ("hypercube", ndims (@var{bw}), 3)} is used as
+## structuring element.
 ##
 ## @item diag
 ## Performs a diagonal fill operation. Sets a pixel to 1 if that
 ## eliminates eight-connectivity of the background.
 ##
 ## @item dilate
-## Performs a dilation operation. It uses ones(3) as structuring element
-## (see @code{imdilate}).
+## Performs a dilation operation (see @code{imdilate}).  @var{bw} can have
+## any number of dimensions, and
+## @code{strel ("hypercube", ndims (@var{bw}), 3)} is used as
+## structuring element.
 ##
 ## @item erode
-## Performs an erosion operation. It uses ones(3) as structuring element
-## (see @code{imerode}).
+## Performs an erosion operation (see @code{imerode}).  @var{bw} can have
+## any number of dimensions, and
+## @code{strel ("hypercube", ndims (@var{bw}), 3)} is used as
+## structuring element.
 ##
 ## @item fill
 ## Performs a interior fill operation. Sets a pixel to 1 if all
-## four-connected pixels are 1.
+## four-connected pixels are 1.  @var{bw} can have any number
+## of dimensions in which case connectivity is @code{(2*ndims(@var{bw}))}.
 ##
 ## @item hbreak
 ## Performs a H-break operation. Breaks (sets to 0) pixels that are
 ## H-connected.
 ##
 ## @item majority
-## Performs a majority black operation. Sets a pixel to 1 if five
-## or more pixels in a 3-by-3 window are 1. If not it is set to 0.
+## Performs a majority black operation.  Sets a pixel to 1 if the majority
+## of the pixels (5 or more for a two dimensional image) in a 3-by-3 window
+## is 1. If not set to 0.  @var{bw} can have any number of dimensions in
+## which case the window has dimensions @code{repmat (3, 1, ndims (@var{bw}))}.
 ##
 ## @item open
 ## Performs an opening operation, which is an erosion followed by a
-## dilation. It uses ones(3) as structuring element (see @code{imopen}).
+## dilation (see @code{imopen}).  @var{bw} can have any number of
+## dimensions, and @code{strel ("hypercube", ndims (@var{bw}), 3)}
+## is used as structuring element.
 ##
 ## @item remove
-## Performs a iterior pixel remove operation. Sets a pixel to 0 if 
-## all of its four-connected neighbours are 1.
+## Performs a iterior pixel remove operation.  Sets a pixel to 0 if
+## all of its four-connected neighbours are 1.  @var{bw} can have any number
+## of dimensions in which case connectivity is @code{(2*ndims(@var{bw}))}.
 ##
 ## @item shrink
 ## Performs a shrink operation. Sets pixels to 0 such that an object
@@ -109,6 +126,8 @@
 ## @var{n} times or number of iterations specified in algorithm
 ## description. It's most useful to run this algorithm with @code{n=Inf}.
 ##
+## @var{bw} can have any number of dimensions.
+##
 ## @item skel-pratt
 ## Performs a skeletonization operation as described by William K. Pratt
 ## in "Digital Image Processing".
@@ -135,7 +154,9 @@
 ## @item tophat
 ## Performs a top hat operation, a opening operation (which is an
 ## erosion followed by a dilation) and finally substracts the original
-## image (see @code{imtophat}).
+## image (see @code{imtophat}).  @var{bw} can have any number of
+## dimensions, and @code{strel ("hypercube", ndims (@var{bw}), 3)}
+## is used as structuring element.
 ## @end table
 ##
 ## Some useful concepts to understant operators:
@@ -223,7 +244,7 @@ function bw2 = bwmorph (bw, operation, n = 1)
   switch (tolower (operation))
     case "bothat"
       loop_once = true;
-      se  = strel ("square", 3);
+      se = strel ("hypercube", ndims (bw), 3);
       morph = @(x) imbothat (x, se);
 
 #    case "branchpoints"
@@ -252,17 +273,21 @@ function bw2 = bwmorph (bw, operation, n = 1)
       morph = @(x) applylut (x, lut);
 
     case "clean"
+      ## Remove elements that are surrounded by false elements. So we
+      ## create a hypercube kernel of side length 3 and values 1, and
+      ## center value with the connectivity value. After convolution,
+      ## only true elements with another one surrounding it, will have
+      ## values above the connectivity (remember that the input matrix
+      ## is binary).
       loop_once = true;
-      ## BW(j,k) = X && (X0||X1||...||X7)
-      ## lut = makelut (inline ("x(2,2)&&any((x.*[1,1,1;1,0,1;1,1,1])(:))", "x"), 3);
-      ## which is the same as...
-      lut = repmat ([false(16, 1); true(16, 1)], 16, 1); # identity
-      lut(17) = false; # isolated to 0
-      morph = @(x) applylut (x, lut);
+      kernel       = ones (repmat (3, 1, ndims (bw)));
+      connectivity = numel (kernel) -1;
+      kernel(ceil (numel (kernel) /2)) = connectivity; # n-dimensional center
+      morph = @(x) convn (x, kernel, "same") > connectivity;
 
     case "close"
       loop_once = true;
-      se = strel ("square", 3);
+      se = strel ("hypercube", ndims (bw), 3);
       morph = @(x) imclose (x, se);
 
     case "diag"
@@ -287,7 +312,7 @@ function bw2 = bwmorph (bw, operation, n = 1)
       morph = @(x) applylut (x, lut);
 
     case "dilate"
-      se = strel ("square", 3);
+      se = strel ("hypercube", ndims (bw), 3);
       morph = @(x) imdilate (x, se);
 
 #    case "endpoints"
@@ -300,17 +325,21 @@ function bw2 = bwmorph (bw, operation, n = 1)
       ## im* functions, and in bwmorph. The rest of bwmorph that uses
       ## erosion (open, close, bothat, and tophat a least), suffer the
       ## same problem. We do not replicate the bug and use imerode.
-      se = strel ("square", 3);
+      se = strel ("hypercube", ndims (bw), 3);
       morph = @(x) imerode (x, se);
 
     case "fill"
+      ## Fill elements that are surrounded by true elements (with
+      ## connectivity 4 and its equivalent to N dimensions).
+      ## So we create a hypercube kernel with the connected pixels as 1
+      ## and the center with the connectivity value. After convolution,
+      ## only true elements, or elements surrounded by true elements
+      ## will have a values >= connectivity.
       loop_once = true;
-      ## lut = makelut (inline ("x(2,2)||(sum((x&[0,1,0;1,0,1;0,1,0])(:))==4)", "x"), 3);
-      ## which is the same as...
-      lut = repmat ([false(16, 1); true(16, 1)], 16, 1); # identity
-      ## 16 exceptions
-      lut([171 172 175 176 235 236 239 240 427 428 431 432 491 492 495 496]) = true;
-      morph = @(x) applylut (x, lut);
+      kernel = double (draw_nd_cross (bw));
+      connectivity = nnz (kernel) -1;
+      kernel(ceil (numel (kernel) /2)) = connectivity;
+      morph = @(x) convn (x, kernel, "same") >= connectivity;
 
     case "hbreak"
       loop_once = true;
@@ -321,37 +350,30 @@ function bw2 = bwmorph (bw, operation, n = 1)
       morph = @(x) applylut (x, lut);
 
     case "majority"
-      ## lut = makelut (inline ("sum((x&ones(3,3))(:))>=5"), 3);
-      lut = logical ([0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;
-                      0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;
-                      0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;
-                      0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;
-                      0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;
-                      0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;
-                      0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;
-                      0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                      0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;
-                      0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;
-                      0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;
-                      0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                      0;0;0;0;0;0;0;1;0;0;0;1;0;1;1;1;0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;
-                      0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                      0;0;0;1;0;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
-                      0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1]);
-      morph = @(x) applylut (x, lut);
+      ## If the majority of the elements surrounding an element is true,
+      ## it changes to true. We do this using convolution, with an
+      ## hypercube kernel, any value of the convolution above the half
+      ## number of elements becomes tru
+      kernel   = ones (repmat (3, 1, ndims (bw)));
+      majority = numel (kernel) /2;
+      morph    = @(x) convn (x, kernel, "same") >= majority;
 
     case "open"
       loop_once = true;
-      se = strel ("square", 3);
+      se = strel ("hypercube", ndims (bw), 3);
       morph = @(x) imopen (x, se);
 
     case "remove"
+      ## Remove elements that are surrounded by true elements by 4 connectivity.
+      ## We create a 4 connectivity kernel with -1 values, and a center with
+      ## the number of -1 values. Only true elements can have positives values,
+      ## with a maximum of 4 (or whatever is the connectivity value for that
+      ## number of dimensions) from the kernel center, and -1 per each of the
+      ## connectivity. If all are true, its value will go down to 0.
       loop_once = true;
-      ## lut = makelut (inline ("x(2,2)&&!(sum((x&[0,1,0;1,1,1;0,1,0])(:))==5)", "x"), 3);
-      lut = repmat ([false(16,1); true(16,1)], 16, 1); # identity
-      ## 16 qualifying patterns
-      lut ([187 188 191 192 251 252 255 256 443 444 447 448 507 508 511 512]) = false;
-      morph = @(x) applylut (x, lut);
+      kernel = - double (draw_nd_cross (bw));
+      kernel(ceil (numel (kernel) /2)) = nnz (kernel) -1;
+      morph = @(x) convn (x, kernel, "same") > 0;
 
     case "shrink"
       ## lut1 = makelut ("__conditional_mark_patterns_lut_fun__", 3, "S");
@@ -445,7 +467,7 @@ function bw2 = bwmorph (bw, operation, n = 1)
       ## of this, we will set n to 0 in the end. However, we must take care
       ## to not touch the input image if n already is zero.
       if (n > 0)
-        se  = strel ("square", 3);
+        se = strel ("hypercube", ndims (bw), 3);
         bw_tmp = false (size (bw)); # skeleton result
         i = 1;
         while (i <= n)
@@ -524,7 +546,7 @@ function bw2 = bwmorph (bw, operation, n = 1)
       ## top hat filtering has no effect after being performed once
       ## (inherits this behaviour from closing and opening)
       loop_once = true;
-      se = strel ("square", 3);
+      se = strel ("hypercube", ndims (bw), 3);
       morph = @(x) imtophat (x, se);
 
     otherwise
@@ -558,6 +580,20 @@ function bw2 = bwmorph (bw, operation, n = 1)
     imshow (bw2_tmp);
   endif
 
+endfunction
+
+function nd_cross = draw_nd_cross (bw)
+  ## FIXME there must be an easier way to do this. Also, this should
+  ##       probably be a shape in @strel
+  origin = false (repmat (3, 1, ndims (bw)));
+  center = ceil (numel (origin) /2);
+  origin(center) = true;
+  nd_cross = origin;
+  for dim = 1:ndims (bw)
+    se_size      = ones (1, ndims (bw));
+    se_size(dim) = 3;
+    nd_cross    |= imdilate (origin, true (se_size));
+  endfor
 endfunction
 
 %!demo

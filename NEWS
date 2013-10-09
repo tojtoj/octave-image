@@ -13,6 +13,10 @@
     functions that use them, such imopen and imclose, get an equivalent
     performance boost.
 
+ ** Most of bwmorph operations now support N dimensional images and have
+    increased performance.  Other Matlab compatibility fixes have been
+    made such as displaying image when there's no output variable.
+
  ** The __spatial_filtering__ function has been mostly rewritten and
     performs in approximattely 1/5 to 2/5 of the previous time, depending
     on the filter.  With this change, all functions dependent on it,
