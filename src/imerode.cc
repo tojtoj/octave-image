@@ -368,7 +368,7 @@ DEFUN_DLD(imerode, args, , "\
 -*- texinfo -*-\n\
 @deftypefn  {Loadable Function} {} imerode (@var{im}, @var{SE})\n\
 @deftypefnx {Loadable Function} {} imerode (@var{im}, @var{SE}, @var{shape})\n\
-Perform morphological erosion on image.\n\
+Perform morphological erosion.\n\
 \n\
 The image @var{im} must be a numeric matrix with any number of dimensions.\n\
 The erosion is performed with the structuring element @var{se} which can\n\
@@ -666,7 +666,7 @@ DEFUN_DLD(imdilate, args, , "\
 -*- texinfo -*-\n\
 @deftypefn  {Loadable Function} {} imdilate (@var{im}, @var{SE})\n\
 @deftypefnx {Loadable Function} {} imdilate (@var{im}, @var{SE}, @var{shape})\n\
-Perform morphological dilation on image.\n\
+Perform morphological dilation.\n\
 \n\
 The image @var{im} must be a numeric matrix with any number of dimensions.\n\
 The dilation is performed with the structuring element @var{se} which can\n\
