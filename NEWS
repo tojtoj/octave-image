@@ -105,6 +105,11 @@
  ** The transform option of imtophat has been removed (it was deprecated
     in version 2.0.0) in favour of using imbothat.
 
+ ** Other functions that have been changed for smaller bugfixes, increased
+    Matlab compatibility, or performance:
+
+      padarray
+
  Summary of important user-visible changes for image 2.0.0 (2012/11/08):
 -------------------------------------------------------------------------
 
