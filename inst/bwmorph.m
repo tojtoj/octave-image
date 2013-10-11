@@ -325,6 +325,8 @@ function bw2 = bwmorph (bw, operation, n = 1)
       ## im* functions, and in bwmorph. The rest of bwmorph that uses
       ## erosion (open, close, bothat, and tophat a least), suffer the
       ## same problem. We do not replicate the bug and use imerode.
+      ## In 2013, Mathworks has confirmed this bug and will try to fix it
+      ## for their next releases. So, do NOT fix this for "compatibility".
       se = strel ("hypercube", ndims (bw), 3);
       morph = @(x) imerode (x, se);
 
