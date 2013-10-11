@@ -17,6 +17,35 @@
 ## @deftypefn {Function File} {} impad(@var{A}, @var{xpad}, @var{ypad}, [@var{padding}, [@var{const}]])
 ## Pad (augment) a matrix for application of image processing algorithms.
 ##
+## This function has been deprecated in favor of @code{padarray} and will be
+## removed from future versions of image package.  Notes when making
+## the conversion:
+##
+## @itemize @bullet
+## @item
+## padarray will take the order of the padding arguments by order of dimension,
+## i.e., swap @var{xpad} and @var{ypad}.  Use
+## @code{padarray (@var{A}, [@var{ypad} @var{xpad}], @dots{})}
+##
+## @item
+## There is no @qcode{"ones"} as @var{padding} option.  Simply set the value
+## 1 as padding value.
+##
+## @item
+## If @var{xpad} and @var{ipad} are 2 element vectors with different values,
+## they will need to be replaced by two calls to padarray as follow:
+## @group
+## @example
+## B = padarray (A, [ypad(1) xpad(1)], "pre");
+## B = padarray (B, [ypad(2) xpad(2)], "post");
+## @end example
+## @end group
+##
+## @item
+## The @qcode{"reflect"} @var{padding} option of @code{padarray} is different
+## from @code{impad}.  Use @qcode{"circular"} instead.
+## @end itemize
+##
 ## Pads the input image @var{A} with @var{xpad}(1) elements from left, 
 ## @var{xpad}(2), elements from right, @var{ypad}(1) elements from above 
 ## and @var{ypad}(2) elements from below.
@@ -51,6 +80,19 @@
 ## A = 10*[1:5]' * ones(1,5) + ones(5,1)*[1:5]
 
 function retim = impad(im, xpad, ypad, padding = "zeros", const = 1)
+
+  persistent warned = false;
+  if (! warned)
+    warned = true;
+    ## We are deprecating impad because padarray already does the same thing
+    ## (we don't want multiple functions with the same purpose), padarray
+    ## already exists in Matlab so it must stay, padarray works for matrices
+    ## with any number of dimensions, and is now also working faster.
+    warning ("Octave:deprecated-function",
+             "`impad' has been deprecated in favor of `padarray (IM, [YPAD XPAD], \"PADDING\")'. This function will be removed from future versions of the `image' package");
+  endif
+
+
   ## Input checking
   if (!ismatrix(im) || ndims(im) < 2 || ndims(im) > 3)
     error("impad: first input argument must be an image");

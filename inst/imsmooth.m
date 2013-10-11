@@ -77,7 +77,7 @@
 ## default, this area is 3 by 3, but this can be changed. If the third input
 ## argument is a scalar @var{N} the area will be @var{N} by @var{N}, and if it's
 ## a two-vector [@var{N}, @var{M}] the area will be @var{N} by @var{M}.
-## 
+##
 ## The image is extrapolated symmetrically before the filtering is performed.
 ##
 ## @strong{Gaussian bilateral filtering}
@@ -86,7 +86,7 @@
 ## Tomasi and Manduchi [2]. The filtering result is computed as
 ## @example
 ## @var{J}(x0, y0) = k * SUM SUM @var{I}(x,y) * w(x, y, x0, y0, @var{I}(x0,y0), @var{I}(x,y))
-##                  x   y        
+##                  x   y
 ## @end example
 ## where @code{k} a normalisation variable, and
 ## @example
@@ -102,7 +102,7 @@
 ## small edges are preserved better. By default @var{sigma_d} is 2, and @var{sigma_r}
 ## is @math{10/255} for floating points images (with integer images this is
 ## multiplied with the maximal possible value representable by the integer class).
-## 
+##
 ## The image is extrapolated symmetrically before the filtering is performed.
 ##
 ## @strong{Perona and Malik}
@@ -207,10 +207,10 @@ function J = imsmooth(I, name = "Gaussian", varargin)
     error("imsmooth: second input must be a string");
   endif
   len = length(varargin);
-  
+
   ## Save information for later
   C = class(I);
-  
+
   ## Take action depending on 'name'
   switch (lower(name))
     ##############################
@@ -230,7 +230,7 @@ function J = imsmooth(I, name = "Gaussian", varargin)
       h = ceil(3*s);
       f = exp( (-(-h:h).^2)./(2*s^2) ); f /= sum(f);
       ## Pad image
-      I = double(impad(I, h, h, "symmetric"));
+      I = double (padarray (I, [h h], "symmetric"));
       ## Perform the filtering
       for i = imchannels:-1:1
         J(:,:,i) = conv2(f, f, I(:,:,i), "valid");
@@ -255,12 +255,14 @@ function J = imsmooth(I, name = "Gaussian", varargin)
       f2 = ones(1,s(1))/s(1);
       f1 = ones(1,s(2))/s(2);
       ## Pad image
-      I = impad(double(I), floor([s(2), s(2)-1]/2), floor([s(1), s(1)-1]/2), "symmetric");
+      I = padarray (I, floor ( [s(1) s(2)]   /2), "symmetric", "pre");
+      I = padarray (I, floor (([s(1) s(2)]-1)/2), "symmetric", "post");
+      I = double (I);
       ## Perform the filtering
       for i = imchannels:-1:1
-        J(:,:,i) = conv2(f1, f2, I(:,:,i), "valid");
+        J(:,:,i) = conv2 (f1, f2, I(:,:,i), "valid");
       endfor
-      
+
     ##############################
     ###   Circular averaging   ###
     ##############################
@@ -277,12 +279,12 @@ function J = imsmooth(I, name = "Gaussian", varargin)
       ## Compute filter
       f = fspecial("disk", r);
       ## Pad image
-      I = impad(double(I), r, r, "symmetric");
+      i = double (padarray (I, [r r], "symmetric"));
       ## Perform the filtering
       for i = imchannels:-1:1
         J(:,:,i) = conv2(I(:,:,i), f, "valid");
       endfor
-    
+
     ############################
     ###   Median Filtering   ###
     ############################
@@ -304,7 +306,7 @@ function J = imsmooth(I, name = "Gaussian", varargin)
       for i = imchannels:-1:1
         J(:,:,i) = medfilt2(I(:,:,i), s, "symmetric");
       endfor
-    
+
     ###############################
     ###   Bilateral Filtering   ###
     ###############################
@@ -331,10 +333,10 @@ function J = imsmooth(I, name = "Gaussian", varargin)
       endif
       ## Pad image
       s = max([round(3*sigma_d),1]);
-      I = impad(I, s, s, "symmetric");
+      I = padarray (I, [s s], "symmetric");
       ## Perform the filtering
       J = __bilateral__(I, sigma_d, sigma_r);
-    
+
     ############################
     ###   Perona and Malik   ###
     ############################
@@ -384,7 +386,7 @@ function J = imsmooth(I, name = "Gaussian", varargin)
       for i = imchannels:-1:1
         J(:,:,i) = pm(I(:,:,i), iter, lambda, method);
       endfor
-    
+
     #####################################
     ###   Custom Gaussian Smoothing   ###
     #####################################
@@ -411,15 +413,15 @@ function J = imsmooth(I, name = "Gaussian", varargin)
           error ("imsmooth: %s input argument must be of class 'double'", arg_names {k});
         endif
       endfor
-      
+
       ## Perform the smoothing
       for i = imchannels:-1:1
         J(:,:,i) = __custom_gaussian_smoothing__ (I(:,:,i), varargin {:});
       endfor
-    
+
     ######################################
     ###   Mean Shift Based Smoothing   ###
-    ######################################  
+    ######################################
     # NOT YET IMPLEMENTED
     #case "mean shift"
     #  J = mean_shift(I, varargin{:});
@@ -430,7 +432,7 @@ function J = imsmooth(I, name = "Gaussian", varargin)
     otherwise
       error("imsmooth: unsupported smoothing type '%s'", name);
   endswitch
-  
+
   ## Cast the result to the same class as the input
   J = cast(J, C);
 endfunction
@@ -440,10 +442,10 @@ function J = pm(I, iter, lambda, g)
   ## Initialisation
   [imrows, imcols] = size(I);
   J = I;
-  
+
   for i = 1:iter
     ## Pad image
-    padded = impad(J, 1, 1, "replicate");
+    padded = padarray (J, [1 1], "circular");
 
     ## Spatial derivatives
     dN = padded(1:imrows, 2:imcols+1) - J;
@@ -475,7 +477,7 @@ function J = mean_shift(I, s1, s2)
   m01 = conv2(I.*y, f, "same")./tmp;
   ms_x = round( m10./m00 ); # konverter ms_x og ms_y til linære indices og arbejd med dem!
   ms_y = round( m01./m00 );
-  
+
   ms = sub2ind(sz, ms_y, ms_x);
   %for i = 1:10
   i = 0;
@@ -493,7 +495,7 @@ function J = mean_shift(I, s1, s2)
     %endfor
   endwhile
   %endfor
-  
+
   ## Compute result
   J = I(ms);
 endfunction

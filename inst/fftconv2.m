@@ -74,8 +74,8 @@ function X = fftconv2 (varargin)
   rb = rows(b);
   cb = columns(b);
 
-  A = fft2 (impad (a, [0 cb-1], [0 rb-1]));
-  B = fft2 (impad (b, [0 ca-1], [0 ra-1]));
+  A = fft2 (padarray (a, [rb-1 cb-1], "post"));
+  B = fft2 (padarray (b, [ra-1 ca-1], "post"));
 
   X = ifft2 (A.*B);
 

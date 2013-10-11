@@ -53,6 +53,7 @@
  ** The following functions have been deprecated (see their help text
     for the recommended alternatives):
 
+      impad
       imrotate_Fourier
 
  ** rgb2ycbcr was completely rewritten to accept images of other classes, and

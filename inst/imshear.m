@@ -61,7 +61,7 @@ function g = imshear(m, axis, alpha, bbox, noshift)
   [ydim_orig xdim_orig] = size(m);
   if ( strcmp(bbox, "wrap") == 0 )
     ypad = ceil( (xdim_orig+1)/2 * abs(alpha) );
-    m = impad(m, [0,0], [ypad,ypad]);
+    m = padarray (m, ypad);
   endif
 
   [ydim_new xdim_new] = size(m);

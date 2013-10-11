@@ -153,7 +153,7 @@ function [imgPost, H, valid] = imrotate (imgPre, thetaDeg, interp = "nearest", b
       endfor
     endif
     valid = NA;
-    
+
     ## we probably should do this in a safer way... but hardcoding the list of
     ## im2xxxx functions might not be a good idea since it then it requires to
     ## be added here if a new im2xxx function is implemented
@@ -214,7 +214,7 @@ function fs = imrotate_Fourier (f, theta, method, bbox)
                 [ydim xdim] = size(fs);
                 xpad = ceil( xmax - (xdim+1)/2 );
                 ypad = ceil( ymax - (ydim+1)/2 );
-                fs = impad(fs, [xpad,xpad], [ypad,ypad], "zeros");
+                fs = padarray (fs, [ypad xpad]);
             endif
             xcentre_new = (size(fs,2)+1) / 2;
             ycentre_new = (size(fs,1)+1) / 2;
@@ -248,7 +248,7 @@ function fs = imrotate_Fourier (f, theta, method, bbox)
             [ydim xdim] = size(f);
             xpad = ceil( xmax - xdim/2 );
             ypad = ceil( ymax - ydim/2 );
-            %f = impad(f, [xpad,xpad], [ypad,ypad], "zeros");
+            %f = padarray (f, [ypad xpad]);
             xcentre_new = (size(f,2)+1) / 2;
             ycentre_new = (size(f,1)+1) / 2;
         endif

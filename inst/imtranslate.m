@@ -28,24 +28,12 @@
 function Y = imtranslate (X, a, b, bbox = "wrap")
 
   if ( strcmp(bbox, "crop")==1 )
-
-    xpad = [0,0];
-    if (a>0)
-      xpad = [0,ceil(a)];
-    elseif (a<0)
-      xpad = [-ceil(a),0];
-    endif
-
-    ypad = [0,0];
-    if (b>0)
-      ypad = [ceil(b),0];
-    elseif (b<0)
-      ypad = [0,-ceil(b)];
-    endif
-
-    X = impad(X, xpad, ypad, 'zeros');
+    pre = post = ceil ([a b]);
+    pre(pre   > 0) = 0;
+    post(post < 0) = 0;
+    X = padarray (X, abs (pre), "pre");
+    X = padarray (X, post, "post");
   endif
-
 
   [dimy, dimx] = size(X);
   x = fft2(X);
