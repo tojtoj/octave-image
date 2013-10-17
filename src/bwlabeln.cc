@@ -1,4 +1,6 @@
+// Copyright (C) 2002 Jeffrey E. Boyd <boyd@cpsc.ucalgary.ca>
 // Copyright (C) 2011-2012 Jordi Gutiérrez Hermoso <jordigh@octave.org>
+// Copyright (C) 2013 Carnë Draug <carandraug@octave.org>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -14,11 +16,14 @@
 // along with this program; if not, see
 // <http://www.gnu.org/licenses/>.
 
-// bwlabeln.cc ---
+// Copyright
+// Jeffrey E. Boyd and Carnë Draug for bwlabel_2d
+// Jordi Gutiérrez Hermoso for bwlabel_nd
 
-
-#include <oct.h>
+#include <octave/oct.h>
+#include <vector>
 #include <set>
+#include <algorithm>
 #include "union-find.h++"
 
 #include "config.h"
@@ -30,7 +35,6 @@
 #else
 #error Must have the TR1 or C++11 unordered_map header
 #endif
-
 
 typedef Array<octave_idx_type> coord;
 
@@ -278,95 +282,12 @@ get_padded_index (octave_idx_type r,
   return padded;
 }
 
-
-
-DEFUN_DLD(bwlabeln, args, , "\
--*- texinfo -*-\n\
-@deftypefn {Loadable Function} {[@var{l}, @var{num}] =} bwlabeln(@var{bw})\n\
-@deftypefnx {Loadable Function} {[@var{l}, @var{num}] =} bwlabeln(@var{bw}, @var{n})\n\
-Label foreground objects in the n-dimensional binary image @var{bw}.\n\
-\n\
-The optional argument @var{n} sets the connectivity and defaults 26,\n\
-for 26-connectivity in 3-D images. Other possible values are 18 and 6\n\
-for 3-D images, 4 and 8 for 2-D images, or an arbitrary N-dimensional\n\
-binary connectivity mask where each dimension is of size 3.\n\
-\n\
-The output @var{l} is an Nd-array where 0 indicates a background\n\
-pixel, 1 indicates that the pixel belong to object number 1, 2 that\n\
-the pixel belong to object number 2, etc. The total number of objects\n\
-is @var{num}.\n\
-\n\
-The algorithm used is a disjoint-set data structure, a.k.a. union-find.\n\
-See, for example, http://en.wikipedia.org/wiki/Union-find\n\
-\n\
-@seealso{bwconncomp, bwlabel, regionprops}\n\
-@end deftypefn\n\
-")
+static octave_value_list
+bwlabel_nd (const boolNDArray& BW, const boolNDArray& conn_mask)
 {
   octave_value_list rval;
 
-  octave_idx_type nargin = args.length ();
-
-  if (nargin < 1 || nargin > 2)
-  {
-    print_usage ();
-    return rval;
-  }
-
-  if (!args(0).is_numeric_type () && !args(0).is_bool_type ())
-    {
-      error ("bwlabeln: first input argument must be an ND array");
-      return rval;
-    }
-
-  boolNDArray BW = args(0).bool_array_value ();
   dim_vector size_vec = BW.dims ();
-
-  //Connectivity mask
-  boolNDArray conn_mask;
-
-  if (nargin == 2)
-    {
-      if (args(1).is_real_scalar ())
-        {
-          double N = args(1).scalar_value ();
-          if (size_vec.length () == 2 && N != 4 && N != 8)
-            error ("bwlabeln: for 2d arrays, scalar N must be 4 or 8");
-          else if (size_vec.length () == 3 && N != 6 && N != 18 && N != 26)
-            error ("bwlabeln: for 3d arrays, scalar N must be 4 or 8");
-          else if (size_vec.length () > 3)
-            error ("bwlabeln: for higher-dimensional arrays, N must be a "
-                   "connectivity mask");
-          else
-            conn_mask = get_mask (N);
-        }
-      else if (args(2).is_numeric_type () || args(2).is_bool_type ())
-        {
-          conn_mask = args(2).bool_array_value ();
-          dim_vector conn_mask_dims = conn_mask.dims ();
-          if (conn_mask_dims.length () != size_vec.length ())
-            error ("bwlabeln: connectivity mask N must have the same "
-                   "dimensions as BW");
-          for (octave_idx_type i = 0; i < conn_mask_dims.length (); i++)
-            {
-              if (conn_mask_dims(i) != 3)
-                {
-                  error ("bwlabeln: connectivity mask N must have all "
-                         "dimensions equal to 3");
-                }
-            }
-        }
-      else
-        error ("bwlabeln: second input argument must be a real scalar "
-               "or a connectivity array");
-    }
-  else
-    // Get the maximal mask that has same number of dims as BW.
-    conn_mask = get_mask (BW);
-
-  if (error_state)
-    return rval;
-
   auto neighbours = populate_neighbours(conn_mask, size_vec);
 
   // Use temporary array with borders padded with zeros. Labels will
@@ -440,3 +361,445 @@ See, for example, http://en.wikipedia.org/wiki/Union-find\n\
   rval(1) = ids_to_label.size ();
   return rval;
 }
+
+static octave_idx_type
+find (std::vector<octave_idx_type>& lset, octave_idx_type x)
+{
+  // Follow lset until we find a value that points to itself
+  while (lset[x] != x)
+    x = lset[x];
+  return x;
+}
+
+static octave_value_list
+bwlabel_2d (const boolMatrix& BW, const octave_idx_type& n)
+{
+  // This algorithm was derived from  BKP Horn, Robot Vision, MIT Press,
+  // 1986, p 65 - 89 by Jeffrey E. Boyd in 2002. Some smaller changes
+  // were then introduced by Carnë Draug in 2013 to speed up by iterating
+  // down a column, and what values to use when connecting two labels
+  // to increase chance of getting them in the right order in the end.
+
+  const octave_idx_type nr = BW.rows ();
+  const octave_idx_type nc = BW.columns ();
+
+  // The labelled image
+  Matrix L (nr, nc);
+
+  std::vector<octave_idx_type> lset (nc*nr);    // label table/tree
+
+  octave_idx_type ntable = 0; // number of elements in the component table/tree
+  octave_idx_type ind    = 0; // linear index
+
+  bool n4, n6, n8;
+  n4 = n6 = n8 = false;
+  if (n == 4)
+    n4 = true;
+  else if (n == 6)
+    n6 = true;
+  else if (n == 8)
+    n8 = true;
+
+  const bool* BW_vec = BW.data ();
+  double* L_vec = L.fortran_vec ();
+
+  for (octave_idx_type c = 0; c < nc; c++)
+    {
+      for (octave_idx_type r = 0; r < nr; r++, ind++)
+        {
+          if (BW_vec[ind]) // if A is an object
+            {
+              octave_idx_type stride = ind - nr;
+              // Get the neighboring pixels B, C, D, and E
+              //
+              //  D  B
+              //  C  A  <-- ind is linear index to A
+              //  E
+              //
+              // C and B will always be needed so we get them here, but
+              // D is only needed when n is 6 or 8, and E when n is 8.
+
+              octave_idx_type B, C;
+              if (c == 0)
+                C = 0;
+              else
+                C = find (lset, L_vec[stride]);
+
+              if (r == 0)
+                B = 0;
+              else
+                B = find (lset, L_vec[ind -1]);
+
+              if (n4)
+                {
+                  // apply 4 connectedness
+                  if (B && C) // B and C are labeled
+                    {
+                      if (B != C)
+                        lset[B] = C;
+
+                      L_vec[ind] = C;
+                    }
+                  else if (B) // B is object but C is not
+                    L_vec[ind] = B;
+                  else if (C) // C is object but B is not
+                    L_vec[ind] = C;
+                  else // B, C not object - new object
+                    {
+                      // label and put into table
+                      ntable++;
+                      L_vec[ind] = lset[ntable] = ntable;
+                    }
+                }
+              else if (n6)
+                {
+                  // Apply 6 connectedness. Seem there's more than one
+                  // possible way to do this for 2D images but for some
+                  // reason, the most common seems to be the top left pixel
+                  // and the bottom right
+                  // See http://en.wikipedia.org/wiki/Pixel_connectivity
+
+                  octave_idx_type D;
+                  // D is only required for n6 and n8
+                  if (r == 0 || c == 0)
+                    D = 0;
+                  else
+                    D = find (lset, L_vec[stride -1]);
+
+                  if (D) // D object, copy label and move on
+                    L_vec[ind] = D;
+                  else if (B && C) // B and C are labeled
+                    {
+                      if (B == C)
+                        L_vec[ind] = B;
+                      else
+                        {
+                          octave_idx_type tlabel = std::min (B, C);
+                          lset[B] = tlabel;
+                          lset[C] = tlabel;
+                          L_vec[ind] = tlabel;
+                        }
+                    }
+                  else if (B) // B is object but C is not
+                    L_vec[ind] = B;
+                  else if (C) // C is object but B is not
+                    L_vec[ind] = C;
+                  else // B, C, D not object - new object
+                    {
+                      // label and put into table
+                      ntable++;
+                      L_vec[ind] = lset[ntable] = ntable;
+                    }
+                }
+              else if (n8)
+                {
+                  octave_idx_type D, E;
+                  // D is only required for n6 and n8
+                  if (r == 0 || c == 0)
+                    D = 0;
+                  else
+                    D = find (lset, L_vec[stride -1]);
+
+                  // E is only required for n8
+                  if (c == 0 || r == nr -1)
+                    E = 0;
+                  else
+                    E = find (lset, L_vec[stride +1]);
+
+                  // apply 8 connectedness
+                  if (B || C || D || E)
+                    {
+                      octave_idx_type tlabel = D;
+                      if (D)
+                        ; // do nothing (tlabel is already D)
+                      else if (C)
+                        tlabel = C;
+                      else if (E)
+                        tlabel = E;
+                      else if (B)
+                        tlabel = B;
+
+                      L_vec[ind] = tlabel;
+
+                      if (B && B != tlabel)
+                        lset[B] = tlabel;
+                      if (C && C != tlabel)
+                        lset[C] = tlabel;
+                      if (D)
+                        // we don't check if B != tlabel since if B
+                        // is true, tlabel == B
+                        lset[D] = tlabel;
+                      if (E && E != tlabel)
+                        lset[E] = tlabel;
+                    }
+                  else
+                    {
+                      // label and put into table
+                      ntable++;  // run image through the look-up table
+                      L_vec[ind] = lset[ntable] = ntable;
+                    }
+                }
+            }
+          else
+            L_vec[ind] = 0; // A is not an object so leave it
+        }
+    }
+
+  const octave_idx_type numel = BW.numel ();
+
+  // consolidate component table
+  for (octave_idx_type i = 0; i <= ntable; i++)
+    lset[i] = find (lset, i);
+
+  // run image through the look-up table
+  for (octave_idx_type ind = 0; ind < numel; ind++)
+    L_vec[ind] = lset[L_vec[ind]];
+
+  // count up the objects in the image
+  for (octave_idx_type i = 0; i <= ntable; i++)
+    lset[i] = 0;
+
+  for (octave_idx_type ind = 0; ind < numel; ind++)
+    lset[L_vec[ind]]++;
+
+  // number the objects from 1 through n objects
+  octave_idx_type nobj = 0;
+  lset[0] = 0;
+  for (octave_idx_type i = 1; i <= ntable; i++)
+    if (lset[i] > 0)
+      lset[i] = ++nobj;
+
+  // Run through the look-up table again, so that their numbers
+  // match the number of labels
+  for (octave_idx_type ind = 0; ind < numel; ind++)
+    L_vec[ind] = lset[L_vec[ind]];
+
+  octave_value_list rval;
+  rval(0) = L;
+  rval(1) = double (nobj);
+  return rval;
+}
+
+DEFUN_DLD(bwlabeln, args, , "\
+-*- texinfo -*-\n\
+@deftypefn  {Loadable Function} {[@var{l}, @var{num}] =} bwlabeln (@var{bw})\n\
+@deftypefnx {Loadable Function} {[@var{l}, @var{num}] =} bwlabeln (@var{bw}, @var{n})\n\
+Label foreground objects in the n-dimensional binary image @var{bw}.\n\
+\n\
+The optional argument @var{n} sets the connectivity and defaults 26,\n\
+for 26-connectivity in 3-D images. Other possible values are 18 and 6\n\
+for 3-D images, 4 and 8 for 2-D images, or an arbitrary N-dimensional\n\
+binary connectivity mask where each dimension is of size 3.\n\
+\n\
+The output @var{l} is an Nd-array where 0 indicates a background\n\
+pixel, 1 indicates that the pixel belong to object number 1, 2 that\n\
+the pixel belong to object number 2, etc. The total number of objects\n\
+is @var{num}.\n\
+\n\
+The algorithm used is a disjoint-set data structure, a.k.a. union-find.\n\
+See, for example, http://en.wikipedia.org/wiki/Union-find\n\
+\n\
+@seealso{bwconncomp, bwlabel, regionprops}\n\
+@end deftypefn\n\
+")
+{
+  octave_value_list rval;
+
+  const octave_idx_type nargin = args.length ();
+  if (nargin < 1 || nargin > 2)
+    {
+      print_usage ();
+      return rval;
+    }
+
+  if (!args(0).is_numeric_type () && !args(0).is_bool_type ())
+    {
+      error ("bwlabeln: BW must be a numeric or logical matrix");
+      return rval;
+    }
+  boolNDArray BW = args(0).bool_array_value ();
+  dim_vector size_vec = BW.dims ();
+
+  //Connectivity mask
+  boolNDArray conn_mask;
+  if (nargin == 2)
+    {
+      if (args(1).is_real_scalar ())
+        {
+          double N = args(1).scalar_value ();
+          if (size_vec.length () == 2 && N != 4 && N != 8)
+            error ("bwlabeln: for 2d arrays, scalar N must be 4 or 8");
+          else if (size_vec.length () == 3 && N != 6 && N != 18 && N != 26)
+            error ("bwlabeln: for 3d arrays, scalar N must be 4 or 8");
+          else if (size_vec.length () > 3)
+            error ("bwlabeln: for higher-dimensional arrays, N must be a "
+                   "connectivity mask");
+          else
+            conn_mask = get_mask (N);
+        }
+      else if (args(1).is_numeric_type () || args(1).is_bool_type ())
+        {
+          conn_mask = args(1).bool_array_value ();
+          dim_vector conn_mask_dims = conn_mask.dims ();
+          if (conn_mask_dims.length () != size_vec.length ())
+            error ("bwlabeln: connectivity mask N must have the same "
+                   "dimensions as BW");
+          for (octave_idx_type i = 0; i < conn_mask_dims.length (); i++)
+            {
+              if (conn_mask_dims(i) != 3)
+                {
+                  error ("bwlabeln: connectivity mask N must have all "
+                         "dimensions equal to 3");
+                }
+            }
+        }
+      else
+        error ("bwlabeln: second input argument must be a real scalar "
+               "or a connectivity array");
+    }
+  else
+    // Get the maximal mask that has same number of dims as BW.
+    conn_mask = get_mask (BW);
+
+  if (error_state)
+    return rval;
+
+  // The implementation in bwlabel_2d is faster so use it if we can
+  const octave_idx_type ndims = BW.ndims ();
+  if (ndims == 2 && boolMatrix (conn_mask) == get_mask (4))
+    rval = bwlabel_2d (BW, 4);
+  else if (ndims == 2 && boolMatrix (conn_mask) == get_mask (8))
+    rval = bwlabel_2d (BW, 8);
+  else
+    rval = bwlabel_nd (BW, conn_mask);
+
+  return rval;
+}
+
+// PKG_ADD: autoload ("bwlabel", which ("bwlabeln"));
+// PKG_DEL: autoload ("bwlabel", which ("bwlabeln"), "remove");
+DEFUN_DLD(bwlabel, args, , "\
+-*- texinfo -*-\n\
+@deftypefn  {Loadable Function} {[@var{l}, @var{num}] =} bwlabel(@var{BW})\n\
+@deftypefnx {Loadable Function} {[@var{l}, @var{num}] =} bwlabel(@var{BW}, @var{n})\n\
+Label binary 2 dimensional image.\n\
+\n\
+Labels foreground objects in the binary image @var{bw}.\n\
+The output @var{l} is a matrix where 0 indicates a background pixel,\n\
+1 indicates that the pixel belong to object number 1, 2 that the pixel\n\
+belong to object number 2, etc.\n\
+The total number of objects is @var{num}.\n\
+\n\
+To pixels belong to the same object if the are neighbors. By default\n\
+the algorithm uses 8-connectivity to define a neighborhood, but this\n\
+can be changed through the argument @var{n} that can be either 4, 6, or 8.\n\
+\n\
+@seealso{bwconncomp, bwlabeln, regionprops}\n\
+@end deftypefn\n\
+")
+{
+  octave_value_list rval;
+
+  const octave_idx_type nargin = args.length ();
+  if (nargin < 1 || nargin > 2)
+    {
+      print_usage ();
+      return rval;
+    }
+
+  // We do not check error state after conversion to boolMatrix
+  // because what we want is to actually get a boolean matrix
+  // with all non-zero elements as true (Matlab compatibility).
+  if (! args(0).is_numeric_type () && ! args(0).is_bool_type ())
+    {
+      error ("bwlabeln: first input argument must be an ND array");
+      return rval;
+    }
+  const boolMatrix BW = args(0).bool_array_value ();
+
+  // N-hood connectivity
+  const octave_idx_type n = nargin < 2 ? 8 : args(1).idx_type_value ();
+  if (error_state || (n != 4 && n!= 6 && n != 8))
+    {
+      error ("bwlabel: BW must be a 2 dimensional matrix");
+      return rval;
+    }
+  return bwlabel_2d (BW, n);
+}
+
+/*
+%!assert (bwlabel (logical ([0 1 0; 0 0 0; 1 0 1])), [0 2 0; 0 0 0; 1 0 3]);
+%!assert (bwlabel ([0 1 0; 0 0 0; 1 0 1]), [0 2 0; 0 0 0; 1 0 3]);
+
+## Support any type of real non-zero value
+%!assert (bwlabel ([0 -1 0; 0 0 0; 5 0 0.2]), [0 2 0; 0 0 0; 1 0 3]);
+
+%!shared in, out
+%!
+%! in = [  0   1   1   0   0   1   0   0   0   0
+%!         0   0   0   1   0   0   0   0   0   1
+%!         0   1   1   0   0   0   0   0   1   1
+%!         1   0   0   0   0   0   0   1   0   0
+%!         0   0   0   0   0   1   1   0   0   0
+%!         0   0   0   0   0   0   0   0   0   0
+%!         0   0   0   1   0   0   0   0   0   0
+%!         0   0   0   0   1   1   0   1   0   0
+%!         0   0   0   1   0   1   0   1   0   1
+%!         1   1   0   0   0   0   0   1   1   0];
+%!
+%! out = [ 0   3   3   0   0   9   0   0   0   0
+%!         0   0   0   5   0   0   0   0   0  13
+%!         0   4   4   0   0   0   0   0  13  13
+%!         1   0   0   0   0   0   0  11   0   0
+%!         0   0   0   0   0  10  10   0   0   0
+%!         0   0   0   0   0   0   0   0   0   0
+%!         0   0   0   6   0   0   0   0   0   0
+%!         0   0   0   0   8   8   0  12   0   0
+%!         0   0   0   7   0   8   0  12   0  14
+%!         2   2   0   0   0   0   0  12  12   0];
+%!assert (nthargout ([1 2], @bwlabel, in, 4), {out, 14});
+%!assert (nthargout ([1 2], @bwlabel, logical (in), 4), {out, 14});
+%!
+%! out = [ 0   3   3   0   0   7   0   0   0   0
+%!         0   0   0   3   0   0   0   0   0  11
+%!         0   4   4   0   0   0   0   0  11  11
+%!         1   0   0   0   0   0   0   9   0   0
+%!         0   0   0   0   0   8   8   0   0   0
+%!         0   0   0   0   0   0   0   0   0   0
+%!         0   0   0   5   0   0   0   0   0   0
+%!         0   0   0   0   5   5   0  10   0   0
+%!         0   0   0   6   0   5   0  10   0  12
+%!         2   2   0   0   0   0   0  10  10   0];
+%!assert (nthargout ([1 2], @bwlabel, in, 6), {out, 12});
+%!assert (nthargout ([1 2], @bwlabel, logical (in), 6), {out, 12});
+%!
+%! ## The labeled image is not the same as Matlab, but they are
+%! ## labeled correctly. Do we really need to get them properly
+%! ## ordered? (the algorithm in bwlabeln does it)
+%! mout = [0   1   1   0   0   4   0   0   0   0
+%!         0   0   0   1   0   0   0   0   0   5
+%!         0   1   1   0   0   0   0   0   5   5
+%!         1   0   0   0   0   0   0   5   0   0
+%!         0   0   0   0   0   5   5   0   0   0
+%!         0   0   0   0   0   0   0   0   0   0
+%!         0   0   0   3   0   0   0   0   0   0
+%!         0   0   0   0   3   3   0   6   0   0
+%!         0   0   0   3   0   3   0   6   0   6
+%!         2   2   0   0   0   0   0   6   6   0];
+%!
+%! out = [ 0   2   2   0   0   4   0   0   0   0
+%!         0   0   0   2   0   0   0   0   0   5
+%!         0   2   2   0   0   0   0   0   5   5
+%!         2   0   0   0   0   0   0   5   0   0
+%!         0   0   0   0   0   5   5   0   0   0
+%!         0   0   0   0   0   0   0   0   0   0
+%!         0   0   0   3   0   0   0   0   0   0
+%!         0   0   0   0   3   3   0   6   0   0
+%!         0   0   0   3   0   3   0   6   0   6
+%!         1   1   0   0   0   0   0   6   6   0];
+%!assert (nthargout ([1 2], @bwlabel, in, 8), {out, 6});
+%!assert (nthargout ([1 2], @bwlabel, logical (in), 8), {out, 6});
+%!
+%!error bwlabel (rand (10) > 0.8, "text")
+%!error bwlabel ("text", 6)
+*/
