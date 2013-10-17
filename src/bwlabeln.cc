@@ -710,11 +710,16 @@ can be changed through the argument @var{n} that can be either 4, 6, or 8.\n\
   // We do not check error state after conversion to boolMatrix
   // because what we want is to actually get a boolean matrix
   // with all non-zero elements as true (Matlab compatibility).
-  if (! args(0).is_numeric_type () && ! args(0).is_bool_type ())
+  if ((! args(0).is_numeric_type () && ! args(0).is_bool_type ()) ||
+      args(0).ndims () != 2)
     {
-      error ("bwlabeln: first input argument must be an ND array");
+      error ("bwlabel: BW must be a 2D matrix");
       return rval;
     }
+  // For some reason, we can't use bool_matrix_value() to get a
+  // a boolMatrix since it will error if there's values other
+  // than 0 and 1 (whatever bool_array_value() does, bool_matrix_value()
+  // does not).
   const boolMatrix BW = args(0).bool_array_value ();
 
   // N-hood connectivity
@@ -800,6 +805,7 @@ can be changed through the argument @var{n} that can be either 4, 6, or 8.\n\
 %!assert (nthargout ([1 2], @bwlabel, in, 8), {out, 6});
 %!assert (nthargout ([1 2], @bwlabel, logical (in), 8), {out, 6});
 %!
+%!error bwlabel (rand (10, 10, 10) > 0.8, 4)
 %!error bwlabel (rand (10) > 0.8, "text")
 %!error bwlabel ("text", 6)
 */
