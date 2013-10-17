@@ -733,6 +733,13 @@ can be changed through the argument @var{n} that can be either 4, 6, or 8.\n\
 }
 
 /*
+%!shared in
+%! in = rand (10) > 0.8;
+%!assert (bwlabel (in, 4), bwlabeln (in, 4));
+%!assert (bwlabel (in, 4), bwlabeln (in, [0 1 0; 1 0 1; 0 1 0]));
+%!assert (bwlabel (in, 8), bwlabeln (in, 8));
+%!assert (bwlabel (in, 8), bwlabeln (in, [1 1 1; 1 0 1; 1 1 1]));
+
 %!assert (bwlabel (logical ([0 1 0; 0 0 0; 1 0 1])), [0 2 0; 0 0 0; 1 0 3]);
 %!assert (bwlabel ([0 1 0; 0 0 0; 1 0 1]), [0 2 0; 0 0 0; 1 0 3]);
 
