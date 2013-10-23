@@ -634,6 +634,32 @@ endfunction
 %!assert (bwmorph (slBW, "skel-lantuejoul",   3), rslBW);
 %!assert (bwmorph (slBW, "skel-lantuejoul", Inf), rslBW);
 
+## Test for bug #39293
+%!test
+%! bw = [
+%!   0   1   1   1   1   1
+%!   0   1   1   1   1   1
+%!   0   1   1   1   1   1
+%!   1   1   1   1   1   1
+%!   1   1   1   1   1   1
+%!   1   1   1   1   1   1
+%!   1   1   1   1   1   0
+%!   1   1   1   1   1   0
+%!   1   1   1   1   1   0];
+%!
+%! final = logical ([
+%!   0   1   0   0   0   1
+%!   0   0   1   0   1   0
+%!   0   0   0   1   0   0
+%!   0   0   0   1   0   0
+%!   0   0   1   1   0   0
+%!   0   0   1   0   0   0
+%!   0   0   1   0   0   0
+%!   0   1   0   1   0   0
+%!   1   0   0   0   1   0]);
+%! assert (bwmorph (bw, "skel", Inf), final)
+%! assert (bwmorph (bw, "skel", 3), final)
+
 %!error bwmorph ("not a matrix", "dilate")
 
 ## this makes sense to be an error but for Matlab compatibility, it is not
