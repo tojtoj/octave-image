@@ -30,6 +30,7 @@
       findbounds
       impixel
       imtransform
+      intlut
       maketform
       montage
       strel
@@ -56,6 +57,7 @@
       bwborder
       impad
       imrotate_Fourier
+      uintlut
 
  ** The function im2col has been completely rewritten for massive performace
     increase (increases greater than 500X have been observed, with biggest

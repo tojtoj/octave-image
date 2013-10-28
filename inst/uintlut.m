@@ -17,6 +17,8 @@
 ## @deftypefn {Function File} {@var{B} =} uintlut (@var{A}, @var{LUT})
 ## Computes matrix B by using A as an index to lookup table LUT.
 ##
+## This function has been deprecated. Use @code{intlut} instead.
+##
 ## B = uintlut(A, LUT) calculates a matrix B by using @var{LUT} as a
 ## lookup table indexed by values in @var{A}.
 ## 
@@ -27,11 +29,16 @@ function B = uintlut (A, LUT)
   if (nargin != 2)
     print_usage;
   endif
+  persistent warned = false;
+  if (! warned)
+    warned = true;
+    warning ("Octave:deprecated-function",
+             ["`uintlut' has been deprecated in favor of `intlut'. This " ...
+              "function will be removed from future versions of the `image'" ...
+              " package"]);
+  endif
 
-  ## We convert indexing array A to double since even CVS version of
-  ## Octave is unable to use non-double arrays as indexing types. This
-  ## won't be needed in the future eventually.
-  B = LUT(double(A));
+  B = LUT(A);
 endfunction
 
 %!demo

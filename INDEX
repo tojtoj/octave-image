@@ -69,6 +69,7 @@ Filtering and Transforms
  fspecial
  imfilter
  imtransform
+ intlut
  iradon
  nonmax_supress
  phantom
