@@ -33,6 +33,7 @@ inst/applylut.m                         GPLv3+
 inst/bestblk.m                          GPLv3+
 inst/blockproc.m                        GPLv3+
 inst/bwarea.m                           GPLv3+
+inst/bwareaopen.m                       GPLv3+
 inst/bwborder.m                         GPLv3+
 inst/bwboundaries.m                     GPLv3+
 inst/bwconncomp.m                       GPLv3+

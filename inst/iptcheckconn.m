@@ -49,7 +49,7 @@ function iptcheckconn (con, func_name, var_name, pos)
   ## error ends in \n so the back trace of the error is not show. This is on
   ## purpose since the whole idea of this function is already to give a properly
   ## formatted error message
-  if (!any (strcmp (class (con), {'logical', 'double'})) || !isreal (con) || !isnumeric (con))
+  if (! any (strcmp (class (con), {'logical', 'double'})) || ! isreal (con))
     error ("%sConnectivity must be a real number of the logical or double class.\n", base_msg);
   elseif (isscalar (con))
     if (!any (con == [1 4 6 8 18 26]))

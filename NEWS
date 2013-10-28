@@ -25,6 +25,7 @@
 
  ** The following functions are new:
 
+      bwareaopen
       checkerboard
       cp2tform
       findbounds

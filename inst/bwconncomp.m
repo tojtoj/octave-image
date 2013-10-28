@@ -70,7 +70,6 @@ function CC = bwconncomp (bw, N)
   endif
   [conn, N] = make_conn ("bwconncomp", 2, ndims (bw), N);
 
-
   [bw, n_obj] = bwlabeln (logical (bw), conn);
   ## We should probably implement this as the first part of bwlabeln
   ## as getting the indices is the first part of its code. Here we are
