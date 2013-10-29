@@ -1,4 +1,5 @@
 ## Copyright (C) 2004 Josep Mones i Teixidor <jmones@puntbarra.com>
+## Copyright (C) 2013 Carnë Draug <carandraug@octave.org>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -14,12 +15,12 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {@var{B} =} im2col (@var{A}, [@var{m}, @var{n}], @var{block_type})
-## @deftypefnx {Function File} {@var{B} =} im2col (@var{A}, [@var{m}, @var{n}])
-## @deftypefnx {Function File} {@var{B} =} im2col (@var{A}, 'indexed', @dots{})
-## Rearranges image blocks into columns.
+## @deftypefn  {Function File} {} im2col (@var{A}, @var{block_size})
+## @deftypefnx {Function File} {} im2col (@var{A}, v, @var{block_type})
+## @deftypefnx {Function File} {} im2col (@var{A}, "indexed", @dots{})
+## Rearrange image blocks into columns.
 ##
-## @code{B=im2col(A, [m, n], blocktype)} rearranges blocks in @var{A}
+## @code{B=im2col(A, block_size, blocktype)} rearranges blocks in @var{A}
 ## into columns in a way that's determined by @var{block_type}, which
 ## can take the following values:
 ##
@@ -44,7 +45,7 @@
 ## the complementary function @code{col2im} expects.
 ## @end table
 ##
-## @code{B=im2col(A,[m,n])} takes @code{distinct} as a default value for
+## @code{B=im2col(A, block_size)} takes @code{distinct} as a default value for
 ## @var{block_type}. 
 ##
 ## @code{B=im2col(A,'indexed', @dots{})} will treat @var{A} as an indexed
@@ -59,92 +60,88 @@
 ## @end deftypefn
 
 function B = im2col (A, varargin)
-  if(nargin < 2 || nargin > 4)
-    print_usage;
+  if (nargin < 2 || nargin > 4)
+    print_usage ();
+  elseif (! ismatrix (A) || ! (isnumeric (A) || islogical (A)))
+    error ("im2col: A must be a numeric of logical matrix");
   endif
+  p = 1;  # varargin param being processsed
 
-  ## check 'indexed' presence
-  indexed=false;
-  p=1;
-  if(ischar(varargin{1}) && strcmp(varargin{1}, "indexed"))
-    if(nargin<3)
-      print_usage;
+  ## Defaults
+  block_type  = "sliding";
+  padval      = 0;
+  indexed     = false;
+
+  ## Check for 'indexed' presence
+  if (ischar (varargin{p}) && strcmpi (varargin{p}, "indexed"))
+    indexed = true;
+    if (nargin < 3)
+      print_usage ();
     endif
-    indexed=true;
-    p+=1;
-    if(isa(A,"uint8") || isa(A,"uint16"))
-      padval=0;
-    else
-      padval=1;
+    if (isfloat (A))
+      ## We pad with value of 1 for indexed images of floating point class,
+      ## because lowest index is 1 for them (it's 0 for integer indexed images).
+      padval = 1;
     endif
-  else
-    padval=0;
+    p++;
+  elseif (nargin > 3)
+    ## If we didn't have "indexed" but had 4 parameters there's an error
+    print_usage ();
   endif
 
   ## check [m,n]
-  if(!isvector(varargin{p}))
-    error("im2col: expected [m,n] but param is not a vector.");
+  block_size = varargin{p};
+  if (! isnumeric (block_size) || ! isvector (block_size) ||
+      any (block_size(:) < 1))
+    error ("im2col: BLOCK_SIZE must be a vector of positive elements.");
+  elseif (numel (block_size) > ndims (A))
+    error ("im2col: BLOCK_SIZE can't have more elements than the dimensions of A");
   endif
-  if(length(varargin{p})!=2)
-    error("im2col: expected [m,n] but param has wrong length.");
-  endif
-  m=varargin{p}(1);
-  n=varargin{p}(2);
-  p+=1;
+  block_size(end+1:ndims(A)) = 1; # expand singleton dimensions
+  block_size = block_size(:).'; # make sure it's a row vector
+  p++;
 
-  block_type='sliding';
-  if(nargin>p)
+  if (nargin > p)
     ## we have block_type param
-    if(!ischar(varargin{p}))
+    if (! ischar (varargin{p}))
       error("im2col: invalid parameter block_type.");
     endif
-    block_type=varargin{p};
-    p+=1;
+    block_type = varargin{p};
   endif
 
-  ## if we didn't have 'indexed' but had 4 parameters there's an error
-  if(nargin>p)
-    print_usage;
-  endif
-  
-  ## common checks
-  if(!ismatrix(A))
-    error("im2col: A should be a matrix (or vector).");
-  endif
-
-  switch(block_type)
-    case('distinct')
-      ## calc needed padding
-      sp=mod(-size(A)',[m;n]);
-
-      if(any(sp))
-        A=padarray(A,sp,padval,'post');
+  switch (tolower (block_type))
+    case "distinct"
+      ## Calculate needed padding
+      sp = mod (-size (A), block_size);
+      if (any (sp))
+        A = padarray (A, sp, padval, "post");
       endif
 
-      ## iterate through all blocks
-      B=[];
-      for i=1:m:size(A,1) ## up to bottom
-        for j=1:n:size(A,2) ## left to right
-          ## TODO: check if we can horzcat([],uint8([10;11])) in a
-          ## future Octave version > 2.1.58
-          if(isempty(B))
-            B=A(i:i+m-1,j:j+n-1)(:);
-          else
-            B=horzcat(B, A(i:i+m-1,j:j+n-1)(:));
-          endif
-        endfor
-      endfor
-      
-    case('sliding')
-      if(indexed)
-        disp("WARNING: 'indexed' has no sense when using sliding.");
+      ## Create the dimensions arguments for mat2cell (one per dimension
+      ## with the length of that dimension repeated the number of blocks
+      ## for that dimension)
+      n_blocks   = size (A) ./ block_size;
+      cell_split = arrayfun (@(x) repmat (block_size(x), [1 n_blocks(x)]),
+                             1:numel (block_size), "UniformOutput", false);
+
+      ## This functions may be a good candidate to rewrite in C++, making
+      ## use of the code in mat2cell without the need to convert between
+      ## cell and matrix and transposing.
+      B_cell = mat2cell (A, cell_split{:})';
+      B = cell2mat (cellfun (@(x) x(:), B_cell(:), "UniformOutput", false)');
+
+    case "sliding"
+      if (any (size (A) < block_size))
+        error("im2col: no dimension of A can be greater than BLOCK_SIZE in sliding");
+      elseif (ndims (A) > 2)
+        ## TODO: implement n-dimensional sliding
+        error ("im2col: only 2 dimensional are supported for sliding");
       endif
-      if(m>size(A,1) || n>size(A,2))
-        error("im2col: block size can't be greater than image size in sliding");
-      endif
+      m = block_size(1);
+      n = block_size(2);
       ## TODO: check if matlab uses top-down and left-right order
-      B=[];
-      for j=1:1:size(A,2)-n+1 ## left to right
+      B = [];
+      for j = 1:1:size(A,2)-n+1 ## left to right
         for i=1:1:size(A,1)-m+1 ## up to bottom
           ## TODO: check if we can horzcat([],uint8([10;11])) in a
           ## future Octave version > 2.1.58
@@ -155,9 +152,9 @@ function B = im2col (A, varargin)
           endif
         endfor
       endfor
-      
+
     otherwise
-      error("im2col: invalid block_type.");
+      error ("im2col: invalid BLOCK_TYPE `%s'.", block_type);
   endswitch
 
 endfunction
