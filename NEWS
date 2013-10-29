@@ -57,6 +57,11 @@
       impad
       imrotate_Fourier
 
+ ** The function im2col has been completely rewritten for massive performace
+    increase (increases greater than 500X have been observed, with biggest
+    differences for smaller blocks and sliding option), and support of
+    N-dimensional blocks and images.
+
  ** rgb2ycbcr was completely rewritten to accept images of other classes, and
     colormaps.  A new argument was implemented to convert the RGB values
     according to different standards.

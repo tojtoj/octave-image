@@ -1,4 +1,3 @@
-## Copyright (C) 2004 Josep Mones i Teixidor <jmones@puntbarra.com>
 ## Copyright (C) 2013 Carnë Draug <carandraug@octave.org>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
@@ -137,19 +136,19 @@ function B = im2col (A, varargin)
         ## TODO: implement n-dimensional sliding
         error ("im2col: only 2 dimensional are supported for sliding");
       endif
+      n_slides  = size (A) - block_size +1;
+      n_elems   = prod (block_size);
+      n_blocks  = prod (n_slides);
+
+      B = zeros (n_elems, n_blocks, class (A));
+      ## TODO: vectorize this thing and implement N-dimensional. Most likely
+      ##       needs to be written as an oct function
       m = block_size(1);
       n = block_size(2);
-      ## TODO: check if matlab uses top-down and left-right order
-      B = [];
+      col = 1;
       for j = 1:1:size(A,2)-n+1 ## left to right
         for i=1:1:size(A,1)-m+1 ## up to bottom
-          ## TODO: check if we can horzcat([],uint8([10;11])) in a
-          ## future Octave version > 2.1.58
-          if(isempty(B))
-            B=A(i:i+m-1,j:j+n-1)(:);
-          else
-            B=horzcat(B, A(i:i+m-1,j:j+n-1)(:));
-          endif
+          B(:,col++) = A(i:i+m-1,j:j+n-1)(:);
         endfor
       endfor
 
