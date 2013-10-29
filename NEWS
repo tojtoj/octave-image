@@ -53,6 +53,7 @@
  ** The following functions have been deprecated (see their help text
     for the recommended alternatives):
 
+      bwborder
       impad
       imrotate_Fourier
 
