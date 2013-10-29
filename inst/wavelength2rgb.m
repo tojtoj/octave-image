@@ -93,52 +93,45 @@ function rgb = wavelength2rgb (wavelength, out_class = "double", gamma = 0.8)
   ## we already initialized the matrix with zeros()
   get_rgb_mask = @(mask) repmat (mask, [ones(1, ndims (mask) - size_adjust) 3]);
 
-  ## FIXME when warning for broadcasting is turned off by default, this
-  ## unwind_protect block could be removed
-  bc_warn = warning ("query", "Octave:broadcast");
-  unwind_protect
-    warning ("off", "Octave:broadcast");
-    mask    = wavelength >= 380 & wavelength < 440;
-    rgbmask = get_rgb_mask (mask);
-    rgb(rgbmask & Rmask) = -(wavelength(mask) - 440) / 60; # 60 comes from 440-380
-    ## skiping green channel (values of zero)
-    rgb(rgbmask & Bmask) = 1;
+  warning ("off", "Octave:broadcast", "local");
 
-    mask    = wavelength >= 440 & wavelength < 490;
-    rgbmask = get_rgb_mask (mask);
-    ## skiping red channel (values of zero)
-    rgb(rgbmask & Gmask) = (wavelength(mask) - 440) / 50; # 50 comes from 490-440
-    rgb(rgbmask & Bmask) = 1;
+  mask    = wavelength >= 380 & wavelength < 440;
+  rgbmask = get_rgb_mask (mask);
+  rgb(rgbmask & Rmask) = -(wavelength(mask) - 440) / 60; # 60 comes from 440-380
+  ## skiping green channel (values of zero)
+  rgb(rgbmask & Bmask) = 1;
 
-    mask    = wavelength >= 490 & wavelength < 510;
-    rgbmask = get_rgb_mask (mask);
-    ## skiping red channel (values of zero)
-    rgb(rgbmask & Gmask) = 1;
-    rgb(rgbmask & Bmask) = -(wavelength(mask) - 510) / 20; # 20 comes from 510-490
+  mask    = wavelength >= 440 & wavelength < 490;
+  rgbmask = get_rgb_mask (mask);
+  ## skiping red channel (values of zero)
+  rgb(rgbmask & Gmask) = (wavelength(mask) - 440) / 50; # 50 comes from 490-440
+  rgb(rgbmask & Bmask) = 1;
 
-    mask    = wavelength >= 510 & wavelength < 580;
-    rgbmask = get_rgb_mask (mask);
-    rgb(rgbmask & Rmask) = (wavelength(mask) - 510) / 70; # 70 comes from 580-510
-    rgb(rgbmask & Gmask) = 1;
-    ## skiping blue channel (values of zero)
+  mask    = wavelength >= 490 & wavelength < 510;
+  rgbmask = get_rgb_mask (mask);
+  ## skiping red channel (values of zero)
+  rgb(rgbmask & Gmask) = 1;
+  rgb(rgbmask & Bmask) = -(wavelength(mask) - 510) / 20; # 20 comes from 510-490
 
-    mask    = wavelength >= 580 & wavelength < 645;
-    rgbmask = get_rgb_mask (mask);
-    rgb(rgbmask & Rmask) = 1;
-    rgb(rgbmask & Gmask) = -(wavelength(mask) - 645) / 65; # 65 comes from 645-580
-    ## skiping blue channel (values of zero)
+  mask    = wavelength >= 510 & wavelength < 580;
+  rgbmask = get_rgb_mask (mask);
+  rgb(rgbmask & Rmask) = (wavelength(mask) - 510) / 70; # 70 comes from 580-510
+  rgb(rgbmask & Gmask) = 1;
+  ## skiping blue channel (values of zero)
 
-    mask    = wavelength >= 645 & wavelength <= 780;
-    rgbmask = get_rgb_mask (mask);
-    rgb(rgbmask & Rmask) = 1;
-    ## skiping green channel (values of zero)
-    ## skiping blue channel (values of zero)
+  mask    = wavelength >= 580 & wavelength < 645;
+  rgbmask = get_rgb_mask (mask);
+  rgb(rgbmask & Rmask) = 1;
+  rgb(rgbmask & Gmask) = -(wavelength(mask) - 645) / 65; # 65 comes from 645-580
+  ## skiping blue channel (values of zero)
 
-    ## all other wavelengths have values of zero in all channels (black)
-  unwind_protect_cleanup
-    ## restore broadcats warning status
-    warning (bc_warn.state, "Octave:broadcast");
-  end_unwind_protect
+  mask    = wavelength >= 645 & wavelength <= 780;
+  rgbmask = get_rgb_mask (mask);
+  rgb(rgbmask & Rmask) = 1;
+  ## skiping green channel (values of zero)
+  ## skiping blue channel (values of zero)
+
+  ## all other wavelengths have values of zero in all channels (black)
 
   ## let intensity fall off near the vision limits
   ## set the factor

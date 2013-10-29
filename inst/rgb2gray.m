@@ -36,37 +36,26 @@ function gray = rgb2gray (rgb)
 
   if (iscolormap (rgb))
     gray = rgb2ntsc (rgb) (:, 1) * ones (1, 3);
+
   elseif (isimage (rgb) && ndims (rgb) == 3)
+    warning ("off", "Octave:broadcast", "local");
 
-    ## FIXME when warning for broadcasting is turned off by default, this
-    ## unwind_protect block could be removed
+    ## mutiply each color by the luminance factor (this is also matlab compatible)
+    ##      0.29894 * red + 0.58704 * green + 0.11402 * blue
+    gray = im2double (rgb) .* permute ([0.29894, 0.58704, 0.11402], [1, 3, 2]);
+    gray = sum (gray, 3);
 
-    ## we are using broadcasting on the code below so we turn off the
-    ## warnings but will restore to previous state at the end
-    bc_warn = warning ("query", "Octave:broadcast");
-    unwind_protect
-      warning ("off", "Octave:broadcast");
+    switch (class (rgb))
+    case {"single", "double"}
+      ## do nothing. All is good
+    case "uint8"
+      gray = im2uint8 (gray);
+    case "uint16"
+      gray = im2uint16 (gray);
+    otherwise
+      error ("rgb2gray: unsupported class %s", class(rgb));
+    endswitch
 
-      ## mutiply each color by the luminance factor (this is also matlab compatible)
-      ##      0.29894 * red + 0.58704 * green + 0.11402 * blue
-      gray = im2double (rgb) .* permute ([0.29894, 0.58704, 0.11402], [1, 3, 2]);
-      gray = sum (gray, 3);
-
-      switch (class (rgb))
-      case {"single", "double"}
-        ## do nothing. All is good
-      case "uint8"
-        gray = im2uint8 (gray);
-      case "uint16"
-        gray = im2uint16 (gray);
-      otherwise
-        error ("rgb2gray: unsupported class %s", class(rgb));
-      endswitch
-
-    unwind_protect_cleanup
-      ## restore broadcats warning status
-      warning (bc_warn.state, "Octave:broadcast");
-    end_unwind_protect
   else
     error ("rgb2gray: the input must either be an RGB image or a colormap");
   endif
