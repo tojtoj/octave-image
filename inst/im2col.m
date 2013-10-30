@@ -15,48 +15,58 @@
 
 ## -*- texinfo -*-
 ## @deftypefn  {Function File} {} im2col (@var{A}, @var{block_size})
-## @deftypefnx {Function File} {} im2col (@var{A}, v, @var{block_type})
+## @deftypefnx {Function File} {} im2col (@var{A}, @var{block_size}, @var{block_type})
 ## @deftypefnx {Function File} {} im2col (@var{A}, "indexed", @dots{})
-## Rearrange image blocks into columns.
+## Rearrange blocks from matrix into columns.
 ##
-## @code{B=im2col(A, block_size, blocktype)} rearranges blocks in @var{A}
-## into columns in a way that's determined by @var{block_type}, which
-## can take the following values:
+## Rearranges blocks of size @var{block_size}, sampled from the matrix @var{A},
+## into a serie of columns.  This effectively transforms any image into a
+## 2 dimensional matrix, a block per column, which can then be passed to
+## other functions that perform calculations along columns.
 ##
-## @table @code
-## @item distinct
-## Rearranges each distinct @var{m}-by-@var{n} block in image @var{A}
-## into a column of @var{B}. Blocks are scanned from left to right and
-## the up to bottom in @var{A}, and columns are added to @var{B} from
-## left to right. If @var{A}'s size is not multiple @var{m}-by-@var{n}
-## it is padded.
-## @item sliding
-## Rearranges any @var{m}-by-@var{n} sliding block of @var{A} in a
-## column of @var{B}, without any padding, so only sliding blocks which
-## can be built using a full @var{m}-by-@var{n} neighbourhood are taken.
-## In consequence, @var{B} has @var{m}*@var{n} rows and
-## (@var{mm}-@var{m}+1)*(@var{nn}-@var{n}+1) columns (where @var{mm} and
-## @var{nn} are the size of @var{A}).
+## Both blocks and matrix @var{A} can have any number of dimensions (though
+## for sliding blocks, a block can't be larger than @var{A} in any dimension).
+## Blocks are always accessed in column-major order (like Octave arrays are
+## stored) so that a matrix can be easily reconstructed with @code{reshape}
+## and @code{col2im}. For a 2 dimensional matrix, blocks are taken first from
+## the top to the bottom, and then from the left to the right of the matrix.
 ##
-## This case is thought to be used applying operations on columns of
-## @var{B} (for instance using sum(:)), so that result is a
-## 1-by-(@var{mm}-@var{m}+1)*(@var{nn}-@var{n}+1) vector, that is what
-## the complementary function @code{col2im} expects.
+## The sampling can be performed in two different ways as defined by
+## @var{block_type} (defaults to @qcode{"sliding"}):
+##
+## @table @qcode
+## @item "distinct"
+## Each block is completely distinct from the other, with no overlapping
+## elements.  The matrix @var{A} is padded as required with a value of 0
+## (or 1 for non-integer indexed images).
+##
+## @item "sliding"
+## A single block slides across @var{A} without any padding.
+##
+## While this can be used to perform sliding window operations such as maximum
+## and median filters, specialized functions such as @code{imdilate} and
+## @code{medfilt2} will be more efficient.
+##
+## Note that large images being arranged in large blocks can easily exceed the
+## maximum matrix size (see @code{sizemax}).  For example, a matrix @var{A} of
+## size 500x500, with sliding block of size [100 100], would require a matrix
+## with 2.4108e+09 elements, i.e., the number of elements in a block,
+## @code{100*100}, times the number of blocks, @code{(500-10+1) * (500-10+1)}.
+##
 ## @end table
 ##
-## @code{B=im2col(A, block_size)} takes @code{distinct} as a default value for
-## @var{block_type}. 
+## If @var{A} is an indexed image, the second argument should be the
+## string @qcode{"indexed"} so that any required padding is done correctly.
+## The padding value will be 0 except for indexed images of class uint8
+## and uint16.
 ##
-## @code{B=im2col(A,'indexed', @dots{})} will treat @var{A} as an indexed
-## image, so it will pad using 1 if @var{A} is double. All other cases
-## (incluing indexed matrices with uint8 and uint16 types and
-## non-indexed images) will use 0 as padding value.
-##
-## Any padding needed in 'distinct' processing will be added at right
-## and bottom edges of the image.
-##
-## @seealso{col2im}
+## @seealso{blockproc, bestblk, col2im, colfilt, nlfilter, reshape}
 ## @end deftypefn
+
+## Matlab behaves weird with N-dimensional images. It ignores block_size
+## elements after the first 2, and treat N-dimensional as if the extra
+## dimensions were concatenated horizontally. We are performing real
+## N-dimensional conversion of image blocks into colums.
 
 function B = im2col (A, varargin)
   if (nargin < 2 || nargin > 4)
@@ -77,9 +87,12 @@ function B = im2col (A, varargin)
     if (nargin < 3)
       print_usage ();
     endif
-    if (isfloat (A))
-      ## We pad with value of 1 for indexed images of floating point class,
-      ## because lowest index is 1 for them (it's 0 for integer indexed images).
+    ## We pad with value of 0 for indexed images of uint8 or uint16 class.
+    ## Indexed images of signed integer, or above uint16, are treated the
+    ## same as floating point (a value of 1 is index 1 on the colormap)
+    if (any (isa (A, {"uint8", "uint16"})))
+      padval = 0;
+    else
       padval = 1;
     endif
     p++;
@@ -93,11 +106,9 @@ function B = im2col (A, varargin)
   if (! isnumeric (block_size) || ! isvector (block_size) ||
       any (block_size(:) < 1))
     error ("im2col: BLOCK_SIZE must be a vector of positive elements.");
-  elseif (numel (block_size) > ndims (A))
-    error ("im2col: BLOCK_SIZE can't have more elements than the dimensions of A");
   endif
-  block_size(end+1:ndims(A)) = 1; # expand singleton dimensions
-  block_size = block_size(:).'; # make sure it's a row vector
+  block_size(end+1:ndims(A)) = 1; # expand singleton dimensions if required
+  block_size = block_size(:).';   # make sure it's a row vector
   p++;
 
   if (nargin > p)
@@ -108,103 +119,147 @@ function B = im2col (A, varargin)
     block_type = varargin{p};
   endif
 
+  ## After all the input check, start the actual im2col. The idea is to
+  ## calculate the linear indices for each of the blocks (using broadcasting
+  ## for each dimension), and then reshape it with one block per column.
+  warning ("off", "Octave:broadcast", "local");
+
   switch (tolower (block_type))
     case "distinct"
+      ## We may need to expand the size vector to include singletons
+      size_singletons = @(x, ndim) postpad (size (x), ndim, 1);
+
       ## Calculate needed padding
-      sp = mod (-size (A), block_size);
+      A_size = size_singletons (A, numel (block_size));
+      sp = mod (-A_size, block_size);
       if (any (sp))
         A = padarray (A, sp, padval, "post");
       endif
+      A_size = size_singletons (A, numel (block_size));
 
-      ## Create the dimensions arguments for mat2cell (one per dimension
-      ## with the length of that dimension repeated the number of blocks
-      ## for that dimension)
-      n_blocks   = size (A) ./ block_size;
-      cell_split = arrayfun (@(x) repmat (block_size(x), [1 n_blocks(x)]),
-                             1:numel (block_size), "UniformOutput", false);
+      ## Get linear indixes for the first block
+      [ind, stride] = get_1st_ind (A_size, block_size);
 
-      ## This functions may be a good candidate to rewrite in C++, making
-      ## use of the code in mat2cell without the need to convert between
-      ## cell and matrix and transposing.
-      B_cell = mat2cell (A, cell_split{:})';
-      B = cell2mat (cellfun (@(x) x(:), B_cell(:), "UniformOutput", false)');
+      ## Get linear indices for all of the blocks
+      blocks  = A_size ./ block_size;
+      step    = stride .* block_size;
+      limit   = step .* (blocks -1);
+      for dim = 1:numel (A_size)
+        ind = ind(:) .+ (0:step(dim):limit(dim));
+      endfor
+      n_blocks = prod (blocks);
 
     case "sliding"
-      if (any (size (A) < block_size))
+      if (numel (block_size) > ndims (A))
+        error ("im2col: BLOCK_SIZE can't have more elements than the dimensions of A");
+      elseif (any (size (A) < block_size))
         error("im2col: no dimension of A can be greater than BLOCK_SIZE in sliding");
-      elseif (ndims (A) > 2)
-        ## TODO: implement n-dimensional sliding
-        error ("im2col: only 2 dimensional are supported for sliding");
       endif
-      n_slides  = size (A) - block_size +1;
-      n_elems   = prod (block_size);
-      n_blocks  = prod (n_slides);
 
-      B = zeros (n_elems, n_blocks, class (A));
-      ## TODO: vectorize this thing and implement N-dimensional. Most likely
-      ##       needs to be written as an oct function
-      m = block_size(1);
-      n = block_size(2);
-      col = 1;
-      for j = 1:1:size(A,2)-n+1 ## left to right
-        for i=1:1:size(A,1)-m+1 ## up to bottom
-          B(:,col++) = A(i:i+m-1,j:j+n-1)(:);
-        endfor
+      ## Get linear indixes for the first block
+      [ind, stride] = get_1st_ind (size (A), block_size);
+
+      ## Get linear indices for all of the blocks
+      slides  = size (A) - block_size;
+      limit   = stride .* slides;
+      for dim = 1:ndims (A)
+        ind = ind(:) .+ (0:stride(dim):limit(dim));
       endfor
+      n_blocks = prod (slides +1);
 
     otherwise
       error ("im2col: invalid BLOCK_TYPE `%s'.", block_type);
   endswitch
 
+  B = reshape (A(ind(:)), prod (block_size), n_blocks);
+endfunction
+
+## Get linear indices and for the first block, and stride size per dimension
+function [ind, stride] = get_1st_ind (A_size, block_size)
+  stride = [1 cumprod(A_size(1:end-1))];
+  limit = (block_size -1) .* stride;
+  ind = 1;
+  for dim = 1:numel (A_size)
+    ind = ind(:) .+ (0:stride(dim):limit(dim));
+  endfor
 endfunction
 
 %!demo
-%! A=[1:10;11:20;21:30;31:40]
-%! B=im2col(A,[2,5],'distinct')
-%! C=col2im(B,[2,5],[4,10],'distinct')
-%! # Divide A using distinct blocks and reverse operation
+%! ## Divide A using distinct blocks and then reverse the operation
+%! A = [ 1:10
+%!      11:20
+%!      21:30
+%!      31:40];
+%! B = im2col (A, [2 5], "distinct")
+%! C = col2im (B, [2 5], [4 10], "distinct")
 
-%!shared B, A, Bs, As, Ap, Bp0, Bp1
-%! v=[1:10]';
-%! r=reshape(v,2,5);
-%! B=[v, v+10, v+20, v+30, v+40, v+50];
-%! A=[r, r+10; r+20, r+30; r+40, r+50];
-%! As=[1,2,3,4,5;6,7,8,9,10;11,12,13,14,15];
-%! b1=As(1:2,1:4)(:);
-%! b2=As(2:3,1:4)(:);
-%! b3=As(1:2,2:5)(:);
-%! b4=As(2:3,2:5)(:);
-%! Bs=[b1,b2,b3,b4];
-%! Ap=A(:,1:9);
-%! Bp1=Bp0=B;
-%! Bp0([9:10],[2,4,6])=0;
-%! Bp1([9:10],[2,4,6])=1;
+## test default block type
+%!test
+%! a = rand (10);
+%! assert (im2col (a, [5 5]), im2col (a, [5 5], "sliding"))
 
-%!# bad block_type
-%!error(im2col(A,[2,5],'wrong_block_type'));
+## indexed makes no difference when sliding
+%!test
+%! a = rand (10);
+%! assert (im2col (a, [5 5]), im2col (a, "indexed", [5 5]))
 
-%!# distinct
-%!assert(im2col(A,[2,5],'distinct'), B);
+%!error <BLOCK_TYPE> im2col (rand (20), [2 5], "wrong_block_type")
+%!error <greater than> im2col (rand (10), [11 5], "sliding")
 
-%!# padding
-%!assert(im2col(Ap,[2,5],'distinct'), Bp0);
-%!assert(im2col(Ap,'indexed',[2,5],'distinct'), Bp1);
+%!shared B, A, Bs, As, Ap, Bp0, Bp1, Bp0_3s
+%! v   = [1:10]';
+%! r   = reshape (v, 2, 5);
+%! B   = [v v+20  v+40 v+10  v+30 v+50];
+%! A   = [r r+10; r+20 r+30; r+40 r+50];
+%! As  = [ 1  2  3  4  5
+%!         6  7  8  9 10
+%!        11 12 13 14 15];
+%! b1  = As(1:2, 1:4)(:);
+%! b2  = As(2:3, 1:4)(:);
+%! b3  = As(1:2, 2:5)(:);
+%! b4  = As(2:3, 2:5)(:);
+%! Bs  = [b1, b2, b3, b4];
+%! Ap  = A(:, 1:9);
+%! Bp1 = Bp0 = B;
+%! Bp0(9:10, 4:6) = 0;
+%! Bp1(9:10, 4:6) = 1;
+%! Bp0_3s = Bp0;
+%! Bp0_3s(11:30, :) = 0;
 
-%!# now sliding
-%!assert(im2col(As,[2,4]), Bs);
-%!assert(im2col(As,[2,4],'sliding'), Bs);
-%!assert(im2col(As,[3,5],'sliding'), As(:));
+## test distinct block type
+%!assert (im2col (A, [2 5], "distinct"), B);
 
-%!# disctint uint8 & uint16
-%!assert(im2col(uint8(A),[2,5],'distinct'), uint8(B));
-%!assert(im2col(uint16(A),[2,5],'distinct'), uint16(B));
+## padding for distinct
+%!assert (im2col (Ap, [2 5], "distinct"), Bp0);
+%!assert (im2col (Ap, [2 5 3], "distinct"), Bp0_3s);
+%!assert (im2col (Ap, "indexed", [2 5], "distinct"), Bp1);
+%!assert (im2col (uint8  (Ap), "indexed", [2 5], "distinct"), uint8  (Bp0));
+%!assert (im2col (uint16 (Ap), "indexed", [2 5], "distinct"), uint16 (Bp0));
+%!assert (im2col (int16  (Ap), "indexed", [2 5], "distinct"), int16  (Bp1));
+%!assert (im2col (uint32 (Ap), "indexed", [2 5], "distinct"), uint32 (Bp1));
 
-%!# padding uint8 & uint16 (to 0 even in indexed case)
-%!assert(im2col(uint8(Ap),[2,5],'distinct'), uint8(Bp0));
-%!assert(im2col(uint8(Ap),'indexed',[2,5],'distinct'), uint8(Bp0));
-%!assert(im2col(uint16(Ap),[2,5],'distinct'), uint16(Bp0));
-%!assert(im2col(uint16(Ap),'indexed',[2,5],'distinct'), uint16(Bp0));
+## Always return correct class
+%!assert (im2col (uint8   (A),  [2 5], "distinct"), uint8   (B));
+%!assert (im2col (single  (A),  [2 5], "distinct"), single  (B));
+%!assert (im2col (logical (A),  [2 5], "distinct"), logical (B));
+%!assert (im2col (uint8   (As), [2 4], "sliding"),  uint8   (Bs));
+%!assert (im2col (single  (As), [2 4], "sliding"),  single  (Bs));
+%!assert (im2col (logical (As), [2 4], "sliding"),  logical (Bs));
 
-%!# now sliding uint8 & uint16
-%!assert(im2col(uint8(As),[2,4],'sliding'), uint8(Bs));
-%!assert(im2col(uint16(As),[2,4],'sliding'), uint16(Bs));
+## test sliding block type
+%!assert (im2col (As, [2 4], "sliding"), Bs);
+%!assert (im2col (As, [3 5], "sliding"), As(:));
+
+## Test N-dimensional
+%!test
+%! A = randi (9, 10, 9, 5);
+%!assert (convn (A, ones (3, 3, 3), "valid"),
+%!        reshape (sum (im2col (A, [3 3 3])), [8 7 3]));
+%!
+%! A = randi (9, 10, 9, 5, 7);
+%!assert (convn (A, ones (3, 3, 3), "valid"),
+%!        reshape (sum (im2col (A, [3 3 3])), [8 7 3 7]));
+%!assert (convn (A, ones (3, 4, 3), "valid"),
+%!        reshape (sum (im2col (A, [3 4 3])), [8 6 3 7]));
+%!assert (convn (A, ones (3, 5, 3, 2), "valid"),
+%!        reshape (sum (im2col (A, [3 5 3 2])), [8 5 3 6]));
