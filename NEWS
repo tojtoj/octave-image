@@ -121,6 +121,13 @@
       bwperim
       padarray
 
+ ** The following functions now fully support matrices with an arbitrary
+    number of dimensions:
+
+      bestblk
+      col2im
+      im2col
+
  Summary of important user-visible changes for image 2.0.0 (2012/11/08):
 -------------------------------------------------------------------------
 
