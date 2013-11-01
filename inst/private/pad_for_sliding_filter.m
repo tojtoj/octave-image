@@ -18,15 +18,15 @@
 ## __spatial_filtering__. It may be better to have __spatial_filtering__ do this
 ## part as well then
 
-function im = pad_for_spatial_filter (im, domain, padval)
+function im = pad_for_sliding_filter (im, window_size, padval)
 
-  if (ndims (im) != ndims (domain))
+  if (ndims (im) != numel (window_size))
     error ("image and domain must have the same number of dimensions")
   endif
 
-  pad  = floor (size (domain) / 2);
+  pad  = floor (window_size / 2);
   im   = padarray (im, pad, padval);
-  even = ! mod (size(domain), 2);
+  even = ! mod (window_size, 2);
 
   ## if one of the domain dimensions is even, its origin is must be
   ##     floor ([size(domain)/2] + 1)

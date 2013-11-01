@@ -127,6 +127,7 @@
       bestblk
       col2im
       im2col
+      nlfilter
 
  Summary of important user-visible changes for image 2.0.0 (2012/11/08):
 -------------------------------------------------------------------------

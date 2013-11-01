@@ -77,7 +77,7 @@ function retval = ordfiltn (A, nth, domain, varargin)
     endif
   endfor
 
-  A = pad_for_spatial_filter (A, domain, padding);
+  A = pad_for_sliding_filter (A, size (domain), padding);
 
   ## Perform the filtering
   retval = __spatial_filtering__ (A, logical (domain), "ordered", S, nth);

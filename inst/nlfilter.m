@@ -1,4 +1,4 @@
-## Copyright (C) 2004 Josep Mones i Teixidor <jmones@puntbarra.com>
+## Copyright (C) 2013 Carnë Draug <carandraug@octave.org>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -14,130 +14,135 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {@var{B} = } nlfilter (@var{A}, [@var{m},@var{n}], @var{fun})
-## @deftypefnx {Function File} {@var{B} = } nlfilter (@var{A}, [@var{m},@var{n}], @var{fun}, @dots{})
-## @deftypefnx {Function File} {@var{B} = } nlfilter (@var{A},'indexed', @dots{})
-## Processes image in sliding blocks using user-supplied function.
+## @deftypefn  {Function File} {} nlfilter (@var{A}, @var{block_size}, @var{func})
+## @deftypefnx {Function File} {} nlfilter (@var{A}, @var{block_size}, @var{func}, @dots{})
+## @deftypefnx {Function File} {} nlfilter (@var{A}, "indexed", @dots{})
+## Process matrix in sliding blocks with user-supplied function.
 ##
-## @code{B=nlfilter(A,[m,n],fun)} passes sliding @var{m}-by-@var{n}
-## blocks to user-supplied function @var{fun}. A block is build for
-## every pixel in @var{A}, such as it is centered within the block.
-## @var{fun} must return a scalar, and it is used to create matrix
-## @var{B}. @var{nlfilter} pads the @var{m}-by-@var{n} block at the
-## edges if necessary.
-## 
-## Center of block is taken at ceil([@var{m},@var{n}]/2).
+## Executes the function @var{fun} on each sliding block of
+## size @var{block_size}, taken from the matrix @var{A}.  Both the matrix
+## @var{A}, and the block can have any number of dimensions.  This function
+## is specially useful to perform sliding/moving window functions such as
+## moving average.
 ##
-## @code{B=nlfilter(A,[m,n],fun, @dots{})} behaves as described above but
-## passes extra parameters to function @var{fun}.
+## The output will have the same dimensions @var{A}, each one of its values
+## corresponding to the processing of a block centered at the same
+## coordinates in @var{A}, with @var{A} being padded with zeros for the
+## borders (see below for indexed images).  In case any side of the block
+## is of even length, the center is considered at indices
+## @code{floor ([@var{block_size}/2] + 1)}.
 ##
-## @code{B=nlfilter(A,'indexed', @dots{})} assumes that @var{A} is an indexed
-## image, so it pads the image using proper value: 0 for uint8 and
-## uint16 images and 1 for double images. Keep in mind that if 'indexed'
-## is not specified padding is always done using 0.
+## The argument @var{func} must be a function handle that takes matrices of
+## size @var{block_size} as input and returns a single scalar.  Any extra
+## input arguments to @code{nlfilter} are passed to @var{func} after the
+## block matrix.
 ##
-## @seealso{colfilt,blkproc,inline}
+## If @var{A} is an indexed image, the second argument should be the
+## string @qcode{"indexed"} so that any required padding is done correctly
+## as done by @code{im2col}.
+##
+## @seealso{blockproc, col2im, colfilt, im2col}
 ## @end deftypefn
 
-function B = nlfilter(A, varargin)
-  if(nargin<3)
-    error("nlfilter: invalid number of parameters.");
-  endif
-  
-  ## check 'indexed' presence
-  indexed=false;
-  p=1;
-  if(ischar(varargin{1}) && strcmp(varargin{1}, "indexed"))
-    indexed=true;
-    p+=1;
-    if(isa(A,"uint8") || isa(A,"uint16"))
-      padval=0;
-    else
-      padval=1; 
-    endif
-  else
-    padval=0;
-  endif
+function B = nlfilter (A, varargin)
 
-  ## check [m,n]
-  if(!isvector(varargin{p}))
-    error("nlfilter: expected [m,n] but param is not a vector.");
+  ## Input check
+  [p, block_size, padval] = im2col_check ("nlfilter", nargin, A, varargin{:});
+
+  if (nargin < p)
+    print_usage ();
   endif
-  if(length(varargin{p})!=2)
-    error("nlfilter: expected [m,n] but param has wrong length.");
+  func = varargin{p++};
+  if (! isa (func, "function_handle"))
+    error ("nlfilter: FUNC must be a function handle");
+  elseif (! isscalar (func (ones (block_size, class (A)), varargin{p:nargin-1})))
+    error ("nlfilter: FUNC must take a matrix of size BLOCK_SIZE and return a scalar");
   endif
-  sblk=varargin{p}(:);
-  p+=1;
+  ## Remaining params are parameters to fun. We need to place them into
+  ## a separate variable, we can't varargin{p:nargin-1} inside the anonymous
+  ## function because nargin will have a different value there
+  extra_args = varargin(p:nargin -1);
 
-  ## check fun
-  ## TODO: add proper checks for this one
-  if(nargin<p)
-    error("nlfilter: required parameters haven't been supplied.");
-  endif
-  fun=varargin{p};
-  
-  ## remaining params are params to fun
-  ## extra params are p+1:nargin-1
+  ## Pad image as required
+  padded = pad_for_sliding_filter (A, block_size, padval);
 
-  ## We take an easy approach... feel free to optimize it (coding this
-  ## in C++ would be a great idea).
-  
-  ## Calculate center of block
-  c=ceil(sblk/2);
-  
-  ## Pre-padding
-  prepad=c-ones(2,1);
-  
-  ## Post-padding
-  postpad=sblk-c;
-  
-  ## Save A size
-  as=size(A);
+  ## Get the blocks (one per column)
+  blks = im2col (padded, block_size, "sliding");
 
-  ## Pad data
-  if(all(prepad==postpad))
-    if(any(prepad>0))
-      A=padarray(A,prepad,padval,'both');
-    endif
-  else
-    if(any(prepad>0))
-      A=padarray(A,prepad,padval,'pre');
-    endif
-    if(any(postpad>0))
-      A=padarray(A,postpad,padval,'post');
-    endif
-  endif
+  ## New function that reshapes the array into a block before
+  ## passing it to the actual user supplied function
+  blk_func = @(x, z) func (reshape (blks(x:z), block_size), extra_args{:});
 
-  ## calc end offsets
-  me=postpad(1)+prepad(1);
-  ne=postpad(2)+prepad(2);
+  ## Perform the filtering
+  blk_step = 1:(rows (blks)):(rows (blks) * columns (blks));
+  B = arrayfun (blk_func, blk_step, blk_step + rows (blks) -1);
 
-  ## We concatenate everything to preserve fun return type
-  for i=1:as(1)
-    r=feval(fun,A(i:i+me,1:1+ne),varargin{p+1:nargin-1});
-    for j=2:as(2)
-      r=horzcat(r,feval(fun,A(i:i+me,j:j+ne),varargin{p+1:nargin-1}));
-    endfor
-    if(i==1)
-      B=r;
-    else
-      B=vertcat(B,r);
-    endif
-  endfor
+  ## Back into its original shape
+  B = reshape (B, size (A));
 
 endfunction
 
 %!demo
-%! nlfilter(eye(10),[3,3],inline("any(x(:)>0)","x"))
-%! # creates a "wide" diagonal
+%! ## creates a "wide" diagonal (although it can be performed more
+%! ## efficiently with "imdilate (A, true (3))")
+%! nlfilter (eye (10), [3 3], @(x) any (x(:) > 0))
 
-%!assert(nlfilter(eye(4),[2,3],inline("sum(x(:))","x")),[2,2,1,0;1,2,2,1;0,1,2,2;0,0,1,1]);
-%!assert(nlfilter(eye(4),'indexed',[2,3],inline("sum(x(:))","x")),[4,2,1,2;3,2,2,3;2,1,2,4;4,3,4,5]);
-%!assert(nlfilter(eye(4),'indexed',[2,3],inline("sum(x(:))==y","x","y"),2),[0,1,0,1;0,1,1,0;1,0,1,0;0,0,0,0]!=0);
+%!assert (nlfilter (eye (4), [2 3], @(x) sum (x(:))),
+%!        [2 2 1 0
+%!         1 2 2 1
+%!         0 1 2 2
+%!         0 0 1 1]);
+%!assert (nlfilter (eye (4), "indexed", [2 3], @(x) sum (x(:))),
+%!        [4 2 1 2
+%!         3 2 2 3
+%!         2 1 2 4
+%!         4 3 4 5]);
+%!assert (nlfilter (eye (4), "indexed", [2 3], @(x, y) sum (x(:)) == y, 2),
+%!        logical ([0 1 0 1
+%!                  0 1 1 0
+%!                  1 0 1 0
+%!                  0 0 0 0]));
 
-% Check uint8 and uint16 padding
-%!assert(nlfilter(uint8(eye(4)),'indexed',[2,3],inline("sum(x(:))","x")),[2,2,1,0;1,2,2,1;0,1,2,2;0,0,1,1]);
-%!assert(nlfilter(uint16(eye(4)),'indexed',[2,3],inline("sum(x(:))","x")),[2,2,1,0;1,2,2,1;0,1,2,2;0,0,1,1]);
+## Check uint8 and uint16 padding (only the padding since the class of
+## the output is dependent on the function and sum() always returns double)
+%!assert (nlfilter (uint8 (eye (4)), "indexed", [2 3], @(x) sum (x(:))),
+%!        [2 2 1 0
+%!         1 2 2 1
+%!         0 1 2 2
+%!         0 0 1 1]);
+%!assert (nlfilter (int16 (eye (4)), "indexed", [2 3], @(x) sum (x(:))),
+%!        [4 2 1 2
+%!         3 2 2 3
+%!         2 1 2 4
+%!         4 3 4 5]);
 
-% Check if function class is preserved
-%!assert(nlfilter(uint8(eye(4)),'indexed',[2,3],inline("int8(sum(x(:)))","x")),int8([2,2,1,0;1,2,2,1;0,1,2,2;0,0,1,1]));
+## Check if function class is preserved
+%!assert (nlfilter (uint8 (eye (4)), "indexed", [2 3], @(x) int8 (sum (x(:)))),
+%!        int8 ([2 2 1 0
+%!               1 2 2 1
+%!               0 1 2 2
+%!               0 0 1 1]));
+
+## Test N-dimensional
+%!test
+%! a = randi (10, 20, 20, 20);
+%! ## extra dimensions on matrix only
+%! assert (nlfilter (a, [5 5], @(x) max(x(:))), imdilate (a, ones (5)))
+%! ## extra dimensions on both matrix and block
+%! assert (nlfilter (a, [5 5 5], @(x) max(x(:))), imdilate (a, ones ([5 5 5])))
+%! ## extra dimensions and padding
+%! assert (nlfilter (a, [3 7], @(x) max(x(:))), imdilate (a, ones ([3 7])))
+%! assert (nlfilter (a, [3 7 3], @(x) max(x(:))), imdilate (a, ones ([3 7 3])))
+
+## FIXME: this is failing due to a bug in imdilate
+%!test
+%! a = randi (10, 15, 15, 4, 8, 3);
+%! assert (nlfilter (a, [3 4 7 5], @(x) max(x(:))),
+%!         imdilate (a, ones ([3 4 7 5])))
+
+## Just to make sure it's not a bug in imdilate
+%!test
+%! a = randi (10, 15, 15, 4, 3, 8);
+%! ord = ordfiltn (a, 3, ones ([3 7 3 1 5]));
+%! assert (nlfilter (a, [3 7 3 1 5], @(x) sort (x(:))(3)), ord)
+%! assert (nlfilter (a, [3 7 3 1 5], @(x, y) sort (x(:))(y), 3), ord)

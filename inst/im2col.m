@@ -69,54 +69,23 @@
 ## N-dimensional conversion of image blocks into colums.
 
 function B = im2col (A, varargin)
-  if (nargin < 2 || nargin > 4)
-    print_usage ();
-  elseif (! ismatrix (A) || ! (isnumeric (A) || islogical (A)))
-    error ("im2col: A must be a numeric of logical matrix");
-  endif
-  p = 1;  # varargin param being processsed
 
-  ## Defaults
-  block_type  = "sliding";
-  padval      = 0;
-  indexed     = false;
-
-  ## Check for 'indexed' presence
-  if (ischar (varargin{p}) && strcmpi (varargin{p}, "indexed"))
-    indexed = true;
-    if (nargin < 3)
-      print_usage ();
-    endif
-    ## We pad with value of 0 for indexed images of uint8 or uint16 class.
-    ## Indexed images of signed integer, or above uint16, are treated the
-    ## same as floating point (a value of 1 is index 1 on the colormap)
-    if (any (isa (A, {"uint8", "uint16"})))
-      padval = 0;
-    else
-      padval = 1;
-    endif
-    p++;
-  elseif (nargin > 3)
-    ## If we didn't have "indexed" but had 4 parameters there's an error
+  ## Input check
+  if (nargin > 4)
     print_usage ();
   endif
-
-  ## check [m,n]
-  block_size = varargin{p};
-  if (! isnumeric (block_size) || ! isvector (block_size) ||
-      any (block_size(:) < 1))
-    error ("im2col: BLOCK_SIZE must be a vector of positive elements.");
-  endif
-  block_size(end+1:ndims(A)) = 1; # expand singleton dimensions if required
-  block_size = block_size(:).';   # make sure it's a row vector
-  p++;
-
+  [p, block_size, padval] = im2col_check ("im2col", nargin, A, varargin{:});
   if (nargin > p)
     ## we have block_type param
     if (! ischar (varargin{p}))
-      error("im2col: invalid parameter block_type.");
+      error("im2col: BLOCK_TYPE must be a string");
     endif
-    block_type = varargin{p};
+    block_type = varargin{p++};
+  else
+    block_type = "sliding";
+  endif
+  if (nargin > p)
+    print_usage ();
   endif
 
   ## After all the input check, start the actual im2col. The idea is to
@@ -203,8 +172,11 @@ endfunction
 %! a = rand (10);
 %! assert (im2col (a, [5 5]), im2col (a, "indexed", [5 5]))
 
+%!error <BLOCK_TYPE> im2col (rand (20), [2 5], 10)
 %!error <BLOCK_TYPE> im2col (rand (20), [2 5], "wrong_block_type")
 %!error <greater than> im2col (rand (10), [11 5], "sliding")
+%!error im2col (rand (10), [5 5], "sliding", 5)
+%!error im2col (rand (10), "indexed", [5 5], "sliding", 5)
 
 %!shared B, A, Bs, As, Ap, Bp0, Bp1, Bp0_3s
 %! v   = [1:10]';
