@@ -41,6 +41,15 @@
 ## string @qcode{"indexed"} so that any required padding is done correctly
 ## as done by @code{im2col}.
 ##
+## @emph{Note}: if @var{func} is a column compression function, i.e., it acts
+## along a column to return a single value, consider using @code{colfilt}
+## which usually performs faster.  If @var{func} makes use of the colon
+## operator to select all elements in the block, e.g., if @var{func} looks
+## anything like @code{@(x) sum (x(:))}, it is a good indication that
+## @code{colfilt} should be used.  In addition, many sliding block operations
+## have their own specific implementations (see help text of @code{colfilt}
+## for a list).
+##
 ## @seealso{blockproc, col2im, colfilt, im2col}
 ## @end deftypefn
 

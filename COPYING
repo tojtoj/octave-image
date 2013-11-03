@@ -43,7 +43,7 @@ inst/bwmorph.m                          GPLv3+
 inst/bwperim.m                          GPLv3+
 inst/bwselect.m                         GPLv3+
 inst/col2im.m                           GPLv3+
-inst/colfilt.m                          public domain
+inst/colfilt.m                          GPLv3+
 inst/colorgradient.m                    public domain
 inst/conndef.m                          GPLv3+
 inst/corr2.m                            GPLv3+

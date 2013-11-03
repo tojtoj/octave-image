@@ -126,6 +126,7 @@
 
       bestblk
       col2im
+      colfilt
       im2col
       nlfilter
 
