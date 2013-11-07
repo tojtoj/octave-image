@@ -79,7 +79,7 @@
 ## with the @code{floor (prod (@var{N}/ 2)} th element, where @var{N} is the
 ## total number of elements in a block (add 1 if it is an even number).
 ##
-## @item sort
+## @item sort or nth_element
 ## Use @code{ordfiltn}.
 ##
 ## @item standard deviation
