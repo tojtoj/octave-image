@@ -56,12 +56,14 @@ function CC = bwconncomp (bw, N = 4)
   B = bwboundaries (bw, N);
 
   ## Convert from (x, y) index to linear indexing
-  P = cell (numel (B), 1);
+  P = cell (1, numel (B));
   for k = 1:numel (B)
-    P {k} = sub2ind (size (bw), B {k} (:, 2), B {k} (:, 1));
+    P{k} = sub2ind (size (bw), B{k}(:, 1), B{k}(:, 2));
   endfor
-  
+
   ## Return result
-  CC = struct ("Connectivity", N, "ImageSize", size (bw), "NumObjects", numel (B));
-  CC.PixelIdxList = P;
+  CC = struct ("Connectivity",  N,
+               "ImageSize",     size (bw),
+               "NumObjects",    numel (B),
+               "PixelIdxList",  {P});
 endfunction
