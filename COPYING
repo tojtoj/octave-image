@@ -109,6 +109,7 @@ inst/isgray.m                           GPLv3+
 inst/isind.m                            GPLv3+
 inst/isrgb.m                            GPLv3+
 inst/label2rgb.m                        GPLv3+
+inst/labelmatrix.m                      GPLv3+
 inst/makelut.m                          GPLv3+
 inst/maketform.m                        GPLv3+
 inst/mat2gray.m                         GPLv3+
