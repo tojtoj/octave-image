@@ -112,6 +112,10 @@
  ** The transform option of imtophat has been removed (it was deprecated
     in version 2.0.0) in favour of using imbothat.
 
+ ** The function bwconncomp now returns the indices for each element in each
+    object, no longer the indices for the elements in the object boundaries
+    only. The connectivity default was changed to 8.
+
  ** Other functions that have been changed for smaller bugfixes, increased
     Matlab compatibility, or performance:
 
@@ -123,6 +127,7 @@
     number of dimensions:
 
       bestblk
+      bwconncomp
       col2im
       colfilt
       im2col
