@@ -143,7 +143,6 @@ endfunction
 %! assert (nlfilter (a, [3 7], @(x) max(x(:))), imdilate (a, ones ([3 7])))
 %! assert (nlfilter (a, [3 7 3], @(x) max(x(:))), imdilate (a, ones ([3 7 3])))
 
-## FIXME: this is failing due to a bug in imdilate
 %!test
 %! a = randi (10, 15, 15, 4, 8, 3);
 %! assert (nlfilter (a, [3 4 7 5], @(x) max(x(:))),

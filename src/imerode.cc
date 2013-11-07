@@ -412,29 +412,45 @@ at indices @code{floor ([size(@var{SE})/2] + 1)}.\n\
 %!assert (imerode (eye (3), []), eye (3));
 
 ## test normal usage with non-symmetric SE
-%!shared im, se
+%!test
 %! im = [0 1 0
 %!       1 1 1
 %!       0 1 0];
 %! se = [1 0 0
 %!       0 1 0
 %!       0 1 1];
-%!assert (imerode (im,          se),          [0 1 0; 0 0 0; 0 1 0]);
-%!assert (imerode (logical(im), se), logical ([0 1 0; 0 0 0; 0 1 0]));
-%!assert (imerode (im, se, "full"),
+%! assert (imerode (im,          se),          [0 1 0; 0 0 0; 0 1 0]);
+%! assert (imerode (logical(im), se), logical ([0 1 0; 0 0 0; 0 1 0]));
+%! assert (imerode (im, se, "full"),
 %!                 [  0    0    0    0  Inf
 %!                    1    0    1    0  Inf
 %!                    0    0    0    0    0
 %!                  Inf    0    1    0    1
 %!                  Inf  Inf    0    1    0]);
-%!assert (imerode (logical(im), se, "full"),
+%! assert (imerode (logical(im), se, "full"),
 %!                 logical([0     0     0     0     1
 %!                          1     0     1     0     1
 %!                          0     0     0     0     0
 %!                          1     0     1     0     1
 %!                          1     1     0     1     0]));
 
-%!shared im, se, out
+%!test
+%! a = rand ([10 40 15 6 8 5]) > 0.2;
+%! se = ones ([5 3 7]);
+%!
+%! ## the image is not really indexed but this way it is padded with 1s
+%! assert (imerode (a, se), colfilt (a, "indexed", size (se), "sliding", @all))
+%!
+%! assert (imerode (a, se, "valid"), convn (a, se, "valid") == nnz (se))
+%! ## again, we need to pad it ourselves because convn pads with zeros
+%! b = true (size (a) + [4 2 6 0 0 0]);
+%! b(3:12, 2:41, 4:18,:,:,:) = a;
+%! assert (imdilate (b, se, "same"), convn (b, se, "same") > 0)
+%! b = true (size (a) + [8 4 12 0 0 0]);
+%! b(5:14, 3:42, 7:21,:,:,:) = a;
+%! assert (imdilate (b, se, "full"), convn (b, se, "full") > 0)
+
+%!test
 %! im = [0 0 0 0 0 0 0
 %!       0 0 1 0 1 0 0
 %!       0 0 1 1 0 1 0
@@ -448,10 +464,10 @@ at indices @code{floor ([size(@var{SE})/2] + 1)}.\n\
 %!        0 0 1 1 0 0 0
 %!        0 0 0 0 0 0 0
 %!        0 0 0 0 0 0 0];
-%!assert (imerode (im, se), out);
-%!assert (imerode (logical (im), se), logical (out));
-%!assert (imerode (im, logical (se)), out);
-%!assert (imerode (logical (im), logical (se)), logical (out));
+%! assert (imerode (im, se), out);
+%! assert (imerode (logical (im), se), logical (out));
+%! assert (imerode (im, logical (se)), out);
+%! assert (imerode (logical (im), logical (se)), logical (out));
 %!
 %! # with an even-size SE
 %! se =  [0 0 0 1
@@ -462,16 +478,16 @@ at indices @code{floor ([size(@var{SE})/2] + 1)}.\n\
 %!        0 0 1 0 0 0 0
 %!        0 0 0 0 0 0 0
 %!        0 0 0 0 0 0 0];
-%!assert (imerode (im, se), out);
+%! assert (imerode (im, se), out);
 %! out = [ 0 0 0 0 1 0 1
 %!        0 0 1 0 1 1 0
 %!        0 0 1 1 1 1 1
 %!        0 0 1 1 1 1 1
 %!        0 0 1 1 1 1 1];
-%!assert (imdilate (im, se), out);
+%! assert (imdilate (im, se), out);
 
 ## normal usage for grayscale images
-%!shared a, domain, out
+%!test
 %! a = [ 82    2   97   43   79   43   41   65   51   11
 %!       60   65   21   56   94   77   36   38   75   39
 %!       32   68   78    1   16   75   76   90   81   56
@@ -492,13 +508,13 @@ at indices @code{floor ([size(@var{SE})/2] + 1)}.\n\
 %!          9    4    3    3    3   36    4    4
 %!          9    4    4    4   14   36    4    4
 %!          9    4    4    4   14   23    7    3];
-%!assert (imerode (a, domain, "valid"), out);
-%!assert (imerode (uint8 (a), domain, "valid"), uint8 (out));
-%!assert (imerode (uint8 (a), strel ("arbitrary", domain), "valid"), uint8 (out));
-%!assert (imerode (uint8 (a), strel ("square", 3), "valid"), uint8 (out));
+%! assert (imerode (a, domain, "valid"), out);
+%! assert (imerode (uint8 (a), domain, "valid"), uint8 (out));
+%! assert (imerode (uint8 (a), strel ("arbitrary", domain), "valid"), uint8 (out));
+%! assert (imerode (uint8 (a), strel ("square", 3), "valid"), uint8 (out));
 %!
 %!## Test for non-flat strel
-%!assert (imerode (a, strel ("arbitrary", domain, ones (3)), "valid"), out -1);
+%! assert (imerode (a, strel ("arbitrary", domain, ones (3)), "valid"), out -1);
 %!
 %! out = [ 97   97   97   94   94   90   90   90
 %!         90   90   94   94   94   90   90   90
@@ -508,11 +524,11 @@ at indices @code{floor ([size(@var{SE})/2] + 1)}.\n\
 %!         98   98   90   98   98   98   88   79
 %!         98   98   82   98   98   99   99   99
 %!         96   96   84   98   98   99   99   99];
-%!assert (imdilate (a, domain, "valid"), out);
-%!assert (imdilate (uint8 (a), domain, "valid"), uint8 (out));
+%! assert (imdilate (a, domain, "valid"), out);
+%! assert (imdilate (uint8 (a), domain, "valid"), uint8 (out));
 %!
 %!## Test for non-flat strel
-%!assert (imdilate (a, strel ("arbitrary", domain, ones (3)), "valid"), out +1);
+%! assert (imdilate (a, strel ("arbitrary", domain, ones (3)), "valid"), out +1);
 %!
 %! ## test while using SE that can be decomposed and an actual sequence
 %! domain = ones (5);
@@ -526,9 +542,9 @@ at indices @code{floor ([size(@var{SE})/2] + 1)}.\n\
 %!           9   4   3   3   3   3   3   3   3   3
 %!           9   4   4   4   4   4   4   3   3   3
 %!           9   4   4   4   4   4   7   3   3   3];
-%!assert (imerode (a, domain), out);
-%!assert (imerode (a, strel ("square", 5)), out);
-%!assert (imerode (a, getsequence (strel ("square", 5))), out);
+%! assert (imerode (a, domain), out);
+%! assert (imerode (a, strel ("square", 5)), out);
+%! assert (imerode (a, getsequence (strel ("square", 5))), out);
 %!
 %! ## using a non-symmetric SE
 %! domain = [ 1 1 0
@@ -543,8 +559,8 @@ at indices @code{floor ([size(@var{SE})/2] + 1)}.\n\
 %!         11    9    4    3    3   36    4    4
 %!          9    4    4   10   36   36   38    4
 %!         37    9    4    4   33   36    7    7];
-%!assert (imerode (a, domain, "valid"), out);
-%!assert (imerode (a, strel ("arbitrary", domain, ones (3)), "valid"), out -1);
+%! assert (imerode (a, domain, "valid"), out);
+%! assert (imerode (a, strel ("arbitrary", domain, ones (3)), "valid"), out -1);
 %!
 %! out = [ 78   97   56   94   94   90   90   81
 %!         90   82   78   94   87   87   90   90
@@ -554,11 +570,11 @@ at indices @code{floor ([size(@var{SE})/2] + 1)}.\n\
 %!         98   98   79   98   98   90   88   57
 %!         98   82   50   74   98   99   99   53
 %!         96   82   84   89   98   97   99   99];
-%!assert (imdilate (a, domain, "valid"), out);
-%!assert (imdilate (a, strel ("arbitrary", domain, ones (3)), "valid"), out +1);
+%! assert (imdilate (a, domain, "valid"), out);
+%! assert (imdilate (a, strel ("arbitrary", domain, ones (3)), "valid"), out +1);
 
 // Tests for N-dimensions
-%!shared im, se, out
+%!test
 %! im = reshape (magic(16), [4 8 4 2]);
 %! se = true (3, 3, 3);
 %! out = zeros (4, 8, 4, 2);
@@ -602,8 +618,8 @@ at indices @code{floor ([size(@var{SE})/2] + 1)}.\n\
 %!    15  15  18  14  14  14  19  19
 %!    29  29   4   4   4  32   1   1
 %!    45  45   4   4   4  48   1   1];
-%!assert (imerode (im, se), out);
-%!assert (imerode (uint16 (im), se), uint16 (out));
+%! assert (imerode (im, se), out);
+%! assert (imerode (uint16 (im), se), uint16 (out));
 %!
 %! ## trying a more weird SE
 %! se(:,:,1) = [1 0 1; 0 1 1; 0 0 0];
@@ -648,8 +664,8 @@ at indices @code{floor ([size(@var{SE})/2] + 1)}.\n\
 %!   15  15  18  14  18  14  35  35
 %!   45  29  18  18  18  32   1   1
 %!   63  45   4   4  18  48   1   1];
-%!assert (imerode (im, se), out);
-%!assert (imerode (uint16 (im), se), uint16 (out));
+%! assert (imerode (im, se), out);
+%! assert (imerode (uint16 (im), se), uint16 (out));
 
 ## Test input check
 %!error imerode (ones (10), 45)
@@ -706,7 +722,16 @@ at indices @code{floor ([size(@var{SE})/2] + 1)}.\n\
 
 /*
 // Tests for N-dimensions
-%!shared im, se, out
+
+%!test
+%! a = rand ([10 40 15 6 8 5]) > 0.8;
+%! se = ones ([5 3 7]);
+%! assert (imdilate (a, se), convn (a, se) > 0)
+%! assert (imdilate (a, se, "full"), convn (a, se, "full") > 0)
+%! assert (imdilate (a, se, "valid"), convn (a, se, "valid") > 0)
+%! assert (imdilate (a, se), colfilt (a, size (se), "sliding", @any))
+
+%!test
 %! im = reshape (magic(16), [4 8 4 2]);
 %! se = true (3, 3, 3);
 %! out = zeros (4, 8, 4, 2);
@@ -751,8 +776,8 @@ at indices @code{floor ([size(@var{SE})/2] + 1)}.\n\
 %!   244   244   237   241   241   241   240   240
 %!   226   226   255   255   255   227   254   254
 %!   210   210   255   255   255   211   254   254];
-%!assert (imdilate (im, se), out);
-%!assert (imdilate (uint16 (im), se), uint16 (out));
+%! assert (imdilate (im, se), out);
+%! assert (imdilate (uint16 (im), se), uint16 (out));
 %!
 %! ## trying a more weird SE
 %! se(:,:,1) = [1 0 1; 0 1 1; 0 0 0];
@@ -797,6 +822,6 @@ at indices @code{floor ([size(@var{SE})/2] + 1)}.\n\
 %!  226   244   237   241   241   241   240   240
 %!  226   226   255   255   255   227   254   240
 %!  210   210   255   255   255   211   240   254];
-%!assert (imdilate (im, se), out);
-%!assert (imdilate (uint16 (im), se), uint16 (out));
+%! assert (imdilate (im, se), out);
+%! assert (imdilate (uint16 (im), se), uint16 (out));
 */

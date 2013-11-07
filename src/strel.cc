@@ -250,7 +250,7 @@ octave::image::strel::pre_pad (const octave_idx_type& mt_ndims,
   if (ndims < mt_ndims)
     {
       resized_origin.resize (dim_vector (mt_ndims, 1), 0);
-      resized_size.redim (mt_ndims);
+      resized_size.resize (mt_ndims, 1);
     }
 
   for (octave_idx_type dim = 0; dim < mt_ndims; dim++)
@@ -284,7 +284,7 @@ octave::image::strel::post_pad (const octave_idx_type& mt_ndims,
   if (ndims < mt_ndims)
     {
       resized_origin.resize (dim_vector (mt_ndims, 1), 0);
-      resized_size.redim (mt_ndims);
+      resized_size.resize (mt_ndims, 1);
     }
 
   for (octave_idx_type dim = 0; dim < mt_ndims; dim++)
