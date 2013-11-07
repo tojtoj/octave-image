@@ -69,8 +69,9 @@
     according to different standards.
 
  ** The use of non logical matrices to specify the neighborhood for the medfilt2
-    function has been deprecated.  If using a vector to specify the size of the
-    neighborhood, the elements are no longer swapped.
+    function has been deprecated.  Also, when using a vector to specify the size
+    of the neighborhood, the elements were swapped (first element is now the
+    number of rows and the second the number of columns).
 
  ** For consistency with other functions that allow specification of padding
     values, the function padarray now accepts the string "zeros" as a valid
@@ -81,9 +82,6 @@
     colormarp is used on the colorbar for indexed images; and the stems no
     longer display the markers at their top. The Y axis is also adjusted in case
     of peaks with high values that prevent a good overview of the histogram.
-
- ** The function `rgbplot' accepts a style option which alows for a composite
-    display of a colormap.
 
  ** The option to create poisson noise to an image has been added to `imnoise'.
 
