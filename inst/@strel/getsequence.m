@@ -1,4 +1,5 @@
 ## Copyright (C) 2012 Roberto Metere <roberto@metere.it>
+## Copyright (C) 2013 Carnë Draug <carandraug@octave.org>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -38,9 +39,21 @@ function se = getsequence (se)
         vec_size(idx) = size (se.nhood, idx);
         se.seq{idx}   = strel ("arbitrary", true (vec_size));
       endfor
+    elseif (strcmp (se.shape, "octagon") && se.opt.apothem > 0)
+      persistent octagon_template = get_octagon_template ();
+      se.seq = repmat (octagon_template, se.opt.apothem /3, 1);
     else
         se.seq{1,1} = se;
     endif
   endif
 
+endfunction
+
+function template = get_octagon_template ()
+  template = repmat ({false(3)}, 4, 1);
+  template{1}(2,:)     = true;
+  template{2}(:,2)     = true;
+  template{3}([1 5 9]) = true;
+  template{4}([3 5 7]) = true;
+  template = cellfun (@(x) strel ("arbitrary", x), template, "UniformOutput", false);
 endfunction

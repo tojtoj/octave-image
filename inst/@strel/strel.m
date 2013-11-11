@@ -92,8 +92,8 @@
 ## @end deftypefn
 ## @deftypefn {Function File} {} strel ("octagon", @var{apothem})
 ## Create octagon shaped flat structuring element.  @var{apothem} must be a
-## positive integer that specifies the distance from the origin to the sides of
-## the octagon.
+## non-negative integer, multiple of 3, that specifies the distance from the
+## origin to the sides of the octagon.
 ##
 ## @end deftypefn
 ## @deftypefn {Function File} {} strel ("pair", @var{offset})
@@ -413,24 +413,28 @@ function SE = strel (shape, varargin)
 
     case "octagon"
       if (numel (varargin) == 1)
-        apothem = varargin{1};
+        SE.opt.apothem = apothem = varargin{1};
       else
         error ("strel: no APOTHEM specified for octagon shape");
       endif
-      if (! is_positive_integer (apothem) || mod (apothem, 3) != 0)
+      if (! is_nonnegative_integer (apothem) || mod (apothem, 3) != 0)
         error ("strel: APOTHEM must be a positive integer multiple of 3");
       endif
 
       ## we look at it as 9 blocks. North AND South are the same and West TO
       ## East as well. We make the corner for NorthEast and rotate it for the
       ## other corners
-      cwide    = apothem/3*2 + 1;
-      iwide    = apothem/3*2 - 1;
-      N_and_S  = true ([cwide iwide]);
-      corner   = tril (true (cwide));
-      SE.nhood = [rotdim(corner), N_and_S, corner;
-                  true([iwide (2*apothem + 1)]);
-                  transpose(corner), N_and_S, rotdim(corner, -1)];
+      if (apothem == 0)
+        SE.nhood = true (1);
+      else
+        cwide    = apothem/3*2 + 1;
+        iwide    = apothem/3*2 - 1;
+        N_and_S  = true ([cwide iwide]);
+        corner   = tril (true (cwide));
+        SE.nhood = [rotdim(corner), N_and_S, corner;
+                    true([iwide (2*apothem + 1)]);
+                    transpose(corner), N_and_S, rotdim(corner, -1)];
+      endif
       SE.flat  = true;
 
     case "pair"
@@ -517,6 +521,10 @@ function retval = is_positive_integer (val)
   retval = isscalar (val) && isnumeric (val) && val > 0 && fix (val) == val;
 endfunction
 
+function retval = is_nonnegative_integer (val)
+  retval = isscalar (val) && isnumeric (val) && val >= 0 && fix (val) == val;
+endfunction
+
 function retval = sign0positive (val)
   if (sign (val) == -1)
     retval = -1;
@@ -525,24 +533,29 @@ function retval = sign0positive (val)
   endif
 endfunction
 
-%!shared shape, height
-%! shape  = [0 0 0 1];
-%!assert (getnhood (strel (shape)), logical (shape));
-%!assert (getnhood (strel ("arbitrary", shape)), logical (shape));
+%!test
+%! shape  = logical ([0 0 0 1]);
+%! assert (getnhood (strel (shape)), shape);
+%! assert (getnhood (strel ("arbitrary", shape)), shape);
+%!
 %! height = [0 0 0 3];
-%!assert (getnhood (strel ("arbitrary", shape, height)), logical (shape));
-%!assert (getheight (strel ("arbitrary", shape, height)), height);
-%! shape = [0 0 1];
+%! assert (getnhood (strel ("arbitrary", shape, height)), shape);
+%! assert (getheight (strel ("arbitrary", shape, height)), height);
+
+%!test
+%! shape = logical ([0 0 1]);
 %! height = [-2 1 3];  ## this works for matlab compatibility
-%!assert (getnhood (strel ("arbitrary", shape, height)), logical (shape));
-%!assert (getheight (strel ("arbitrary", shape, height)), height);
-%! shape = [0 0 0 1 0 0 0
-%!          0 1 1 1 1 1 0
-%!          0 1 1 1 1 1 0
-%!          1 1 1 1 1 1 1
-%!          0 1 1 1 1 1 0
-%!          0 1 1 1 1 1 0
-%!          0 0 0 1 0 0 0];
+%! assert (getnhood (strel ("arbitrary", shape, height)), shape);
+%! assert (getheight (strel ("arbitrary", shape, height)), height);
+
+%!test
+%! shape = logical ([0 0 0 1 0 0 0
+%!                   0 1 1 1 1 1 0
+%!                   0 1 1 1 1 1 0
+%!                   1 1 1 1 1 1 1
+%!                   0 1 1 1 1 1 0
+%!                   0 1 1 1 1 1 0
+%!                   0 0 0 1 0 0 0]);
 %! height = [ 0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
 %!            0.00000   0.33333   0.66667   0.74536   0.66667   0.33333   0.00000
 %!            0.00000   0.66667   0.88192   0.94281   0.88192   0.66667   0.00000
@@ -550,91 +563,130 @@ endfunction
 %!            0.00000   0.66667   0.88192   0.94281   0.88192   0.66667   0.00000
 %!            0.00000   0.33333   0.66667   0.74536   0.66667   0.33333   0.00000
 %!            0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000];
-%!assert (getnhood (strel ("ball", 3, 1)), logical (shape));
-%!assert (getheight (strel ("ball", 3, 1)), height, 0.0001);
-%! shape = [0 0 0 1 0 0 0
-%!          0 0 1 1 1 0 0
-%!          0 1 1 1 1 1 0
-%!          1 1 1 1 1 1 1
-%!          0 1 1 1 1 1 0
-%!          0 0 1 1 1 0 0
-%!          0 0 0 1 0 0 0];
-%!assert (getnhood (strel ("diamond", 3)), logical (shape));
-%! shape = [0 0 0 1 0 0 0
-%!          0 1 1 1 1 1 0
-%!          0 1 1 1 1 1 0
-%!          1 1 1 1 1 1 1
-%!          0 1 1 1 1 1 0
-%!          0 1 1 1 1 1 0
-%!          0 0 0 1 0 0 0];
-%!assert (getnhood (strel ("disk", 3)), logical (shape));
-%! shape = [1 1 1];
-%!assert (getnhood (strel ("line", 3.9, 20.17)), logical (shape));
-%! shape = [0 0 1
-%!          0 1 0
-%!          1 0 0];
-%!assert (getnhood (strel ("line", 3.9, 20.18)), logical (shape));
-%! shape = [1 0 0 0 0 0 0 0 0
-%!          0 1 0 0 0 0 0 0 0
-%!          0 0 1 0 0 0 0 0 0
-%!          0 0 1 0 0 0 0 0 0
-%!          0 0 0 1 0 0 0 0 0
-%!          0 0 0 0 1 0 0 0 0
-%!          0 0 0 0 0 1 0 0 0
-%!          0 0 0 0 0 0 1 0 0
-%!          0 0 0 0 0 0 1 0 0
-%!          0 0 0 0 0 0 0 1 0
-%!          0 0 0 0 0 0 0 0 1];
-%!assert (getnhood (strel ("line", 14, 130)), logical (shape));
-%! shape = [0 0 1 1 1 0 0
-%!          0 1 1 1 1 1 0
-%!          1 1 1 1 1 1 1
-%!          1 1 1 1 1 1 1
-%!          1 1 1 1 1 1 1
-%!          0 1 1 1 1 1 0
-%!          0 0 1 1 1 0 0];
-%!assert (getnhood (strel ("octagon", 3)), logical (shape));
-%! shape = [1;1;0];
-%!assert (getnhood (strel ("pair", [-1 0])), logical (shape));
-%! shape = [1 0 0 0 0 0 0
-%!          0 0 0 1 0 0 0
-%!          0 0 0 0 0 0 0];
-%!assert (getnhood (strel ("pair", [-1 -3])), logical (shape));
-%! shape = [0 0 0 0 0 0 0
-%!          0 0 0 0 0 0 0
-%!          0 0 0 1 0 0 0
-%!          0 0 0 0 0 0 0
-%!          0 0 0 0 0 0 1];
-%!assert (getnhood (strel ("pair", [2 3])), logical (shape));
-%!assert (getnhood (strel ("rectangle", [10 5])), true (10, 5));
-%!assert (getnhood (strel ("square", 5)), true (5));
+%! assert (getnhood (strel ("ball", 3, 1)), shape);
+%! assert (getheight (strel ("ball", 3, 1)), height, 0.0001);
+
+%!test
+%! shape = logical ([0 0 0 1 0 0 0
+%!                   0 0 1 1 1 0 0
+%!                   0 1 1 1 1 1 0
+%!                   1 1 1 1 1 1 1
+%!                   0 1 1 1 1 1 0
+%!                   0 0 1 1 1 0 0
+%!                   0 0 0 1 0 0 0]);
+%! assert (getnhood (strel ("diamond", 3)), shape);
+
+%!test
+%! shape = logical ([0 0 0 1 0 0 0
+%!                   0 1 1 1 1 1 0
+%!                   0 1 1 1 1 1 0
+%!                   1 1 1 1 1 1 1
+%!                   0 1 1 1 1 1 0
+%!                   0 1 1 1 1 1 0
+%!                   0 0 0 1 0 0 0]);
+%! assert (getnhood (strel ("disk", 3)), shape);
+
+%!test
+%! shape = logical ([1 1 1]);
+%! assert (getnhood (strel ("line", 3.9, 20.17)), shape);
+%! shape = logical ([0 0 1
+%!                   0 1 0
+%!                   1 0 0]);
+%! assert (getnhood (strel ("line", 3.9, 20.18)), shape);
+%! shape = logical ([1 0 0 0 0 0 0 0 0
+%!                   0 1 0 0 0 0 0 0 0
+%!                   0 0 1 0 0 0 0 0 0
+%!                   0 0 1 0 0 0 0 0 0
+%!                   0 0 0 1 0 0 0 0 0
+%!                   0 0 0 0 1 0 0 0 0
+%!                   0 0 0 0 0 1 0 0 0
+%!                   0 0 0 0 0 0 1 0 0
+%!                   0 0 0 0 0 0 1 0 0
+%!                   0 0 0 0 0 0 0 1 0
+%!                   0 0 0 0 0 0 0 0 1]);
+%! assert (getnhood (strel ("line", 14, 130)), shape);
+
+%!test
+%! se = strel ("octagon", 0);
+%! seq = getsequence (se);
+%! assert (getnhood (se), true (1));
+%! assert (getnhood (seq(1)), true (1));
+%!
+%! se = strel ("octagon", 3);
+%! seq = getsequence (se);
+%! shape = logical ([0 0 1 1 1 0 0
+%!                   0 1 1 1 1 1 0
+%!                   1 1 1 1 1 1 1
+%!                   1 1 1 1 1 1 1
+%!                   1 1 1 1 1 1 1
+%!                   0 1 1 1 1 1 0
+%!                   0 0 1 1 1 0 0]);
+%! assert (getnhood (se), shape);
+%! assert (size (seq), [4 1]);
+%!
+%! templ1 = logical ([0 0 0; 1 1 1; 0 0 0]);
+%! templ2 = logical ([0 1 0; 0 1 0; 0 1 0]);
+%! templ3 = logical ([1 0 0; 0 1 0; 0 0 1]);
+%! templ4 = logical ([0 0 1; 0 1 0; 1 0 0]);
+%! assert ({getnhood(seq(1)) getnhood(seq(2)) getnhood(seq(3)) getnhood(seq(4))},
+%!         {templ1 templ2 templ3 templ4});
+
+%!test
+%! seq = getsequence (strel ("octagon", 21));
+%! assert (size (seq), [28 1]);
+%! assert (arrayfun (@(x) getnhood (seq(x)), 1:4:25, "UniformOutput", false),
+%!         repmat ({templ1}, 1, 7));
+%! assert (arrayfun (@(x) getnhood (seq(x)), 2:4:26, "UniformOutput", false),
+%!         repmat ({templ2}, 1, 7));
+%! assert (arrayfun (@(x) getnhood (seq(x)), 3:4:27, "UniformOutput", false),
+%!         repmat ({templ3}, 1, 7));
+%! assert (arrayfun (@(x) getnhood (seq(x)), 4:4:28, "UniformOutput", false),
+%!         repmat ({templ4}, 1, 7));
+
+%!test
+%! shape = logical ([1 1 0]');
+%! assert (getnhood (strel ("pair", [-1 0])), shape);
+%! shape = logical ([1 0 0 0 0 0 0
+%!                   0 0 0 1 0 0 0
+%!                   0 0 0 0 0 0 0]);
+%! assert (getnhood (strel ("pair", [-1 -3])), shape);
+%! shape = logical ([0 0 0 0 0 0 0
+%!                   0 0 0 0 0 0 0
+%!                   0 0 0 1 0 0 0
+%!                   0 0 0 0 0 0 0
+%!                   0 0 0 0 0 0 1]);
+%! assert (getnhood (strel ("pair", [2 3])), shape);
+
+%!test
+%! assert (getnhood (strel ("rectangle", [10 5])), true (10, 5));
+%! assert (getnhood (strel ("square", 5)), true (5));
 
 ## test how @strel/getsequence and indexing works fine
 %!shared se, seq
 %! se = strel ("square", 5);
 %! seq = getsequence (se);
-%!assert (class (se(1)),  "strel")
-%!assert (class (se(1,1)),"strel")
-%!assert (class (seq),    "strel")
-%!assert (class (seq(1)), "strel")
-%!assert (class (seq(2)), "strel")
-%!assert (numel (se), 1)
-%!assert (numel (seq), 2)
-%!assert (getnhood (seq(1)), true (5, 1))
-%!assert (getnhood (seq(2)), true (1, 5))
-%!assert (size (se),  [1 1])
-%!assert (size (seq), [2 1])
-%!assert (isscalar (se),  true)
-%!assert (isscalar (seq), false)
-%!error se(2);
-%!error seq(3);
+%! assert (class (se(1)),  "strel")
+%! assert (class (se(1,1)),"strel")
+%! assert (class (seq),    "strel")
+%! assert (class (seq(1)), "strel")
+%! assert (class (seq(2)), "strel")
+%! assert (numel (se), 1)
+%! assert (numel (seq), 2)
+%! assert (getnhood (seq(1)), true (5, 1))
+%! assert (getnhood (seq(2)), true (1, 5))
+%! assert (size (se),  [1 1])
+%! assert (size (seq), [2 1])
+%! assert (isscalar (se),  true)
+%! assert (isscalar (seq), false)
+%!error <index out of bounds> se(2);
+%!error <index out of bounds> seq(3);
 
 ## test reflection
-%!shared se, ref
+%!test
 %! se = strel ("arbitrary", [1 0 0; 1 1 0; 0 1 0], [2 0 0; 3 1 0; 0 3 0]);
 %! ref = reflect (se);
-%!assert (getnhood (ref), logical([0 1 0; 0 1 1; 0 0 1]));
-%!assert (getheight (ref), [0 3 0; 0 1 3; 0 0 2]);
+%! assert (getnhood (ref), logical([0 1 0; 0 1 1; 0 0 1]));
+%! assert (getheight (ref), [0 3 0; 0 1 3; 0 0 2]);
 
 ## test input validation
 %!error strel()
@@ -646,7 +698,9 @@ endfunction
 %!error strel("diamond", -3)
 %!error strel("disk", -3)
 %!error strel("line", 0, 45)
-%!error strel("octagon", 4)
+%!error <positive integer multiple of 3> strel("octagon", 3.5)
+%!error <positive integer multiple of 3> strel("octagon", 4)
+%!error <positive integer multiple of 3> strel("octagon", -1)
 %!error strel("pair", [45 67 90])
 %!error strel("rectangle", 2)
 %!error strel("rectangle", [2 -5])
