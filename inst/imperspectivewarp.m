@@ -54,7 +54,7 @@ function [warped, valid] = imperspectivewarp(im, P, interp = "linear", bbox = "l
 
   if (nargin < 2 || nargin > 5)
     print_usage ();
-  elseif (! isimage (im) || (! isrgb (im) && ! isgray (im)))
+  elseif (! isimage (im))
     error ("imperspectivewarp: IM must be a grayscale or RGB image.")
   elseif (! ischar (interp))
     error ("imperspectivewarp: INTERP must be a string with interpolation method")

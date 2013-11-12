@@ -50,7 +50,7 @@ function [warped, valid] = imremap(im, XI, YI, interp = "linear", extrapval = NA
 
   if (nargin < 3 || nargin > 5)
     print_usage ();
-  elseif (! isimage (im) || (! isrgb (im) && ! isgray (im)))
+  elseif (! isimage (im) || ndims (im) > 3)
     error ("imremap: IM must be a grayscale or RGB image.")
   elseif (! size_equal (XI, YI) || ! ismatrix (XI) || ndims (XI) != 2)
     error ("imremap: XI and YI must be matrices of the same size");

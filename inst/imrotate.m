@@ -61,7 +61,7 @@ function [imgPost, H, valid] = imrotate (imgPre, thetaDeg, interp = "nearest", b
 
   if (nargin < 2 || nargin > 5)
     print_usage ();
-  elseif (! isimage (imgPre) || (! isrgb (imgPre) && ! isgray (imgPre)))
+  elseif (! isimage (imgPre) || ndims (imgPre) != 2)
     error ("imrotate: IMGPRE must be a grayscale or RGB image.")
   elseif (! isscalar (thetaDeg))
     error("imrotate: THETA must be a scalar");
