@@ -50,10 +50,10 @@ function bool = isind (img)
 
 endfunction
 
-%!fail(isind([]))         ## should fail for empty matrix
-%!assert(isind(1:10))
-%!assert(!isind(0:10))
-%!assert(isind(1))
-%!assert(!isind(0))
-%!assert(!isind([1.3,2.4]))
-%!assert(isind([1,2;3,4]))
+%!assert (isind ([]), false)
+%!assert (isind (1:10), true)
+%!assert (isind (0:10), false)
+%!assert (isind (1), true)
+%!assert (isind (0), false)
+%!assert (isind ([1.3 2.4]), false)
+%!assert (isind ([1 2; 3 4]), true)
