@@ -10,11 +10,6 @@ CPPFLAGS="-std=c++0x"
 AC_PROG_CXX
 AC_LANG(C++)
 
-AC_CHECK_PROG([HAVE_MKOCTFILE], [mkoctfile], [yes], [no])
-if [test $HAVE_MKOCTFILE = "no"]; then
-  AC_MSG_ERROR([mkoctfile required to install $PACKAGE_NAME])
-fi
-
 dnl
 dnl Check for unordered map headers and whether tr1 namespace is
 dnl required. This is copied from m4/acinclude.m4 from core Octave
