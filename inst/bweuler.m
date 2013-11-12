@@ -37,7 +37,7 @@
 function eul = bweuler (BW, n = 8)
   if (nargin < 1 || nargin > 2)
     print_usage;
-  elseif (!isbw (BW))
+  elseif (!isbw (BW, "non-logical"))
     error("first argument must be a Black and White image");
   endif
 

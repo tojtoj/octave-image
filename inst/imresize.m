@@ -147,7 +147,7 @@ function retval = is_for_integer (scale)
   endif
 endfunction
 
-%!shared in, out
+%!test
 %! in = [116  227  153   69  146  194   59  130  139  106
 %!         2   47  137  249   90   75   16   24  158   44
 %!       155   68   46   84  166  156   69  204   32  152
@@ -155,8 +155,8 @@ endfunction
 %!       107  143  108   52   51   73  101   21  175   90
 %!        54  158  143   77   26  168  113  229  165  225
 %!         9   47  133  135  130  207  236   43   19   73];
-%!assert (imresize (uint8 (in), 1, "nearest"), uint8 (in))
-%!assert (imresize (uint8 (in), 1, "bicubic"), uint8 (in))
+%! assert (imresize (uint8 (in), 1, "nearest"), uint8 (in))
+%! assert (imresize (uint8 (in), 1, "bicubic"), uint8 (in))
 %!
 %! out = [116  116  227  227  153  153   69   69  146  146  194  194   59   59  130  130  139  139  106  106
 %!        116  116  227  227  153  153   69   69  146  146  194  194   59   59  130  130  139  139  106  106
@@ -172,10 +172,10 @@ endfunction
 %!         54   54  158  158  143  143   77   77   26   26  168  168  113  113  229  229  165  165  225  225
 %!          9    9   47   47  133  133  135  135  130  130  207  207  236  236   43   43   19   19   73   73
 %!          9    9   47   47  133  133  135  135  130  130  207  207  236  236   43   43   19   19   73   73];
-%!assert (imresize (uint8 (in), 2, "nearest"), uint8 (out))
-%!assert (imresize (uint8 (in), 2, "neAreST"), uint8 (out))
-%!assert (imresize (uint8 (in), [14 NaN], "nearest"), uint8 (out))
-%!assert (imresize (uint8 (in), [NaN 20], "nearest"), uint8 (out))
+%! assert (imresize (uint8 (in), 2, "nearest"), uint8 (out))
+%! assert (imresize (uint8 (in), 2, "neAreST"), uint8 (out))
+%! assert (imresize (uint8 (in), [14 NaN], "nearest"), uint8 (out))
+%! assert (imresize (uint8 (in), [NaN 20], "nearest"), uint8 (out))
 %!
 %! out = [116  116  227  227  153  153   69   69  146  146  194  194   59   59  130  130  139  139  106  106
 %!          2    2   47   47  137  137  249  249   90   90   75   75   16   16   24   24  158  158   44   44
@@ -184,19 +184,19 @@ endfunction
 %!        107  107  143  143  108  108   52   52   51   51   73   73  101  101   21   21  175  175   90   90
 %!         54   54  158  158  143  143   77   77   26   26  168  168  113  113  229  229  165  165  225  225
 %!          9    9   47   47  133  133  135  135  130  130  207  207  236  236   43   43   19   19   73   73];
-%!assert (imresize (uint8 (in), [7 20], "nearest"), uint8 (out))
+%! assert (imresize (uint8 (in), [7 20], "nearest"), uint8 (out))
 %!
-%!assert (imresize (uint8 (in), 1.5, "bicubic"), imresize (uint8 (in), 1.5, "cubic"))
-%!assert (imresize (uint8 (in), [NaN, size(in,2)*1.5], "bicubic"), imresize (uint8 (in), 1.5, "cubic"))
-%!assert (imresize (uint8 (in), [size(in,1)*1.5, NaN], "bicubic"), imresize (uint8 (in), 1.5, "cubic"))
-%!assert (imresize (uint8 (in), 1.5, "linear"), imresize (uint8 (in), 1.5, "LIneAR"))
-%!assert (imresize (uint8 (in), 1.5, "linear"), imresize (uint8 (in), 1.5, "triangle"))
+%! assert (imresize (uint8 (in), 1.5, "bicubic"), imresize (uint8 (in), 1.5, "cubic"))
+%! assert (imresize (uint8 (in), [NaN, size(in,2)*1.5], "bicubic"), imresize (uint8 (in), 1.5, "cubic"))
+%! assert (imresize (uint8 (in), [size(in,1)*1.5, NaN], "bicubic"), imresize (uint8 (in), 1.5, "cubic"))
+%! assert (imresize (uint8 (in), 1.5, "linear"), imresize (uint8 (in), 1.5, "LIneAR"))
+%! assert (imresize (uint8 (in), 1.5, "linear"), imresize (uint8 (in), 1.5, "triangle"))
 %!
 %! out = [ 47  249   75   24   44
 %!        221  230  153  115  118
 %!        158   77  168  229  225
 %!        47   135  207   43   73];
-%!assert (imresize (uint8 (in), 0.5, "nearest"), uint8 (out))
+%! assert (imresize (uint8 (in), 0.5, "nearest"), uint8 (out))
 
 ## The following are the matlab results. We have slighlty different results but
 ## not by much. If there's would be any fixes, they would have to be on interp2
@@ -248,4 +248,3 @@ endfunction
 %!        115  108   93  128  146
 %!         38  124  175  143   54];
 %!xtest assert (imresize (uint8 (in), 0.5, "bicubic"), uint8 (out))
-

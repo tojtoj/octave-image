@@ -48,7 +48,11 @@ endfunction
 %! disp (S)
 %! ## Everything should be 0 despite a diagonal which doesn't reach borders.
 
-%!assert(prod(applylut(eye(3),makelut(inline('x(1,1)==1','x'),2))==eye(3))==1); % 2-by-2 test
-%!assert(prod(applylut(eye(3),makelut(inline('x(2,2)==1','x'),3))==eye(3))==1); % 3-by-3 test
-%!assert(prod(applylut(eye(3),makelut(inline('x(3,3)==1','x'),3))== \
-%!              applylut(eye(3),makelut(inline('x(2,2)==1','x'),2)))==1);
+## 2-by-2 test
+%!assert (prod (applylut (eye (3), makelut (@(x) x(1) == 1, 2)) == eye (3)), [1 1 1]);
+
+## 3-by-3 test
+%!assert (prod (applylut (eye (3), makelut (@(x) x(2,2) == 1, 3)) == eye (3)), [1 1 1]);
+%!assert (prod (applylut (eye (3), makelut (@(x) x(3,3) == 1, 3)) ==
+%!              applylut (eye (3), makelut (@(x) x(2,2) == 1, 2))),
+%!        [1 1 1]);

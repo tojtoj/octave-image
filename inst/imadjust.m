@@ -220,19 +220,19 @@ endfunction
 %!assert(imadjust([1:100]),[0,linspace(0,1,98),1]);
 
 %!# test with only input arg
-%!assert(sum(abs((imadjust(linspace(0,1,100),[1/99;98/99]) - \
+%!assert(sum(abs((imadjust(linspace(0,1,100),[1/99;98/99]) -
 %!                [0,linspace(0,1,98),1] )(:))) < 1e-10);
 
 %!# a test with input and output args
-%!assert(imadjust([1:100],[50;90],[-50;-30]), \
+%!assert(imadjust([1:100],[50;90],[-50;-30]),
 %!       [-50*ones(1,49), linspace(-50,-30,90-50+1), -30*ones(1,10)]);
 
 %!# a test with input and output args in a row vector (Compatibility behaviour)
-%!assert(imadjust([1:100],[50,90],[-50,-30]), \
+%!assert(imadjust([1:100],[50,90],[-50,-30]),
 %!       [-50*ones(1,49), linspace(-50,-30,90-50+1), -30*ones(1,10)]);
 
 %!# the previous test, "negated"
-%!assert(imadjust([1:100],[50;90],[-30;-50]), \
+%!assert(imadjust([1:100],[50;90],[-30;-50]),
 %!       [-30*ones(1,49), linspace(-30,-50,90-50+1), -50*ones(1,10)]);
 
 %!shared cm,cmn
@@ -249,27 +249,27 @@ endfunction
 %!assert(imadjust(cmn,[0;1],[10,20,30;11,21,31]),cmn+repmat([10,20,30],10,1));
 
 %!# a colormap, different input on each, we need increased tolerance for this test
-%!assert(sum(abs((imadjust(cm,[2,4,6;7,9,11],[0;1]) -                   \
-%!       [[0,linspace(0,1,6),1,1,1]',                                   \
-%!        [0,0,linspace(0,1,6),1,1]',                                   \
-%!        [0,0,0,linspace(0,1,6),1]']                                   \
-%!       ))(:)) < 1e-10                                                 \
+%!assert(sum(abs((imadjust(cm,[2,4,6;7,9,11],[0;1]) -
+%!       [[0 linspace(0, 1, 6) 1 1 1]' ...
+%!        [0 0 linspace(0, 1, 6) 1 1]' ...
+%!        [0 0 0 linspace(0, 1, 6) 1]']
+%!       ))(:)) < 1e-10
 %!       );
 
 %!# a colormap, different input and output on each
-%!assert(sum(abs((imadjust(cm,[2,4,6;7,9,11],[0,1,2;1,2,3]) -           \
-%!       [[0,linspace(0,1,6),1,1,1]',                                   \
-%!        [0,0,linspace(0,1,6),1,1]'+1,                                 \
-%!        [0,0,0,linspace(0,1,6),1]'+2]                                 \
-%!       ))(:)) < 1e-10                                                 \
+%!assert(sum(abs((imadjust(cm,[2,4,6;7,9,11],[0,1,2;1,2,3]) -
+%!       [[0 linspace(0, 1, 6) 1 1 1]' ...
+%!        [0 0 linspace(0, 1, 6) 1 1]'+1, ...
+%!        [0 0 0 linspace(0, 1, 6) 1]'+2]
+%!       ))(:)) < 1e-10
 %!       );
 
 %!# a colormap, different gamma, input and output on each
-%!assert(sum(abs((imadjust(cm,[2,4,6;7,9,11],[0,1,2;1,2,3],[1,2,3]) -   \
-%!       [[0,linspace(0,1,6),1,1,1]',                                   \
-%!        [0,0,linspace(0,1,6).^2,1,1]'+1,                              \
-%!        [0,0,0,linspace(0,1,6).^3,1]'+2]                              \
-%!       )(:))) < 1e-10                                                 \
+%!assert(sum(abs((imadjust(cm,[2,4,6;7,9,11],[0,1,2;1,2,3],[1,2,3]) -
+%!       [[0 linspace(0, 1, 6) 1 1 1]', ...
+%!        [0 0 linspace(0, 1, 6).^2 1 1]'+1, ...
+%!        [0 0 0 linspace(0, 1, 6).^3 1]'+2]
+%!       )(:))) < 1e-10
 %!       );
 
 %!shared iRGB,iRGBn,oRGB

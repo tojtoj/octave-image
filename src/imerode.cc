@@ -726,7 +726,7 @@ at indices @code{floor ([size(@var{SE})/2] + 1)}.\n\
 %!test
 %! a = rand ([10 40 15 6 8 5]) > 0.8;
 %! se = ones ([5 3 7]);
-%! assert (imdilate (a, se), convn (a, se) > 0)
+%! assert (imdilate (a, se), convn (a, se, "same") > 0)
 %! assert (imdilate (a, se, "full"), convn (a, se, "full") > 0)
 %! assert (imdilate (a, se, "valid"), convn (a, se, "valid") > 0)
 %! assert (imdilate (a, se), colfilt (a, size (se), "sliding", @any))
