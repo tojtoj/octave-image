@@ -363,7 +363,7 @@ function T = minimum(y)
       peakfound = true;
     end
     if peakfound && y(k-1) >= y(k) && y(k+1) >= y(k)
-      T = k-1;
+      T{1} = k-1;
       return
     end
   end
