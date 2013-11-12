@@ -14,8 +14,8 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn  {Function File} {@var{blk_siz} =} bestblk (@var{IMS})
-## @deftypefnx {Function File} {@var{blk_siz} =} bestblk (@var{IMS}, @var{max})
+## @deftypefn  {Function File} {@var{blk_size} =} bestblk (@var{IMS})
+## @deftypefnx {Function File} {@var{blk_size} =} bestblk (@var{IMS}, @var{max})
 ## @deftypefnx {Function File} {[@var{Mb}, @var{Nb}, @dots{}] =} bestblk (@dots{})
 ## Calculate block best size for block processing.
 ##
@@ -23,11 +23,11 @@
 ## blocks @var{blk_size}, that minimize padding and is smaller than or equal to
 ## @var{k} (defaults to 100) 
 ##
-## The output @var{blk_siz] is a row vector for the block size.  If there are
+## The output @var{blk_size} is a row vector for the block size.  If there are
 ## multiple output arguments, the number of rows is assigned to the first
 ## (@var{Mb}), and the number of columns to the second (@var{Nb}), etc.
 ##
-## To determine @var{block_size}, the following is performed for each
+## To determine @var{blk_size}, the following is performed for each
 ## dimension:
 ##
 ## @enumerate

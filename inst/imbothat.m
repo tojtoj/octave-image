@@ -23,7 +23,7 @@
 ## @item
 ## strel object;
 ## @item
-## array of strel objects as returned by `@strel/getsequence';
+## array of strel objects as returned by `@@strel/getsequence';
 ## @item
 ## matrix of 0's and 1's.
 ## @end itemize
