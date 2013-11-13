@@ -1,5 +1,5 @@
 ## Copyright (C) 2000 Kai Habel <kai.habel@gmx.de>
-## Copyright (C) 2012 Carnë Draug <carandraug+dev@gmail.com>
+## Copyright (C) 2012, 2013 Carnë Draug <carandraug@octave.org>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -39,18 +39,28 @@
 ## @end deftypefn
 
 function BW = im2bw (img, cmap, thres)
+
   if (nargin < 1 || nargin > 3)
-    print_usage;
-  elseif (nargin == 3 && !isind (img))
-    error ("im2bw: there must be only two arguments for non indexed images")
-  elseif (nargin == 3 && !iscolormap (cmap))
-    error ("im2bw: `cmap' must be the a colormap for indexed images")
+    print_usage ();
+  elseif (nargin == 3 && ! isind (img))
+    error ("im2bw: there must be only two arguments for non indexed images");
+  elseif (nargin == 3 && ! iscolormap (cmap))
+    error ("im2bw: CMAP must be the a colormap for indexed images");
   elseif (nargin == 2)
     thres = cmap;
   endif
 
-  if (!isnumeric (thres) || !isscalar (thres) || !isreal (thres) || !isa (thres, "double") || thres < 0 || thres > 1)
-    error ("im2bw: `threshold' must be a scalar of class double in the interval [0, 1]")
+  if (! isimage (img))
+    error ("im2bw: IMG must be an image");
+  elseif (! isnumeric (thres) || ! isscalar (thres) || ! isreal (thres) ||
+      thres < 0 || thres > 1)
+    error ("im2bw: THRESHOLD must be a scalar in the interval [0, 1]");
+  endif
+
+  if (islogical (img))
+    warning ("im2bw: IMG is already binary so nothing is done");
+    BW = img;
+    return
   endif
 
   ## Convert img to gray scale
@@ -59,10 +69,8 @@ function BW = im2bw (img, cmap, thres)
     img = ind2gray (img, cmap);
   elseif (isrgb (img))
     img = rgb2gray (img);
-  elseif (isgray (img))
-    ## do nothing. All is good
   else
-    error ("im2bw: first input argument must be an image");
+    ## Everything else, we do nothing, no matter how many dimensions
   endif
 
   ## Convert the threshold value to same image class to do the thresholding which
@@ -86,3 +94,8 @@ endfunction
 
 %!assert(im2bw ([0 0.4 0.5 0.6 1], 0.5), logical([0 0 0 1 1])); # basic usage
 %!assert(im2bw (uint8 ([0 100 255]), 0.5), logical([0 0 1]));   # with a uint8 input
+
+## This will issue a warning
+%!assert (im2bw (logical ([0 1 0])),    logical ([0 1 0]))
+%!assert (im2bw (logical ([0 1 0]), 0), logical ([0 1 0]))
+%!assert (im2bw (logical ([0 1 0]), 1), logical ([0 1 0]))
