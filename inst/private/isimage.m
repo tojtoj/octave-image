@@ -17,5 +17,6 @@
 ## It simply checks if the input really is an image.
 
 function retval = isimage (img)
-  retval = (ismatrix (img) && !issparse (img) && !isempty (img) && isreal (img));
+  retval = (ismatrix (img) && ! issparse (img) && ! isempty (img) &&
+            isreal (img) && (isnumeric (img) || islogical (img)));
 endfunction
