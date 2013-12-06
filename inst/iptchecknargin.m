@@ -17,6 +17,19 @@
 ## @deftypefn {Function File} {} iptchecknargin (@var{low}, @var{high}, @var{in}, @var{func_name})
 ## Checks for correct number of arguments.
 ##
+## This function has been deprecated.  For an exact replacement, use
+## @code{narginchk (@var{low}, @var{high})} instead.  Alternatively,
+## @code{print_usage} is able to provide an even better error message
+## provided that there is documentation for the function:
+##
+## @example
+## @group
+## if (nargin < min_inputs || nargin > max_inputs)
+##   print_usage ();
+## endif
+## @end group
+## @end example
+##
 ## This function returns an error unless @var{in} is between the values of
 ## @var{low} and @var{high}. It does nothing otherwise. They all must be non
 ## negative scalar integers. @var{high} can also be Inf.
@@ -27,6 +40,13 @@
 ## @end deftypefn
 
 function iptchecknargin (low, high, in, func_name)
+
+  persistent warned = false;
+  if (! warned)
+    warned = true;
+    warning ("Octave:deprecated-function",
+             "iptchecknargin is obsolete and will be removed from a future version of the image package, please use narginchk instead");
+  endif
 
   if (nargin != 4)
     print_usage;

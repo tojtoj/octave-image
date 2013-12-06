@@ -17,6 +17,8 @@
 ## @deftypefn {Function File} {@var{valid} =} iptcheckstrs (@var{in}, @var{valid_str}, @var{func_name}, @var{var_name}, @var{pos})
 ## Check if argument is a valid string.
 ##
+## This function has been deprecated.  Use @code{validatestring} instead.
+##
 ## If @var{in} is not a string, present in the cell array of strings
 ## @var{valid_str} gives a properly formatted error message. Otherwise,
 ## @var{valid} is the matched string. The performed matching is case-insensitive.
@@ -29,6 +31,13 @@
 ## @end deftypefn
 
 function out = iptcheckstrs (in, valid_str, func_name, var_name, pos)
+
+  persistent warned = false;
+  if (! warned)
+    warned = true;
+    warning ("Octave:deprecated-function",
+             "iptcheckstrs is obsolete and will be removed from a future version of the image package, please use validatestring instead");
+  endif
 
   if (nargin != 5)
     print_usage;

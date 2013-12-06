@@ -59,6 +59,8 @@
       bwborder
       impad
       imrotate_Fourier
+      iptchecknargin
+      iptcheckstrs
       uintlut
 
  ** The functions im2col and col2im has been completely rewritten for massive
