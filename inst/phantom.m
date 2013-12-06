@@ -1,4 +1,5 @@
 ## Copyright (C) 2010 Alex Opie <lx_op@orcon.net.nz>
+## Copyright (C) 2013 Carnë Draug <carandraug@octave.org>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -14,40 +15,63 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
+## @deftypefn  {Function File} {@var{P}} = phantom ()
+## @deftypefnx {Function File} {@var{P}} = phantom (@var{model})
+## @deftypefnx {Function File} {@var{P}} = phantom (@var{E})
+## @deftypefnx {Function File} {@var{P}} = phantom (@dots{}, @var{n})
+## @deftypefnx {Function File} {[@var{P}, @var{E}]} = phantom (@dots{})
+## Create computational phantom head.
 ##
-## @defun {@var{P} =} phantom ('Shepp-Logan', @var{n})
+## A phantom is a known object (either real or purely mathematical) that is
+## used for testing image reconstruction algorithms.  The Shepp-Logan phantom
+## is a popular mathematical model of a cranial slice, made up of a set of
+## overlaying ellipses.  This allows rigorous testing of computed tomography
+## (CT) algorithms as it can be analytically transformed with the radon
+## transform (see the functions @code{radon} and @code{iradon}).
 ##
-## Produces the Shepp-Logan phantom, with size @var{n} x @var{n}.
-## If @var{n} is omitted, 256 is used.
+## The phantom @var{P}, is created by overlaying ellipses as defined by the
+## matrix @var{E} or one of the standard @var{model}s, in a square of size
+## @var{n} by @var{n} (defaults to 256).
 ##
-## @defunx {@var{P} =} phantom ('Modified Shepp-Logan', @var{n})
+## The available standard @var{model}s (use the output argument @var{E} to
+## inspect the details of the different ellipses) are:
 ##
-## Produces a modified version of the Shepp-Logan phantom which has
-## higher contrast than the original,  with size @var{n} x @var{n}.
-## If @var{n} is omitted, 256 is used.
+## @table @asis
+## @item @qcode{"Sheep-Logan"}
+## This is the original Sheep-Logan model with 10 ellipses as described in
+## Table 1 of @cite{Shepp, Lawrence A., and Benjamin F. Logan. "The Fourier
+## reconstruction of a head section." Nuclear Science, IEEE Transactions on
+## 21, no. 3 (1974): 21-43.}
 ##
-## @defunx {@var{P} =} phantom (@var{ellipses}, @var{n})
+## @item @qcode{"Modified Shepp-Logan"} (default)
+## A modification of the original Shepp-Logan model to give a better contrast,
+## as described in Table B.3 of @cite{Toft, Peter Aundal. "The radon
+## transform-theory and implementation." PhD diss., Department of Mathematical
+## Modelling, Technical University of Denmark, 1996.}
 ##
-## Produces a custom phantom using the ellipses described in @var{ellipses}.
-## Each row of @var{ellipses} describes one ellipse, and must have 6 columns:
-## @{I, a, b, x0, y0, phi@}:
-##  @table @abbr
-##  @item I
-##    is the additive intensity of the ellipse
+## @end table
 ##
-##  @item a
+## A 6 column matrix @var{E} can be used to generate a custom image by
+## superimposing arbitrary ellipses.  Each row defines a single ellipse, with
+## each column for the values of @{I, a, b, x0, y0, phi@}:
+##
+## @table @abbr
+## @item I
+##   is the additive intensity of the ellipse
+##
+## @item a
 ##    is the length of the major axis
 ##
-##  @item b
+## @item b
 ##    is the length of the minor axis
 ##
-##  @item x0
+## @item x0
 ##    is the horizontal offset of the centre of the ellipse
 ##
-##  @item y0
-##    is the vercal offset of the centre of the ellipse
+## @item y0
+##    is the vertical offset of the centre of the ellipse
 ##
-##  @item phi
+## @item phi
 ##    is the counterclockwise rotation of the ellipse in degrees,
 ##    measured as the angle between the x axis and the ellipse major axis.
 ##
@@ -55,153 +79,149 @@
 ##
 ## The image bounding box in the algorithm is @{[-1, -1], [1, 1]@}, so the
 ## values of a, b, x0, y0 should all be specified with this in mind.
-## If @var{n} is omitted, 256 is used.
-##
-## @defunx {@var{P} =} phantom (@var{n})
-##
-## Creates a modified Shepp-Logan phantom with size @var{n} x @var{n}.
-##
-## @defunx {@var{P} = } phantom ()
-##
-## Creates a modified Shepp-Logan phantom with size 256 x 256.
-## @end defun
-##
-## Create a Shepp-Logan or modified Shepp-Logan phantom.
-##
-## A phantom is a known object (either real or purely mathematical) that
-## is used for testing image reconstruction algorithms.  The Shepp-Logan
-## phantom is a popular mathematical model of a cranial slice, made up
-## of a set of ellipses.  This allows rigorous testing of computed 
-## tomography (CT) algorithms as it can be analytically transformed with
-## the radon transform (see the function @command{radon}).
 ##
 ## Example:
-## 
+##
 ## @example
-##   P = phantom (512);
-##   imshow (P, []);
+## @group
+## P = phantom (512);
+## imshow (P);
+## @end group
 ## @end example
 ##
-## References:
-##
-##  Shepp, L. A.; Logan, B. F.; Reconstructing Interior Head Tissue 
-##  from X-Ray Transmissions, IEEE Transactions on Nuclear Science,
-##  Feb. 1974, p. 232.
-##
-##  Toft, P.; "The Radon Transform - Theory and Implementation", Ph.D. thesis,
-##  Department of Mathematical Modelling, Technical University 
-##  of Denmark, June 1996.
+## @seealso{iradon, radon}
+## @end deftypefn
 
-function p = phantom (varargin)
+function [head, ellipses] = phantom (varargin)
 
-  [n, ellipses] = read_args (varargin {:});
+  if (nargin > 2)
+    print_usage ()
+  endif
 
-  # Blank image
-  p = zeros (n);
+  ## Would be really cool if we implemented a 3D phantom as already described
+  ## in Cheng Guan Koay, Joelle E. Sarlls, and Evren Ozarslan (2007).
+  ## "Three-Dimensional Analytical Magnetic Resonance Imaging Phantom in the
+  ## Fourier Domain". Magnetic Resonance in Medicine 58:430 - 436.
+  ## The Table 1 on their paper to generate the 3D model, would take 8 columns,
+  ## an extra value for z axis coordinates, and extra axis length.
+  ## They mention other phantom heads as more canonical 3D head phantoms (read
+  ## the introduction)
+
+  ## Defaults
+  ellipses  = mod_shepp_logan ();
+  n         = 256;
+
+  if (nargin)
+    ## Check validity of N
+    chk_n = @(x) isnumeric (x) && isscalar (x) && ceil (x) == x;
+
+    in = varargin{1};
+    if (ischar (in))
+      switch (tolower (in))
+        case "shepp-logan",           ellipses = shepp_logan ();
+        case "modified shepp-logan",  ellipses = mod_shepp_logan ();
+        otherwise
+          error ("phantom: unknown MODEL `%s'", in);
+      endswitch
+    elseif (isnumeric (in) && ndims (in) == 2 && columns (in) == 6)
+      ellipses = in;
+    elseif (chk_n (in))
+      n = in;
+      ## If N is the first argument, we can't have more
+      if (nargin > 1)
+        print_usage ();
+      endif
+    else
+      error ("phantom: first argument must either be MODEL, E, or N");
+    endif
+
+    ## If there is a second input argument, must be N
+    if (nargin > 1)
+      if (chk_n (varargin{2}))
+        n = varargin{2};
+      else
+        error ("phantom: N must be numeric scalar");
+      endif
+    endif
+  endif
+
+  ## Initialize blank image
+  head = zeros (n);
 
   # Create the pixel grid
   xvals = (-1 : 2 / (n - 1) : 1);
   xgrid = repmat (xvals, n, 1);
 
-  for i = 1:size (ellipses, 1)    
+  for i = 1:rows (ellipses)
     I   = ellipses (i, 1);
     a2  = ellipses (i, 2)^2;
     b2  = ellipses (i, 3)^2;
     x0  = ellipses (i, 4);
     y0  = ellipses (i, 5);
     phi = ellipses (i, 6) * pi / 180;  # Rotation angle in radians
-    
-    # Create the offset x and y values for the grid
+
+    ## Create the offset x and y values for the grid
     x = xgrid - x0;
     y = rot90 (xgrid) - y0;
-    
-    cos_p = cos (phi); 
+
+    cos_p = cos (phi);
     sin_p = sin (phi);
-    
-    # Find the pixels within the ellipse
+
+    ## Find the pixels within the ellipse
     locs = find (((x .* cos_p + y .* sin_p).^2) ./ a2 ...
-     + ((y .* cos_p - x .* sin_p).^2) ./ b2 <= 1);
-    
-    # Add the ellipse intensity to those pixels
-    p (locs) = p (locs) + I;
+      + ((y .* cos_p - x .* sin_p).^2) ./ b2 <= 1);
+
+    ## Add the ellipse intensity to those pixels
+    head(locs) += I;
   endfor
 endfunction
 
-function [n, ellip] = read_args (varargin)
-  n = 256;
-  ellip = mod_shepp_logan ();
-  
-  if (nargin == 1)
-    if (ischar (varargin {1}))
-      ellip = select_phantom (varargin {1});
-    elseif (numel (varargin {1}) == 1)
-      n = varargin {1};
-    else
-      if (size (varargin {1}, 2) != 6)
-        error ("Wrong number of columns in user phantom");
-      endif
-      ellip = varargin {1};
-    endif
-  elseif (nargin == 2)
-    n = varargin {2};
-    if (ischar (varargin {1}))
-      ellip = select_phantom (varargin {1});
-    else
-      if (size (varargin {1}, 2) != 6)
-        error ("Wrong number of columns in user phantom");
-      endif
-      ellip = varargin {1};
-    endif
-  elseif (nargin > 2)
-    warning ("Extra arguments passed to phantom were ignored");
-  endif
+function ellipses = shepp_logan ()
+  ## Standard head phantom, taken from Shepp & Logan
+  ##
+  ## Note that the first element of this matrix, the gray value for the first
+  ## ellipse (human skull), has a value of 1.0 even though the paper gives it a
+  ## a value of 2.0 (see Table 1 on page 32 and Figure 1 on page 34). This
+  ## change is so that the **head** intensity values appear in the range [0 1]
+  ## rather than the range [1 2].
+  ##
+  ##    **The problem with this**
+  ##
+  ## The background still need an intensity value which is going to be 0. This
+  ## means that we can't distinguish between the background and the ventricles
+  ## (ellipse "c" and "d" whose intensities are a + b + c and a + b + d, see
+  ## Figure 1) since they will have an intensity value of 0 (actually, because
+  ## of machine precision the ventricules will be almost 0). But if we didn't
+  ## made this change, the ** image** range would be [0 2] with all of the head
+  ## details compressed in half of the display range. Also, Matlab seems to be
+  ## doing the same.
+  persistent ellipses = [ 1     0.69    0.92     0      0         0
+                         -0.98  0.6624  0.874    0     -0.0184    0
+                         -0.02  0.11    0.31     0.22   0       -18
+                         -0.02  0.16    0.41    -0.22   0        18
+                          0.01  0.21    0.25     0      0.35      0
+                          0.01  0.046   0.046    0      0.1       0
+                          0.01  0.046   0.046    0     -0.1       0
+                          0.01  0.046   0.023   -0.08  -0.605     0
+                          0.01  0.023   0.023    0     -0.606     0
+                          0.01  0.023   0.046    0.06  -0.605     0];
 endfunction
 
-function e = select_phantom (name)
-  if (strcmpi (name, 'shepp-logan'))
-    e = shepp_logan ();
-  elseif (strcmpi (name, 'modified shepp-logan'))
-    e = mod_shepp_logan ();
-  else
-    error ("Unknown phantom type: %s", name);
-  endif
+function ellipses = mod_shepp_logan ()
+  ## Modified version of Shepp & Logan's head phantom, adjusted to improve
+  ## contrast.  Taken from Peter Toft PhD thesis, Table B.3
+  persistent ellipses = [ 1.0   0.69    0.92     0.0    0.0       0
+                         -0.8   0.6624  0.874    0.0   -0.0184    0
+                         -0.2   0.11    0.31     0.22   0.0     -18
+                         -0.2   0.16    0.41    -0.22   0.0      18
+                          0.1   0.21    0.25     0.0    0.35      0
+                          0.1   0.046   0.046    0.0    0.1       0
+                          0.1   0.046   0.046    0.0   -0.1       0
+                          0.1   0.046   0.023   -0.08  -0.605     0
+                          0.1   0.023   0.023    0.0   -0.606     0
+                          0.1   0.023   0.046    0.06  -0.605     0];
 endfunction
-
-function e = shepp_logan
-  #  Standard head phantom, taken from Shepp & Logan
-  e = [  2,   .69,   .92,    0,      0,   0;  
-      -.98, .6624, .8740,    0, -.0184,   0;
-      -.02, .1100, .3100,  .22,      0, -18;
-      -.02, .1600, .4100, -.22,      0,  18;
-       .01, .2100, .2500,    0,    .35,   0;
-       .01, .0460, .0460,    0,     .1,   0;
-       .02, .0460, .0460,    0,    -.1,   0;
-       .01, .0460, .0230, -.08,  -.605,   0; 
-       .01, .0230, .0230,    0,  -.606,   0;
-       .01, .0230, .0460,  .06,  -.605,   0];
-endfunction
-
-function e = mod_shepp_logan
-  #  Modified version of Shepp & Logan's head phantom, 
-  #  adjusted to improve contrast.  Taken from Toft.
-  e = [  1,   .69,   .92,    0,      0,   0;
-      -.80, .6624, .8740,    0, -.0184,   0;
-      -.20, .1100, .3100,  .22,      0, -18;
-      -.20, .1600, .4100, -.22,      0,  18;
-       .10, .2100, .2500,    0,    .35,   0;
-       .10, .0460, .0460,    0,     .1,   0;
-       .10, .0460, .0460,    0,    -.1,   0;
-       .10, .0460, .0230, -.08,  -.605,   0; 
-       .10, .0230, .0230,    0,  -.606,   0;
-       .10, .0230, .0460,  .06,  -.605,   0];
-endfunction
-
-#function e = ??
-#  # Add any further phantoms of interest here
-#  e = [ 0, 0, 0, 0, 0, 0;
-#        0, 0, 0, 0, 0, 0];
-#endfunction
 
 %!demo
 %! P = phantom (512);
-%! imshow (P, []);
+%! imshow (P);

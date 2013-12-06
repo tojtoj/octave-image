@@ -120,6 +120,10 @@
     object, no longer the indices for the elements in the object boundaries
     only. The connectivity default was changed to 8.
 
+ ** The original Shepp-Logan model in the function phantom as been changed to
+    return all values in the range [0 1] rather than [0 2] by changing the
+    intensity of the first ellipse from 2 to 1.
+
  ** Other functions that have been changed for smaller bugfixes, increased
     Matlab compatibility, or performance:
 
