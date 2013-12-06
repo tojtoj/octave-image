@@ -72,7 +72,6 @@ Filtering and Transforms
  intlut
  iradon
  nonmax_supress
- phantom
  radon
  rho_filter
  uintlut
@@ -153,3 +152,4 @@ Utilities
  iptcheckstrs
  iptnum2ordinal
  padarray
+ phantom
