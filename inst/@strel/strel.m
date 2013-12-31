@@ -175,9 +175,8 @@ function SE = strel (shape, varargin)
       else
         error ("strel: an arbitrary shape takes 1 or 2 arguments");
       endif
-      ## isbw returns false in case of an empty matrix but we need
-      ## to support empty strel objects as well.
-      if (! isbw (nhood, "non-logical") && ! isempty (nhood))
+      ## don't use isbw because we also want to allow empty nhood
+      if (any ((nhood(:) != 1) & (nhood(:) != 0)))
         error ("strel: NHOOD must be a matrix with only 0 and 1 values")
       endif
 
@@ -630,8 +629,7 @@ endfunction
 %! templ4 = logical ([0 0 1; 0 1 0; 1 0 0]);
 %! assert ({getnhood(seq(1)) getnhood(seq(2)) getnhood(seq(3)) getnhood(seq(4))},
 %!         {templ1 templ2 templ3 templ4});
-
-%!test
+%!
 %! seq = getsequence (strel ("octagon", 21));
 %! assert (size (seq), [28 1]);
 %! assert (arrayfun (@(x) getnhood (seq(x)), 1:4:25, "UniformOutput", false),
