@@ -206,9 +206,7 @@
 function bw2 = bwmorph (bw, operation, n = 1)
   if (nargin < 2 || nargin > 3)
     print_usage ();
-  elseif (! ismatrix (bw) || ! (isbool (bw) || isnumeric (bw)))
-    ## we can't use isbw because we must accept anything numeric or boolean
-    ## which will then be converted into boolean anyway.
+  elseif (! isimage (bw))
     error ("bwmorph: BW must be a binary image");
   elseif (! ischar (operation))
     error ("bwmorph: OPERATION must be a string");
@@ -221,16 +219,7 @@ function bw2 = bwmorph (bw, operation, n = 1)
     n = 1;
   endif
 
-  ## Matlab will accepts anything numeric or boolean. We can at least
-  ## issue a warning.
-  if (! isbw (bw, "non-logical"))
-    warning ("octave:image:non-bw-conversion",
-             "bwmorph: converting non binary image to binary");
-  endif
-
-  ## Performing on logical matrices is faster. We could do this and
-  ## then revert back to its original class but will NOT for Matlab
-  ## compatibility, who always returns a logical matrix.
+  ## Anything is valid, just convert it to logical
   bw = logical (bw);
 
   ## Some operations have no effect after being applied the first time.
