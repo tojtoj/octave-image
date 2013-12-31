@@ -1,6 +1,6 @@
 ## Copyright (C) 2004 Antti Niemistö <antti.niemisto@tut.fi>
 ## Copyright (C) 2007 Søren Hauberg
-## Copyright (C) 2012 Carnë Draug <carandraug+dev@gmail.com>
+## Copyright (C) 2012-2013 Carnë Draug <carandraug+dev@gmail.com>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -154,8 +154,6 @@ function [varargout] = graythresh (img, algo = "otsu", varargin)
     print_usage();
   elseif (nargin > 2 && !any (strcmpi (algo, {"percentile"})))
     error ("graythresh: algorithm `%s' does not accept any options.", algo);
-  elseif (strcmpi (algo, "percentile") && (nargin != 3 || ! isscalar (varargin{1})))
-    error ("graythresh: algorithm `%s' requires a scalar value.", algo);
   else
     hist_in = false;
     ## If the image is RGB convert it to grayscale
@@ -204,7 +202,7 @@ function [varargout] = graythresh (img, algo = "otsu", varargin)
     case {"minimum"},       thresh = minimum        (ihist);
     case {"moments"},       thresh = moments        (ihist);
     case {"otsu"},          thresh = otsu           (ihist, nargout > 1);
-    case {"percentile"},    thresh = percentile     (ihist, varargin{1});
+    case {"percentile"},    thresh = percentile     (ihist, varargin{:});
     otherwise, error ("graythresh: unknown method '%s'", algo);
   endswitch
   ## normalize the threshold value to the [0 1] range
@@ -327,17 +325,12 @@ function [T] = intermodes (y)
   T{1} = floor(mean(TT));
 endfunction
 
-function [T] = percentile (y, p)
-  n = numel (y) - 1;
-
-  % The threshold is chosen such that 50% of pixels lie in each category.
-  Avec = zeros(1,n+1);
-  for t = 0:n
-    Avec(t+1) = partial_sumA(y,t)/partial_sumA(y,n);
-  end
-
-  [minimum,ind] = min(abs(Avec-p));
-  T{1} = ind-1;
+## The threshold is chosen such that 50% (in case of p = 0.5) of
+## pixels lie in each category.
+function [T] = percentile (y, p = 0.5)
+  Avec = cumsum (y) / sum (y);
+  [~, ind] = min (abs (Avec - p));
+  T{1} = ind -1;
 endfunction
 
 
@@ -685,6 +678,7 @@ endfunction
 %!shared img, histo
 %! [img, cmap] = imread ("default.img");
 %! img = im2uint8 (ind2gray (img, cmap));
+%!assert (graythresh (img, "percentile"),      142/255);
 %!assert (graythresh (img, "percentile", 0.5), 142/255);
 %!assert (graythresh (img, "moments"),         142/255);
 %!assert (graythresh (img, "minimum"),          93/255);
