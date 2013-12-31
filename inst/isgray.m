@@ -15,20 +15,24 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} @var{bool} = isgray (@var{img})
-## Return true if @var{img} is a grayscale image.
+## @deftypefn {Function File} isgray (@var{img})
+## Return true if @var{img} is an indexed image.
 ##
-## A variable is considereed to be a gray scale image if it is 2-dimensional,
-## non-sparse matrix, and:
+## A variable can be considered a grayscale image if it is a non-sparse
+## matrix of size @nospell{MxNx1xK} and:
+##
 ## @itemize @bullet
-## @item is of class double and all values are in the range [0, 1];
+## @item is of class double and all values are in the range [0, 1] or NaN;
 ## @item is of class uint8, uint16 or int16.
 ## @end itemize
 ##
-## Note that grayscale time-series image have 4 dimensions (NxMx1xtime) but
-## isgray will still return false.
+## @strong{Note:} despite their suggestive names, the functions isbw,
+## isgray, isind, and isrgb, are ambiguous since it is not always possible
+## to distinguish between those image types.  For example, an uint8 matrix
+## can be both a grayscale and indexed image.  They are good to dismiss
+## input as an invalid image type, but not for identification.
 ##
-## @seealso{isbw, isind, isrgb}
+## @seealso{gray2ind, isbw, isind, isrgb}
 ## @end deftypefn
 
 function bool = isgray (img)
@@ -38,9 +42,7 @@ function bool = isgray (img)
   endif
 
   bool = false;
-  if (!isimage (img))
-    bool = false;
-  elseif (ndims (img) == 2)
+  if (isimage (img) && ndims (img) < 5 && size (img, 3) == 1)
     switch (class (img))
       case "double"
         bool = ispart (@is_double_image, img);
@@ -51,12 +53,24 @@ function bool = isgray (img)
 
 endfunction
 
-%!shared a
+%!test
 %! a = rand (100);
-%!assert (isgray (a), true);
+%! assert (isgray (a), true);
 %! a(50, 50) = 2;
-%!assert (isgray (a), false);
+%! assert (isgray (a), false);
+
+%!test
 %! a = uint8 (randi (255, 100));
-%!assert (isgray (a), true);
+%! assert (isgray (a), true);
 %! a = int8 (a);
-%!assert (isgray (a), false);
+%! assert (isgray (a), false);
+
+%!test
+%! a = rand (100);
+%! a(500) = NaN;
+%! assert (isgray (a), true);
+
+%!assert (isgray (rand (5, 5, 1, 4)), true);
+%!assert (isgray (rand (5, 5, 3, 4)), false);
+%!assert (isgray (rand (5, 5, 3)), false);
+%!assert (isgray (rand (5, 5, 1, 3, 4)), false);

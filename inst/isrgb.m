@@ -19,17 +19,21 @@
 ## @deftypefn {Function File} {@var{bool} = } isrgb (@var{img})
 ## Return true if @var{img} is a RGB image.
 ##
-## A variable is considereed to be a RGB image if it is 3-dimensional,
-## non-sparse matrix, of size MxNx3 and:
+## A variable can be considered a RGB image if it is a non-sparse
+## matrix of size @nospell{MxNx3xK} and:
+##
 ## @itemize @bullet
-## @item is of class double and all values are in the range [0, 1];
-## @item is of class uint8 or uint16.
+## @item is of class double and all values are in the range [0, 1] or NaN;
+## @item is of class uint8, or uint16.
 ## @end itemize
 ##
-## Note that RGB time-series image have 4 dimensions (NxMx3xtime) but
-## isrgb will still return false.
+## @strong{Note:} despite their suggestive names, the functions isbw,
+## isgray, isind, and isrgb, are ambiguous since it is not always possible
+## to distinguish between those image types.  For example, an uint8 matrix
+## can be both a grayscale and indexed image.  They are good to dismiss
+## input as an invalid image type, but not for identification.
 ##
-## @seealso{isbw, isgray, isind}
+## @seealso{rgb2gray, rgb2ind, isbw, isgray, isind}
 ## @end deftypefn
 
 function bool = isrgb (img)
@@ -39,9 +43,7 @@ function bool = isrgb (img)
   endif
 
   bool = false;
-  if (!isimage (img))
-    bool = false;
-  elseif (ndims (img) == 3 && size (img, 3) == 3)
+  if (isimage (img) && ndims (img) < 5 && size (img, 3) == 3)
     switch (class (img))
       case "double"
         bool = ispart (@is_double_image, img);
@@ -58,11 +60,10 @@ endfunction
 %!# Double matrix tests
 %!assert(isrgb(rand(5,5)),false);
 %!assert(isrgb(rand(5,5,1,5)),false);
-%!assert(isrgb(rand(5,5,3,5)),false);
+%!assert(isrgb(rand(5,5,3,5)),true);
 %!assert(isrgb(rand(5,5,3)),true);
 %!assert(isrgb(ones(5,5,3)),true);
 %!assert(isrgb(ones(5,5,3)+.0001),false);
 %!assert(isrgb(zeros(5,5,3)-.0001),false);
 
-%!# Logical -- checked in matlab, should return false
 %!assert(isrgb(logical(round(rand(5,5,3)))),false);

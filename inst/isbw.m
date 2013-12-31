@@ -15,61 +15,69 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} @var{bool} = isbw (@var{img})
-## @deftypefnx {Function File} @var{bool} = isbw (@var{img}, @var{logic})
+## @deftypefn  {Function File} isbw (@var{img})
+## @deftypefnx {Function File} isbw (@var{img}, @var{logic})
 ## Return true if @var{img} is a black and white image.
 ##
-## The optional argument @var{logic} defines what is considered a black and
-## white image. Possible values are the strings `logical' or `non-logical'. The
-## first defines it as a logical matrix, while the second defines it as a matrix
-## where the only values are 1 and 0. Defaults to `logical'.
+## A variable can be considered a black and white image if it is a
+## non-sparse matrix of size @nospell{MxNx1xK}, and depending on the
+## string @var{logic}, defined as:
 ##
-## @seealso{isgray, isind, islogical, isrgb}
+## @table @asis
+## @item @qcode{"logical"} (default)
+## @var{img} must be of class logical.
+##
+## @item @qcode{"non-logical"}
+## all values in @var{img} are either 1 or 0.
+## @end table
+##
+## @strong{Note:} despite their suggestive names, the functions isbw,
+## isgray, isind, and isrgb, are ambiguous since it is not always possible
+## to distinguish between those image types.  For example, an uint8 matrix
+## can be both a grayscale and indexed image.  They are good to dismiss
+## input as an invalid image type, but not for identification.
+##
+## @seealso{im2bw, isgray, isind, islogical, isrgb}
 ## @end deftypefn
 
 function bool = isbw (BW, logic = "logical")
-  ## this function has been removed from version 7.3 (R2011b) of
-  ## matlab's image processing toolbox
+
   if (nargin < 1 || nargin > 2)
     print_usage;
-  elseif (!ischar (logic) && any (strcmpi (logic, {"logical", "non-logical"})))
-    error ("second argument must either be a string 'logical' or 'non-logical'")
   endif
 
   bool = false;
-  if (!isimage (BW))
-    bool = false;
-  elseif (strcmpi (logic, "logical"))
-    ## this is the matlab compatible way (before they removed the function)
-    bool = islogical (BW);
+  if (isimage (BW) && ndims (BW) < 5 && size (BW, 3) == 1)
+    if (strcmpi (logic, "logical"))
+      ## this is the matlab compatible way (before they removed the function)
+      bool = islogical (BW);
 
-    ## FIXME the following block is just temporary to keep backwards compatibility
-    if (nargin == 1 && !islogical (BW) && isbw (BW, "non-logical"))
-      persistent warned = false;
-      if (! warned)
-        warned = true;
-        warning ("isbw: image is not logical matrix and therefore not binary but all values are either 0 and 1.")
-        warning ("isbw: future versions of this function will return true. Consider using the call `isbw (img, \"non-logical\")'.")
-      endif
-      bool = true;
+    elseif (strcmpi (logic, "non-logical"))
+      bool = islogical (BW) || ispart (@is_bw_nonlogical, BW);
+
+    else
+      error ("isbw: LOGIC must be the string 'logical' or 'non-logical'")
     endif
-    ## end of temporary block for backwards compatibility
-
-  elseif (strcmpi (logic, "non-logical"))
-    bool = ispart (@is_bw_nonlogical, BW);
   endif
 
 endfunction
 
 function bool = is_bw_nonlogical (BW)
-  bool = all ((BW(:) == 1) | (BW(:) == 0));
+  bool = ! any ((BW(:) != 1) & (BW(:) != 0));
 endfunction
 
-%!shared a
-%! a = round(rand(100));
-%!assert (isbw (a, "non-logical"), true);
-%!assert (isbw (a, "logical"), false);
-%!assert (isbw (logical(a), "logical"), true);
-%!assert (isbw (logical(a), "non-logical"), true);
+%!test
+%! a = round (rand (100));
+%! assert (isbw (a, "non-logical"), true);
+%! assert (isbw (a, "logical"), false);
+%! assert (isbw (logical (a), "logical"), true);
+%! assert (isbw (logical (a), "non-logical"), true);
+%!
+%! ## change when the different value is near the start and then in middle,
+%! ## because of the way we test part of the image before the rest
+%! a(1, 1) = 2;
+%! assert (isbw (a, "non-logical"), false);
+%!
+%! a( 1,  1) = 1;
 %! a(50, 50) = 2;
-%!assert (isbw (a, "non-logical"), false);
+%! assert (isbw (a, "non-logical"), false);
