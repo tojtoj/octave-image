@@ -15,8 +15,8 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {@var{BW} =} im2bw (@var{img}, threshold)
-## @deftypefnx {Function File} {@var{BW} =} im2bw (@var{X}, @var{cmap}, threshold)
+## @deftypefn  {Function File} {} im2bw (@var{img}, threshold)
+## @deftypefnx {Function File} {} im2bw (@var{X}, @var{cmap}, threshold)
 ## Convert image to binary, black and white, by threshold.
 ##
 ## The input image @var{img} can either be a grayscale or RGB image.  In the later
@@ -38,14 +38,14 @@
 ## @seealso{graythresh, ind2gray, rgb2gray}
 ## @end deftypefn
 
-function BW = im2bw (img, cmap, thres)
+function BW = im2bw (img, cmap, thres = 0.5)
 
   if (nargin < 1 || nargin > 3)
     print_usage ();
   elseif (nargin == 3 && ! isind (img))
-    error ("im2bw: there must be only two arguments for non indexed images");
+    error ("im2bw: IMG must be an indexed image when are 3 input arguments");
   elseif (nargin == 3 && ! iscolormap (cmap))
-    error ("im2bw: CMAP must be the a colormap for indexed images");
+    error ("im2bw: CMAP must be a colormap");
   elseif (nargin == 2)
     thres = cmap;
   endif
