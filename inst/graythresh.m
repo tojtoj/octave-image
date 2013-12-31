@@ -49,13 +49,6 @@
 ## (1983). "Histogram concavity analysis as an aid in threshold selection", IEEE
 ## Transactions on Systems, Man, and Cybernetics, 13: 231-235}.
 ##
-## @item Huang
-## Not yet implemented.
-##
-## @item ImageJ
-## A variation of the intermeans algorithm, this is the default for ImageJ.
-## Not yet implemented.
-##
 ## @item intermodes
 ## This assumes a bimodal histogram and chooses the threshold to be the mean of
 ## the two peaks of the bimodal histogram @cite{J. M. S. Prewitt, and M. L.
@@ -75,9 +68,6 @@
 ##
 ## Note that several implementations of this method exist. See the source code
 ## for details.
-##
-## @item Li
-## Not yet implemented.
 ##
 ## @item MaxEntropy
 ## Implements Kapur-Sahoo-Wong (Maximum Entropy) thresholding method based on the
@@ -124,18 +114,6 @@
 ## If no value is given, assumes 0.5 (equal distribution of background and foreground)
 ## @cite{W Doyle (1962). "Operation useful for similarity-invariant pattern
 ## recognition", Journal of the Association for Computing Machinery 9: 259-267}
-##
-## @item RenyiEntropy
-## Not yet implemented.
-##
-## @item Shanbhag
-## Not yet implemented.
-##
-## @item triangle
-## Not yet implemented.
-##
-## @item Yen
-## Not yet implemented.
 ## @end table
 ##
 ## @seealso{im2bw}
@@ -147,6 +125,11 @@
 ##      MaxEntropy    MaxLikelihood   intermeans
 ##      moments       minerror        concavity
 ##  * Carnë Draug implemented and vectorized the Otsu's method
+##  * Carnë Draug vectorized percentile
+##  * missing methods from ImageJ
+##      Yen           triangle        RenyiEntropy
+##      Shanbhag      Li              Huang
+##      ImageJ
 
 function [varargout] = graythresh (img, algo = "otsu", varargin)
   ## Input checking
