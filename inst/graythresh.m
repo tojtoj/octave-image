@@ -125,7 +125,7 @@
 ##      MaxEntropy    MaxLikelihood   intermeans
 ##      moments       minerror        concavity
 ##  * Carnë Draug implemented and vectorized the Otsu's method
-##  * Carnë Draug vectorized percentile
+##  * Carnë Draug vectorized percentile and moments.
 ##  * missing methods from ImageJ
 ##      Yen           triangle        RenyiEntropy
 ##      Shanbhag      Li              Huang
@@ -243,20 +243,21 @@ endfunction
 function level = moments (y)
   n = numel (y) - 1;
 
-  % The threshold is chosen such that partial_sumA(y,t)/partial_sumA(y,n) is closest to x0.
-  Avec = zeros (1, n+1);
+  ## The threshold is chosen such that partial_sumA(y,t)/partial_sumA(y,n)
+  ## is closest to x0.
+  sumY = sum (y);
+  Avec = cumsum (y) / sumY;
 
-  for t = 0:n
-    Avec(t+1) = partial_sumA (y, t) / partial_sumA (y, n);
-  end
+  sumB = partial_sumB (y,n);
+  sumC = partial_sumC (y,n);
+  sumD = partial_sumD (y,n);
+  ## The following finds x0.
+  x2 = (sumB*sumC - sumY*sumD) / (sumY*sumC - sumB^2);
+  x1 = (sumB*sumD - sumC^2) / (sumY*sumC - sumB^2);
+  x0 = .5 - (sumB/sumY + x2/2) / sqrt (x2^2 - 4*x1);
 
-  % The following finds x0.
-  x2 = (partial_sumB(y,n)*partial_sumC(y,n) - partial_sumA(y,n)*partial_sumD(y,n)) / (partial_sumA(y,n)*partial_sumC(y,n) - partial_sumB(y,n)^2);
-  x1 = (partial_sumB(y,n)*partial_sumD(y,n) - partial_sumC(y,n)^2) / (partial_sumA (y,n)*partial_sumC(y,n) - partial_sumB(y,n)^2);
-  x0 = .5 - (partial_sumB(y,n)/partial_sumA(y,n) + x2/2) / sqrt (x2^2 - 4*x1);
-
-  % And finally the threshold.
-  [minimum, ind] = min (abs (Avec-x0));
+  ## And finally the threshold
+  [~, ind] = min (abs (Avec-x0));
   level{1} = ind-1;
 endfunction
 
