@@ -143,15 +143,19 @@ function [varargout] = imhist (img, b)
   else
     stem (bins, nn, "marker", "none");
     xlim ([bins(1) bins(end)]);
-    ## we remove the box to see values with a value fo 255 (we can't remove the
-    ## line on the right since that wil remove the numbers and tics at the same
-    ## time)
-    box off;
-    ## if values are above this, they are likely outliers and prevent the
-    ## overview of the histogram
-    ylimit = median (nn) * 10;
-    if (ylim()(2) > ylimit)
-      ylim ([0 round(ylimit)]);
+    box off;     # remove the box to see bar for the last bin
+
+    ## If we have a few very high peaks, it prevents the overview of the
+    ## histogram since the axis are set automatically. So we consider the
+    ## automatic y axis bad if it's 10 times above the median of the
+    ## histogram.
+    ## The (ylimit != 0) is for cases when most of the bins is zero. In
+    ## such cases, the median is zero and we'd get an error trying to set
+    ## "ylim ([0 0])". We could adjust it to [0 1] but in such cases, it's
+    ## probably important to show how high those few peaks are.
+    ylimit = round (median (nn) * 10);
+    if (ylim()(2) > ylimit && ylimit != 0)
+      ylim ([0 ylimit]);
     endif
     if (indexed)
       colormap (b);
