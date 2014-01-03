@@ -267,17 +267,21 @@ function T = maxentropy(y)
   dz_warn = warning ("query", "divide-by-zero");
   unwind_protect
     warning ("off", "Octave:divide-by-zero");
-    % The threshold is chosen such that the following expression is minimized.
+    ## The threshold is chosen such that the following expression is minimized.
+    sumY = sum (y);
+    negY = negativeE (y, n);
     for j = 0:n
-      vec(j+1) = negativeE(y,j)/partial_sumA(y,j) - log10(partial_sumA(y,j)) + ...
-          (negativeE(y,n)-negativeE(y,j))/(partial_sumA(y,n)-partial_sumA(y,j)) - log10(partial_sumA(y,n)-partial_sumA(y,j));
+      sumA = partial_sumA (y, j);
+      negE = negativeE (y, j);
+      sum_diff = sumY - sumA;
+      vec(j+1) = negE/sumA - log10 (sumA) + (negY-negE)/(sum_diff) - log10 (sum_diff);
     end
   unwind_protect_cleanup
     ## restore broadcats warning status
     warning (dz_warn.state, "Octave:divide-by-zero");
   end_unwind_protect
 
-  [minimum,ind] = min(vec);
+  [~,ind] = min (vec);
   T{1} = ind-1;
 endfunction
 
@@ -354,14 +358,22 @@ function [Tout] = minerror_iter (y, T)
   dz_warn = warning ("query", "divide-by-zero");
   unwind_protect
     warning ("off", "Octave:divide-by-zero");
+    sumA = partial_sumA (y, n);
+    sumB = partial_sumB (y, n);
+    sumC = partial_sumC (y, n);
     while T ~= Tprev
       % Calculate some statistics.
-      mu = partial_sumB(y,T)/partial_sumA(y,T);
-      nu = (partial_sumB(y,n)-partial_sumB(y,T))/(partial_sumA(y,n)-partial_sumA(y,T));
-      p = partial_sumA(y,T)/partial_sumA(y,n);
-      q = (partial_sumA(y,n)-partial_sumA(y,T)) / partial_sumA(y,n);
-      sigma2 = partial_sumC(y,T)/partial_sumA(y,T)-mu^2;
-      tau2 = (partial_sumC(y,n)-partial_sumC(y,T)) / (partial_sumA(y,n)-partial_sumA(y,T)) - nu^2;
+      sumAT = partial_sumA (y, T);
+      sumBT = partial_sumB (y, T);
+      sumCT = partial_sumC (y, T);
+      sumAdiff = sumA - sumAT;
+
+      mu = sumBT/sumAT;
+      nu = (sumB-sumBT)/(sumAdiff);
+      p = sumAT/sumA;
+      q = (sumAdiff) / sumA;
+      sigma2 = sumCT/sumAT-mu^2;
+      tau2 = (sumC-sumCT) / (sumAdiff) - nu^2;
 
       % The terms of the quadratic equation to be solved.
       w0 = 1/sigma2-1/tau2;
@@ -430,13 +442,21 @@ function Tout = maxlikelihood (y)
   ## initial estimate for the threshold is found with the minimum algorithm
   T = minimum (y){1};
 
+  sumY = sum (y);
+
+  sumB  = partial_sumB (y, n);
+  sumC  = partial_sumC (y, n);
+
+  sumAT = partial_sumA (y, T);
+  sumBT = partial_sumB (y, T);
+  sumCT = partial_sumC (y, T);
   ## initial values for the statistics
-  mu     = partial_sumB (y, T) / partial_sumA (y, T);
-  nu     = (partial_sumB (y, n) - partial_sumB (y, T)) / (partial_sumA (y, n) - partial_sumA (y, T));
-  p      = partial_sumA (y, T) / partial_sumA (y, n);
-  q      = (partial_sumA (y, n) - partial_sumA (y, T)) / partial_sumA (y, n);
-  sigma2 = partial_sumC (y, T) / partial_sumA (y, T) - mu^2;
-  tau2   = (partial_sumC (y, n) - partial_sumC (y, T)) / (partial_sumA (y, n) - partial_sumA (y, T)) - nu^2;
+  mu     = sumBT / sumAT;
+  nu     = (sumB - sumBT) / (sumY - sumAT);
+  p      = sumAT / sumY;
+  q      = (sumY - sumAT) / sumY;
+  sigma2 = sumCT / sumAT - mu^2;
+  tau2   = (sumC - sumCT) / (sumY - sumAT) - nu^2;
 
   ## Return if sigma2 or tau2 are zero, to avoid division by zero
   if (sigma2 == 0 || tau2 == 0)
@@ -466,8 +486,8 @@ function Tout = maxlikelihood (y)
 
     mu      = ind.*phi*y'/F;
     nu      = ind.*gamma*y'/G;
-    p       = F / partial_sumA (y,n);
-    q       = G / partial_sumA (y,n);
+    p       = F / sumY;
+    q       = G / sumY;
     sigma2  = ind.^2.*phi*y'/F - mu^2;
     tau2    = ind.^2.*gamma*y'/G - nu^2;
 
@@ -499,9 +519,14 @@ function Tout = intermeans (y, T)
   % The threshold is found iteratively. In each iteration, the means of the
   % pixels below (mu) the threshold and above (nu) it are found. The
   % updated threshold is the mean of mu and nu.
+  sumY = sum (y);
+  sumB = partial_sumB (y, n);
   while T ~= Tprev
-    mu = partial_sumB(y,T)/partial_sumA(y,T);
-    nu = (partial_sumB(y,n)-partial_sumB(y,T))/(partial_sumA(y,n)-partial_sumA(y,T));
+    sumAT = partial_sumA (y, T);
+    sumBT = partial_sumB (y, T);
+
+    mu = sumBT/sumAT;
+    nu = (sumB-sumBT)/(sumY-sumAT);
     Tprev = T;
     T = floor((mu+nu)/2);
   end
