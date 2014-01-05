@@ -3,7 +3,6 @@ Analysis and Statistics
  edge
  fftconv2
  corr2
- imhist
  mean2
  std2
  entropy
@@ -15,6 +14,9 @@ Analysis and Statistics
  houghtf
  hough_line
  hough_circle
+ imgradient
+ imgradientxy
+ imhist
  immaximas
  normxcorr2
  rangefilt

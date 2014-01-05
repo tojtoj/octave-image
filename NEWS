@@ -29,6 +29,8 @@
       checkerboard
       cp2tform
       findbounds
+      imgradient
+      imgradientxy
       impixel
       imtransform
       intlut
