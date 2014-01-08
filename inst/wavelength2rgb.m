@@ -165,5 +165,5 @@ endfunction
 %!
 %! ##draw RGB values for wavelengths between 350 and 800 nm
 %! RGB = wavelength2rgb (350:800);
-%! rgbplot (RGB, "composite");
+%! rgbplot (squeeze (RGB), "composite");
 %! axis off;
