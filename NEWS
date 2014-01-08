@@ -25,45 +25,28 @@
 
  ** The following functions are new:
 
-      bwareaopen
-      checkerboard
-      cp2tform
-      findbounds
-      imgradient
-      imgradientxy
-      impixel
-      imtransform
-      intlut
-      labelmatrix
-      maketform
-      montage
-      strel
-      tformfwd
-      tforminv
-      ycbcr2rgb
+      bwareaopen            impixel               strel
+      checkerboard          imtransform           tformfwd
+      cp2tform              intlut                tforminv
+      findbounds            labelmatrix           ycbcr2rgb
+      imgradient            maketform
+      imgradientxy          montage
 
  ** The following functions have been moved from the Octave Forge Image package
     to GNU Octave core:
 
-      cmpermute
-      cmunique
-      iscolormap
-      rgbplot
+      cmpermute       cmunique        iscolormap      rgbplot
 
  ** The following functions have been deprecated in the previous release
     of the Image package and have now been removed:
 
-      blkproc         bmpwrite          dilate        erode
+      blkproc         bmpwrite        dilate          erode
 
  ** The following functions have been deprecated (see their help text
     for the recommended alternatives):
 
-      bwborder
-      impad
-      imrotate_Fourier
-      iptchecknargin
-      iptcheckstrs
-      uintlut
+      bwborder              imrotate_Fourier      iptcheckstrs
+      impad                 iptchecknargin        uintlut
 
  ** The functions im2col and col2im has been completely rewritten for massive
     performace increase (increases greater than 500X have been observed, with
@@ -83,21 +66,18 @@
     values, the function padarray now accepts the string "zeros" as a valid
     option.
 
- ** The plot produced by `imhist' is correctly scaled on the X axis so that the
+ ** The plot produced by imhist is correctly scaled on the X axis so that the
     colorbar corresponds to the actual intensity of the stems; the given
     colormarp is used on the colorbar for indexed images; and the stems no
     longer display the markers at their top. The Y axis is also adjusted in case
     of peaks with high values that prevent a good overview of the histogram.
 
- ** The option to create poisson noise to an image has been added to `imnoise'.
+ ** The option to create poisson noise to an image has been added to imnoise.
 
- ** With the addition of the strel class, the following functions are now able
-    to handle strel objects:
+ ** With the addition of the strel class, imdilate and imerode are able
+    to handle strel objects.
 
-      imdilate
-      imerode
-
- ** The performance of `imresize()' has been greatly improved when using the
+ ** The performance of imresize has been greatly improved when using the
     nearest neighbor method for N or 1/N scale factors (e.g.: 2, 50, 1/4, 1/7).
 
  ** The imperspectivewarp, imremap, imresize, and imrotate functions will now
@@ -111,7 +91,7 @@
  ** Bug fixes on the concavity, intermodes, maxlikelihood, and minimum methods
     of graythresh.
 
- ** The `bwdist' function will now consider any non zero value as object pixels,
+ ** The bwdist function will now consider any non zero value as object pixels,
     the class of the distance matrix has changed to single, and indexes an
     uint dependent on the matrix size.
 
@@ -129,19 +109,14 @@
  ** Other functions that have been changed for smaller bugfixes, increased
     Matlab compatibility, or performance:
 
-      bwlabel
-      bwperim
-      padarray
+      bwlabel               bwperim               padarray
 
  ** The following functions now fully support matrices with an arbitrary
     number of dimensions:
 
-      bestblk
-      bwconncomp
-      col2im
-      colfilt
-      im2col
-      nlfilter
+      bestblk               col2im                im2col
+      bwconncomp            colfilt               nlfilter
+
 
  Summary of important user-visible changes for image 2.0.0 (2012/11/08):
 -------------------------------------------------------------------------

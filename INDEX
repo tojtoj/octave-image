@@ -46,17 +46,15 @@ Black and white image functions
  bwperim
  bwselect
  fchcode
+ labelmatrix
  makelut
 Colour maps and Colour controls
- cmpermute
- cmunique
  colorgradient
  rgb2ycbcr
  wavelength2rgb
  ycbcr2rgb
 Display
  montage
- rgbplot
 Enhancement and Restoration
  histeq
  imadjust
@@ -88,7 +86,7 @@ Morhophological Operations
  imtophat
  mmgradm
  @strel/getheight
- @strel/getneightbors
+ @strel/getneighbors
  @strel/getnhood
  @strel/getsequence
  @strel/isflat
@@ -99,7 +97,6 @@ Read/write
  analyze75info
  analyze75read
  analyze75write
- bmpwrite
  readexif
  tiff_tag_read
 Region-based and block processing
@@ -138,7 +135,6 @@ Types and Type conversions
  im2uint16
  imdither
  isbw
- iscolormap
  isgray
  isind
  isrgb
