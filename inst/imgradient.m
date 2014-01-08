@@ -15,7 +15,7 @@
 
 ## -*- texinfo -*- 
 ## @deftypefn  {Function File} {[@var{gradMag}, @var{gradDir}] =} imgradient (@var{img})
-## @deftypefn  {Function File} {[@var{gradMag}, @var{gradDir}] =} imgradient (@var{img}, @var{method})
+## @deftypefnx {Function File} {[@var{gradMag}, @var{gradDir}] =} imgradient (@var{img}, @var{method})
 ## @deftypefnx {Function File} {[@var{gradMag}, @var{gradDir}] =} imgradient (@var{gx}, @var{gy})
 ## Compute the gradient magnitude and direction in degrees for an image.
 ##
