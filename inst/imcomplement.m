@@ -1,4 +1,5 @@
 ## Copyright (C) 2008 Søren Hauberg <soren@hauberg.org>
+## Copyright (C) 2014 Carnë Draug <carandraug@octave.org>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -14,33 +15,73 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} @var{B} = imcomplement(@var{A})
-## Computes the complement image. Intuitively this corresponds to the intensity
-## of bright and dark regions being reversed.
+## @deftypefn {Function File} {} imcomplement (@var{A})
+## Compute image complement or negative.
 ##
-## For binary images, the complement is computed as @code{!@var{A}}, for floating
-## point images it is computed as @code{1 - @var{A}}, and for integer images as
-## @code{intmax(class(@var{A})) - @var{A}}.
+## Intuitively this corresponds to the intensity of bright and dark
+## regions being reversed.  The exact operation performed is dependent
+## on the class of the image.
+##
+## @table @asis
+## @item floating point
+## Since floating point images are meant to have values in the range [0 1],
+## this is equivalent @code{A -1}.  This leads to values within the range
+## to be inverted while others to equally distance from the limits.
+##
+## @item logical
+## Equivalent to @code{! A}
+##
+## @item integer
+## Inverts the values within the range of the data.  This is a different
+## depending whether it's signed or unsigned integers class.
+## @end table
+##
 ## @seealso{imadd, imdivide, imlincomb, immultiply, imsubtract}
 ## @end deftypefn
 
-function B = imcomplement(A)
-  ## Check input
+function B = imcomplement (A)
+
   if (nargin != 1)
-    error("imcomplement: not enough input arguments");
-  endif
-  if (!ismatrix(A))
-    error("imcomplement: input must be an array");
+    print_usage ();
   endif
 
-  ## Take action depending on the class of A
-  if (isa(A, "double") || isa(A, "single"))
+  if (isfloat (A))
     B = 1 - A;
-  elseif (islogical(A))
-    B = !A;
-  elseif (isinteger(A))
-    B = intmax(class(A)) - A;
+  elseif (islogical (A))
+    B = ! A;
+  elseif (any (isa (A, {"int8", "int16", "int32", "int64"})))
+    ## Signed integers are different. We have all this extra work to avoid
+    ## conversion into another class which may not fit in memory. And seems
+    ## like it it still performs faster.
+    cl = class (A);
+    B = zeros (size (A), cl);
+    m = (A != intmin (cl));
+
+    B(! m) = intmax (cl);
+    B(m)   = -A -1;
+
+  elseif (isinteger (A))
+    B = intmax (class (A)) - A;
   else
-    error("imcomplement: unsupported input class: '%s'", class(A));
+    error("imcomplement: A must be an image but is of class `%s'", class (A));
   endif
+
 endfunction
+
+%!assert (imcomplement (10), -9);
+%!assert (imcomplement (single (10)), single (-9));
+%!assert (imcomplement (0.2), 0.8);
+%!assert (imcomplement (uint8 (0)), uint8 (255));
+%!assert (imcomplement (uint8 (1)), uint8 (254));
+%!assert (imcomplement (uint16 (0)), uint16 (65535));
+%!assert (imcomplement (uint16 (1)), uint16 (65534));
+
+%!assert (imcomplement (int8 (-128)), int8 ( 127));
+%!assert (imcomplement (int8 ( 127)), int8 (-128));
+%!assert (imcomplement (int16 (-1)), int16 ( 0));
+%!assert (imcomplement (int16 ( 0)), int16 (-1));
+%!assert (imcomplement (int16 ( 1)), int16 (-2));
+
+%!assert (imcomplement ([true false true]), [false true false])
+
+%!error <must be an image> imcomplement ("not an image")

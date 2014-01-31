@@ -8,6 +8,8 @@
     for the cropping in addition to the cropped image.  It will no longer
     loop forever until it gets two valid coordinates for the bounding box.
 
+ ** Fixed bug in imcomplement to compute the complement of signed integers
+    correctly.
 
  Summary of important user-visible changes for image 2.2.0 (2014/01/08):
 -------------------------------------------------------------------------
