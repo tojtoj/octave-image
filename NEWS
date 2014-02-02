@@ -11,6 +11,8 @@
  ** Fixed bug in imcomplement to compute the complement of signed integers
     correctly.
 
+ ** Fix imrotate to handle RGB images.
+
  Summary of important user-visible changes for image 2.2.0 (2014/01/08):
 -------------------------------------------------------------------------
 
