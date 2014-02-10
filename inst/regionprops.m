@@ -348,6 +348,8 @@ function retval = regionprops (bw, varargin)
         error ("regionprops: unsupported property '%s'", property);
     endswitch
   endfor
+  ## Matlab returns a column vector struct array.
+  retval = retval(:);
 endfunction
 
 function retval = local_area (bw)
