@@ -185,7 +185,7 @@ endfunction
 ## shadows core function to support ND image.  If we have one, use
 ## the first frame only
 function h = nd_imshow (varargin)
-  size (varargin{1})
+  size (varargin{1});
   h = imshow (varargin{1}(:,:,:,1), varargin{2:end});
 endfunction
 
