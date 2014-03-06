@@ -14,79 +14,99 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {@var{filter} = } fspecial(@var{type}, @var{arg1}, @var{arg2})
+## @deftypefn {Function File} {} fspecial(@var{type}, @var{arg1}, @var{arg2})
 ## Create spatial filters for image processing.
 ##
 ## @var{type} determines the shape of the filter and can be
-## @table @t
-## @item "average"
+## @table @asis
+## @item @qcode{"average"}
 ## Rectangular averaging filter. The optional argument @var{arg1} controls the
 ## size of the filter. If @var{arg1} is an integer @var{N}, a @var{N} by @var{N}
 ## filter is created. If it is a two-vector with elements @var{N} and @var{M}, the
 ## resulting filter will be @var{N} by @var{M}. By default a 3 by 3 filter is
 ## created.
-## @item "disk"
+##
+## @item @qcode{"disk"}
 ## Circular averaging filter. The optional argument @var{arg1} controls the
-## radius of the filter. If @var{arg1} is an integer @var{N}, a 2 @var{N} + 1
-## filter is created. By default a radius of 5 is used.
-## @item "gaussian"
+## radius of the filter. If @var{arg1} is an integer @var{R}, a 2 @var{R} + 1
+## filter is created. By default a radius of 5 is used. If the returned matrix
+## corresponds to a cartesian grid, each element of the matrix is weighted by
+## how much of the corresponding grid square is covered by a disk of radius
+## @var{R} and centered at the middle of the element @var{R}+1,@var{R}+1.
+##
+## @item @qcode{"gaussian"}
 ## Gaussian filter. The optional argument @var{arg1} controls the size of the
 ## filter. If @var{arg1} is an integer @var{N}, a @var{N} by @var{N}
 ## filter is created. If it is a two-vector with elements @var{N} and @var{M}, the
 ## resulting filter will be @var{N} by @var{M}. By default a 3 by 3 filter is
 ## created. The optional argument @var{arg2} sets spread of the filter. By default
 ## a spread of @math{0.5} is used.
-## @item "log"
+##
+## @item @qcode{"log"}
 ## Laplacian of Gaussian. The optional argument @var{arg1} controls the size of the
 ## filter. If @var{arg1} is an integer @var{N}, a @var{N} by @var{N}
 ## filter is created. If it is a two-vector with elements @var{N} and @var{M}, the
 ## resulting filter will be @var{N} by @var{M}. By default a 5 by 5 filter is
 ## created. The optional argument @var{arg2} sets spread of the filter. By default
 ## a spread of @math{0.5} is used.
-## @item "laplacian"
+##
+## @item @qcode{"laplacian"}
 ## 3x3 approximation of the laplacian. The filter is approximated as
+##
 ## @example
-## (4/(@var{alpha}+1))*[@var{alpha}/4,     (1-@var{alpha})/4, @var{alpha}/4; ...
-##                (1-@var{alpha})/4, -1,          (1-@var{alpha})/4;  ...
-##                @var{alpha}/4,     (1-@var{alpha})/4, @var{alpha}/4];
+## (4/(@var{alpha}+1)) * [   @var{alpha}/4   (1-@var{alpha})/4     @var{alpha}/4
+##                  (1-@var{alpha})/4   -1          (1-@var{alpha})/4
+##                     @var{alpha}/4   (1-@var{alpha})/4     @var{alpha}/4 ];
 ## @end example
+##
 ## where @var{alpha} is a number between 0 and 1. This number can be controlled
 ## via the optional input argument @var{arg1}. By default it is @math{0.2}.
-## @item "unsharp"
+##
+## @item @qcode{"unsharp"}
 ## Sharpening filter. The following filter is returned
 ## @example
-## (1/(@var{alpha}+1))*[-@var{alpha},   @var{alpha}-1, -@var{alpha}; ...
-##                 @var{alpha}-1, @var{alpha}+5,  @var{alpha}-1; ...
-##                -@var{alpha},   @var{alpha}-1, -@var{alpha}];
+## (1/(@var{alpha}+1)) * [-@var{alpha}   @var{alpha}-1 -@var{alpha}
+##                   @var{alpha}-1 @var{alpha}+5  @var{alpha}-1
+##                  -@var{alpha}   @var{alpha}-1 -@var{alpha}];
 ## @end example
+##
 ## where @var{alpha} is a number between 0 and 1. This number can be controlled
 ## via the optional input argument @var{arg1}. By default it is @math{0.2}.
-## @item "motion"
+##
+## @item @qcode{"motion"}
 ## Moion blur filter of width 1 pixel. The optional input argument @var{arg1}
 ## controls the length of the filter, which by default is 9. The argument @var{arg2}
 ## controls the angle of the filter, which by default is 0 degrees.
-## @item "sobel"
+##
+## @item @qcode{"sobel"}
 ## Horizontal Sobel edge filter. The following filter is returned
+##
 ## @example
-## [ 1,  2,  1;
-##   0,  0,  0;
-##  -1, -2, -1 ]
+## [ 1  2  1
+##   0  0  0
+##  -1 -2 -1 ]
 ## @end example
-## @item "prewitt"
+##
+## @item @qcode{"prewitt"}
 ## Horizontal Prewitt edge filter. The following filter is returned
+##
 ## @example
-## [ 1,  1,  1;
-##   0,  0,  0;
-##  -1, -1, -1 ]
+## [ 1  1  1
+##   0  0  0
+##  -1 -1 -1 ]
 ## @end example
+##
 ## @item "kirsch"
 ## Horizontal Kirsch edge filter. The following filter is returned
-## @example
-## [ 3,  3,  3;
-##   3,  0,  3;
-##  -5, -5, -5 ]
-## @end example
+##
+## @verbatim
+## [ 3  3  3
+##   3  0  3
+##  -5 -5 -5 ]
+## @end verbatim
 ## @end table
+##
+## @seealso{conv2, convn, filter2, imfilter}
 ## @end deftypefn
 
 ## Remarks by Søren Hauberg (jan. 2nd 2007)
@@ -95,11 +115,14 @@
 ## http://www.csse.uwa.edu.au/~pk/research/matlabfns/OctaveCode/fspecial.m
 
 function f = fspecial (type, arg1, arg2)
-  if (!ischar (type))
+
+  if (nargin < 1)
+    print_usage ();
+  elseif (! ischar (type))
     error ("fspecial: first argument must be a string");
   endif
-  
-  switch lower(type)
+
+  switch lower (type)
     case "average"
       ## Get filtersize
       if (nargin > 1 && isreal (arg1) && length (arg1 (:)) <= 2)
@@ -114,17 +137,91 @@ function f = fspecial (type, arg1, arg2)
 
     case "disk"
       ## Get the radius
-      if (nargin > 1 && isreal (arg1) && length (arg1 (:)) == 1)
-        radius = arg1;
+      if (nargin > 1 && isreal (arg1) && isscalar (arg1))
+        r = arg1;
       else
-        radius = 5;
+        r = 5;
       endif
       ## Create the filter
-      [x, y] = meshgrid (-radius:radius, -radius:radius);
-      r = sqrt (x.^2 + y.^2);
-      f = (r <= radius);
-      ## Normalize the filter to integral 1
-      f = f / sum (f (:));
+      if (r == 0)
+        f = 1;
+      else
+        ax = r + 1; # index of the "x-axis" and "y-axis"
+        corner = floor (r / sqrt (2)+0.5)-0.5; # corner corresponding to 45 degrees
+        rsq = r*r;
+        ## First set values for points completely covered by the disk
+        [X, Y] = meshgrid (-r:r, -r:r);
+        rhi = (abs (X) +0.5).^2 + (abs (Y)+0.5).^2;
+        f = (rhi <= rsq) / 1.0;
+        xx = linspace (0.5, r - 0.5, r);
+        ii = sqrt (rsq - xx.^2); # intersection points for sqrt (r^2 - x^2)
+        ## Set the values at the axis caps
+        tmp = sqrt (rsq -0.25);
+        rint = (0.5*tmp + rsq * atan (0.5/tmp))/2; # value of integral on the right
+        cap = 2*rint - r+0.5; # at the caps, lint = rint
+        f(ax  ,ax+r) = cap;
+        f(ax  ,ax-r) = cap;
+        f(ax+r,ax  ) = cap;
+        f(ax-r,ax  ) = cap;
+        if (r == 1)
+          y = ii(1);
+          lint = rint;
+          tmp = sqrt (rsq - y^2);
+          rint = (y*tmp + rsq * atan (y/tmp))/2;
+          val  = rint - lint - 0.5 * (y-0.5);
+          f(ax-r,ax-r) = val;
+          f(ax+r,ax-r) = val;
+          f(ax-r,ax+r) = val;
+          f(ax+r,ax+r) = val;
+        else
+          ## Set the values elsewhere on the rim
+          idx = 1; # index in the vector ii
+          x   = 0.5; # bottom left corner of the current square
+          y   = r-0.5;
+          rx  = 0.5; # x on the right of the integrable region
+          ybreak = false; # did we change our y last time
+          do
+            i = x +0.5;
+            j = y +0.5;
+            lint = rint;
+            lx = rx;
+            if (ybreak)
+              ybreak = false;
+              val = lx-x;
+              idx++;
+              x++;
+              rx = x;
+              val -= y*(x-lx);
+            elseif (ii(idx+1) < y)
+              ybreak = true;
+              y--;
+              rx  = ii(y+1.5);
+              val = (y+1) * (x-rx);
+            else
+              val = -y;
+              idx++;
+              x++;
+              rx = x;
+              if (floor (ii(idx)-0.5) == y)
+                y++;
+              endif
+            endif
+            tmp  = sqrt (rsq - rx*rx);
+            rint = (rx*tmp + rsq * atan (rx/tmp))/2;
+            val += rint - lint;
+            f(ax+i, ax+j) = val;
+            f(ax+i, ax-j) = val;
+            f(ax-i, ax+j) = val;
+            f(ax-i, ax-j) = val;
+            f(ax+j, ax+i) = val;
+            f(ax+j, ax-i) = val;
+            f(ax-j, ax+i) = val;
+            f(ax-j, ax-i) = val;
+          until (y < corner || x > corner)
+        endif
+        # Normalize
+        f /= pi * rsq;
+      endif
 
     case "gaussian"
       ## Get hsize
@@ -250,3 +347,33 @@ function f = fspecial (type, arg1, arg2)
       error ("fspecial: filter type '%s' is not supported", type);
   endswitch
 endfunction
+
+
+## Test that the disk filter's error does not grow unreasonably large
+%!test
+%! for i = 1:9
+%!   n = 2^i;
+%!   assert (sum (fspecial ("disk", n)(:)), 1, eps*n*n);
+%! endfor
+
+## Test that all squares completely under the disk or completely out of it are
+## being assigned the correct values.
+%!test
+%! for r = [3 5 9 17]
+%!   f = fspecial ("disk", r);
+%!   [X, Y] = meshgrid (-r:r, -r:r);
+%!   rhi = (abs (X) + 0.5).^2 + (abs (Y) + 0.5).^2;
+%!   rlo = (abs (X) - 0.5).^2 + (abs (Y) - 0.5).^2;
+%!   fhi = (rhi <= (r^2));
+%!   flo = (rlo >= (r^2));
+%!   for i = 1:(2*r+1)
+%!     for j = 1:(2*r+1)
+%!       if (fhi(i,j))
+%!         assert (f(i,j), 1/(pi*r^2), eps);
+%!       endif
+%!       if (flo(i,j))
+%!         assert (f(i,j), 0);
+%!       endif
+%!     endfor
+%!   endfor
+%! endfor

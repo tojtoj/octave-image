@@ -1,6 +1,14 @@
  Summary of important user-visible changes for image 2.4.0 (yyyy/mm/dd):
 -------------------------------------------------------------------------
 
+ ** The disk shaped filter of fspecial has been changed for Matlab
+    compatibility. The elements on the border of the disk are now
+    weighted by how much of them is covered by the disk. Note that
+    this change is backwards incompatible.
+
+ ** The 'disk' filter of the function fspecial has been changed in a
+    backwards incompatible way. 
+
  ** The following functions will display the output image as a figure
     instead of printing to the command line, when there are no output
     arguments:
