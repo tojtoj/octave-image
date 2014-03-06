@@ -382,7 +382,8 @@ void edtfunc (float (*func)(short int, short int),
 
 // The different functions used to calculate distance, as a
 // class so its typename can be used for edtfunc template
-static float euclidean (short x, short y)
+static float
+euclidean (short x, short y)
 {
   // the actual euclidean distance, is the square root of this. But
   // squaring does not change the order of the distances, so we can
@@ -390,40 +391,48 @@ static float euclidean (short x, short y)
   return ((int)(x)*(x) + (y)*(y));
 }
 
-static float chessboard (short x, short y)
+static float
+chessboard (short x, short y)
 { return std::max (abs (y), abs (x)); }
 
-static float cityblock (short x, short y)
+static float
+cityblock (short x, short y)
 { return abs (x) + abs (y); }
 
-static float quasi_euclidean (short x, short y)
+static float
+quasi_euclidean (short x, short y)
 {
   static const float sqrt2_1 = sqrt (2) - 1;
   return abs(x)>abs(y) ? (abs(x) + sqrt2_1 * abs(y)) :
                          (sqrt2_1 * abs(x) + abs(y)) ;
 }
 
-FloatMatrix calc_distances (float (*func)(short, short),
-                            Matrix bw,
-                            short *xdist,
-                            short *ydist)
+static FloatMatrix
+calc_distances (float (*func)(short, short), Matrix bw,
+                short *xdist, short *ydist)
 {
   FloatMatrix dist (bw.dims ());
   edtfunc (func, bw, xdist, ydist);
   const int numel = dist.numel ();
+  float* dist_vec = dist.fortran_vec ();
   for (int i = 0; i < numel; i++)
-    dist(i) = (*func)(xdist[i], ydist[i]);
+    dist_vec[i] = (*func)(xdist[i], ydist[i]);
   return dist;
 }
 
 template <class T>
 T calc_index (Matrix bw, short *xdist, short *ydist)
 {
+  typedef typename T::element_type P;
+
   T idx (bw.dims ());
   const int numel = bw.numel ();
   const int rows  = bw.rows ();
+
+  P* idx_vec = idx.fortran_vec ();
   for(int i = 0; i < numel; i++)
-    idx (i) = i+1 - xdist[i] - ydist[i]*rows;
+    idx_vec[i] = i+1 - xdist[i] - ydist[i]*rows;
+
   return idx;
 }
 
