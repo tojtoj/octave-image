@@ -54,14 +54,14 @@ void edtfunc (float (*func)(short int, short int),
   bool changed;
 
   // Initialize index offsets for the current image width
-  const int offset_u  = -w;
-  const int offset_ur = -w+1;
+  const int offset_u  = -h;
+  const int offset_ur = -h+1;
   const int offset_r  = 1;
-  const int offset_rd = w+1;
-  const int offset_d  = w;
-  const int offset_dl = w-1;
+  const int offset_rd = h+1;
+  const int offset_d  = h;
+  const int offset_dl = h-1;
   const int offset_l  = -1;
-  const int offset_lu = -w-1;
+  const int offset_lu = -h-1;
 
   // Initialize the distance images to be all large values
   for (i = 0; i < numel; i++)
@@ -84,10 +84,10 @@ void edtfunc (float (*func)(short int, short int),
       changed = false;
 
       // Scan rows, except first row
-      for (y = 1; y < h; y++)
+      for (y = 1; y < w; y++)
         {
           // move index to leftmost pixel of current row
-          i = y*w;
+          i = y*h;
 
           /* scan right, propagate distances from above & left */
 
@@ -119,7 +119,7 @@ void edtfunc (float (*func)(short int, short int),
           i++;
 
           /* Middle pixels have all neighbors */
-          for(x=1; x<w-1; x++, i++)
+          for(x=1; x<h-1; x++, i++)
             {
               OCTAVE_QUIT;
               olddist2 = (*func)(distx[i], disty[i]);
@@ -209,10 +209,10 @@ void edtfunc (float (*func)(short int, short int),
 
           /* Move index to second rightmost pixel of current row. */
           /* Rightmost pixel is skipped, it has no right neighbor. */
-          i = y*w + w-2;
+          i = y*h + h-2;
 
           /* scan left, propagate distance from right */
-          for(x=w-2; x>=0; x--, i--)
+          for(x=h-2; x>=0; x--, i--)
             {
               OCTAVE_QUIT;
               olddist2 = (*func)(distx[i], disty[i]);
@@ -231,11 +231,11 @@ void edtfunc (float (*func)(short int, short int),
         }
       
       /* Scan rows in reverse order, except last row */
-      for(y=h-2; y>=0; y--)
+      for(y=w-2; y>=0; y--)
         {
           OCTAVE_QUIT;
           /* move index to rightmost pixel of current row */
-          i = y*w + w-1;
+          i = y*h + h-1;
 
           /* Scan left, propagate distances from below & right */
 
@@ -267,7 +267,7 @@ void edtfunc (float (*func)(short int, short int),
           i--;
 
           /* Middle pixels have all neighbors */
-          for(x=w-2; x>0; x--, i--)
+          for(x=h-2; x>0; x--, i--)
             {
               OCTAVE_QUIT;
               olddist2 = (*func)(distx[i], disty[i]);
@@ -356,8 +356,8 @@ void edtfunc (float (*func)(short int, short int),
 
           /* Move index to second leftmost pixel of current row. */
           /* Leftmost pixel is skipped, it has no left neighbor. */
-          i = y*w + 1;
-          for(x=1; x<w; x++, i++)
+          i = y*h + 1;
+          for(x=1; x<h; x++, i++)
             {
               OCTAVE_QUIT;
               /* scan right, propagate distance from left */
@@ -549,7 +549,7 @@ Currently, only 2D images are supported.\n\
 }
 
 /*
-%!shared bw, out
+%!shared bw
 %!
 %! bw = [0   1   0   1   0   1   1   0
 %!       0   0   0   1   1   0   0   0
@@ -559,7 +559,8 @@ Currently, only 2D images are supported.\n\
 %!       1   1   1   1   0   0   0   1
 %!       1   1   1   0   0   0   1   0
 %!       0   0   1   0   0   0   1   1];
-%!
+
+%!test
 %! out = [ 1.00000   0.00000   1.00000   0.00000   1.00000   0.00000   0.00000   1.00000
 %!         1.41421   1.00000   1.00000   0.00000   0.00000   1.00000   1.00000   1.41421
 %!         2.23607   2.00000   1.00000   0.00000   0.00000   1.00000   2.00000   2.00000
@@ -570,10 +571,11 @@ Currently, only 2D images are supported.\n\
 %!         1.00000   1.00000   0.00000   1.00000   2.00000   1.00000   0.00000   0.00000];
 %! out = single (out);
 %!
-%!assert (bwdist (bw), out, 0.0001);  # default is euclidean
-%!assert (bwdist (bw, "euclidean"), out, 0.0001);
-%!assert (bwdist (logical (bw), "euclidean"), out, 0.0001);
-%!
+%! assert (bwdist (bw), out, 0.0001);  # default is euclidean
+%! assert (bwdist (bw, "euclidean"), out, 0.0001);
+%! assert (bwdist (logical (bw), "euclidean"), out, 0.0001);
+
+%!test
 %! out = [ 1   0   1   0   1   0   0   1
 %!         1   1   1   0   0   1   1   1
 %!         2   2   1   0   0   1   2   2
@@ -584,8 +586,9 @@ Currently, only 2D images are supported.\n\
 %!         1   1   0   1   2   1   0   0];
 %! out = single (out);
 %!
-%!assert (bwdist (bw, "chessboard"), out);
-%!
+%! assert (bwdist (bw, "chessboard"), out);
+
+%!test
 %! out = [ 1   0   1   0   1   0   0   1
 %!         2   1   1   0   0   1   1   2
 %!         3   2   1   0   0   1   2   2
@@ -596,8 +599,9 @@ Currently, only 2D images are supported.\n\
 %!         1   1   0   1   2   1   0   0];
 %! out = single (out);
 %!
-%!assert (bwdist (bw, "cityblock"), out);
-%!
+%! assert (bwdist (bw, "cityblock"), out);
+
+%!test
 %! out = [ 1.00000   0.00000   1.00000   0.00000   1.00000   0.00000   0.00000   1.00000
 %!         1.41421   1.00000   1.00000   0.00000   0.00000   1.00000   1.00000   1.41421
 %!         2.41421   2.00000   1.00000   0.00000   0.00000   1.00000   2.00000   2.00000
@@ -608,12 +612,35 @@ Currently, only 2D images are supported.\n\
 %!         1.00000   1.00000   0.00000   1.00000   2.00000   1.00000   0.00000   0.00000];
 %! out = single (out);
 %!
-%!assert (bwdist (bw, "quasi-euclidean"), out, 0.0001);
+%! assert (bwdist (bw, "quasi-euclidean"), out, 0.0001);
 %!
 %! bw(logical (bw)) = 3; # there is no actual check if matrix is binary or 0 and 1
-%!assert (bwdist (bw, "quasi-euclidean"), out, 0.0001);
-%! bw(logical (bw)) = -2; # anything non-zero is considered object
-%!assert (bwdist (bw, "quasi-euclidean"), out, 0.0001);
+%! assert (bwdist (bw, "quasi-euclidean"), out, 0.0001);
 %!
-%!error bwdist (bw, "not a valid method");
+%! bw(logical (bw)) = -2; # anything non-zero is considered object
+%! assert (bwdist (bw, "quasi-euclidean"), out, 0.0001);
+
+%!test
+%! bw =    [  1   1   1   1   0   1   1   1   1
+%!            1   1   1   1   0   1   1   1   1
+%!            1   1   0   1   1   1   1   1   1
+%!            0   1   1   1   1   1   1   1   1];
+%!
+%! dist = [   0   0   0   0   1   0   0   0   0
+%!            0   0   0   0   1   0   0   0   0
+%!            0   0   1   0   0   0   0   0   0
+%!            1   0   0   0   0   0   0   0   0];
+%! dist = single (dist);
+%!
+%! c =    [   1   5   9  13  13  21  25  29  33
+%!            2   6  10  14  14  22  26  30  34
+%!            3   7  10  15  19  23  27  31  35
+%!            8   8  12  16  20  24  28  32  36];
+%! c = uint32 (c);
+%!
+%! [dout, cout] = bwdist (bw, "euclidean");
+%! assert (dout, dist)
+%! assert (cout, c)
+
+%!error <unknown METHOD> bwdist (bw, "not a valid method");
 */

@@ -13,6 +13,8 @@
 
  ** Fix imrotate to handle RGB images.
 
+ ** Fix regression in bwdist when calculating the closest pixel map.
+
  Summary of important user-visible changes for image 2.2.0 (2014/01/08):
 -------------------------------------------------------------------------
 
