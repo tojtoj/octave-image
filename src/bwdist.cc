@@ -41,7 +41,7 @@
  */
 
 void edtfunc (float (*func)(short int, short int),
-              const Matrix &img,
+              const boolNDArray &img,
               short *distx,
               short *disty)
 {
@@ -49,7 +49,22 @@ void edtfunc (float (*func)(short int, short int),
   const int h     = img.rows  ();
   const int numel = img.numel ();
 
-  int x, y, i;
+  // Initialize the distance images to be all large values
+  const bool* elem = img.fortran_vec ();
+  for (octave_idx_type i = 0; i < numel; i++)
+    {
+      if(elem[i])
+        {
+          distx[i] = 0;
+          disty[i] = 0;
+        }
+      else
+        {
+          distx[i] = 32000; // Large but still representable in a short, and
+          disty[i] = 32000; // 32000^2 + 32000^2 does not overflow an int
+        }
+    }
+
   float olddist2, newdist2, newdistx, newdisty;
   bool changed;
 
@@ -63,22 +78,8 @@ void edtfunc (float (*func)(short int, short int),
   const int offset_l  = -1;
   const int offset_lu = -h-1;
 
-  // Initialize the distance images to be all large values
-  for (i = 0; i < numel; i++)
-    {
-      if(img(i) == 0.0)
-        {
-          distx[i] = 32000; // Large but still representable in a short, and
-          disty[i] = 32000; // 32000^2 + 32000^2 does not overflow an int
-        }
-      else
-        {
-          distx[i] = 0;
-          disty[i] = 0;
-        }
-    }
-
   // Perform the transformation
+  int x, y, i;
   do
     {
       changed = false;
@@ -86,8 +87,9 @@ void edtfunc (float (*func)(short int, short int),
       // Scan rows, except first row
       for (y = 1; y < w; y++)
         {
+          OCTAVE_QUIT;
           // move index to leftmost pixel of current row
-          i = y*h;
+          octave_idx_type i = y*h;
 
           /* scan right, propagate distances from above & left */
 
@@ -121,7 +123,6 @@ void edtfunc (float (*func)(short int, short int),
           /* Middle pixels have all neighbors */
           for(x=1; x<h-1; x++, i++)
             {
-              OCTAVE_QUIT;
               olddist2 = (*func)(distx[i], disty[i]);
               if(olddist2 == 0) continue; // Already zero distance
 
@@ -214,7 +215,6 @@ void edtfunc (float (*func)(short int, short int),
           /* scan left, propagate distance from right */
           for(x=h-2; x>=0; x--, i--)
             {
-              OCTAVE_QUIT;
               olddist2 = (*func)(distx[i], disty[i]);
               if(olddist2 == 0) continue; // Already zero distance
               
@@ -269,7 +269,6 @@ void edtfunc (float (*func)(short int, short int),
           /* Middle pixels have all neighbors */
           for(x=h-2; x>0; x--, i--)
             {
-              OCTAVE_QUIT;
               olddist2 = (*func)(distx[i], disty[i]);
               if(olddist2 == 0) continue; // Already zero distance
 
@@ -359,7 +358,6 @@ void edtfunc (float (*func)(short int, short int),
           i = y*h + 1;
           for(x=1; x<h; x++, i++)
             {
-              OCTAVE_QUIT;
               /* scan right, propagate distance from left */
               olddist2 = (*func)(distx[i], disty[i]);
               if(olddist2 == 0) continue; // Already zero distance
@@ -408,7 +406,7 @@ quasi_euclidean (short x, short y)
 }
 
 static FloatMatrix
-calc_distances (float (*func)(short, short), Matrix bw,
+calc_distances (float (*func)(short, short), const boolNDArray& bw,
                 short *xdist, short *ydist)
 {
   FloatMatrix dist (bw.dims ());
@@ -421,7 +419,7 @@ calc_distances (float (*func)(short, short), Matrix bw,
 }
 
 template <class T>
-T calc_index (Matrix bw, short *xdist, short *ydist)
+T calc_index (const boolNDArray& bw, const short *xdist, const short *ydist)
 {
   typedef typename T::element_type P;
 
@@ -481,10 +479,10 @@ Currently, only 2D images are supported.\n\
 
   // for matlab compatibility, we do not actually check if the values are all
   // 0 and 1, any non-zero value is considered true
-  const Matrix bw = args (0).matrix_value ();
+  const boolNDArray bw = args (0).bool_array_value ();
   if (error_state)
     {
-      error ("bwdist: BW must be a matrix");
+      error ("bwdist: BW must be a logical matrix");
       return retval;
     }
 
@@ -521,9 +519,10 @@ Currently, only 2D images are supported.\n\
       dist = calc_distances (euclidean, bw, xdist, ydist);
       const Array<octave_idx_type> positions = (!bw).find ();
       const int zpos = positions.numel();
-      for (int i = 0; i < zpos; i++) {
-        dist (positions(i)) = sqrt(dist(positions(i)));
-      }
+      const octave_idx_type* pos_vec = positions.fortran_vec ();
+      float* dist_vec = dist.fortran_vec ();
+      for (int i = 0; i < zpos; i++)
+        dist_vec[pos_vec[i]] = sqrt (dist_vec[pos_vec[i]]);
     }
   else if (method == "chessboard")
     dist = calc_distances (chessboard,      bw, xdist, ydist);
