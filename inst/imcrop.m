@@ -1,5 +1,4 @@
-## Copyright (C) 2012 Pablo Rossi <prossi@ing.unrc.edu.ar>
-## Copyright (C) 2012 Carnë Draug <carandraug+dev@gmail.com>
+## Copyright (C) 2014 Carnë Draug <carandraug+dev@gmail.com>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -15,36 +14,211 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} @var{cropped} = imcrop (@var{Img})
+## @deftypefn  {Function File} {} imcrop ()
+## @deftypefnx {Function File} {} imcrop (@var{img})
+## @deftypefnx {Function File} {} imcrop (@var{ind}, @var{cmap})
+## @deftypefnx {Function File} {} imcrop (@var{h})
+## @deftypefnx {Function File} {} imcrop (@dots{}, @var{rect})
+## @deftypefnx {Function File} {[@var{cropped}] =} imcrop (@dots{})
+## @deftypefnx {Function File} {[@var{cropped}, @var{rect}] =} imcrop (@dots{})
+## @deftypefnx {Function File} {[@var{x}, @var{y}, @var{cropped}, @var{rect}] =} imcrop (@dots{})
 ## Crop image.
 ##
-## Displays the image @var{Img} in a figure window and waits for user to select
-## two points to define the bounding box.  First click on the top left and then
-## on the bottom right corner of the region.  The function will not return until
-## two valid points in the correct order are selected.
+## Displays the image @var{img} in a figure window and waits for the user to
+## select two points defining a bounding box.  First click on the top left
+## and then on the bottom right corner of the region.  For an indexed image, a
+## corresponding colormap can be specified in @var{cmap}.  For multi-dimensional
+## images (each 2D image is concatenated in the 4th dimension), only the
+## first image is displayed.
 ##
-## Returns the @var{cropped} image.
+## if no image data is given, uses the current figure or figure from graphics
+## handle @var{h}.
 ##
-## @seealso{imshow}
+## Non-interactive usage is supported if the last input argument is 4 element
+## vector @var{rect} defining the region of interest.  The first two elements
+## specify the initial @var{x_ini} and @var{y_ini} coordinates, and the last
+## two the @var{width} and @var{height}, i.e.,
+## @code{@var{rect} = [@var{x_ini} @var{y_ini} @var{width} @var{height}]}.
+## Note how this the opposite of the majority of Octave indexing rules where
+## rows come before columns.
+##
+## Returns the @var{cropped} image and a vector @var{rect} with the
+## coordinates and size for @var{cropped}.  If more than 3 output arguments
+## are requested, also returns the @var{x} and @var{y} data that define
+## the coordinate system.
+##
+## @emph{Note}: the values in @var{rect} are not necessarily integer values
+## and can't always be used directly as index values for other images.  To
+## crop the same region from a multiple images of the same size, either using
+## a multi-dimensional image:
+##
+## @example
+## @group
+## nd_img = cat (4, img1, img2, img3, img4);
+## croped = imcrop (nd_img);
+## cropped_1 = cropped(:,:,:,1);
+## cropped_2 = cropped(:,:,:,2);
+## cropped_3 = cropped(:,:,:,3);
+## cropped_4 = cropped(:,:,:,4);
+## @end group
+## @end example
+##
+## or multiple calls to @code{imcrop}:
+##
+## @example
+## @group
+## [croped_1, rect] = imcrop (img1);
+## cropped_2        = imcrop (img2, rect);
+## cropped_3        = imcrop (img3, rect);
+## cropped_4        = imcrop (img4, rect);
+## @end group
+## @end example
+##
+## @seealso{impixel, imshow}
 ## @end deftypefn
 
-function col = imcrop (Img)
+## TODO not yet implemented
+## @deftypefnx {Function File} {} imcrop (@var{xData}, @var{yData}, @dots{})
 
-  handle = imshow (Img);
-  [a, b] = size (Img);
+function varargout = imcrop (varargin)
 
-  do
-    [hl, rd] = ginput(2);
-    if (hl(1) <= 1), hl(1) = 1; endif
-    if (rd(1) <= 1), rd(1) = 1; endif
-    if (hl(2) >= b), hl(2) = b; endif
-    if (rd(2) >= a), rd(2) = a; endif
-  until (hl(1) < hl(2) || rd(1) < rd(2))
-  ## should we close the image after? Anyway, close does not accept the handle
-  ## since the handle from imshow is not a figure handle
-#  close (handle); 
+  ## Screw Matlab and their over complicated API's! How can we properly
+  ## parse all the possible alternative calls? See
+  ## http://www.youtube.com/watch?v=1oZWacjmYm8 to understand how such
+  ## API's develop.
 
-  hl  = floor (hl);
-  rd  = floor (rd);
-  col = Img(rd(1):rd(2), hl(1):hl(2));
+  ## There is no check for this things, anything is valid. We (Octave)
+  ## are at least checking the number of elements otherwise the input
+  ## parsing would be horrible.
+  valid_rect   = @(x) numel (x) == 4;
+  valid_system = @(x) numel (x) == 2;
+
+  rect = [];
+  interactive = true;   # is interactive usage
+  alt_system  = false;  # was an alternative coordinate system requested?
+  from_fig    = false;  # do we have the image data or need to fetch from figure?
+
+  if (nargin > 5)
+    print_usage ();
+  endif
+
+  rect = [];
+  if (numel (varargin) > 1 && valid_rect (varargin{end}))
+    interactive = false;
+    rect = varargin{end};
+    varargin(end) = [];
+  endif
+
+  xdata = [];
+  ydata = [];
+  if (numel (varargin) > 2 && valid_system (varargin{1}) && valid_system (varargin{2}))
+    ## requested messy stuff
+    ## we should probably reuse part of what impixel does
+    alt_system = true;
+    xdata = varargin{1};
+    ydata = varargin{2};
+    varargin([1 2]) = [];
+    error ("imcrop: messing around with coordinate system is not implemented");
+  endif
+
+  ## After we remove all that extra stuff, we are left with the image
+  fnargin = numel (varargin);
+  if (fnargin > 2)
+    print_usage ();
+  elseif (fnargin == 0)
+    ## use current figure
+    from_fig = true;
+    h = gcf ();
+  elseif (fnargin == 1 && ishandle (varargin{1}))
+    ## use specified figure
+    from_fig = true;
+    h = varargin{1};
+  elseif (interactive)
+    ## leave input check to imshow
+    h = nd_imshow (varargin{:});
+  elseif (isimage (varargin{1}))
+    ## we have the image data and it's not interactive, so there is
+    ## nothing to do. We only check the minimum in the image.
+  else
+    print_usage ();
+  endif
+
+  if (from_fig)
+    cdata = get (h, "cdata");
+    xdata = get (h, "xdata");
+    ydata = get (h, "ydata");
+  else
+    cdata = varargin{1};
+    if (! alt_system)
+      xdata = [1 columns(cdata)];
+      ydata = [1 rows(cdata)];
+    endif
+  endif
+
+  ## Finally, crop the image
+  if (interactive)
+    [x, y] = ginput (2);
+    rect = [x(1) y(1) x(2)-x(1) y(2)-y(1)];
+  endif
+  i_ini = round ([rect(1) rect(2)]);
+  i_end = round ([rect(1)+rect(3) rect(2)+rect(4)]);
+  img = cdata(i_ini(2):i_end(2), i_ini(1):i_end(1),:,:); # don't forget RGB and ND images
+
+  ## Even the API for the output is complicated
+  if (nargout == 0 && interactive)
+    figure ();
+    ## In case we have a colormap or something like that, use
+    ## it again when displaying the cropped image.
+    nd_imshow (img, varargin{2:end});
+  elseif (nargout < 3)
+    varargout{1} = img;
+    varargout{2} = rect;
+  else
+    varargout{1} = xdata;
+    varargout{2} = ydata;
+    varargout{3} = img;
+    varargout{4} = rect;
+  endif
+
 endfunction
+
+## shadows core function to support ND image.  If we have one, use
+## the first frame only
+function h = nd_imshow (varargin)
+  size (varargin{1});
+  h = imshow (varargin{1}(:,:,:,1), varargin{2:end});
+endfunction
+
+## test typical non-interactive usage, grayscale image
+%!test
+%! a = randi (255, [100 100]);
+%! rect = [20 30 3 5];
+%! assert (nthargout ([1 2], @imcrop, a, rect), {a(30:35, 20:23) rect});
+%! assert (nthargout (2, @imcrop, a, rect), rect);
+%! assert (nthargout ([3 4], 4, @imcrop, a, rect), {a(30:35, 20:23) rect});
+
+## test typical non-interactive usage, RGB image
+%!test
+%! rgb = randi (255, [100 100 3]);
+%! rect = [20 30 3 5];
+%! assert (nthargout ([1 2], @imcrop, rgb, rect), {rgb(30:35, 20:23,:) rect});
+%! assert (nthargout (2, @imcrop, rgb, rect), rect);
+%! assert (nthargout ([3 4], 4, @imcrop, rgb, rect), {rgb(30:35, 20:23,:) rect});
+
+## test typical non-interactive usage, indexed image
+%!test
+%! a = randi (255, [100 100]);
+%! rect = [20 30 3 5];
+%! cmap = jet (255);
+%! assert (nthargout ([1 2], @imcrop, a, cmap, rect), {a(30:35, 20:23) rect});
+%! assert (nthargout (2, @imcrop, a, cmap, rect), rect);
+%! assert (nthargout ([3 4], 4, @imcrop, a, cmap, rect), {a(30:35, 20:23) rect});
+
+## test typical non-interactive usage, logical image
+%!test
+%! a = rand (100) > 0.5;
+%! rect = [20 30 3 5];
+%! assert (nthargout ([1 2], @imcrop, a, rect), {a(30:35, 20:23) rect});
+%! assert (nthargout (2, @imcrop, a, rect), rect);
+%! assert (nthargout ([3 4], 4, @imcrop, a, rect), {a(30:35, 20:23) rect});
+

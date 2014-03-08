@@ -6,9 +6,6 @@
     weighted by how much of them is covered by the disk. Note that
     this change is backwards incompatible.
 
- ** The 'disk' filter of the function fspecial has been changed in a
-    backwards incompatible way. 
-
  ** The following functions will display the output image as a figure
     instead of printing to the command line, when there are no output
     arguments:
@@ -23,6 +20,25 @@
       bwborder              iptchecknargin        readexif
       impad                 iptcheckstrs
       imrotate_Fourier      uintlut
+
+
+ Summary of important user-visible changes for image 2.2.1 (2014/03/08):
+-------------------------------------------------------------------------
+
+ ** imcrop had many alternative interfaces added for more flexibility.
+    Added support in the input for indexed images, figures handles,
+    N-dimensional images, and specific bounding box vector for a
+    non-interactive usage.  Output can now also return the bounding box used
+    for the cropping in addition to the cropped image.  It will no longer
+    loop forever until it gets two valid coordinates for the bounding box.
+
+ ** Fixed bug in imcomplement to compute the complement of signed integers
+    correctly.
+
+ ** Fix imrotate to handle RGB images.
+
+ ** Fix regression in bwdist when calculating the closest pixel map.
+
 
  Summary of important user-visible changes for image 2.2.0 (2014/01/08):
 -------------------------------------------------------------------------

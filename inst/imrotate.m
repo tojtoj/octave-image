@@ -61,7 +61,7 @@ function [imgPost, H, valid] = imrotate (imgPre, thetaDeg, interp = "nearest", b
 
   if (nargin < 2 || nargin > 5)
     print_usage ();
-  elseif (! isimage (imgPre) || ndims (imgPre) != 2)
+  elseif (! isimage (imgPre))
     error ("imrotate: IMGPRE must be a grayscale or RGB image.")
   elseif (! isscalar (thetaDeg))
     error("imrotate: THETA must be a scalar");
@@ -118,12 +118,12 @@ function [imgPost, H, valid] = imrotate (imgPre, thetaDeg, interp = "nearest", b
     nRot90 = mod(thetaDeg, 360) / 90;
     if (mod(thetaDeg, 180) == 0 || sizePre(1) == sizePre(2) ||
         strcmpi(bbox, "loose"))
-      imgPost = rot90(imgPre, nRot90);
+      imgPost = rotdim (imgPre, nRot90, [1 2]);
       return;
     elseif (mod(sizePre(1), 2) == mod(sizePre(2), 2))
       ## Here, bbox is "crop" and the rotation angle is +/- 90 degrees.
       ## This works only if the image dimensions are of equal parity.
-      imgRot = rot90(imgPre, nRot90);
+      imgRot = rotdim (imgPre, nRot90, [1 2]);
       imgPost = zeros(sizePre);
       hw = min(sizePre) / 2 - 0.5;
       imgPost   (round(oPost(2) - hw) : round(oPost(2) + hw),
@@ -139,7 +139,7 @@ function [imgPost, H, valid] = imrotate (imgPre, thetaDeg, interp = "nearest", b
       ## caller who wants to avoid this should ensure that the image
       ## dimensions are of equal parity.
     endif
-  end
+  endif
 
   ## Now the actual rotations happen
   if (strcmpi (interp, "fourier"))
@@ -188,14 +188,14 @@ function fs = imrotate_Fourier (f, theta, method, bbox)
         phi = theta;
     elseif ( theta>45 && theta<=135 )
         phi = theta - 90;
-        f = rot90(f,1);
+        f = rotdim(f,1, [1 2]);
         perp = 1;
     elseif ( theta>135 && theta<=225 )
         phi = theta - 180;
-        f = rot90(f,2);
+        f = rotdim(f,2, [1 2]);
     elseif ( theta>225 && theta<=315 )
         phi = theta - 270;
-        f = rot90(f,3);
+        f = rotdim(f,3, [1 2]);
         perp = 1;
     else
         phi = theta;
@@ -293,57 +293,82 @@ function fs = imrotate_Fourier (f, theta, method, bbox)
 
 endfunction
 
-%!test
-%! ## Verify minimal loss across six rotations that add up to 360 +/- 1 deg.:
-%! methods = { "nearest", "bilinear", "bicubic", "Fourier" };
-%! angles     = [ 59  60  61  ];
-%! tolerances = [ 7.4 8.5 8.6     # nearest
-%!                3.5 3.1 3.5     # bilinear
-%!                2.7 2.0 2.7     # bicubic
-%!                2.7 1.6 2.8 ]/8;  # Fourier
-%!
-%! # This is peaks(50) without the dependency on the plot package
-%! x = y = linspace(-3,3,50);
-%! [X,Y] = meshgrid(x,y);
-%! x = 3*(1-X).^2.*exp(-X.^2 - (Y+1).^2) ...
-%!      - 10*(X/5 - X.^3 - Y.^5).*exp(-X.^2-Y.^2) ...
-%!      - 1/3*exp(-(X+1).^2 - Y.^2);
-%!
-%! x -= min(x(:));            # Fourier does not handle neg. values well
-%! x = x./max(x(:));
-%! for m = 1:(length(methods))
-%!   y = x;
-%!   for i = 1:5
-%!     y = imrotate(y, 60, methods{m}, "crop", 0);
-%!   end
-%!   for a = 1:(length(angles))
-%!     assert(norm((x - imrotate(y, angles(a), methods{m}, "crop", 0))
-%!                 (10:40, 10:40)) < tolerances(m,a));
-%!   end
-%! end
+#%!test
+#%! ## Verify minimal loss across six rotations that add up to 360 +/- 1 deg.:
+#%! methods = { "nearest", "bilinear", "bicubic", "Fourier" };
+#%! angles     = [ 59  60  61  ];
+#%! tolerances = [ 7.4 8.5 8.6     # nearest
+#%!                3.5 3.1 3.5     # bilinear
+#%!                2.7 2.0 2.7     # bicubic
+#%!                2.7 1.6 2.8 ]/8;  # Fourier
+#%!
+#%! # This is peaks(50) without the dependency on the plot package
+#%! x = y = linspace(-3,3,50);
+#%! [X,Y] = meshgrid(x,y);
+#%! x = 3*(1-X).^2.*exp(-X.^2 - (Y+1).^2) ...
+#%!      - 10*(X/5 - X.^3 - Y.^5).*exp(-X.^2-Y.^2) ...
+#%!      - 1/3*exp(-(X+1).^2 - Y.^2);
+#%!
+#%! x -= min(x(:));            # Fourier does not handle neg. values well
+#%! x = x./max(x(:));
+#%! for m = 1:(length(methods))
+#%!   y = x;
+#%!   for i = 1:5
+#%!     y = imrotate(y, 60, methods{m}, "crop", 0);
+#%!   end
+#%!   for a = 1:(length(angles))
+#%!     assert(norm((x - imrotate(y, angles(a), methods{m}, "crop", 0))
+#%!                 (10:40, 10:40)) < tolerances(m,a));
+#%!   end
+#%! end
 
-%!xtest
-%! ## Verify exactness of near-90 and 90-degree rotations:
-%! X = rand(99);
-%! for angle = [90 180 270]
-%!   for da = [-0.1 0.1]
-%!     Y = imrotate(X,   angle + da , "nearest", :, 0);
-%!     Z = imrotate(Y, -(angle + da), "nearest", :, 0);
-%!     assert(norm(X - Z) == 0); # exact zero-sum rotation
-%!     assert(norm(Y - imrotate(X, angle, "nearest", :, 0)) == 0); # near zero-sum
-%!   end
-%! end
+#%!xtest
+#%! ## Verify exactness of near-90 and 90-degree rotations:
+#%! X = rand(99);
+#%! for angle = [90 180 270]
+#%!   for da = [-0.1 0.1]
+#%!     Y = imrotate(X,   angle + da , "nearest", :, 0);
+#%!     Z = imrotate(Y, -(angle + da), "nearest", :, 0);
+#%!     assert(norm(X - Z) == 0); # exact zero-sum rotation
+#%!     assert(norm(Y - imrotate(X, angle, "nearest", :, 0)) == 0); # near zero-sum
+#%!   end
+#%! end
+
+#%!test
+#%! ## Verify preserved pixel density:
+#%! methods = { "nearest", "bilinear", "bicubic", "Fourier" };
+#%! ## This test does not seem to do justice to the Fourier method...:
+#%! tolerances = [ 4 2.2 2.0 209 ];
+#%! range = 3:9:100;
+#%! for m = 1:(length(methods))
+#%!   t = [];
+#%!   for n = range
+#%!     t(end + 1) = sum(imrotate(eye(n), 20, methods{m}, :, 0)(:));
+#%!   end
+#%!   assert(t, range, tolerances(m));
+#%! end
 
 %!test
-%! ## Verify preserved pixel density:
-%! methods = { "nearest", "bilinear", "bicubic", "Fourier" };
-%! ## This test does not seem to do justice to the Fourier method...:
-%! tolerances = [ 4 2.2 2.0 209 ];
-%! range = 3:9:100;
-%! for m = 1:(length(methods))
-%!   t = [];
-%!   for n = range
-%!     t(end + 1) = sum(imrotate(eye(n), 20, methods{m}, :, 0)(:));
-%!   end
-%!   assert(t, range, tolerances(m));
-%! end
+%! a = reshape (1:18, [2 3 3]);
+%!
+%! a90(:,:,1) = [5 6; 3 4; 1 2];
+%! a90(:,:,2) = a90(:,:,1) + 6;
+%! a90(:,:,3) = a90(:,:,2) + 6;
+%!
+%! a180(:,:,1) = [6 4 2; 5 3 1];
+%! a180(:,:,2) = a180(:,:,1) + 6;
+%! a180(:,:,3) = a180(:,:,2) + 6;
+%!
+%! am90(:,:,1) = [2 1; 4 3; 6 5];
+%! am90(:,:,2) = am90(:,:,1) + 6;
+%! am90(:,:,3) = am90(:,:,2) + 6;
+%!
+%! assert (imrotate (a,    0), a);
+%! assert (imrotate (a,   90), a90);
+%! assert (imrotate (a,  -90), am90);
+%! assert (imrotate (a,  180), a180);
+%! assert (imrotate (a, -180), a180);
+%! assert (imrotate (a,  270), am90);
+%! assert (imrotate (a, -270), a90);
+%! assert (imrotate (a,  360), a);
+
