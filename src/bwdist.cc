@@ -65,7 +65,7 @@ void edtfunc (float (*func)(short int, short int),
         }
     }
 
-  float olddist2, newdist2, newdistx, newdisty;
+  double olddist2, newdist2, newdistx, newdisty;
   bool changed;
 
   // Initialize index offsets for the current image width
@@ -640,6 +640,30 @@ Currently, only 2D images are supported.\n\
 %! [dout, cout] = bwdist (bw, "euclidean");
 %! assert (dout, dist)
 %! assert (cout, c)
+
+## The quasi-euclidean method is apparently sensitive to a machine precision
+## error that happens in x86 systems only. This test will cause an endless
+## loop in case of a regression.
+%!test
+%! bw = [  0   1   1   0   0   0   1   0
+%!         0   0   0   0   0   0   0   0
+%!         1   1   0   0   0   0   0   0
+%!         0   0   0   0   0   0   1   0
+%!         0   0   0   0   1   0   0   1
+%!         0   0   0   0   0   0   0   0
+%!         1   0   0   0   0   0   0   0
+%!         0   0   1   0   0   1   1   0];
+%! out = single ([
+%! 1.00000   0.00000   0.00000   1.00000   2.00000   1.00000   0.00000   1.00000
+%! 1.00000   1.00000   1.00000   sqrt(2)   sqrt(2)+1 sqrt(2)   1.00000   sqrt(2)
+%! 0.00000   0.00000   1.00000   2.00000   2.00000   sqrt(2)   1.00000   sqrt(2)
+%! 1.00000   1.00000   sqrt(2)   sqrt(2)   1.00000   1.00000   0.00000   1.00000
+%! 2.00000   2.00000   2.00000   1.00000   0.00000   1.00000   1.00000   0.00000
+%! 1.00000   sqrt(2)   2.00000   sqrt(2)   1.00000   sqrt(2)   sqrt(2)   1.00000
+%! 0.00000   1.00000   1.00000   sqrt(2)   sqrt(2)   1.00000   1.00000   sqrt(2)
+%! 1.00000   1.00000   0.00000   1.00000   1.00000   0.00000   0.00000   1.00000
+%! ]);
+%! assert (bwdist (bw, "quasi-euclidean"), out);
 
 %!error <unknown METHOD> bwdist (bw, "not a valid method");
 */
