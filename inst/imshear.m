@@ -32,7 +32,7 @@
 ## NOTE: @var{alpha} does NOT need to be an integer.
 ##
 ## @var{bbox} can be one of 'loose', 'crop' or 'wrap'.
-## 'loose' allows the image to grow to accomodate the new transformed image.
+## 'loose' allows the image to grow to accommodate the new transformed image.
 ## 'crop' keeps the same size as the original, clipping any part of the image
 ## that is moved outside the bounding box.
 ## 'wrap' keeps the same size as the original, but does not clip the part 

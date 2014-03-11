@@ -390,7 +390,7 @@ which takes the following values:\n\
 Return image of the same size as input @var{im}.\n\
 \n\
 @item @qcode{\"full\"}\n\
-Return the full erosion (image is padded to accomodate @var{se} near the\n\
+Return the full erosion (image is padded to accommodate @var{se} near the\n\
 borders).\n\
 \n\
 @item @qcode{\"valid\"}\n\
@@ -704,7 +704,7 @@ which takes the following values:\n\
 Return image of the same size as input @var{im}.\n\
 \n\
 @item @qcode{\"full\"}\n\
-Return the full dilation (matrix is padded to accomodate @var{se} near the\n\
+Return the full dilation (matrix is padded to accommodate @var{se} near the\n\
 borders).\n\
 \n\
 @item @qcode{\"valid\"}\n\
