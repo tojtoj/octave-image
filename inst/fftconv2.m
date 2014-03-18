@@ -101,41 +101,48 @@ function X = fftconv2 (varargin)
 
 endfunction
 
-%!# usage: fftconv2(a,b,[, shape])
-%!shared a,b
-%! a = repmat(1:10, 5);
-%! b = repmat(10:-1:3, 7);
-%!assert(norm(fftconv2(a,b)-conv2(a,b)), 0, 1e6*eps)
-%!assert(norm(fftconv2(b,a)-conv2(b,a)), 0, 1e6*eps)
-%!assert(norm(fftconv2(a,b,'full')-conv2(a,b,'full')), 0, 1e6*eps)
-%!assert(norm(fftconv2(b,a,'full')-conv2(b,a,'full')), 0, 1e6*eps)
-%!assert(norm(fftconv2(a,b,'same')-conv2(a,b,'same')), 0, 1e6*eps)
-%!assert(norm(fftconv2(b,a,'same')-conv2(b,a,'same')), 0, 1e6*eps)
-%!assert(isempty(fftconv2(a,b,'valid')));
-%!assert(norm(fftconv2(b,a,'valid')-conv2(b,a,'valid')), 0, 1e6*eps)
+## usage: fftconv2(a,b,[, shape])
+%!test
+%! a = repmat (1:10, 5);
+%! b = repmat (10:-1:3, 7);
+%! assert (fftconv2 (a, b), conv2 (a, b), 1e4*eps)
+%! assert (fftconv2 (b, a), conv2 (b, a), 1e4*eps)
+%! assert (fftconv2 (a, b, "full"), conv2 (a, b, "full"), 1e4*eps)
+%! assert (fftconv2 (b, a, "full"), conv2 (b, a, "full"), 1e4*eps)
+%! assert (fftconv2 (a, b, "same"), conv2 (a, b, "same"), 1e4*eps)
+%! assert (fftconv2 (b, a, "same"), conv2 (b, a, "same"), 1e4*eps)
+%! assert (isempty (fftconv2 (a, b, "valid")));
+%! assert (fftconv2 (b, a, "valid"),  conv2 (b, a, "valid"), 1e4*eps)
 
-%!# usage: fftconv2(v1, v2, a[, shape])
-%!##FIXME this usage is broken
-%!shared x,y,a
-%! x = 1:4; y = 4:-1:1; a = repmat(1:10, 5);
-%!test assert(norm(fftconv2(x,y,a)-conv2(x,y,a)), 0, 1e6*eps)
-%!test assert(norm(fftconv2(x,y,a,'full')-conv2(x,y,a,'full')), 0, 1e6*eps)
-%!test assert(norm(fftconv2(x,y,a,'same')-conv2(x,y,a,'same')), 0, 1e6*eps)
-%!test assert(norm(fftconv2(x,y,a,'valid')-conv2(x,y,a,'valid')), 0, 1e6*eps)
+## usage: fftconv2(v1, v2, a[, shape])
+%!test
+%! x = 1:4;
+%! y = 4:-1:1;
+%! a = repmat(1:10, 5);
+%! assert (fftconv2 (x, y, a),          conv2 (x, y, a),          1e4*eps)
+%! assert (fftconv2 (x, y, a, "full"),  conv2 (x, y, a, "full"),  1e4*eps)
+%! assert (fftconv2 (x, y, a, "same"),  conv2 (x, y, a, "same"),  1e4*eps)
+%! assert (fftconv2 (x, y, a, "valid"), conv2 (x, y, a, "valid"), 1e4*eps)
 
 %!demo
 %! ## Draw a cross
-%! N = 100;
-%! [x,y] = meshgrid(-N:N, -N:N);
-%! z = 0*x;
-%! z(N,1:2*N+1) = 1; z(1:2*N+1, N) = 1;
-%! imshow(z);
+%! z = zeros (101, 101);
+%! z(50, :) = 1;
+%! z(:, 50) = 1;
+%! subplot (1, 3, 1)
+%! imshow (z);
+%! title ("Original thin cross")
 %!
 %! ## Draw a sinc blob
-%! n = floor(N/10);
-%! [x,y] = meshgrid(-n:n, -n:n);
-%! b = x.^2 + y.^2; b = max(b(:)) - b; b = b / max(b(:));
-%! imshow(b);
+%! b = getheight (strel ("ball", 10, 1));
+%! subplot (1, 3, 2)
+%! imshow (b);
+%! title ("Sync blob")
 %!
 %! ## Convolve the cross with the blob
-%! imshow(real(fftconv2(z, b, 'same')*N))
+%! fc = real (fftconv2 (z, b, "same"));
+%! subplot (1, 3, 3)
+%! imshow (fc, [min(fc(:)) max(fc(:))])
+%! title ("Convolution in the frequency domain")
+
+
