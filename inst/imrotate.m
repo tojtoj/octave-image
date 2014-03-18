@@ -154,10 +154,7 @@ function [imgPost, H, valid] = imrotate (imgPre, thetaDeg, interp = "nearest", b
     endif
     valid = NA;
 
-    ## we probably should do this in a safer way... but hardcoding the list of
-    ## im2xxxx functions might not be a good idea since it then it requires to
-    ## be added here if a new im2xxx function is implemented
-    imgPost = feval (["im2" in_class], imgPost);
+    imgPost = imcast (imgPost, in_class);
   else
     [imgPost, valid] = imperspectivewarp(imgPre, H, interp, bbox, extrapval);
   endif

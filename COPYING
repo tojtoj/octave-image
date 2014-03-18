@@ -73,6 +73,7 @@ inst/imabsdiff.m                        GPLv3+
 inst/imadd.m                            GPLv3+
 inst/imadjust.m                         GPLv3+
 inst/imbothat.m                         GPLv3+
+inst/imcast.m                           GPLv3+
 inst/imclose.m                          GPLv3+
 inst/imcomplement.m                     GPLv3+
 inst/imcrop.m                           GPLv3+

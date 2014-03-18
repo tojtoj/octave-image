@@ -133,6 +133,7 @@ Types and Type conversions
  im2single
  im2uint8
  im2uint16
+ imcast
  imdither
  isbw
  isgray
