@@ -1,9 +1,7 @@
 inst/private/analyze75filename.m        GPLv3+
 inst/private/handle_colorspec.m         GPLv3+
 inst/private/im2col_check.m             GPLv3+
-inst/private/im2float.m                 GPLv3+
 inst/private/imarithmetics.m            GPLv3+
-inst/private/imconversion.m             GPLv3+
 inst/private/interp_method.m            GPLv3+
 inst/private/is_double_image.m          GPLv3+
 inst/private/isimage.m                  GPLv3+

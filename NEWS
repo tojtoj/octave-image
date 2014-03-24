@@ -30,6 +30,14 @@
       impad                 iptcheckstrs
       imrotate_Fourier      uintlut
 
+ ** Other functions that have been changed for smaller bugfixes, increased
+    Matlab compatibility, or performance:
+
+      im2double
+      im2int16
+      im2single
+      im2uint8
+      im2uint16
 
  Summary of important user-visible changes for image 2.2.1 (2014/03/08):
 -------------------------------------------------------------------------
