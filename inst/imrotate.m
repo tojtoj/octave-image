@@ -41,8 +41,7 @@
 ##     @end itemize
 ##
 ##   @var{extrapval} sets the value used for extrapolation. The default value
-##      is @code{NA} for images represented using doubles, and 0 otherwise.
-##      This argument is ignored of Fourier interpolation is used.
+##      is 0.  This argument is ignored of Fourier interpolation is used.
 ##
 ## Output parameters:
 ##
@@ -57,7 +56,7 @@
 ##                  not available if Fourier interpolation is used.
 ## @end deftypefn
 
-function [imgPost, H, valid] = imrotate (imgPre, thetaDeg, interp = "nearest", bbox = "loose", extrapval = NA)
+function [imgPost, H, valid] = imrotate (imgPre, thetaDeg, interp = "nearest", bbox = "loose", extrapval = 0)
 
   if (nargin < 2 || nargin > 5)
     print_usage ();

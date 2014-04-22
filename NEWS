@@ -21,6 +21,10 @@
 
       im2bw
 
+ ** For better compatibility with Matlab, the imrotate, imremap, and
+    imperspectivewarp functions now use 0 instead of NA for the default
+    extrapolation value.
+
  ** Deprecated functions.
 
     The following functions were deprecated in image 2.2.0 and have been

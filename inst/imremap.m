@@ -37,8 +37,7 @@
 ## @code{linear}) are also supported.
 ##
 ## All values of the result that fall outside the original image will
-## be set to @var{extrapval}. For images of class @code{double} @var{extrapval}
-## defaults to @code{NA} and for other classes it defaults to 0.
+## be set to @var{extrapval}.  The default value of @var{extrapval} is 0.
 ##
 ## The optional output @var{valid} is a matrix of the same size as @var{warped}
 ## that contains the value 1 in pixels where @var{warped} contains an interpolated
@@ -46,7 +45,7 @@
 ## @seealso{imperspectivewarp, imrotate, imresize, imshear, interp2}
 ## @end deftypefn
 
-function [warped, valid] = imremap(im, XI, YI, interp = "linear", extrapval = NA)
+function [warped, valid] = imremap(im, XI, YI, interp = "linear", extrapval = 0)
 
   if (nargin < 3 || nargin > 5)
     print_usage ();
@@ -63,10 +62,10 @@ function [warped, valid] = imremap(im, XI, YI, interp = "linear", extrapval = NA
   
   ## Interpolate
   if (size (im, 3) == 1) # Gray
-    warped = grayinterp(im, XI, YI, interp, NA);
+    warped = grayinterp(im, XI, YI, interp, 0);
   else # rgb image
     for i = 3:-1:1
-      warped(:,:,i) = grayinterp(im(:,:,i), XI, YI, interp, NA);
+      warped(:,:,i) = grayinterp(im(:,:,i), XI, YI, interp, 0);
     endfor
   endif
   valid = !isna(warped);
@@ -79,9 +78,9 @@ endfunction
 
 function [warped, valid] = grayinterp(im, XI, YI, interp, extrapval)
   if (strcmp(interp, "cubic"))
-    warped = graybicubic(double(im), XI, YI, NA);
+    warped = graybicubic(double(im), XI, YI, 0);
   else
-    warped = interp2(double(im), XI, YI, interp, NA);
+    warped = interp2(double(im), XI, YI, interp, 0);
   endif
   valid = !isna(warped);
   warped(!valid) = extrapval;
@@ -97,7 +96,7 @@ endfunction
 ## @seealso{interp2}
 ## @end deftypefn
 
-function ZI = graybicubic (Z, XI, YI, extrapval = NA)
+function ZI = graybicubic (Z, XI, YI, extrapval = 0)
   
   ## Allocate output
   [X, Y] = meshgrid(1:columns(Z), 1:rows(Z));
