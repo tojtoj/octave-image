@@ -129,7 +129,11 @@ function varargout = imcrop (varargin)
     ## use current figure
     from_fig = true;
     h = gcf ();
-  elseif (fnargin == 1 && ishandle (varargin{1}))
+  ## We check isscalar() because ishandle() accepts arrays of handles, and we
+  ## check "!= 0" because 0 is and handle for the "root figure" which is
+  ## invalid for imcrop (see bug #42714).
+  elseif (fnargin == 1 && isscalar (varargin{1})
+          && varargin{1} != 0 && ishandle (varargin{1}))
     ## use specified figure
     from_fig = true;
     h = varargin{1};
@@ -222,3 +226,7 @@ endfunction
 %! assert (nthargout (2, @imcrop, a, rect), rect);
 %! assert (nthargout ([3 4], 4, @imcrop, a, rect), {a(30:35, 20:23) rect});
 
+## 0 is the root figure (always true figure handle), so make sure we use
+## scalar 0 as image data, not as figure handle.
+%!assert (imcrop (0, [0.5 0.5 0.9 0.9]), 0);
+%!assert (imcrop (zeros (5), [1 1 1 1]), zeros (2));
