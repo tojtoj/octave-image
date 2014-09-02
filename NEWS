@@ -1,3 +1,48 @@
+ Summary of important user-visible changes for image 2.4.0 (yyyy/mm/dd):
+-------------------------------------------------------------------------
+
+ ** The following functions are new:
+
+      imcast
+
+ ** The implementation of normxcorr2 has been changed. The new method is
+    Matlab compatible and will return values in the range [-1 1].
+
+ ** The image package is no longer dependent on the signal package.
+
+ ** The disk shaped filter of fspecial has been changed for Matlab
+    compatibility. The elements on the border of the disk are now
+    weighted by how much of them is covered by the disk. Note that
+    this change is backwards incompatible.
+
+ ** The following functions will display the output image as a figure
+    instead of printing to the command line, when there are no output
+    arguments:
+
+      im2bw
+
+ ** For better compatibility with Matlab, the imrotate, imremap, and
+    imperspectivewarp functions now use 0 instead of NA for the default
+    extrapolation value.
+
+ ** Deprecated functions.
+
+    The following functions were deprecated in image 2.2.0 and have been
+    removed from image 2.4.0.
+
+      bwborder              iptchecknargin        readexif
+      impad                 iptcheckstrs
+      imrotate_Fourier      uintlut
+
+ ** Other functions that have been changed for smaller bugfixes, increased
+    Matlab compatibility, or performance:
+
+      im2double
+      im2int16
+      im2single
+      im2uint8
+      im2uint16
+
  Summary of important user-visible changes for image 2.2.1 (2014/03/08):
 -------------------------------------------------------------------------
 
@@ -14,6 +59,7 @@
  ** Fix imrotate to handle RGB images.
 
  ** Fix regression in bwdist when calculating the closest pixel map.
+
 
  Summary of important user-visible changes for image 2.2.0 (2014/01/08):
 -------------------------------------------------------------------------

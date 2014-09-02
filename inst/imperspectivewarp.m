@@ -41,8 +41,7 @@
 ## @end table
 ##
 ## All values of the result that fall outside the original image will
-## be set to @var{extrapval}. For images of class @code{double} @var{extrapval}
-## defaults to @code{NA} and for other classes it defaults to 0.
+## be set to @var{extrapval}.  The default value of @var{extrapval} is 0.
 ##
 ## The optional output @var{valid} is a matrix of the same size as @var{warped}
 ## that contains the value 1 in pixels where @var{warped} contains an interpolated
@@ -50,7 +49,7 @@
 ## @seealso{imremap, imrotate, imresize, imshear, interp2}
 ## @end deftypefn
 
-function [warped, valid] = imperspectivewarp(im, P, interp = "linear", bbox = "loose", extrapolation_value = NA)
+function [warped, valid] = imperspectivewarp(im, P, interp = "linear", bbox = "loose", extrapolation_value = 0)
 
   if (nargin < 2 || nargin > 5)
     print_usage ();

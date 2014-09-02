@@ -348,6 +348,8 @@ function retval = regionprops (bw, varargin)
         error ("regionprops: unsupported property '%s'", property);
     endswitch
   endfor
+  ## Matlab returns a column vector struct array.
+  retval = retval(:);
 endfunction
 
 function retval = local_area (bw)
@@ -423,3 +425,5 @@ endfunction
 %! x = sum (img(2,ix) .* (ix)) / sum (img(2,ix));
 %! assert (props(1).WeightedCentroid(1), x, 10*eps)
 %! assert (props(1).WeightedCentroid(2), 2, 10*eps)
+
+%!assert (size (regionprops ([1 0 0; 0 0 2], "Area")), [2, 1])

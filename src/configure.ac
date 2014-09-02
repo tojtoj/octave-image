@@ -1,5 +1,5 @@
 AC_PREREQ([2.67])
-AC_INIT([Octave-Forge image package], [2.2.1])
+AC_INIT([Octave-Forge image package], [2.3.0+])
 
 AH_BOTTOM([#include "undef_unordered_map.h"])
 AC_CONFIG_HEADERS([config.h])

@@ -1,4 +1,4 @@
-## Copyright (C) 2011 Carnë Draug <carandraug+dev@gmail.com>
+## Copyright (C) 2014 Benjamin Eltzner <b.eltzner@gmx.de>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -14,27 +14,127 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn  {Function File} {} normxcorr2 (@var{template}, @var{img})
-## @deftypefnx {Function File} {} normxcorr2 (@var{template}, @var{img})
-## Compute the normalized 2D cross-correlation.
+## @deftypefn {Function File} {} normxcorr2 (@var{template}, @var{img})
+## Compute normalized cross-correlation.
 ##
-## Returns the normalized cross correlation matrix of @var{template} and
-## @var{img} so that a value of 1 corresponds to the positions of @var{img} that
-## match @var{template} perfectly.
+## Returns the the cross-correlation coefficient of matrices @var{template}
+## and @var{img}, a matrix of the same size as @var{img} with values ranging
+## between -1 and 1.
 ##
-## @emph{Note}: this function exists only for @sc{matlab} compatibility and is
-## just a wrapper to the @code{coeff} option of @code{xcorr2} with the arguments
-## inverted.  See the @code{xcorr2} documentation for more details. Same results
-## can be obtained with @code{xcorr2 (img, template, "coeff")}
+## Normalized correlation is mostly used for template matching, finding an
+## object or pattern, @var{template}, withing an image @var{img}.  Higher
+## values on the output show their locations, even in the presence of noise.
 ##
-## @seealso{conv2, corr2, xcorr2}
+## @group
+## @example
+## img = randi (255, 600, 400);
+## template = imnoise (img(100:150, 300:320), "gaussian");
+## cc = normxcorr2 (template, img);
+## [r, c] = find (cc == max (cc(:)))
+## @result{r} 150
+## @result{c} 320
+## @end example
+## @end group
+##
+## Despite the function name, this function will accept input with an arbitrary
+## number of dimensions.
+##
+## @seealso{conv2, convn, corr2, xcorr, xcorr2}
 ## @end deftypefn
 
-function cc = normxcorr2 (temp, img)
+## Author: Benjamin Eltzner <b.eltzner@gmx.de>
+
+function c = normxcorr2 (a, b)
   if (nargin != 2)
     print_usage ();
-  elseif (rows (temp) > rows (img) || columns (temp) > columns (img))
-    error ("normxcorr2: template must be same size or smaller than image");
   endif
-  cc = xcorr2 (img, temp, "coeff");
+
+  ## If this happens, it is probably a mistake
+  if (ndims (a) > ndims (b) || any (postpad (size (a), ndims (b)) > size (b)))
+    warning ("normxcorr2: TEMPLATE larger than IMG. Arguments may be swapped.");
+  endif
+
+  a = double (a) - mean (a(:));
+  b = double (b) - mean (b(:));
+
+  a1 = ones (size (a));
+  ar = reshape (a(end:-1:1), size (a));
+
+  c = convn (b, conj (ar));
+  b = convn (b.^2, a1) .- convn (b, a1).^2 ./ (prod (size (a)));
+  a = sumsq (a(:));
+  c = reshape (c ./ sqrt (b * a), size (c));
+
+  c(isnan (c)) = 0;
 endfunction
+
+%!function offsets = get_max_offsets (c)
+%!  l = find (c == max (c(:)));
+%!  offsets = nthargout (1:ndims (c), @ind2sub, size (c), l);
+%!endfunction
+
+## test basic usage
+%!test
+%! row_shift = 18;
+%! col_shift = 20;
+%! a = randi (255, 30, 30);
+%! b = a(row_shift-10:row_shift, col_shift-7:col_shift);
+%! c = normxcorr2 (b, a);
+%! ## should return exact coordinates
+%! assert (get_max_offsets (c), {row_shift col_shift});
+%!
+%! ## Even with some small noise, should return exact coordinates
+%! b = imnoise (b, "gaussian");
+%! c = normxcorr2 (b, a);
+%! assert (get_max_offsets (c), {row_shift col_shift});
+
+## The value for a "perfect" match should be 1. However, machine precision
+## creeps in most of the times.
+%!test
+%! a = rand (10, 10);
+%! c = normxcorr2 (a(5:7, 6:9), a);
+%! assert (c(7, 9), 1, eps*2);
+
+## coeff of autocorrelation must be same as negative of correlation
+## by additive inverse
+%!test
+%! a = 10 * randn (100, 100);
+%! auto = normxcorr2 (a, a);
+%! add_in = normxcorr2 (a, -a);
+%! assert (auto, -add_in);
+
+## Normalized correlation should be independent of scaling and shifting
+## up to rounding errors
+%!test
+%! a = 10 * randn (50, 50);
+%! b = 10 * randn (100, 100);
+%! do
+%!   scale = 100 * rand ();
+%! until (scale != 0)
+%!
+%! assert (max ((normxcorr2 (scale*a,b) .- normxcorr2 (a,b))(:)), 0, 1e-10);
+%! assert (max ((normxcorr2 (a,scale*b) .- normxcorr2 (a,b))(:)), 0, 1e-10);
+%!
+%! a_shift1 = a .+ scale * ones (size (a));
+%! b_shift1 = b .+ scale * ones (size (b));
+%! a_shift2 = a .- scale * ones (size (a));
+%! b_shift2 = b .- scale * ones (size (b));
+%! assert (max ((normxcorr2 (a_shift1,b) .- normxcorr2 (a,b))(:)), 0, 1e-10);
+%! assert (max ((normxcorr2 (a,b_shift1) .- normxcorr2 (a,b))(:)), 0, 1e-10);
+%! assert (max ((normxcorr2 (a_shift2,b) .- normxcorr2 (a,b))(:)), 0, 1e-10);
+%! assert (max ((normxcorr2 (a,b_shift2) .- normxcorr2 (a,b))(:)), 0, 1e-10);
+
+## test n dimensional input
+%!test
+%! a = randi (100, 15, 15, 15);
+%! c = normxcorr2 (a(5:10, 2:6, 3:7), a);
+%! assert (get_max_offsets (c), {10 6 7});
+%!
+%! a = randi (100, 15, 15, 15);
+%! c = normxcorr2 (a(5:10, 2:6, 1:1), a);
+%! assert (get_max_offsets (c), {10 6 1});
+
+%!warning <swapped> normxcorr2 (rand (20), rand (5));
+%!error normxcorr2 (rand (5));
+%!error normxcorr2 (rand (5), rand (20), 2);
+

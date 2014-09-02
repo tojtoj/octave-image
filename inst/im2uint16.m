@@ -1,5 +1,5 @@
 ## Copyright (C) 2007 Søren Hauberg <soren@hauberg.org>
-## Copyright (C) 2012 Carnë Draug <carandraug+dev@gmail.com>
+## Copyright (C) 2012-2014 Carnë Draug <carandraug+dev@gmail.com>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -15,67 +15,63 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} @var{im2} = im2uint16 (@var{im1})
-## @deftypefnx {Function File} @var{im2} = im2uint16 (@var{im1}, "indexed")
-## Convert input image @var{im1} to uint16 precision.
+## @deftypefn  {Function File} {} im2uint16 (@var{img})
+## @deftypefnx {Function File} {} im2uint16 (@var{img}, "indexed")
+## Convert image to uint16.
 ##
-## The following images type are supported: double, single, uint8, uint16, int16,
-## binary (logical), indexed. If @var{im1} is an indexed images, the second
-## argument must be a string with the value `indexed'.
+## The conversion of @var{img} to a 16-bit unsigned integer, is dependent
+## on the type of input image.  The following input classes are supported
+## for non-indexed images:
 ##
-## Processing will depend on the class of the input image @var{im1}:
-## @itemize @bullet
-## @item uint16 - returns the same as input
-## @item uint8, double, single, int16, logical - output will be rescaled for the
-## interval of the uint16 class [0 65535]
-## @item indexed - depends on the input class. If double, no value can be above
-## the max of the uint16 class (65535).
+## @table @samp
+## @item int16 or uint8
+## Values are rescaled to the range of the uint16 class [0 65535].
+##
+## @item logical
+## True and false values are assigned a value of 0 and 255 respectively.
+##
+## @item double or single
+## Values are truncated to the interval [0 1] and then rescaled to the range
+## of values of the int16 class [0 255].
+##
+## @item uint16
+## Returns the same image.
 ## @end itemize
 ##
-## @seealso{im2bw, im2double, im2int16, im2single, im2uint8}
+## If the second argument is the string @qcode{"indexed"}, then values are
+## cast to uint16, and a -1 offset is applied if input is
+## a floating point class.  Input checking is performed and an error will
+## be throw is the range of values in uint16 is not enough for all the
+## image indices.
+##
+## @seealso{im2bw, imcast, im2uint8, im2double, im2int16, im2single}
 ## @end deftypefn
 
-function im = im2uint16 (im, indexed = false)
-
-  ## Input checking (private function that is used for all im2class functions)
-  im_class = imconversion (nargin, "im2uint16", indexed, im);
-
-  ## for those who may wonder, 65535 = intmax ("uint16")
-  switch im_class
-    case "uint16"
-      ## do nothing, return the same
-    case {"single", "double"}
-      if (indexed)
-        imax = max (im(:));
-        if ( imax > 65535)
-          error ("Too many colors '%d' for an indexed uint16 image", imax);
-        endif
-        im = uint16 (im) - 1;
-      else
-        im = uint16 (im * 65535);
-      endif
-    case "logical"
-      im = uint16 (im) * uint16 (65535);
-    case "uint8"
-      if (indexed)
-        im = uint16 (im);
-      else
-        ## 257 is the ratio between the max of uint8 and uint16
-        ## double (intmax ("uint16")) / double (intmax ("uint8")) == 257
-        im = 257 * uint16 (im);
-      endif
-    case "int16"
-      im = uint16 (double (im) + double (intmax (im_class)) + 1);
-    otherwise
-      error ("unsupported image class %s", im_class);
-  endswitch
-
+function imout = im2uint16 (im, varargin)
+  if (nargin < 1 || nargin > 2)
+    print_usage ();
+  elseif (nargin == 2 && ! strcmpi (varargin{1}, "indexed"))
+    error ("im2uint16: second input argument must be the string \"indexed\"");
+  endif
+  imout = imcast (im, "uint16", varargin{:});
 endfunction
 
-%!assert(im2uint16(uint16([1 2 3])), uint16([1 2 3]));          # uint16 returns the same
-%!assert(im2uint16(uint8([0 255])), uint16([0 65535]));         # basic usage with uint8
-%!assert(im2uint16([0 0.5 1]), uint16([0 32768 65535]));        # basic usage with double
-%!assert(im2uint16([1 2]), uint16([65535 65535]));              # for double, above 1 is same as 1
-%!assert(im2uint16(uint8([3 25]), "indexed"), uint16([3 25]));  # test indexed uint8
-%!assert(im2uint16([3 25], "indexed"), uint16([2 24]));         # test indexed double
-%!assert(im2uint16(int16([-32768 32768])), uint16([0 65535]));  # test signed integer
+%!assert (im2uint16 (uint16 ([1 2 3])), uint16 ([1 2 3]));
+%!assert (im2uint16 (uint8 ([0 127 128 255])), uint16 ([0 32639 32896 65535]));
+%!assert (im2uint16 ([0 0.5 1]), uint16 ([0 32768 65535]));
+%!assert (im2uint16 ([0 1/65535 1.4/65535 1.5/65535 1]), uint16 ([0 1 1 2 65535]));
+%!assert (im2uint16 ([1 2]), uint16 ([65535 65535]));
+%!assert (im2uint16 ([-1 0 0.5 1]), uint16 ([0 0 32768 65535]));
+%!assert (im2uint16 (int16 ([-32768 -1 0 32768])), uint16 ([0 32767 32768 65535]));
+%!assert (im2uint16 ([false true]), uint16 ([0 65535]));
+%!assert (im2uint16 ([true false]), uint16 ([65535 0]));
+
+%!assert (im2uint16 (uint8 ([3 25]), "indexed"), uint16 ([3 25]));
+%!assert (im2uint16 ([1 3 25], "indexed"), uint16 ([0 2 24]));
+
+%!error <indexed> im2uint16 ([0 1 2], "indexed");
+%!error <indexed> im2uint16 (int16 ([17 8]), "indexed");
+%!error <indexed> im2uint16 (int16 ([-7 8]), "indexed");
+%!error <indexed> im2uint16 ([false true], "indexed");
+%!error <range of values> im2uint16 (65537, "indexed");
+
