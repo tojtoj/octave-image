@@ -1,0 +1,455 @@
+ Summary of important user-visible changes for image 2.2.2 (2014/10/06):
+-------------------------------------------------------------------------
+
+ ** Multiple documentation fixes for compatibility with new versions of
+    Texinfo.
+
+ ** Fix error with imcrop when image was all zeros.
+
+ ** Fix endless loop in bwdist when using the quasi-euclidean method in
+    x86 systems.
+
+
+ Summary of important user-visible changes for image 2.2.1 (2014/03/08):
+-------------------------------------------------------------------------
+
+ ** imcrop had many alternative interfaces added for more flexibility.
+    Added support in the input for indexed images, figures handles,
+    N-dimensional images, and specific bounding box vector for a
+    non-interactive usage.  Output can now also return the bounding box used
+    for the cropping in addition to the cropped image.  It will no longer
+    loop forever until it gets two valid coordinates for the bounding box.
+
+ ** Fixed bug in imcomplement to compute the complement of signed integers
+    correctly.
+
+ ** Fix imrotate to handle RGB images.
+
+ ** Fix regression in bwdist when calculating the closest pixel map.
+
+
+ Summary of important user-visible changes for image 2.2.0 (2014/01/08):
+-------------------------------------------------------------------------
+
+ ** The imerode and imdilate have been completely rewritten for increased
+    performance and many Matlab compatibility fixes. Performance gains between
+    1.5-30X have been demonstrated. Main compatibility changes include the
+    addition of the shape option, support for the strel class, and allowing
+    structuring elements and images of different classes. Non-flat grayscale
+    erosion and dilation has also been implemented by making use of the new
+    strel class.
+
+ ** With the increased performance in imerode and imdilate, all other
+    functions that use them, such imopen and imclose, get an equivalent
+    performance boost.
+
+ ** Most of bwmorph operations now support N dimensional images and have
+    increased performance.  Other Matlab compatibility fixes have been
+    made such as displaying image when there's no output variable.
+
+ ** The __spatial_filtering__ function has been mostly rewritten and
+    performs in approximattely 1/5 to 2/5 of the previous time, depending
+    on the filter.  With this change, all functions dependent on it,
+    rangefilt, entropyfilt, ordfilt2/n, medfilt2/n, and stdfilt, will also
+    perform faster.
+
+ ** The following functions are new:
+
+      bwareaopen            impixel               strel
+      checkerboard          imtransform           tformfwd
+      cp2tform              intlut                tforminv
+      findbounds            labelmatrix           ycbcr2rgb
+      imgradient            maketform
+      imgradientxy          montage
+
+ ** The following functions have been moved from the Octave Forge Image package
+    to GNU Octave core:
+
+      cmpermute       cmunique        iscolormap      rgbplot
+
+ ** The following functions have been deprecated in the previous release
+    of the Image package and have now been removed:
+
+      blkproc         bmpwrite        dilate          erode
+
+ ** The following functions have been deprecated (see their help text
+    for the recommended alternatives):
+
+      bwborder              imrotate_Fourier      iptcheckstrs
+      impad                 iptchecknargin        uintlut
+
+ ** The functions im2col and col2im has been completely rewritten for massive
+    performace increase (increases greater than 500X have been observed, with
+    biggest differences for smaller blocks and sliding option), and support of
+    N-dimensional blocks and images.
+
+ ** rgb2ycbcr was completely rewritten to accept images of other classes, and
+    colormaps.  A new argument was implemented to convert the RGB values
+    according to different standards.
+
+ ** The use of non logical matrices to specify the neighborhood for the medfilt2
+    function has been deprecated.  Also, when using a vector to specify the size
+    of the neighborhood, the elements were swapped (first element is now the
+    number of rows and the second the number of columns).
+
+ ** For consistency with other functions that allow specification of padding
+    values, the function padarray now accepts the string "zeros" as a valid
+    option.
+
+ ** The plot produced by imhist is correctly scaled on the X axis so that the
+    colorbar corresponds to the actual intensity of the stems; the given
+    colormarp is used on the colorbar for indexed images; and the stems no
+    longer display the markers at their top. The Y axis is also adjusted in case
+    of peaks with high values that prevent a good overview of the histogram.
+
+ ** The option to create poisson noise to an image has been added to imnoise.
+
+ ** With the addition of the strel class, imdilate and imerode are able
+    to handle strel objects.
+
+ ** The performance of imresize has been greatly improved when using the
+    nearest neighbor method for N or 1/N scale factors (e.g.: 2, 50, 1/4, 1/7).
+
+ ** The imperspectivewarp, imremap, imresize, and imrotate functions will now
+    accept any interpolation method from the interp2 function thus extending
+    the available methods to "spline" and "pchip".  This in addition to the
+    "bilinear" and "bicubic" methods (same as "linear" and "cubic" respectively)
+    which are kept for matlab compatibility.  For the same reason, the
+    "triangle" method (interpolation kernel) has also been added (which is the
+    same as "linear" method).
+
+ ** Bug fixes on the concavity, intermodes, maxlikelihood, and minimum methods
+    of graythresh.
+
+ ** The bwdist function will now consider any non zero value as object pixels,
+    the class of the distance matrix has changed to single, and indexes an
+    uint dependent on the matrix size.
+
+ ** The transform option of imtophat has been removed (it was deprecated
+    in version 2.0.0) in favour of using imbothat.
+
+ ** The function bwconncomp now returns the indices for each element in each
+    object, no longer the indices for the elements in the object boundaries
+    only. The connectivity default was changed to 8.
+
+ ** The original Shepp-Logan model in the function phantom as been changed to
+    return all values in the range [0 1] rather than [0 2] by changing the
+    intensity of the first ellipse from 2 to 1.
+
+ ** Other functions that have been changed for smaller bugfixes, increased
+    Matlab compatibility, or performance:
+
+      bwlabel               bwperim               padarray
+
+ ** The following functions now fully support matrices with an arbitrary
+    number of dimensions:
+
+      bestblk               col2im                im2col
+      bwconncomp            colfilt               nlfilter
+
+
+ Summary of important user-visible changes for image 2.0.0 (2012/11/08):
+-------------------------------------------------------------------------
+
+ ** The following functions are new:
+
+      analyze75info         imabsdiff         iptcheckconn
+      analyze75read         imadd             iptcheckmap
+      analyze75write        imbothat          iptchecknargin
+      blockproc             imcrop            iptcheckstrs
+      bwlabeln              imdivide          iptnum2ordinal
+      getrangefromclass     imlincomb         iscolormap
+      im2int16              immultiply        normxcorr2
+      im2single             imsubtract        wavelength2rgb
+
+ ** The following functions have been deprecated in previous releases
+    of the image package and have now been removed:
+
+      imginfo
+
+ ** The function `deriche' has been removed.
+
+ ** The complete set of functions to work with Analyze 7.5 files has been
+    implemented. See `analyze75info', `analyze75read' and `analyze75write'.
+
+ ** `graythresh' can optionally accept an histogram rather than an image.  This
+    allows for preprocessing of the histogram previous to an automatic threshold
+    selection.
+
+ ** Otsu's method for automatic threshold selection (default for `graythresh')
+    has been completely rewritten and should perform faster. Now, it can also
+    return a second value representing the ``goodness'' of the computed
+    threshold value (within class variance).
+
+ ** Alternative algorithms for automatic threshold have been implemented in
+    `graythresh' (thanks to Antti Niemistö for releasing HistThresh toolbox 
+    http://www.cs.tut.fi/~ant/histthresh/ from where many were ported, under a
+    GPL license). Currently, the following algorithms have been implemented
+    (see graythresh for notes and references):
+
+      concavity       MaxEntropy        minimum       Otsu
+      intermeans      MaxLikelihood     MinError      percentile
+      intermodes      mean              moments
+
+ ** The following functions have been deprecated (see their help text
+    for the recommended alternatives):
+
+      blkproc         bmpwrite          dilate        erode
+
+ ** With the new function `imbothat' the transform option of
+    `imtophat' has been deprecated.
+
+ ** The following functions have had been changed for bug fixes and/or
+    improved matlab compatibility
+
+      bwarea          imhist            im2uint8      isind
+      bweuler         imnoise           im2uint16     mat2gray
+      bwfill          conndef           isbw          rgb2gray
+      cmpermute       im2bw             isgray
+      cmunique        im2double         isrgb
+
+ ** `bwarea' now supports all image classes and considers objects all non
+    zero pixels (not all pixels higher than zero).
+
+ ** `rgb2gray' now also supports images of the class single and performs a
+    weighted conversion to keep the image luminance instead of a the mean
+    through each color.
+
+ ** `im2bw' now supports input images of the int16 class and deals better with
+    RGB images since it uses `rgb2gray' internally (see changes to rgb2gray).
+    Threshold is performed on all values greater than value instead of greater
+    than or equal.
+
+ ** `imhist' is much more compatible with matlab and among other changes,
+    it now uses the whole range of the class for the histogram rather than
+    the minimum and maximum of the input image and displays a colorbar under
+    the histogram.
+
+ ** `isbw' now defines a black-and-white image as a binary non-sparse
+    matrix. This is compatible with matlab. To use the old behaviour,
+    use the new option for the call "isbw (img, "non-logical").
+    For backwards compatibility, if a non-logical matrix of 0 and 1 is
+    used as input, `isbw' will still return true but a warning will be
+    issued since this will deprecated later.
+
+ ** `isgray' now also returns true for matrices of the int16 class.
+
+ ** `isrgb' now returns false for logical matrix.
+
+ ** `tiff_tag_read' had several bug fixes and can now check IFDs beyond
+    the first. It can also accept mutiple tag values and IFDs simultaneously
+    and return a matrix of the values found. Its documentation has been
+    expanded (as well as an explanation of TIFF structure on the source)
+
+ ** For sake of matlab compatibility, the behaviour of `mat2gray' has been
+    greatly changed. Among the changes, it will no longer swap the minimum and
+    maximum options if the first is larger than the later. Instead, will return
+    the image complement after truncation. Also, when the maximum and minimum
+    values are equal, `mat2gray' will truncate all values between 0 and 1. See
+    the help text (or source) for a detailed description of cautions.
+
+ ** `bwfill' was fixed to always returns a logical matrix.
+
+ ** `imnoise' has been expanded to accept images of differente classes instead
+    of only double and single.
+
+ ** The private function `__bwdist` has been renamed `__bwdist__`
+
+ ** Package is now dependent on GNU Octave version 3.6.0 or later.
+
+ ** Package is now dependent on the signal package version 1.2.0 or later.
+
+ ** Package is no longer automatically loaded.
+
+
+********************************************************************************
+**                                                                            **
+**  NEWS below this point were written after their releases for history       **
+**  purposes and extracted from the Octave Forge general NEWS.  Previous to   **
+**  the image package version 1.0.11, all Octave Forge packages would be      **
+**  released at the same time.  Previous to the package version 1.0.0 there   **
+**  were monolithic releases with no actual packages.  This means that some   **
+**  releases actually had no changes in the image package itself or changes   **
+**  were small compared to the whole Octave Forge project and so, not         **
+**  mentioned on the NEWS file.  Inspection of the actual log in the          **
+**  repository should be used if exact details are required.                  **
+**                                                                            **
+********************************************************************************
+
+ Summary of important user-visible changes for image 1.0.15 (2011/09/21):
+--------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image 1.0.14 (2011/04/12):
+--------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image 1.0.13 (2010/05/22):
+--------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image 1.0.12 (2010/03/22):
+--------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image 1.0.11 (2010/03/05):
+--------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image 1.0.10 (2009/06/07):
+--------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image 1.0.9 (2009/05/08):
+-------------------------------------------------------------------------
+
+ ** The following functions are new:
+
+      entropyfilt  ordfiltn     rangefilt    stdfilt
+
+ ** The following functions have been removed as they are now part of
+    Octave core:
+
+      imread   imwrite
+
+ Summary of important user-visible changes for image 1.0.8 (2008/08/31):
+-------------------------------------------------------------------------
+
+ ** Fix build issues with the last release.
+
+ Summary of important user-visible changes for image 1.0.7 (2008/08/24):
+-------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image 1.0.6 (2008/04/29):
+-------------------------------------------------------------------------
+
+ ** The following functions are new:
+
+      imcomplement  rgbplot
+
+ ** Implemented support for bilateral filtering.
+
+ ** Build fixes for new versions of ImageMagick.
+
+ Summary of important user-visible changes for image 1.0.5 (2008/02/16):
+-------------------------------------------------------------------------
+
+ ** The following functions are new:
+
+      imfilter  imsmooth
+
+ Summary of important user-visible changes for image 1.0.4 (2007/12/12):
+-------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image 1.0.3 (2007/10/14):
+-------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image 1.0.2 (2007/07/26):
+-------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image 1.0.1 (2007/05/26):
+-------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image 1.0.0 (2007/03/28):
+-------------------------------------------------------------------------
+
+ ** First non-monolithic release.
+
+ ** The following functions are new:
+
+      __bwarea            fspecial            impersepectivewap
+      apply               graythresh          imremap
+      bwarea              im2double           label2rgb
+      bwperim             im2uint8            __magick_read__
+      deriche             im2uint16
+
+ ** Fixex for non 8bit images.
+
+ ** Quantum sizes in imagemagick.
+
+ ** Compatiability changes to imwrite, isgray and rgb2gray.
+
+ ** imread, probe depth from bits rather than Red field, allows loading of gray
+    scale images.
+
+ ** Convert all functions to use texinfo help.
+
+ Summary of important user-visible changes for image (Octave Forge 2006.07.09):
+--------------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image (Octave Forge 2006.03.17):
+--------------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image (Octave Forge 2006.01.28):
+--------------------------------------------------------------------------------
+
+ ** imread() now return the appropriate numeric class. Colour images are of size
+    MxNx3, gray images MxN.
+
+ Summary of important user-visible changes for image (Octave Forge 2005.06.13):
+--------------------------------------------------------------------------------
+
+ ** The following functions are new:
+
+      bwarea      imresize
+
+ Summary of important user-visible changes for image (Octave Forge 2004.11.16):
+--------------------------------------------------------------------------------
+
+   ** No important changes to the image package in this Octave Forge release.
+
+ Summary of important user-visible changes for image (Octave Forge 2004.09.09):
+--------------------------------------------------------------------------------
+
+ ** The following functions are new:
+
+      applylut      cmunique      houghtf       poly2mask     uintlut
+      bestblk       col2im        im2col        qtdecomp
+      blkproc       conndef       isrgb         qtgetblk
+      bweuler       dilate        makelut       qtsetblk
+      bwmorph       erode         nlfilter      roicolor
+      cmpermute     graycomatrix  padarray      stretchlim
+
+ ** Implemented initial support for int* types.
+
+ Summary of important user-visible changes for image (Octave Forge 2004.07.07):
+--------------------------------------------------------------------------------
+
+ ** No important changes to the image package in this Octave Forge release.
+
+ Summary of important user-visible changes for image (Octave Forge 2004.02.12):
+--------------------------------------------------------------------------------
+
+ ** `imread' now supports 16-bit grayscale images.
+
+ Summary of important user-visible changes for image (Octave Forge 2003.06.02):
+--------------------------------------------------------------------------------
+
+ ** The following functions are new:
+
+      rotate_scale
+
+ Summary of important user-visible changes for image (Octave Forge 2003.02.22):
+--------------------------------------------------------------------------------
+
+ ** No important changes to the image package in this Octave Forge release.
+
+ Summary of important user-visible changes for image (Octave Forge 2002.11.30):
+--------------------------------------------------------------------------------
+
+ ** The following functions are new:
+
+      colfilt      imginfo      imrotate     imshear      imtranslate
+
+ ** The `colorgradient' function now allow instantaneous transitions (weight 0)
+
+ ** The `bwlabel' function has been implemented in C++ and may behave different.
+
+ Summary of important user-visible changes for image (Octave Forge 2002.05.09):
+--------------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image (Octave Forge 2002.04.20):
+--------------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image (Octave Forge 2002.03.10):
+--------------------------------------------------------------------------------
+
+ Summary of important user-visible changes for image (Octave Forge 2001.11.02):
+--------------------------------------------------------------------------------
+
+ ** First release.
+
