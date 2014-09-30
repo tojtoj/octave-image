@@ -33,7 +33,7 @@
 ## @table @samp
 ## @item bothat
 ## Performs a bottom hat operation, a closing operation (which is a
-## dilation followed by an erosion) and finally substracts the original
+## dilation followed by an erosion) and finally subtracts the original
 ## image (see @code{imbothat}).  @var{bw} can have any number of
 ## dimensions, and @code{strel ("hypercube", ndims (@var{bw}), 3)} is
 ## used as structuring element.
@@ -116,7 +116,7 @@
 ## @item skel-lantuejol
 ## Performs a skeletonization operation as described in Gonzalez & Woods
 ## "Digital Image Processing" pp 538-540. The text references Lantuejoul
-## as authour of this algorithm.
+## as author of this algorithm.
 ##
 ## It has the beauty of being a clean and simple approach, but skeletons
 ## are thicker than they need to and, in addition, not guaranteed to be
@@ -153,13 +153,13 @@
 ##
 ## @item tophat
 ## Performs a top hat operation, a opening operation (which is an
-## erosion followed by a dilation) and finally substracts the original
+## erosion followed by a dilation) and finally subtracts the original
 ## image (see @code{imtophat}).  @var{bw} can have any number of
 ## dimensions, and @code{strel ("hypercube", ndims (@var{bw}), 3)}
 ## is used as structuring element.
 ## @end table
 ##
-## Some useful concepts to understant operators:
+## Some useful concepts to understand operators:
 ##
 ## Operations are defined on 3-by-3 blocks of data, where the pixel in
 ## the center of the block. Those pixels are numerated as follows:
@@ -185,7 +185,7 @@
 ## @item 'skel'
 ## Algorithm used here is described in Pratt's book. When applying it to
 ## the "circles" image in MATLAB documentation, results are not the
-## same. Perhaps MATLAB uses Blum's algoritm (for further info please
+## same. Perhaps MATLAB uses Blum's algorithm (for further info please
 ## read comments in code).
 ## @item 'skel-pratt'
 ## This option is not available in MATLAB.
