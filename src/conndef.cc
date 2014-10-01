@@ -47,7 +47,7 @@ connectivity::connectivity (const octave_idx_type& conn)
       md[22] = true;
     }
   else if (conn == 8)
-      mask = boolNDArray (dim_vector (3, 3), true);
+    mask = boolNDArray (dim_vector (3, 3), true);
   else if (conn == 18)
     {
       mask = boolNDArray (dim_vector (3, 3, 3), true);
@@ -81,16 +81,16 @@ connectivity::connectivity (const octave_idx_type& ndims,
     size.resize (ndims, 3);
 
   if (type == "maximal")
-    mask = boolNDArray (size, true);
+    {
+      mask = boolNDArray (size, true);
+    }
   else if (type == "minimal")
     {
       mask = boolNDArray (size, false);
       bool* md = mask.fortran_vec ();
 
-      const octave_idx_type center = ceil (pow (3, ndims) /2);
-      md += (center -1);
+      md += int (ceil (pow (3, ndims) /2) -1);  // move to center
       md[0] = true;
-
       for (octave_idx_type dim = 0; dim < ndims; dim++)
         {
           const octave_idx_type stride = pow (3, dim);
@@ -102,6 +102,39 @@ connectivity::connectivity (const octave_idx_type& ndims,
     error ("conndef: invalid TYPE of connectivity '%s'", type.c_str ());
 
   return;
+}
+
+Array<octave_idx_type>
+connectivity::offsets (const dim_vector& size) const
+{
+  const octave_idx_type nnz     = mask.nnz ();
+  const octave_idx_type ndims   = mask.ndims ();
+  const dim_vector      dims    = mask.dims ();
+
+  Array<octave_idx_type> offsets (dim_vector (nnz, 1)); // retval
+  const dim_vector cum_size = size.cumulative ();
+
+
+  Array<octave_idx_type> diff (dim_vector (ndims, 1));
+
+  Array<octave_idx_type> sub (dim_vector (ndims, 1), 0);
+  for (octave_idx_type ind = 0, found = 0; found < nnz;
+       ind++, boolNDArray::increment_index (sub, dims))
+    {
+      if (mask(ind))
+        {
+          for (octave_idx_type i = 0; i < ndims; i++)
+            diff(i) = 1 - sub(i);
+
+          octave_idx_type off = diff(0);
+          for (octave_idx_type dim = 1; dim < ndims; dim++)
+            off += (diff(dim) * cum_size(dim-1));
+          offsets(found) = off;
+          found++;
+        }
+    }
+
+  return offsets;
 }
 
 

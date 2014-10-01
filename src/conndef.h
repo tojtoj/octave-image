@@ -31,6 +31,10 @@ namespace octave
         connectivity (const octave_idx_type& ndims, const std::string& type);
 
         boolNDArray mask;
+
+        // For a matrix of size `size', what are the offsets for all of its
+        // connected elements (will have negative and positive values).
+        Array<octave_idx_type> offsets (const dim_vector& size) const;
     };
   }
 }
