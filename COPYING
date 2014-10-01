@@ -44,7 +44,6 @@ inst/bwselect.m                         GPLv3+
 inst/col2im.m                           GPLv3+
 inst/colfilt.m                          GPLv3+
 inst/colorgradient.m                    public domain
-inst/conndef.m                          GPLv3+
 inst/corr2.m                            GPLv3+
 inst/cp2tform.m                         GPLv3+
 inst/edge.m                             GPLv3+
@@ -149,6 +148,8 @@ src/__boundary__.cc                     GPLv3+
 src/bwdist.cc                           GPLv3+
 src/bwfill.cc                           GPLv3+
 src/bwlabeln.cc                         GPLv3+
+src/conndef.cc                          GPLv3+
+src/conndef.h                           GPLv3+
 src/__custom_gaussian_smoothing__.cc    GPLv3+
 src/graycomatrix.cc                     FreeBSD
 src/hough_line.cc                       FreeBSD

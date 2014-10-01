@@ -25,6 +25,10 @@
     imperspectivewarp functions now use 0 instead of NA for the default
     extrapolation value.
 
+ ** The conndef function has a new signature with a single argument to
+    specify the number of elements connected to the center of the
+    connectivity array.
+
  ** Deprecated functions.
 
     The following functions were deprecated in image 2.2.0 and have been

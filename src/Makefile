@@ -2,7 +2,8 @@ MKOCTFILE ?= mkoctfile -Wall
 
 all: __spatial_filtering__.oct __bilateral__.oct __custom_gaussian_smoothing__.oct \
 	__boundary__.oct bwfill.oct rotate_scale.oct hough_line.oct \
-	graycomatrix.oct bwdist.oct nonmax_supress.oct bwlabeln.oct imerode.oct
+	graycomatrix.oct bwdist.oct nonmax_supress.oct bwlabeln.oct imerode.oct \
+	conndef.oct
 
 %.oct: %.cc
 	$(MKOCTFILE) $<
@@ -13,5 +14,12 @@ bwlabeln.oct: bwlabeln.cc union-find.h++
 imerode.oct: imerode.cc strel.cc
 	$(MKOCTFILE) $^ -o $@
 
+conndef.o: conndef.cc conndef.h
+	$(MKOCTFILE) $<
+
+conndef.oct: conndef.o
+	$(MKOCTFILE) $^
+
 clean:
 	rm -f *.o octave-core core *.oct *~
+
