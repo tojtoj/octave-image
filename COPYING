@@ -97,7 +97,6 @@ inst/imtophat.m                         GPLv3+
 inst/imtransform.m                      GPLv3+
 inst/imtranslate.m                      GPLv3+
 inst/intlut.m                           GPLv3+
-inst/iptcheckconn.m                     GPLv3+
 inst/iptcheckmap.m                      GPLv3+
 inst/iptchecknargin.m                   GPLv3+
 inst/iptcheckstrs.m                     GPLv3+

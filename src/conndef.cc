@@ -89,7 +89,7 @@ connectivity::connectivity (const octave_idx_type& ndims,
       mask = boolNDArray (size, false);
       bool* md = mask.fortran_vec ();
 
-      md += int (ceil (pow (3, ndims) /2) -1);  // move to center
+      md += int (floor (pow (3, ndims) /2));  // move to center
       md[0] = true;
       for (octave_idx_type dim = 0; dim < ndims; dim++)
         {
@@ -124,7 +124,7 @@ connectivity::offsets (const dim_vector& size) const
       if (mask(ind))
         {
           for (octave_idx_type i = 0; i < ndims; i++)
-            diff(i) = 1 - sub(i);
+            diff(i) = 1 - sub(i); // 1 is center since conn is 3x3x...x3
 
           octave_idx_type off = diff(0);
           for (octave_idx_type dim = 1; dim < ndims; dim++)
@@ -138,6 +138,44 @@ connectivity::offsets (const dim_vector& size) const
 }
 
 
+bool
+connectivity::validate (const double& conn)
+{
+  if (conn == 4 || conn == 8 || conn == 6 || conn == 18 || conn == 26
+      || conn == 1)
+    return true;
+
+  return false;
+}
+
+
+bool
+connectivity::validate (const boolNDArray& mask)
+{
+  // Must be 3x3x3x...x3
+  const dim_vector dims = mask.dims ();
+  const octave_idx_type ndims = mask.ndims ();
+  for (octave_idx_type i = 0; i < ndims; i++)
+    if (dims(i) != 3)
+      return false;
+
+  // Center must be true
+  const octave_idx_type numel = mask.numel ();
+  const octave_idx_type center = floor (numel /2);
+  if (! mask(center))
+    return false;
+
+  // Must be symmetric relative to its center
+  const bool* start = mask.fortran_vec ();
+  const bool* end   = mask.fortran_vec () + (numel -1);
+  for (octave_idx_type i = 0; i < center; i++)
+    if (start[i] != end[-i])
+      return false;
+
+  return true;
+}
+
+
 // The conndef() function is really really simple and could have easily
 // been a m file (actually it once was, check the hg log if it ever needs
 // to be recovered) but then it would be awkward to call it from oct
@@ -145,8 +183,8 @@ connectivity::offsets (const dim_vector& size) const
 
 DEFUN_DLD(conndef, args, , "\
 -*- texinfo -*-\n\
-@deftypefn  {Function File} {} conndef (@var{conn})\n\
-@deftypefnx {Function File} {} conndef (@var{ndims}, @var{type})\n\
+@deftypefn  {Loadable Function} {} conndef (@var{conn})\n\
+@deftypefnx {Loadable Function} {} conndef (@var{ndims}, @var{type})\n\
 Create connectivity array.\n\
 \n\
 Creates a matrix of for morphological operations, where elements with\n\
@@ -288,4 +326,91 @@ Three-dimensional 26-connected neighborhood.\n\
 %!                                1 1 1 1 1 1 1 1 1
 %!                                0 1 0 1 1 1 0 1 0], [3 3 3]))
 
+*/
+
+// PKG_ADD: autoload ("iptcheckconn", which ("conndef"));
+// PKG_DEL: autoload ("iptcheckconn", which ("conndef"), "remove");
+DEFUN_DLD(iptcheckconn, args, , "\
+-*- texinfo -*-\n\
+@deftypefn {Loadable Function} {} iptcheckconn (@var{con}, @var{func}, @var{var}, @var{pos})\n\
+Check if argument is valid connectivity.\n\
+\n\
+If @var{conn} is not a valid connectivity argument, gives a properly\n\
+formatted error message.  @var{func} is the name of the function to be\n\
+used on the error message, @var{var} the name of the argument being\n\
+checked (for the error message), and @var{pos} the position of the\n\
+argument in the input.\n\
+\n\
+A valid connectivity argument must be either double or logical.  It must\n\
+also be either a scalar from set [1 4 6 8 18 26], or a symmetric matrix\n\
+with all dimensions of size 3, with only 0 or 1 as values, and 1 at its\n\
+center.\n\
+\n\
+@seealso{conndef}\n\
+@end deftypefn")
+{
+  const octave_idx_type nargin = args.length ();
+//  const octave_value rv = octave_value ();
+
+  if (nargin != 4)
+    {
+      print_usage ();
+      return octave_value ();
+    }
+
+  const std::string func = args(1).string_value ();
+  if (error_state)
+    {
+      error ("iptcheckconn: FUNC must be a string");
+      return octave_value ();
+    }
+  const std::string var = args(2).string_value ();
+  if (error_state)
+    {
+      error ("iptcheckconn: VAR must be a string");
+      return octave_value ();
+    }
+  const octave_idx_type pos = args(3).idx_type_value (true);
+  if (error_state || pos < 1)
+    {
+      error ("iptcheckconn: POS must be a positive integer");
+      return octave_value ();
+    }
+
+  bool bad = true;
+
+  const double conn = args(0).double_value ();
+  // check is_scalar_type because of the warning Octave:array-to-scalar
+  if (! error_state && args(0).is_scalar_type () //
+      && connectivity::validate (conn))
+    bad = false;
+  else
+    {
+      const boolNDArray mask = args(0).bool_array_value ();
+      // bool_array_value converts anything other than 0 to true, which will
+      // then validate asconn array, hence any_element_not_one_or_zero
+      if (! error_state && connectivity::validate (mask)
+          && ! args(0).array_value ().any_element_not_one_or_zero ())
+        bad = false;
+    }
+
+  if (bad)
+    error ("%s: %s at pos %i is not a valid connectivity array",
+           func.c_str (), var.c_str (), pos);
+
+  return octave_value ();
+}
+
+/*
+// the complete error message should be "expected error <.> but got none",
+// but how to escape <> within the error message?
+
+%!error <expected error> fail ("iptcheckconn (4, 'func', 'var', 2)");
+%!error <expected error> fail ("iptcheckconn (ones (3, 3, 3, 3), 'func', 'var', 2)");
+
+%!error <not a valid connectivity array> iptcheckconn (3, "func", "var", 2);
+%!error <not a valid connectivity array> iptcheckconn ([1 1 1; 1 0 1; 1 1 1], "func", "var", 2);
+%!error <not a valid connectivity array> iptcheckconn ([1 2 1; 1 1 1; 1 1 1], "func", "var", 2);
+%!error <not a valid connectivity array> iptcheckconn ([0 1 1; 1 1 1; 1 1 1], "func", "var", 2);
+%!error <not a valid connectivity array> iptcheckconn (ones (3, 3, 3, 4), "func", "var", 2);
 */

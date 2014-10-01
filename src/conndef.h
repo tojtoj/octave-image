@@ -35,6 +35,9 @@ namespace octave
         // For a matrix of size `size', what are the offsets for all of its
         // connected elements (will have negative and positive values).
         Array<octave_idx_type> offsets (const dim_vector& size) const;
+
+        static bool validate (const boolNDArray& mask);
+        static bool validate (const double& conn);
     };
   }
 }
