@@ -17,6 +17,8 @@
 #ifndef OCTAVE_IMAGE_CONNDEF
 #define OCTAVE_IMAGE_CONNDEF
 
+#include <stdexcept>
+
 #include <octave/oct.h>
 
 namespace octave
@@ -27,6 +29,10 @@ namespace octave
     {
       public:
         connectivity ();
+
+        //! Will throw if val is bad
+        connectivity (const octave_value& val);
+        connectivity (const boolNDArray& mask);
         connectivity (const octave_idx_type& conn);
         connectivity (const octave_idx_type& ndims, const std::string& type);
 
@@ -36,8 +42,23 @@ namespace octave
         // connected elements (will have negative and positive values).
         Array<octave_idx_type> offsets (const dim_vector& size) const;
 
-        static bool validate (const boolNDArray& mask);
-        static bool validate (const double& conn);
+      private:
+        void ctor (const boolNDArray& mask);
+        void ctor (const octave_idx_type& conn);
+
+        //! Like octave_value::double_value() but actually checks if scalar.
+        static double double_value (const octave_value& val);
+
+        //! Like octave_value::bool_array_value() but actually checks if
+        //! all values are zeros and one.
+        static boolNDArray bool_array_value (const octave_value& val);
+    };
+
+    class invalid_connectivity : public std::invalid_argument
+    {
+      public:
+        invalid_connectivity (const std::string& what_arg)
+          : std::invalid_argument (what_arg) { }
     };
   }
 }
