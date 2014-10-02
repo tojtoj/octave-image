@@ -15,7 +15,7 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} isgray (@var{img})
+## @deftypefn {Function File} {} isgray (@var{img})
 ## Return true if @var{img} is an indexed image.
 ##
 ## A variable can be considered a grayscale image if it is a non-sparse

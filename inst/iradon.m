@@ -14,8 +14,7 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @defun @var{recon} = iradon (@var{proj}, @var{theta}, @var{interp}, @
-##                              @var{filter}, @var{scaling}, @var{output_size})
+## @deftypefn {Function File} {@var{recon} =} iradon (@var{proj}, @var{theta}, @var{interp}, @var{filter}, @var{scaling}, @var{output_size})
 ##
 ## Performs filtered back-projection on the projections in @var{proj}
 ## to reconstruct an approximation of the original image.
@@ -46,11 +45,11 @@
 ## guarantee that the reconstructed image will be exactly the same
 ## size as the original.
 ## 
-## @defunx [@var{recon}, @var{filt}] = iradon (...)
+## @end deftypefn
+## @deftypefn {Function File} {[@var{recon}, @var{filt}] =} iradon (@dots{})
 ##
 ## This form also returns the filter frequency response in the vector
 ## @var{filt}.
-## @end defun
 ##
 ## Performs filtered back-projection in order to reconstruct an
 ## image based on its projections.
@@ -64,12 +63,17 @@
 ## space.  This is the back-projection part.
 ##
 ## Usage example:
+##
 ## @example
+## @group
 ##   P = phantom ();
 ##   projections = radon (P, 1:179);
 ##   reconstruction = iradon (filtered_projections, 1:179, 'Spline', 'Hann');
 ##   figure, imshow (reconstruction, [])
+## @end group
 ## @end example
+##
+## @end deftypefn
 
 function [recon, filt] = iradon (proj, theta, interp, filter, scaling, output_size)
   

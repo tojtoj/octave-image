@@ -15,7 +15,7 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} isind (@var{img})
+## @deftypefn {Function File} {} isind (@var{img})
 ## Return true if @var{img} is an indexed image.
 ##
 ## A variable can be considered an indexed image if it is a non-sparse

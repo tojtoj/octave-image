@@ -15,8 +15,8 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn  {Function File} isbw (@var{img})
-## @deftypefnx {Function File} isbw (@var{img}, @var{logic})
+## @deftypefn  {Function File} {} isbw (@var{img})
+## @deftypefnx {Function File} {} isbw (@var{img}, @var{logic})
 ## Return true if @var{img} is a black and white image.
 ##
 ## A variable can be considered a black and white image if it is a

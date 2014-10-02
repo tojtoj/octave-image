@@ -52,24 +52,24 @@
 ## Values of padding elements are determined from the optional arguments
 ## @var{padding} and @var{const}. @var{padding} is one of
 ##
-## @table @samp
-## @item "zeros"     
+## @table @asis
+## @item @qcode{"zeros"}
 ## pad with zeros (default)
 ##
-## @item "ones"      
+## @item @qcode{"ones"}
 ## pad with ones
 ##
-## @item "constant"  
+## @item @qcode{"constant"}
 ## pad with a value obtained from the optional fifth argument const
 ##
-## @item "symmetric" 
+## @item @qcode{"symmetric"}
 ## pad with values obtained from @var{A} so that the padded image mirrors 
 ## @var{A} starting from edges of @var{A}
 ## 
-## @item "reflect"   
+## @item @qcode{"reflect"}
 ## same as symmetric, but the edge rows and columns are not used in the padding
 ##
-## @item "replicate" 
+## @item @qcode{"replicate"}
 ## pad with values obtained from A so that the padded image 
 ## repeates itself in two dimensions
 ## 

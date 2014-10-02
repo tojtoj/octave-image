@@ -34,13 +34,13 @@
 ## The sampling can be performed in two different ways as defined by
 ## @var{block_type} (defaults to @qcode{"sliding"}):
 ##
-## @table @qcode
-## @item "distinct"
+## @table @asis
+## @item @qcode{"distinct"}
 ## Each block is completely distinct from the other, with no overlapping
 ## elements.  The matrix @var{A} is padded as required with a value of 0
 ## (or 1 for non-integer indexed images).
 ##
-## @item "sliding"
+## @item @qcode{"sliding"}
 ## A single block slides across @var{A} without any padding.
 ##
 ## While this can be used to perform sliding window operations such as maximum

@@ -23,13 +23,15 @@
 ##
 ## There are two possible @var{type}s of connectivity array, defined with
 ## the strings:
-## @table @qcode
-## @item minimal
+## @table @asis
+## @item @qcode{"minimal"}
 ## Neighbours touch the central element on a (@var{num_dims}-1)-dimensional
 ## surface.
-## @item maximal
+##
+## @item @qcode{"maximal"}
 ## Neighbours touch the central element in any way. Equivalent to
 ## @code{ones (repmat (3, 1, @var{num_dims}))}.
+##
 ## @end table
 ##
 ## @seealso{iptcheckconn, strel}

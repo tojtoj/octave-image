@@ -14,7 +14,7 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @defun {@var{filtered} =} rho_filter (@var{proj}, @var{type}, @var{scaling})
+## @deftypefn {Function File} {@var{filtered} =} rho_filter (@var{proj}, @var{type}, @var{scaling})
 ##
 ## Filters the parallel ray projections in the columns of @var{proj},
 ## according to the filter type chosen by @var{type}.  @var{type}
@@ -33,13 +33,12 @@
 ## The window function is compressed accordingly, to avoid an abrupt
 ## truncation of the frequency response.
 ##
-## @defunx {[@var{filtered}, @var{filter}] =} rho_filter (...)
+## @end deftypefn
+## @deftypefn {Function File} {[@var{filtered}, @var{filter}] =} rho_filter (@dots{})
 ##
 ## This form also returns the frequency response of the filter in
 ## the vector @var{filter}.
 ##
-## @end defun
-## 
 ## Performs rho filtering on the parallel ray projections provided.
 ##
 ## Rho filtering is performed as part of the filtered back-projection
@@ -79,6 +78,8 @@
 ##   reconstruction = iradon (filtered_projections, 1, 'linear', 'none');
 ##   figure, imshow (reconstruction, [])
 ## @end example
+##
+## @end deftypefn
 
 function [filtered_proj, filt] = rho_filter (proj, type, scaling)
 

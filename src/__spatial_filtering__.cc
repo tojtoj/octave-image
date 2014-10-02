@@ -333,26 +333,33 @@ The function computes local characteristics of the image @var{A} in the domain\n
 @var{domain}. The following values of @var{method} are supported.\n\
 \n\
 @table @asis\n\
-@item \"ordered\"\n\
+@item @qcode{\"ordered\"}\n\
 Perform ordered filtering. The output in a pixel is the @math{n}th value of a\n\
 sorted list containing the elements of the neighbourhood. The value of @math{n}\n\
 is given in the @var{arg} argument. The corresponding user interface is available\n\
 in @code{ordfilt2} and @code{ordfiltn}.\n\
-@item \"std\"\n\
+\n\
+@item @qcode{\"std\"}\n\
 Compute the local standard deviation. The corresponding user interface is available\n\
 in @code{stdfilt}.\n\
-@item \"entropy\"\n\
+\n\
+@item @qcode{\"entropy\"}\n\
 Compute the local entropy. The corresponding user interface is available\n\
 in @code{entropyfilt}.\n\
-@item \"range\"\n\
+\n\
+@item @qcode{\"range\"}\n\
 Compute the local range of the data. The corresponding user interface is\n\
 available in @code{rangefilt}.\n\
-@item \"min\"\n\
+\n\
+@item @qcode{\"min\"}\n\
 Computes the smallest value in a local neighbourheed.\n\
-@item \"max\"\n\
+\n\
+@item @qcode{\"max\"}\n\
 Computes the largest value in a local neighbourheed.\n\
-@item \"encoded sign of difference\"\n\
+\n\
+@item @qcode{\"encoded sign of difference\"}\n\
 NOT IMPLEMENTED (local binary patterns style)\n\
+\n\
 @end table\n\
 @seealso{ordfilt2}\n\
 @end deftypefn\n\

@@ -31,13 +31,13 @@
 ##
 ## Blocks can be of two different types as defined by the string @var{block_type}:
 ##
-## @table @qcode
-## @item "distinct"
+## @table @asis
+## @item @qcode{"distinct"}
 ## Each block is completely distinct from the other, with no overlapping
 ## elements.  @var{func} must return a matrix of exactly the same size as
 ## its input.
 ##
-## @item "sliding"
+## @item @qcode{"sliding"}
 ## Each possible block of size @var{block_size} inside @var{A} is used.
 ## @var{func} should act along the column dimension (be a column
 ## compression function) and return a vector of length equal to the
