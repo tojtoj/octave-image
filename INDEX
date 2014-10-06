@@ -33,7 +33,6 @@ Arithmetics
 Black and white image functions
  applylut
  bwarea
- bwborder
  bwboundaries
  bwconncomp
  bwdist
@@ -74,7 +73,6 @@ Filtering and Transforms
  nonmax_supress
  radon
  rho_filter
- uintlut
 Morhophological Operations
  bwareaopen
  conndef
@@ -97,7 +95,6 @@ Read/write
  analyze75info
  analyze75read
  analyze75write
- readexif
  tiff_tag_read
 Region-based and block processing
  bestblk
@@ -112,12 +109,10 @@ Region-based and block processing
 Spatial transformations
  cp2tform
  imcrop
- impad
  imperspectivewarp
  imremap
  imresize
  imrotate
- imrotate_Fourier
  imshear
  imtranslate
  maketform
@@ -147,8 +142,6 @@ Utilities
  getrangefromclass
  iptcheckconn
  iptcheckmap
- iptchecknargin
- iptcheckstrs
  iptnum2ordinal
  padarray
  phantom
