@@ -23,20 +23,24 @@
 ## non-zero value.  The output @var{cc} is a structure with information about
 ## each object;
 ##
-## @table @qcode
-## @item "Connectivity"
+## @table @asis
+## @item @qcode{"Connectivity"}
 ## The connectivity used in the boundary tracing. This may be different from
 ## the input argument, e.g., if @var{conn} is defined as a matrix of 1s and
 ## size 3x3, the @qcode{"Connectivity"} value will still be 8.
-## @item "ImageSize"
+##
+## @item @qcode{"ImageSize"}
 ## The size of the matrix @var{bw}.
-## @item "NumObjects"
+##
+## @item @qcode{"NumObjects"}
 ## The number of objects in the image @var{bw}.
-## @item "PixelIdxList"
+##
+## @item @qcode{"PixelIdxList"}
 ## A cell array with linear indices for each element of each object in @var{bw}
 ## A cell array containing where each element corresponds to an object in @var{BW}.
 ## Each element is represented as a vector of linear indices of the boundary of
 ## the given object.
+##
 ## @end table
 ##
 ## Element connectivity @var{conn}, to define the size of objects, can be

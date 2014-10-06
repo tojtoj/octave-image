@@ -47,6 +47,19 @@
       im2uint8
       im2uint16
 
+
+ Summary of important user-visible changes for image 2.2.2 (2014/10/06):
+-------------------------------------------------------------------------
+
+ ** Multiple documentation fixes for compatibility with new versions of
+    Texinfo.
+
+ ** Fix error with imcrop when image was all zeros.
+
+ ** Fix endless loop in bwdist when using the quasi-euclidean method in
+    x86 systems.
+
+
  Summary of important user-visible changes for image 2.2.1 (2014/03/08):
 -------------------------------------------------------------------------
 

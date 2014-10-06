@@ -16,7 +16,7 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {@var{bool} = } isrgb (@var{img})
+## @deftypefn {Function File} {} isrgb (@var{img})
 ## Return true if @var{img} is a RGB image.
 ##
 ## A variable can be considered a RGB image if it is a non-sparse

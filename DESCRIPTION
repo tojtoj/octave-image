@@ -1,8 +1,8 @@
 Name: Image
 Version: 2.3.0
-Date: 2014-03-08
+Date: 2014-10-06
 Author: various authors
-Maintainer: Carnë Draug <carandraug+dev@gmail.com>
+Maintainer: Carnë Draug <carandraug@octave.org>
 Title: Image Processing
 Description: The Octave-forge Image package provides functions for
  processing images.

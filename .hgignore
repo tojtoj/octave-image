@@ -11,9 +11,15 @@ syntax: regexp
 (^|/)octave-core$
 (^|/).*\.tar\.gz$
 
+## Files generated automatically by autoconf and the configure script
 (^|/)aclocal\.m4$
 (^|/)configure$
 (^|/)autom4te\.cache($|/)
+(^|/)config\.log$
+(^|/)config\.status$
+
+## Generated from config.h.in by configure
+(^|/)src/config\.h$
 
 # e.g. doc/faq/OctaveFAQ.info
 #      doc/interpreter/octave.info-4

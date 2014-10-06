@@ -27,14 +27,14 @@
 ## Blocks are assumed to be from one of two types as defined by
 ## @var{block_type} (defaults to @qcode{"sliding"}):
 ##
-## @table @qcode
-## @item "distinct"
+## @table @asis
+## @item @qcode{"distinct"}
 ## Each column of @var{B} is assumed to be distinct blocks, with no
 ## overlapping elements, of size @var{block_size}, to rebuild a matrix of
 ## size @var{A_size}.  Any padding that may have been required to form
 ## @var{B} from a matrix of @var{A_size}, is removed accordingly.
 ##
-## @item "sliding"
+## @item @qcode{"sliding"}
 ## This reshapes @var{B} into a matrix of size
 ## @code{@var{A_size} - @var{block_size} +1}.  Sliding blocks are most useful
 ## to apply a sliding window filter with functions that act along columns.
@@ -44,6 +44,7 @@
 ## will be less blocks to account to borders, so if @var{block_size} is the
 ## same in both @code{col2im} and @code{im2col}, @var{A_size} can be the size
 ## out the ouput from @code{im2col}.
+##
 ## @end table
 ##
 ## Blocks are assumed to have been from a matrix, the same direction elements

@@ -385,7 +385,7 @@ To perform a non-flat erosion, @var{SE} must be a strel object.\n\
 The size of the result is determined by the optional @var{shape} argument\n\
 which takes the following values:\n\
 \n\
-@table @samp\n\
+@table @asis\n\
 @item @qcode{\"same\"} (default)\n\
 Return image of the same size as input @var{im}.\n\
 \n\
@@ -699,7 +699,7 @@ To perform a non-flat dilation, @var{SE} must be a strel object.\n\
 The size of the result is determined by the optional @var{shape} argument\n\
 which takes the following values:\n\
 \n\
-@table @samp\n\
+@table @asis\n\
 @item @qcode{\"same\"} (default)\n\
 Return image of the same size as input @var{im}.\n\
 \n\

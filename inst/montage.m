@@ -179,13 +179,35 @@ function h = montage (images, varargin)
 
   p = inputParser ();
   p.FunctionName = "montage";
-  p = p.addParamValue ("DisplayRange",    [], @(x) isnumeric (x) && any (numel (x) == [0 2]));
-  p = p.addParamValue ("Indices",         1:nImg, @(x) isindex (x, nImg));
-  p = p.addParamValue ("Size",            [NaN NaN], @(x) isnumeric (x) && numel (x) == 2);
-  p = p.addParamValue ("MarginWidth",     0, @(x) isnumeric (x) && isscalar (x));
-  p = p.addParamValue ("MarginColor",     getrangefromclass (images)(2), @(x) isnumeric (x) && any (numel (x) == [1 3]));
-  p = p.addParamValue ("BackgroundColor", getrangefromclass (images)(1), @(x) isnumeric (x) && any (numel (x) == [1 3]));
-  p = p.parse (varargin{:});
+
+  ## FIXME: inputParser was first implemented in the general package in the
+  ##        old @class type which allowed for a very similar interface to
+  ##        Matlab.  classdef was implemented in the upcoming 4.2 release,
+  ##        which enabled inputParser to be implemented exactly the same and
+  ##        it is now part of Octave core.  To prevent issues while all this
+  ##        versions are available, we check if the inputParser being used
+  ##        is in a @inputParser directory.
+  ##
+  ##        Remove all this checks once we are no longer dependent on Octave
+  ##        versions older than 4.2.
+
+  if (strfind (which ("inputParser"), ["@inputParser" filesep "inputParser.m"]))
+    p = p.addParamValue ("DisplayRange",    [], @(x) isnumeric (x) && any (numel (x) == [0 2]));
+    p = p.addParamValue ("Indices",         1:nImg, @(x) isindex (x, nImg));
+    p = p.addParamValue ("Size",            [NaN NaN], @(x) isnumeric (x) && numel (x) == 2);
+    p = p.addParamValue ("MarginWidth",     0, @(x) isnumeric (x) && isscalar (x));
+    p = p.addParamValue ("MarginColor",     getrangefromclass (images)(2), @(x) isnumeric (x) && any (numel (x) == [1 3]));
+    p = p.addParamValue ("BackgroundColor", getrangefromclass (images)(1), @(x) isnumeric (x) && any (numel (x) == [1 3]));
+    p = p.parse (varargin{:});
+  else
+    p.addParamValue ("DisplayRange",    [], @(x) isnumeric (x) && any (numel (x) == [0 2]));
+    p.addParamValue ("Indices",         1:nImg, @(x) isindex (x, nImg));
+    p.addParamValue ("Size",            [NaN NaN], @(x) isnumeric (x) && numel (x) == 2);
+    p.addParamValue ("MarginWidth",     0, @(x) isnumeric (x) && isscalar (x));
+    p.addParamValue ("MarginColor",     getrangefromclass (images)(2), @(x) isnumeric (x) && any (numel (x) == [1 3]));
+    p.addParamValue ("BackgroundColor", getrangefromclass (images)(1), @(x) isnumeric (x) && any (numel (x) == [1 3]));
+    p.parse (varargin{:});
+  endif
 
   ## remove unecessary images
   images = images(:,:,:,p.Results.Indices);

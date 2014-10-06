@@ -33,36 +33,44 @@
 ## The values used in the padding can either be a scalar value @var{padval}, or
 ## the name of a specific @var{pattern}.  Available patterns are:
 ##
-## @table @samp
-## @item "zeros" (default)
+## @table @asis
+## @item @qcode{"zeros"} (default)
 ## Pads with the value 0 (same as passing a @var{padval} of 0).  This is the
 ## default.
-## @item "circular"
+##
+## @item @qcode{"circular"}
 ## Pads with a circular repetition of elements in @var{A} (similar to
 ## tiling @var{A}).
-## @item "replicate"
+##
+## @item @qcode{"replicate"}
 ## Pads replicating the values at the border of @var{A}.
-## @item "symmetric"
+##
+## @item @qcode{"symmetric"}
 ## Pads with a mirror reflection of @var{A}.
-## @item "reflect"
+##
+## @item @qcode{"reflect"}
 ## Same as "symmetric", but the borders are not used in the padding.  Because
 ## of this, it is not possible to pad singleton dimensions.
+##
 ## @end table
 ##
 ## By default, padding is done in both directions.  To change this,
 ## @var{direction} can be one of the following values:
 ##
-## @table @samp
-## @item "both" (default)
+## @table @asis
+## @item @qcode{"both"} (default)
 ## Pad each dimension before the first element of @var{A} the number
 ## of elements defined by @var{padsize}, and the same number again after
 ## the last element. This is the default.
-## @item "pre"
+##
+## @item @qcode{"pre"}
 ## Pad each dimension before the first element of @var{A} the number of
 ## elements defined by @var{padsize}.
-## @item "post"
+##
+## @item @qcode{"post"}
 ## Pad each dimension after the last element of @var{A} the number of
 ## elements defined by @var{padsize}.
+##
 ## @end table
 ##
 ## @seealso{cat, flipdim, resize, prepad, postpad}
