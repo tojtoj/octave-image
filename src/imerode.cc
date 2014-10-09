@@ -128,7 +128,7 @@ pad_matrix (const T& mt, const strel& se,
 // argument, it's all done at compile time so we get better performance.
 // If erosion is false, we perform dilation instead
 template<class P, bool erosion, bool flat>
-static void
+inline static void
 erode_line (const P* in, P* out, const octave_idx_type* offsets, const P* height,
             const octave_idx_type& nnz, const octave_idx_type& line_length)
 {
@@ -141,20 +141,12 @@ erode_line (const P* in, P* out, const octave_idx_type* offsets, const P* height
               if (erosion)
                 {
                   if (in[offsets[nnz_idx]] < out[line_idx])
-                    {
-                      out[line_idx] = in[offsets[nnz_idx]];
-                      if (typeid (P) == typeid (bool))
-                        break;
-                    }
+                    out[line_idx] = in[offsets[nnz_idx]];
                 }
               else
                 {
                   if (in[offsets[nnz_idx]] > out[line_idx])
-                    {
-                      out[line_idx] = in[offsets[nnz_idx]];
-                      if (typeid (P) == typeid (bool))
-                        break;
-                    }
+                    out[line_idx] = in[offsets[nnz_idx]];
                 }
             }
           else
@@ -172,6 +164,39 @@ erode_line (const P* in, P* out, const octave_idx_type* offsets, const P* height
                   P val = in[offsets[nnz_idx]] + height[nnz_idx];
                   if (val > out[line_idx])
                     out[line_idx] = val;
+                }
+            }
+        }
+      in++;
+    }
+}
+
+// For the specific case of boolean dilation/erosion, we may be able to
+// break from the loop sooner.  Also, there is non-flat binary erosion
+// and dilation.
+template<class P, bool erosion, bool flat>
+inline static void
+erode_line (const bool* in, bool* out, const octave_idx_type* offsets, const bool* height,
+            const octave_idx_type& nnz, const octave_idx_type& line_length)
+{
+  for (octave_idx_type line_idx = 0; line_idx < line_length; line_idx++)
+    {
+      for (octave_idx_type nnz_idx = 0; nnz_idx < nnz; nnz_idx++)
+        {
+          if (erosion)
+            {
+              if (! in[offsets[nnz_idx]])
+                {
+                  out[line_idx] = false;
+                  break;
+                }
+            }
+          else
+            {
+              if (in[offsets[nnz_idx]])
+                {
+                  out[line_idx] = true;
+                  break;
                 }
             }
         }
