@@ -49,19 +49,18 @@ function B = imcomplement (A)
     B = 1 - A;
   elseif (islogical (A))
     B = ! A;
-  elseif (any (isa (A, {"int8", "int16", "int32", "int64"})))
-    ## Signed integers are different. We have all this extra work to avoid
-    ## conversion into another class which may not fit in memory. And seems
-    ## like it it still performs faster.
-    cl = class (A);
-    B = zeros (size (A), cl);
-    m = (A != intmin (cl));
-
-    B(! m) = intmax (cl);
-    B(m)   = -A -1;
-
   elseif (isinteger (A))
-    B = intmax (class (A)) - A;
+    if (intmin (class (A)) < 0)
+      ## for signed integers, we use bitcmp
+      ## TODO: bitcmp is broken in core (but fixed on 79d4783a9978). Replace
+      ##       with bitcmp once we are dependent on that Octave version
+      nbits = sizeof (A) / numel (A) * 8;
+      B = bitxor (A, bitpack (true (nbits, 1), class (A)));
+    else
+      ## this is currently more efficient than bitcmp (but hopefully core
+      ## will change)
+      B = intmax (class (A)) - A;
+    endif
   else
     error("imcomplement: A must be an image but is of class `%s'", class (A));
   endif
