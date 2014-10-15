@@ -26,6 +26,9 @@
 #include <algorithm>
 #include "union-find.h++"
 
+#include "conndef.h"
+using namespace octave::image;
+
 #include "config.h"
 
 #if defined (HAVE_UNORDERED_MAP)
@@ -131,136 +134,21 @@ operator- (const coord& a)
 //}
 
 std::set<octave_idx_type>
-populate_neighbours(const boolNDArray& conn_mask,
-                    const dim_vector& size_vec)
+populate_neighbours (const connectivity& conn, const dim_vector& padded_size)
 {
+  const Array<octave_idx_type> offsets = conn.offsets (padded_size);
+
+  //The zero coordinates are the centre, and the negative ones
+  //are the ones reflected about the centre, and we don't need
+  //to consider those.
   std::set<octave_idx_type> neighbours_idx;
-  std::set<coord> neighbours;
+  for (octave_idx_type i = 0; i < offsets.numel (); i++)
+    if (offsets(i) < 0)
+      neighbours_idx.insert (offsets(i));
 
-  dim_vector conn_size = conn_mask.dims ();
-  coord centre (dim_vector(conn_size.length (), 1), 1);
-  coord zero (dim_vector(conn_size.length (), 1), 0);
-  for (octave_idx_type idx = 0; idx < conn_mask.nelem (); idx++)
-    {
-      if (conn_mask(idx))
-        {
-          coord aidx = to_coord (conn_size, idx) - centre;
-
-          //The zero coordinates are the centre, and the negative ones
-          //are the ones reflected about the centre, and we don't need
-          //to consider those.
-          if( aidx == zero || neighbours.find(-aidx) != neighbours.end() )
-            continue;
-
-          neighbours.insert (aidx);
-
-          neighbours_idx.insert (coord_to_pad_idx(size_vec, aidx));
-         }
-    }
   return neighbours_idx;
 }
 
-boolNDArray
-get_mask(int N){
-  bool* mask_ptr;
-  octave_idx_type n;
-
-  static bool mask4[] = {0, 1, 0,
-                         1, 0, 1,
-                         0, 1, 0};
-
-  static bool mask8[] = {1, 1, 1,
-                         1, 0, 1,
-                         1, 1, 1};
-
-  static bool mask6[] = {0, 0, 0,
-                         0, 1, 0,
-                         0, 0, 0,
-
-                         0, 1, 0,
-                         1, 0, 1,
-                         0, 1, 0,
-
-                         0, 0, 0,
-                         0, 1, 0,
-                         0, 0, 0};
-
-  static bool mask18[] = {0, 1, 0,
-                          1, 1, 1,
-                          0, 1, 0,
-
-                          1, 1, 1,
-                          1, 0, 1,
-                          1, 1, 1,
-
-                          0, 1, 0,
-                          1, 1, 1,
-                          0, 1, 0};
-
-  static bool mask26[] = {1, 1, 1,
-                          1, 1, 1,
-                          1, 1, 1,
-
-                          1, 1, 1,
-                          1, 0, 1,
-                          1, 1, 1,
-
-                          1, 1, 1,
-                          1, 1, 1,
-                          1, 1, 1};
-
-  switch (N){
-  case 4:
-    n = 2;
-    mask_ptr = mask4;
-    break;
-  case 8:
-    n = 2;
-    mask_ptr = mask8;
-    break;
-  case 6:
-    n = 3;
-    mask_ptr = mask6;
-    break;
-  case 18:
-    n = 3;
-    mask_ptr = mask18;
-    break;
-  case 26:
-    n = 3;
-    mask_ptr = mask26;
-    break;
-  default:
-    panic_impossible ();
-  }
-
-  boolNDArray conn_mask;
-  if (n == 2)
-    {
-      conn_mask.resize (dim_vector (3, 3));
-      for (octave_idx_type i = 0; i < 9; i++)
-        conn_mask(i) = mask_ptr[i];
-
-    }
-  else
-    {
-      conn_mask.resize (dim_vector (3, 3, 3));
-      for (octave_idx_type i = 0; i < 27; i++)
-        conn_mask(i) = mask_ptr[i];
-    }
-
-  return conn_mask;
-}
-
-boolNDArray
-get_mask (const boolNDArray& BW)
-{
-  dim_vector mask_dims = BW.dims();
-  for (auto i = 0; i < mask_dims.length (); i++)
-    mask_dims(i) = 3;
-
-  return boolNDArray (mask_dims, 1);
-}
 
 octave_idx_type
 get_padded_index (octave_idx_type r,
@@ -283,18 +171,20 @@ get_padded_index (octave_idx_type r,
 }
 
 static octave_value_list
-bwlabel_nd (const boolNDArray& BW, const boolNDArray& conn_mask)
+bwlabel_nd (const boolNDArray& BW, const connectivity& conn)
 {
   octave_value_list rval;
+  boolNDArray conn_mask = conn.mask;
 
-  dim_vector size_vec = BW.dims ();
-  auto neighbours = populate_neighbours(conn_mask, size_vec);
+  const dim_vector size_vec = BW.dims ();
 
   // Use temporary array with borders padded with zeros. Labels will
   // also go in here eventually.
   dim_vector padded_size = size_vec;
   for (octave_idx_type j = 0; j < size_vec.length (); j++)
     padded_size(j) += 2;
+
+  auto neighbours = populate_neighbours (conn, padded_size);
 
   NDArray L (padded_size, 0);
 
@@ -620,58 +510,26 @@ See, for example, http://en.wikipedia.org/wiki/Union-find\n\
   boolNDArray BW = args(0).bool_array_value ();
   dim_vector size_vec = BW.dims ();
 
-  //Connectivity mask
-  boolNDArray conn_mask;
-  if (nargin == 2)
+  connectivity conn;
+  try
     {
-      if (args(1).is_real_scalar ())
-        {
-          double N = args(1).scalar_value ();
-          if (size_vec.length () == 2 && N != 4 && N != 8)
-            error ("bwlabeln: for 2d arrays, scalar N must be 4 or 8");
-          else if (size_vec.length () == 3 && N != 6 && N != 18 && N != 26)
-            error ("bwlabeln: for 3d arrays, scalar N must be 4 or 8");
-          else if (size_vec.length () > 3)
-            error ("bwlabeln: for higher-dimensional arrays, N must be a "
-                   "connectivity mask");
-          else
-            conn_mask = get_mask (N);
-        }
-      else if (args(1).is_numeric_type () || args(1).is_bool_type ())
-        {
-          conn_mask = args(1).bool_array_value ();
-          dim_vector conn_mask_dims = conn_mask.dims ();
-          if (conn_mask_dims.length () != size_vec.length ())
-            error ("bwlabeln: connectivity mask N must have the same "
-                   "dimensions as BW");
-          for (octave_idx_type i = 0; i < conn_mask_dims.length (); i++)
-            {
-              if (conn_mask_dims(i) != 3)
-                {
-                  error ("bwlabeln: connectivity mask N must have all "
-                         "dimensions equal to 3");
-                }
-            }
-        }
-      else
-        error ("bwlabeln: second input argument must be a real scalar "
-               "or a connectivity array");
+      conn = (nargin == 2) ? connectivity (args(1)) :
+                             connectivity (BW.ndims (), "maximal");
     }
-  else
-    // Get the maximal mask that has same number of dims as BW.
-    conn_mask = get_mask (BW);
-
-  if (error_state)
-    return rval;
+  catch (invalid_connectivity& e)
+    {
+      error ("bwlabeln: MASK %s", e.what ());
+      return octave_value ();
+    }
 
   // The implementation in bwlabel_2d is faster so use it if we can
   const octave_idx_type ndims = BW.ndims ();
-  if (ndims == 2 && boolMatrix (conn_mask) == get_mask (4))
+  if (ndims == 2 && boolMatrix (conn.mask) == connectivity (4).mask)
     rval = bwlabel_2d (BW, 4);
-  else if (ndims == 2 && boolMatrix (conn_mask) == get_mask (8))
+  else if (ndims == 2 && boolMatrix (conn.mask) == connectivity (8).mask)
     rval = bwlabel_2d (BW, 8);
   else
-    rval = bwlabel_nd (BW, conn_mask);
+    rval = bwlabel_nd (BW, conn);
 
   return rval;
 }
