@@ -18,7 +18,9 @@ Analysis and Statistics
  imgradientxy
  imhist
  immaximas
+ immse
  normxcorr2
+ psnr
  rangefilt
  regionprops
  stdfilt

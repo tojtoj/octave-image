@@ -82,6 +82,7 @@ inst/imgradientxy.m                     GPLv3+
 inst/imhist.m                           GPLv3+
 inst/imlincomb.m                        GPLv3+
 inst/immaximas.m                        MIT
+inst/immse.m                            GPLv3+
 inst/immultiply.m                       GPLv3+
 inst/imnoise.m                          GPLv3+
 inst/imopen.m                           GPLv3+
@@ -121,6 +122,7 @@ inst/ordfilt2.m                         GPLv3+
 inst/ordfiltn.m                         GPLv3+
 inst/padarray.m                         GPLv3+
 inst/phantom.m                          GPLv3+
+inst/psnr.m                             GPLv3+
 inst/poly2mask.m                        GPLv3+
 inst/qtdecomp.m                         GPLv3+
 inst/qtgetblk.m                         GPLv3+

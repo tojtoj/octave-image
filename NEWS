@@ -8,9 +8,11 @@
       imattributes
       imcast
       imclearborder
+      immse
       imreconstruct
       imregionalmax
       imregionalmin
+      psnr
       subimage
 
  ** The implementation of normxcorr2 has been changed. The new method is
