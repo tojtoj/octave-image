@@ -3,6 +3,8 @@
 
  ** The following functions are new:
 
+      bwareafilt
+      bwpropfilt
       imcast
 
  ** The implementation of normxcorr2 has been changed. The new method is

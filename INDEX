@@ -33,6 +33,7 @@ Arithmetics
 Black and white image functions
  applylut
  bwarea
+ bwareafilt
  bwboundaries
  bwconncomp
  bwdist
@@ -43,6 +44,7 @@ Black and white image functions
  bwlabeln
  bwmorph
  bwperim
+ bwpropfilt
  bwselect
  fchcode
  labelmatrix
