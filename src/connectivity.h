@@ -54,11 +54,18 @@ namespace octave
         static boolNDArray bool_array_value (const octave_value& val);
     };
 
-    class invalid_connectivity : public std::invalid_argument
+    class invalid_conversion : public std::invalid_argument
+    {
+      public:
+        invalid_conversion (const std::string& what_arg)
+          : std::invalid_argument (what_arg) { }
+    };
+
+    class invalid_connectivity : public octave::image::invalid_conversion
     {
       public:
         invalid_connectivity (const std::string& what_arg)
-          : std::invalid_argument (what_arg) { }
+          : octave::image::invalid_conversion (what_arg) { }
     };
   }
 }

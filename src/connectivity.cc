@@ -26,22 +26,18 @@ connectivity::connectivity ()
 connectivity::connectivity (const octave_value& val)
 {
   try
+    {ctor (double_value (val));}
+  catch (invalid_conversion& e)
     {
-      const double conn = double_value (val);
-      if (error_state)
-          throw invalid_connectivity ("must be in [4 6 8 18 26]");
-      ctor (conn);
-    }
-  catch (invalid_connectivity& e)
-    {
-      const boolNDArray mask = bool_array_value (val);
-      if (error_state)
-        throw invalid_connectivity ("must be logical or in [4 6 8 18 26]");
-      ctor (mask);
+      try
+        {ctor (bool_array_value (val));}
+      catch (invalid_connectivity& e)
+        {throw;} // so it does not get caught by the parent invalid_conversion
+      catch (invalid_conversion& e)
+        {throw invalid_connectivity ("must be logical or in [4 6 8 18 26]");}
     }
   return;
 }
-
 
 connectivity::connectivity (const boolNDArray& mask)
 {
@@ -217,24 +213,22 @@ connectivity::offsets (const dim_vector& size) const
 double
 connectivity::double_value (const octave_value& val)
 {
-  error_state = 0;
   const double conn = val.double_value ();
   // Check is_scalar_type because the warning Octave:array-to-scalar
   // is off by default and we will get the first element only.
   if (error_state || ! val.is_scalar_type ())
-    error_state = 1;
+    throw invalid_conversion ("no conversion to double value");
   return conn;
 }
 
 boolNDArray
 connectivity::bool_array_value (const octave_value& val)
 {
-  error_state = 0;
   const boolNDArray mask = val.bool_array_value ();
   // bool_array_value converts anything other than 0 to true, which will
   // then validate as conn array, hence any_element_not_one_or_zero()
   if (val.array_value ().any_element_not_one_or_zero ())
-    error_state = 1;
+    throw invalid_conversion ("no conversion to bool array value");
   return mask;
 }
 
