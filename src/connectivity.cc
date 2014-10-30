@@ -39,15 +39,17 @@ connectivity::connectivity (const octave_value& val)
   return;
 }
 
-connectivity::connectivity (const boolNDArray& mask)
+connectivity::connectivity (const boolNDArray& mask_arg)
 {
-  ctor (mask);
+  ctor (mask_arg);
   return;
 }
 
 void
-connectivity::ctor (const boolNDArray& mask)
+connectivity::ctor (const boolNDArray& mask_arg)
 {
+  mask = mask_arg;
+
   // Must be 1x1, 3x1, or 3x3x3x...x3
   const octave_idx_type numel = mask.numel ();
   const octave_idx_type ndims = mask.ndims ();
@@ -57,9 +59,9 @@ connectivity::ctor (const boolNDArray& mask)
     {
       // Don't forget 1x1, and 3x1 which are valid but arrays always
       // have at least 2d
-      if (   (dims(1) != 3 && dims(2) != 3)
-          && (dims(1) != 3 && dims(2) != 1)
-          && (dims(1) != 1 && dims(2) != 1))
+      if (   (dims(0) != 3 && dims(1) != 3)
+          && (dims(0) != 3 && dims(1) != 1)
+          && (dims(0) != 1 && dims(1) != 1))
         throw invalid_connectivity ("is not 1x1, 3x1, 3x3, or 3x3x...x3");
     }
   else
@@ -81,7 +83,6 @@ connectivity::ctor (const boolNDArray& mask)
     if (start[i] != end[-i])
       throw invalid_connectivity ("is not symmetric relative to its center");
 
-  this->mask = mask;
   return;
 }
 

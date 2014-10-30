@@ -32,7 +32,7 @@ namespace octave
 
         //! Will throw if val is bad
         connectivity (const octave_value& val);
-        connectivity (const boolNDArray& mask);
+        connectivity (const boolNDArray& mask_arg);
         connectivity (const octave_idx_type& conn);
         connectivity (const octave_idx_type& ndims, const std::string& type);
 
@@ -43,7 +43,7 @@ namespace octave
         Array<octave_idx_type> offsets (const dim_vector& size) const;
 
       private:
-        void ctor (const boolNDArray& mask);
+        void ctor (const boolNDArray& mask_arg);
         void ctor (const octave_idx_type& conn);
 
         //! Like octave_value::double_value() but actually checks if scalar.
