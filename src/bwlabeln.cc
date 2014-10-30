@@ -26,7 +26,7 @@
 #include <algorithm>
 #include "union-find.h++"
 
-#include "conndef.h"
+#include "connectivity.h"
 using namespace octave::image;
 
 #include "config.h"
