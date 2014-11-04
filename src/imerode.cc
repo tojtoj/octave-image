@@ -14,6 +14,7 @@
 // this program; if not, see <http://www.gnu.org/licenses/>.
 
 #include <octave/oct.h>
+#include <Array-util.h>  // to get ind2sub
 #include <typeinfo>   // for an optimization using logical matrices
 #include <lo-ieee.h>  // gives us octave_Inf
 #include "strel.h"
