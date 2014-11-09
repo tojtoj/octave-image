@@ -142,6 +142,7 @@ Types and Type conversions
 Utilities
  checkerboard
  getrangefromclass
+ imattributes
  iptcheckconn
  iptcheckmap
  iptnum2ordinal

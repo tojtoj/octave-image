@@ -5,6 +5,7 @@
 
       bwareafilt
       bwpropfilt
+      imattributes
       imcast
 
  ** The implementation of normxcorr2 has been changed. The new method is
