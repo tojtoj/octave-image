@@ -22,6 +22,7 @@
     instead of printing to the command line, when there are no output
     arguments:
 
+      grayslice
       im2bw
 
  ** For better compatibility with Matlab, the imrotate, imremap, and
@@ -44,6 +45,7 @@
  ** Other functions that have been changed for smaller bugfixes, increased
     Matlab compatibility, or performance:
 
+      grayslice
       im2double
       im2int16
       im2single
