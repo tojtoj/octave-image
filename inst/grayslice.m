@@ -64,19 +64,20 @@ function sliced = grayslice (I, n = 10)
     error ("grayslice: V or N must be numeric vector or scalar respectively");
   endif
 
-  ## remember that indexed images of floating point class have indices base 1
-  if (n <= 256)
-    sliced_tmp = zeros (size (I), "uint8");
-    indices = 1:n;
-  else
-    sliced_tmp = ones (size (I), "double");
-    indices = 2:n+1;
-  endif
-
+  ## Broadcasting has a much higher memory usage but performs a lot faster
+  ## than a for loop.  See cset a67048847848 for a more memory friendly
+  ## version (performs ~5x times slower but the memory footprint is numel(v)
+  ## times smaller for uint8 images)
+  warning ("off", "Octave:broadcast", "local")
   v = imcast (v, class (I));
-  for idx = 1:n
-    sliced_tmp(I >= v(idx)) = indices(idx);
-  endfor
+  sliced_tmp = reshape (sum (v(:) < vec (I, 2)), size (I));
+
+  if (n <= 256)
+    sliced_tmp = uint8(sliced_tmp);
+  else
+    ## remember that indexed images of floating point class have indices base 1
+    sliced_tmp++;
+  endif
 
   if (nargout < 1)
     imshow (sliced_tmp, jet (n));
@@ -94,7 +95,7 @@ endfunction
 
 %!function gs = test_grayslice_scalar (I, n)
 %!  v = (1:(n-1)) / n;
-%!  gs = test_grayslice_slow (I, v);
+%!  gs = test_grayslice_vector (I, v);
 %!endfunction
 
 %!shared I2d, I3d, I5d, double_corner
@@ -115,7 +116,7 @@ endfunction
 %!assert (grayslice (I3d, [0.3 0.5 0.7]),
 %!        uint8 (test_grayslice_vector (I3d, [0.3 0.5 0.7])))
 
-## FIXME investigate why this sometimes fails
+### FIXME investigate why this sometimes fails
 %!assert (grayslice (im2uint8 (I2d), 3), uint8 (test_grayslice_scalar (I2d, 3)))
 %!assert (grayslice (im2uint16 (I2d), 3), uint8 (test_grayslice_scalar (I2d, 3)))
 
