@@ -33,7 +33,8 @@
 ##
 ## @item int16
 ## Returns the same image.
-## @end itemize
+##
+## @end table
 ##
 ## @seealso{im2bw, imcast, im2uint8, im2double, im2single, im2uint16}
 ## @end deftypefn

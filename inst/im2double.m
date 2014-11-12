@@ -37,7 +37,8 @@
 ##
 ## @item double
 ## Returns the same image.
-## @end itemize
+##
+## @end table
 ##
 ## If the second argument is the string @qcode{"indexed"}, then values are
 ## cast to double precision, and a +1 offset is applied if input is
