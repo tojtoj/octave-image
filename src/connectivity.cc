@@ -14,6 +14,8 @@
 // along with this program; if not, see
 // <http://www.gnu.org/licenses/>.
 
+#include <typeinfo>
+
 #include <octave/oct.h>
 #include "connectivity.h"
 
@@ -316,5 +318,18 @@ octave_idx_type
 connectivity::ndims (const Array<T>& a)
 {
   return connectivity::ndims (a.dims ());
+}
+
+
+Array<octave_idx_type>
+connectivity::padding_lengths (const dim_vector& size, const dim_vector& padded_size)
+{
+  const octave_idx_type ndims = size.length ();
+  Array<octave_idx_type> lengths (dim_vector (ndims, 1), 0);
+  lengths(0) = 1;
+  for (octave_idx_type i = 1; i < ndims; i++)
+    if (size(i) < padded_size(i))
+      lengths(i) = lengths(i -1) * padded_size(i-1);
+  return lengths;
 }
 

@@ -152,6 +152,7 @@ src/__custom_gaussian_smoothing__.cc    GPLv3+
 src/graycomatrix.cc                     FreeBSD
 src/hough_line.cc                       FreeBSD
 src/imerode.cc                          GPLv3+
+src/imreconstruct.cc                    GPLv3+
 src/nonmax_supress.cc                   GPLv3+
 src/rotate_scale.cc                     GPLv3+
 src/__spatial_filtering__.cc            GPLv3+

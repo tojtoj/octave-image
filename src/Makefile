@@ -5,7 +5,7 @@ OCTAVE ?= octave
 ## shared libraries. Because of this, we need to create object files for
 ## our "shared" libraries and statically link to selected oct files.
 
-conn_dependent = conndef.oct bwlabeln.oct
+conn_dependent = conndef.oct bwlabeln.oct imreconstruct.oct
 strel_dependent = imerode.oct
 libs = connectivity.o strel.o
 

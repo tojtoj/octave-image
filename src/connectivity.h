@@ -20,6 +20,7 @@
 #include <stdexcept>
 
 #include <octave/oct.h>
+#include <lo-ieee.h>  // octave_Inf
 
 namespace octave
 {
@@ -44,6 +45,18 @@ namespace octave
         Array<octave_idx_type> deleted_neighbourhood (const dim_vector& size) const;
         Array<octave_idx_type> positive_neighbourhood (const dim_vector& size) const;
         Array<octave_idx_type> negative_neighbourhood (const dim_vector& size) const;
+
+        template<class T, class P>
+        T create_padded (const T& image, const P& val) const;
+
+        template<class T>
+        void unpad (T& image) const;
+
+        template<class P>
+        static P min_value (void);
+
+        static Array<octave_idx_type> padding_lengths (const dim_vector& size,
+                                                       const dim_vector& padded_size);
 
       private:
         void ctor (const boolNDArray& mask_arg);
@@ -76,6 +89,56 @@ namespace octave
           : octave::image::invalid_conversion (what_arg) { }
     };
   }
+}
+
+// Templated methods
+
+template<class T, class P>
+T
+octave::image::connectivity::create_padded (const T& image, const P& val) const
+{
+  const octave_idx_type pad_ndims = std::min (mask.ndims (), image.ndims ());
+
+  Array<octave_idx_type> idx (dim_vector (image.ndims (), 1), 0);
+  dim_vector padded_size = image.dims ();
+  for (octave_idx_type i = 0; i < pad_ndims; i++)
+    {
+      padded_size(i) += 2;
+      idx(i) = 1;
+    }
+
+  T padded (padded_size, val);
+
+  // padded(2:end-1, 2:end-1, ..., 2:end-1) = BW
+  padded.insert (image, idx);
+  return padded;
+}
+
+template<class T>
+void
+octave::image::connectivity::unpad (T& image) const
+{
+  const octave_idx_type pad_ndims = std::min (mask.ndims (), image.ndims ());
+  const dim_vector padded_size = image.dims ();
+
+  Array<idx_vector> inner_slice (dim_vector (image.ndims (), 1));
+  for (octave_idx_type i = 0; i < pad_ndims ; i++)
+    inner_slice(i) = idx_vector (1, padded_size(i) - 1);
+  for (octave_idx_type i = pad_ndims; i < image.ndims (); i++)
+    inner_slice(i) = idx_vector (0, padded_size(i));
+
+  image = image.index (inner_slice);
+  return;
+}
+
+template<class P>
+P
+octave::image::connectivity::min_value (void)
+{
+  if (typeid (P) == typeid (bool))
+    return false;
+  else
+    return P(-octave_Inf);
 }
 
 #endif
