@@ -177,37 +177,110 @@ connectivity::connectivity (const octave_idx_type& ndims,
 }
 
 
+// A couple of things:
+//  * it is handy that the offsets come sorted since they will be used to
+//    access the elements and we want to jump around as little as possible.
+//  * the number of dimensions used may be different than the mask.
 Array<octave_idx_type>
-connectivity::offsets (const dim_vector& size) const
+connectivity::neighbourhood (const dim_vector& size) const
 {
-  const octave_idx_type nnz     = mask.nnz ();
-  const octave_idx_type ndims   = mask.ndims ();
-  const dim_vector      dims    = mask.dims ();
+  const octave_idx_type ndims = connectivity::ndims (mask);
+  const octave_idx_type numel = mask.numel ();
 
-  Array<octave_idx_type> offsets (dim_vector (nnz, 1)); // retval
-  const dim_vector cum_size = size.cumulative ();
+  // offset to adjacent element on correspoding dimension
+  Array<octave_idx_type> strides (dim_vector (ndims, 1));
+  strides(0) = 1;
+  for (octave_idx_type dim = 1; dim < ndims; dim++)
+    strides(dim) = strides(dim-1) * size(dim-1);
 
-  Array<octave_idx_type> diff (dim_vector (ndims, 1));
+  Array<octave_idx_type> pow3 (dim_vector (ndims, 1));
+  pow3(0) = 1;
+  for (octave_idx_type dim = 1; dim < ndims; dim++)
+    pow3(dim) = pow3(dim-1) * 3;
 
-  Array<octave_idx_type> sub (dim_vector (ndims, 1), 0);
-  for (octave_idx_type ind = 0, found = 0; found < nnz;
-       ind++, boolNDArray::increment_index (sub, dims))
+  // We calculate this for all elements. We could do it only for the "true"
+  // elements but that's slightly more complex and in most cases we will
+  // already want most, if not all, elements anyway.
+  Array<octave_idx_type> all_offsets (dim_vector (numel, 1), 0);
+  for (octave_idx_type dim = 0; dim < ndims; dim++)
     {
-      if (mask(ind))
+      octave_idx_type i (0);
+
+      for (int x = 0; x < pow3(ndims -1 -dim); x++)
         {
-          for (octave_idx_type i = 0; i < ndims; i++)
-            diff(i) = 1 - sub(i); // 1 is center since conn is 3x3x...x3
-
-          octave_idx_type off = diff(0);
-          for (octave_idx_type dim = 1; dim < ndims; dim++)
-            off += (diff(dim) * cum_size(dim-1));
-
-          offsets(found) = off;
-          found++;
+          for (octave_idx_type k = 0; k < pow3(dim); k++)
+            all_offsets(i++) -= strides(dim);
+          i += pow3(dim);
+          for (octave_idx_type k = 0; k < pow3(dim); k++)
+            all_offsets(i++) += strides(dim);
         }
     }
 
+  octave_idx_type start_idx = 0;
+  for (octave_idx_type dim = ndims; dim > connectivity::ndims (size); dim--)
+    start_idx += pow3(dim -1);
+
+  const bool* m = mask.fortran_vec ();
+  const octave_idx_type* ao = all_offsets.fortran_vec ();
+
+  octave_idx_type nnz = 0;
+  for (octave_idx_type i = start_idx; i < (numel - start_idx); i++)
+    if (m[i])
+      nnz++;
+
+  Array<octave_idx_type> offsets (dim_vector (nnz, 1));
+  octave_idx_type* o = offsets.fortran_vec ();
+  for (octave_idx_type i = start_idx, j = 0; i < (numel - start_idx); i++)
+    if (m[i])
+      o[j++] = ao[i];
+
   return offsets;
+}
+
+Array<octave_idx_type>
+connectivity::deleted_neighbourhood (const dim_vector& size) const
+{
+  Array<octave_idx_type> offsets = neighbourhood (size);
+  for (octave_idx_type i = 0; i < offsets.numel (); i++)
+    if (offsets(i) == 0)
+      offsets.delete_elements (idx_vector (i));
+  return offsets;
+}
+
+Array<octave_idx_type>
+connectivity::positive_neighbourhood (const dim_vector& size) const
+{
+  Array<octave_idx_type> offsets = neighbourhood (size);
+  std::vector<octave_idx_type> to_keep;
+
+  for (octave_idx_type i = 0; i < offsets.numel (); i++)
+    if (offsets(i) > 0)
+      to_keep.push_back (offsets(i));
+
+  octave_idx_type numel = to_keep.size ();
+  Array<octave_idx_type> neg (dim_vector (numel, 1));
+  for (octave_idx_type i = 0; i < numel; i++)
+    neg(i) = to_keep[i];
+
+  return neg;
+}
+
+Array<octave_idx_type>
+connectivity::negative_neighbourhood (const dim_vector& size) const
+{
+  Array<octave_idx_type> offsets = neighbourhood (size);
+  std::vector<octave_idx_type> to_keep;
+
+  for (octave_idx_type i = 0; i < offsets.numel (); i++)
+    if (offsets(i) < 0)
+      to_keep.push_back (offsets(i));
+
+  octave_idx_type numel = to_keep.size ();
+  Array<octave_idx_type> neg (dim_vector (numel, 1));
+  for (octave_idx_type i = 0; i < numel; i++)
+    neg(i) = to_keep[i];
+
+  return neg;
 }
 
 
@@ -231,5 +304,29 @@ connectivity::bool_array_value (const octave_value& val)
   if (val.array_value ().any_element_not_one_or_zero ())
     throw invalid_conversion ("no conversion to bool array value");
   return mask;
+}
+
+
+octave_idx_type
+connectivity::ndims (const dim_vector& dims)
+{
+  // We do not bother with 1x3 arrays since those are not valid
+  // connectivity masks anyway.
+  if (dims(1) == 1)
+    {
+      if (dims(0) == 1)
+        return 0;
+      else
+        return 1;
+    }
+  else
+    return dims.length ();
+}
+
+template<class T>
+octave_idx_type
+connectivity::ndims (const Array<T>& a)
+{
+  return connectivity::ndims (a.dims ());
 }
 

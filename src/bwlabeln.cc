@@ -42,15 +42,14 @@ using namespace octave::image;
 std::set<octave_idx_type>
 populate_neighbours (const connectivity& conn, const dim_vector& padded_size)
 {
-  const Array<octave_idx_type> offsets = conn.offsets (padded_size);
-
   //The zero coordinates are the centre, and the negative ones
   //are the ones reflected about the centre, and we don't need
   //to consider those.
+  const Array<octave_idx_type> offsets = conn.negative_neighbourhood (padded_size);
+
   std::set<octave_idx_type> neighbours_idx;
   for (octave_idx_type i = 0; i < offsets.numel (); i++)
-    if (offsets(i) < 0)
-      neighbours_idx.insert (offsets(i));
+    neighbours_idx.insert (offsets(i));
 
   return neighbours_idx;
 }

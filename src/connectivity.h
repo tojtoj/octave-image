@@ -40,7 +40,10 @@ namespace octave
 
         // For a matrix of size `size', what are the offsets for all of its
         // connected elements (will have negative and positive values).
-        Array<octave_idx_type> offsets (const dim_vector& size) const;
+        Array<octave_idx_type> neighbourhood (const dim_vector& size) const;
+        Array<octave_idx_type> deleted_neighbourhood (const dim_vector& size) const;
+        Array<octave_idx_type> positive_neighbourhood (const dim_vector& size) const;
+        Array<octave_idx_type> negative_neighbourhood (const dim_vector& size) const;
 
       private:
         void ctor (const boolNDArray& mask_arg);
@@ -52,6 +55,11 @@ namespace octave
         //! Like octave_value::bool_array_value() but actually checks if
         //! all values are zeros and one.
         static boolNDArray bool_array_value (const octave_value& val);
+
+        //! Like Array::ndims() but will return 1 dimension for ColumnVector
+        static octave_idx_type ndims (const dim_vector& d);
+        template<class T>
+        static octave_idx_type ndims (const Array<T>& a);
     };
 
     class invalid_conversion : public std::invalid_argument
