@@ -39,100 +39,6 @@ using namespace octave::image;
 #error Must have the TR1 or C++11 unordered_map header
 #endif
 
-typedef Array<octave_idx_type> coord;
-
-bool operator== (const coord& a, const coord& b)
-{
-  if (a.nelem () != b.nelem())
-    return false;
-  for (octave_idx_type i = 0; i < a.nelem (); i++)
-    if (  a(i) !=  b(i) )
-      return false;
-
-  return true;
-}
-
-//Lexicographic order for coords
-bool operator< (const coord& a, const coord& b)
-{
-  octave_idx_type na = a.nelem (), nb = b.nelem ();
-  if (na < nb)
-    return true;
-  if (na > nb)
-    return false;
-  octave_idx_type i = 0;
-  while (a(i) == b(i) && i < na)
-    {
-      i++;
-    }
-
-  if (i == na          //They're equal, but this is strict order
-      || a(i) > b(i) )
-    return false;
-
-  return true;
-}
-
-// A few basic utility functions
-//{
-inline
-coord
-to_coord (const dim_vector& dv,
-          octave_idx_type k)
-{
-  octave_idx_type n = dv.length ();
-  coord retval ( dim_vector (n, 1));
-  for (octave_idx_type j = 0; j < n; j++)
-    {
-      retval(j) = k % dv(j);
-      k /= dv(j);
-    }
-  return retval;
-}
-
-inline
-octave_idx_type
-coord_to_pad_idx (const dim_vector& dv,
-                  const coord& c)
-{
-  octave_idx_type idx = 0;
-  octave_idx_type mul = 1;
-  for (octave_idx_type j = 0; j < dv.length (); j++)
-    {
-      idx += mul*c(j);
-      mul *= dv(j) + 2;
-    }
-  return idx;
-}
-
-inline
-coord
-operator- (const coord& a, const coord& b)
-{
-  octave_idx_type na = a.nelem ();
-  coord retval( dim_vector(na,1) );
-  for (octave_idx_type i = 0; i < na; i++)
-    {
-      retval(i) = a(i) - b(i);
-    }
-  return retval;
-}
-
-
-inline
-coord
-operator- (const coord& a)
-{
-  octave_idx_type na = a.nelem ();
-  coord retval (dim_vector(na,1) );
-  for (octave_idx_type i = 0; i < na; i++)
-    {
-      retval(i) = -a(i);
-    }
-  return retval;
-}
-//}
-
 std::set<octave_idx_type>
 populate_neighbours (const connectivity& conn, const dim_vector& padded_size)
 {
@@ -189,7 +95,7 @@ bwlabel_nd (const boolNDArray& BW, const connectivity& conn)
   NDArray L (padded_size, 0);
 
   // L(2:end-1, 2:end-1, ..., 2:end-1) = BW
-  L.insert(BW, coord (dim_vector (size_vec.length (), 1), 1));
+  L.insert(BW, Array<octave_idx_type> (dim_vector (size_vec.length (), 1), 1));
 
   double* L_vec = L.fortran_vec ();
   union_find u_f (L.nelem ());
