@@ -55,27 +55,6 @@ populate_neighbours (const connectivity& conn, const dim_vector& padded_size)
   return neighbours_idx;
 }
 
-
-octave_idx_type
-get_padded_index (octave_idx_type r,
-                  const dim_vector& dv)
-{
-  // This function converts a linear index from the unpadded array
-  // into a linear index of the array with zero padding around it. I
-  // worked it out on paper, but if you want me to explain this, I'd
-  // have to work it out again. ;-) --jgh
-
-  octave_idx_type mult = 1;
-  octave_idx_type padded = 0;
-  for (octave_idx_type j = 0; j < dv.length (); j++)
-    {
-      padded += mult*(r % dv(j) + 1);
-      mult *= dv(j) + 2;
-      r /= dv(j);
-    }
-  return padded;
-}
-
 static octave_value_list
 bwlabel_nd (const boolNDArray& BW, const connectivity& conn)
 {
@@ -100,10 +79,11 @@ bwlabel_nd (const boolNDArray& BW, const connectivity& conn)
   double* L_vec = L.fortran_vec ();
   union_find u_f (L.nelem ());
 
-  for (octave_idx_type BWidx = 0; BWidx < BW.nelem (); BWidx++)
+  for (octave_idx_type Lidx = 0; Lidx < L.nelem (); Lidx++)
     {
-      octave_idx_type Lidx = get_padded_index (BWidx, size_vec);
-
+      // The boundary is always zero, so we'll always skip it, so
+      // we're never considering the neighbours of the boundary. Thus,
+      // there is no possibility of out-of-bounds error below.
       if (L_vec[Lidx])
         {
           //Insert this one into its group
