@@ -188,7 +188,7 @@ bwlabel_nd (const boolNDArray& BW, const connectivity& conn)
 
   NDArray L (padded_size, 0);
 
-  // L(2:end-1, 2:end, ..., 2:end-1) = BW
+  // L(2:end-1, 2:end-1, ..., 2:end-1) = BW
   L.insert(BW, coord (dim_vector (size_vec.length (), 1), 1));
 
   double* L_vec = L.fortran_vec ();
