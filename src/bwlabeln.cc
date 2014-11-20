@@ -472,6 +472,7 @@ See, for example, http://en.wikipedia.org/wiki/Union-find\n\
 %! assert (bwlabeln (a2d, 4), label2dc4)
 %! assert (bwlabeln (a2d, [0 1 0; 1 1 1; 0 1 0]), label2dc4)
 %! assert (bwlabeln (a2d, conndef (2, "minimal")), label2dc4)
+%! assert (bwlabeln (a2d, conndef (3, "minimal")), label2dc4)
 
 %!test
 %! label2dc8 = [
@@ -488,6 +489,7 @@ See, for example, http://en.wikipedia.org/wiki/Union-find\n\
 %! assert (bwlabeln (a2d, 8), label2dc8)
 %! assert (bwlabeln (a2d, ones (3)), label2dc8)
 %! assert (bwlabeln (a2d, conndef (2, "maximal")), label2dc8)
+%! assert (bwlabeln (a2d, conndef (3, "maximal")), label2dc8)
 
 %!test
 %! label3dc8 = [
@@ -601,6 +603,55 @@ See, for example, http://en.wikipedia.org/wiki/Union-find\n\
 %!        2   2   0   0   0   0   0   0   0   0];
 %! assert (bwlabeln (a3d, 18), label3dc18)
 
+%!test
+%! label2dc3 = [
+%!        1   0   0   0   0   0  11   0   0  17
+%!        1   0   0   5   0   8   0  14   0  17
+%!        1   0   4   0   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0   3   0   0   0   0   0   0   0   0
+%!        2   3   0   6   7   9   0   0   0   0
+%!        2   3   0   6   0   0   0  15   0   0
+%!        2   3   0   0   0   0  12   0  16   0
+%!        2   3   0   0   0   0   0   0   0   0
+%!        2   3   0   0   0  10  13   0   0  18];
+%! assert (bwlabeln (a2d, [1 1 1]'), label2dc3)
+%!
+%! label3dc3 = label2dc3;
+%! label3dc3(:,:,2) = [
+%!        0   0   0   0   0   0   0   0   0   0
+%!       19   0   0  24  26   0   0  31   0   0
+%!        0   0   0  24   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0  22   0   0   0   0   0   0   0   0
+%!       20  22   0   0  27  28   0   0   0   0
+%!       20  22   0  25   0   0   0   0   0   0
+%!       20   0   0   0   0   0  29   0   0   0
+%!        0  23   0   0   0   0   0   0   0  32
+%!       21  23   0   0   0   0  30   0   0   0];
+%! label3dc3(:,:,3) = [
+%!       33   0   0   0   0   0   0   0   0   0
+%!        0  35   0  37  39   0   0  42   0   0
+%!        0   0   0  37   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0   0   0  38  40  41   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!       34   0   0   0   0   0   0   0   0   0
+%!       34  36   0   0   0   0   0   0   0  43
+%!       34  36   0   0   0   0   0   0   0   0];
+%! assert (bwlabeln (a3d, [1 1 1]'), label3dc3)
+
+%!test
+%! label2dc1 = zeros (size (a2d));
+%! label2dc1(a2d != 0) = 1:nnz (a2d);
+%! assert (bwlabeln (a2d, [1]), label2dc1);
+%! assert (bwlabeln (a2d, [0 1 0]'), label2dc1);
+%!
+%! label3dc1 = zeros (size (a3d));
+%! label3dc1(a3d != 0) = 1:nnz (a3d);
+%! assert (bwlabeln (a3d, [1]), label3dc1);
+%! assert (bwlabeln (a3d, [0 1 0]'), label3dc1);
 */
 
 // PKG_ADD: autoload ("bwlabel", which ("bwlabeln"));

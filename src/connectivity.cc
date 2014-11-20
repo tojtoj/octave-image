@@ -52,24 +52,12 @@ connectivity::ctor (const boolNDArray& mask_arg)
 
   // Must be 1x1, 3x1, or 3x3x3x...x3
   const octave_idx_type numel = mask.numel ();
-  const octave_idx_type ndims = mask.ndims ();
-  const dim_vector      dims  = mask.dims ();
+  const dim_vector dims = mask.dims ();
+  const octave_idx_type ndims = connectivity::ndims (dims);
 
-  if (ndims == 2)
-    {
-      // Don't forget 1x1, and 3x1 which are valid but arrays always
-      // have at least 2d
-      if (   (dims(0) != 3 && dims(1) != 3)
-          && (dims(0) != 3 && dims(1) != 1)
-          && (dims(0) != 1 && dims(1) != 1))
-        throw invalid_connectivity ("is not 1x1, 3x1, 3x3, or 3x3x...x3");
-    }
-  else
-    {
-      for (octave_idx_type i = 0; i < ndims; i++)
-        if (dims(i) != 3)
-          throw invalid_connectivity ("is not 3x3x...x3");
-    }
+  for (octave_idx_type i = 0; i < ndims; i++)
+    if (dims(i) != 3)
+      throw invalid_connectivity ("is not 1x1, 3x1, 3x3, or 3x3x...x3");
 
   // Center must be true
   const octave_idx_type center = floor (numel /2);

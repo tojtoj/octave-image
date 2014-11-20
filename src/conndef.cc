@@ -270,5 +270,5 @@ center.\n\
 %!error <VAR center is not true> iptcheckconn ([1 1 1; 1 0 1; 1 1 1], "func", "VAR");
 %!error <VAR must be logical or in> iptcheckconn ([1 2 1; 1 1 1; 1 1 1], "func", "VAR");
 %!error <VAR is not symmetric relative to its center> iptcheckconn ([0 1 1; 1 1 1; 1 1 1], "func", "VAR");
-%!error <VAR is not 3x3x...x3> iptcheckconn (ones (3, 3, 3, 4), "func", "VAR");
+%!error <VAR is not 1x1, 3x1, 3x3, or 3x3x...x3> iptcheckconn (ones (3, 3, 3, 4), "func", "VAR");
 */
