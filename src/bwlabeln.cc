@@ -20,65 +20,36 @@
 // Jeffrey E. Boyd and Carnë Draug for bwlabel_2d
 // Jordi Gutiérrez Hermoso for bwlabel_nd
 
-#include <octave/oct.h>
 #include <vector>
-#include <set>
 #include <algorithm>
+#include <unordered_map>
+
+#include <octave/oct.h>
 #include "union-find.h++"
 
 #include "connectivity.h"
 using namespace octave::image;
 
-#include "config.h"
-
-#if defined (HAVE_UNORDERED_MAP)
-#include <unordered_map>
-#elif defined (HAVE_TR1_UNORDERED_MAP)
-#include <tr1/unordered_map>
-#else
-#error Must have the TR1 or C++11 unordered_map header
-#endif
-
-std::set<octave_idx_type>
-populate_neighbours (const connectivity& conn, const dim_vector& padded_size)
-{
-  //The zero coordinates are the centre, and the negative ones
-  //are the ones reflected about the centre, and we don't need
-  //to consider those.
-  const Array<octave_idx_type> offsets = conn.negative_neighbourhood (padded_size);
-
-  std::set<octave_idx_type> neighbours_idx;
-  for (octave_idx_type i = 0; i < offsets.numel (); i++)
-    neighbours_idx.insert (offsets(i));
-
-  return neighbours_idx;
-}
-
 static octave_value_list
 bwlabel_nd (const boolNDArray& BW, const connectivity& conn)
 {
-  octave_value_list rval;
   boolNDArray conn_mask = conn.mask;
 
   const dim_vector size_vec = BW.dims ();
 
   // Use temporary array with borders padded with zeros. Labels will
   // also go in here eventually.
-  dim_vector padded_size = size_vec;
-  for (octave_idx_type j = 0; j < size_vec.length (); j++)
-    padded_size(j) += 2;
-
-  auto neighbours = populate_neighbours (conn, padded_size);
-
-  NDArray L (padded_size, 0);
-
-  // L(2:end-1, 2:end-1, ..., 2:end-1) = BW
-  L.insert(BW, Array<octave_idx_type> (dim_vector (size_vec.length (), 1), 1));
-
+  NDArray L = conn.create_padded (BW, 0);
   double* L_vec = L.fortran_vec ();
-  union_find u_f (L.nelem ());
+  const octave_idx_type numel = L.numel ();
 
-  for (octave_idx_type Lidx = 0; Lidx < L.nelem (); Lidx++)
+  const Array<octave_idx_type> neighbours
+    = conn.negative_neighbourhood (L.dims ());
+  const octave_idx_type* nbr = neighbours.fortran_vec ();
+  const octave_idx_type nbr_numel = neighbours.numel ();
+
+  union_find u_f (numel);
+  for (octave_idx_type Lidx = 0; Lidx < numel; Lidx++)
     {
       // The boundary is always zero, so we'll always skip it, so
       // we're never considering the neighbours of the boundary. Thus,
@@ -88,51 +59,41 @@ bwlabel_nd (const boolNDArray& BW, const connectivity& conn)
           //Insert this one into its group
           u_f.find (Lidx);
 
-          //Replace this with C++0x range-based for loop later
-          //(implemented in gcc 4.6)
-          for (auto nbr = neighbours.begin (); nbr != neighbours.end (); nbr++)
+          for (octave_idx_type i = 0; i < nbr_numel; i++)
             {
-              octave_idx_type n = *nbr + Lidx;
-              if (L_vec[n] )
+              octave_idx_type n = *nbr++ + Lidx;
+              if (L_vec[n])
                 u_f.unite (n, Lidx);
             }
+          nbr -= nbr_numel;
         }
     }
 
-#ifdef USE_UNORDERED_MAP_WITH_TR1
-  using std::tr1::unordered_map;
-#else
-  using std::unordered_map;
-#endif
-
-  unordered_map<octave_idx_type, octave_idx_type> ids_to_label;
+  std::unordered_map<octave_idx_type, octave_idx_type> ids_to_label;
   octave_idx_type next_label = 1;
 
-  auto idxs  = u_f.get_ids ();
-
-  //C++0x foreach later
+  std::vector<octave_idx_type> idxs = u_f.get_ids ();
   for (auto idx = idxs.begin (); idx != idxs.end (); idx++)
     {
       octave_idx_type label;
       octave_idx_type id = u_f.find (*idx);
       auto try_label = ids_to_label.find (id);
-      if( try_label == ids_to_label.end ())
+      if (try_label == ids_to_label.end ())
         {
           label = next_label++;
           ids_to_label[id] = label;
         }
       else
-          label = try_label -> second;
+        label = try_label->second;
 
       L_vec[*idx] = label;
     }
 
   // Remove the zero padding...
-  Array<idx_vector> inner_slice (dim_vector (size_vec.length (), 1));
-  for (octave_idx_type i = 0; i < padded_size.length (); i++)
-    inner_slice(i) = idx_vector (1, padded_size(i) - 1);
+  conn.unpad (L);
 
-  rval(0) = L.index (inner_slice);
+  octave_value_list rval;
+  rval(0) = L;
   rval(1) = ids_to_label.size ();
   return rval;
 }
