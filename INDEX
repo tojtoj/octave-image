@@ -84,6 +84,8 @@ Morhophological Operations
  imerode
  imopen
  imreconstruct
+ imregionalmax
+ imregionalmin
  imtophat
  mmgradm
  @strel/getheight
