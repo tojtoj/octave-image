@@ -103,6 +103,8 @@ function attr = imattributes (imgh = gcf ())
 
 endfunction
 
+## The tests for the correct class will all fail until 4.2 is released.
+
 %!shared x, map, img, rgb, bw
 %! [x, map] = imread ("default.img");
 %! rgb = ind2rgb (x, map);
@@ -112,7 +114,7 @@ endfunction
 %!test
 %! h = imshow (img);
 %! a = imattributes (h);
-%! assert ([a.Height a.Width], [53 40]);
+%! assert ([a.("Height (rows)") a.("Width (columns)")], [53 40]);
 %! assert (a.Class, "uint8");
 %! assert (a.("Image type"), "intensity");
 %! assert (a.("Minimum intensity"), uint8 (28));
@@ -122,7 +124,7 @@ endfunction
 %!xtest
 %! h = imshow (rgb);
 %! a = imattributes (h);
-%! assert ([a.Height a.Width], [53 40]);
+%! assert ([a.("Height (rows)") a.("Width (columns)")], [53 40]);
 %! assert (a.Class, "uint8");
 %! assert (a.("Image type"), "truecolor");
 %! assert (isfield (a, "Minimum intensity"), false);
@@ -131,7 +133,7 @@ endfunction
 %!test
 %! h = imshow (bw);
 %! a = imattributes (h);
-%! assert ([a.Height a.Width], [53 40]);
+%! assert ([a.("Height (rows)") a.("Width (columns)")], [53 40]);
 %! assert (a.Class, "logical");
 %! assert (a.("Image type"), "binary");
 %! assert (isfield (a, "Minimum intensity"), false);
@@ -140,7 +142,7 @@ endfunction
 %!test
 %! h = imshow (x, map);
 %! a = imattributes (h);
-%! assert ([a.Height a.Width], [53 40]);
+%! assert ([a.("Height (rows)") a.("Width (columns)")], [53 40]);
 %! assert (a.Class, "uint8");
 %! assert (a.("Image type"), "indexed");
 %! assert (a.("Minimum intensity"), uint8 (0));
