@@ -32,13 +32,6 @@ $(strel_dependent): %.oct: %.cc strel.o
 %.oct: %.cc
 	$(FLAGGED_MKOCTFILE) $<
 
-check: ${OCT_FILES}
-	$(eval PKG_ADD = $(shell grep -Pho '(?<=// PKG_ADD: ).*' ${CC_FILES}))
-	for FILE in $(CC_FILES); do \
-		echo "Running tests from $${FILE}"; \
-		$(OCTAVE) --no-window-system --silent --eval '${PKG_ADD} addpath ("../inst"), test '$${FILE}; \
-	done
-
 clean:
 	rm -f *.o octave-core core *.oct *~
 

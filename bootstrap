@@ -3,4 +3,6 @@
 ## Run this to generate the configure script
 
 set -e      # halt if unhandled error
+
+cd src/
 autoconf    # generate configure script
