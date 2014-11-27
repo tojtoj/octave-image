@@ -159,7 +159,7 @@ function [varargout] = graythresh (img, algo = "otsu", varargin)
   endif
 
   ## we only need to do this if the input is an image. If an histogram, is
-  ## supplieed, no need to do any of this
+  ## supplied, no need to do any of this
   if (!hist_in)
     ## if image is uint we do nothing. If it's int, then we convert to uint since
     ## it may mess up calculations later. If it's double we need some bins so we
@@ -205,7 +205,7 @@ function [thresh] = otsu (ihist, compute_good)
   ## there's not many pages explaining it either. For that, one really needs to
   ## check the paper.
   ##
-  ## The implemententation on the link above assumes that threshold is to be
+  ## The implementation on the link above assumes that threshold is to be
   ## made for values "greater or equal than" but that is not the case (in im2bw
   ## and also not ImageJ) so we subtract 1 at the end.
 
@@ -277,7 +277,7 @@ function T = maxentropy(y)
       vec(j+1) = negE/sumA - log10 (sumA) + (negY-negE)/(sum_diff) - log10 (sum_diff);
     end
   unwind_protect_cleanup
-    ## restore broadcats warning status
+    ## restore broadcast warning status
     warning (dz_warn.state, "Octave:divide-by-zero");
   end_unwind_protect
 
@@ -399,7 +399,7 @@ function [Tout] = minerror_iter (y, T)
       end
     endwhile
   unwind_protect_cleanup
-    ## restore broadcats warning status
+    ## restore broadcast warning status
     warning (dz_warn.state, "Octave:divide-by-zero");
   end_unwind_protect
   Tout{1} = T;
@@ -622,7 +622,7 @@ function E = hbalance(y,ind)
 % References:
 %
 % A. Rosenfeld and P. De La Torre, "Histogram concavity analysis as an aid
-% in threhold selection," IEEE Transactions on Systems, Man, and
+% in threshold selection," IEEE Transactions on Systems, Man, and
 % Cybernetics, vol. 13, pp. 231-235, 1983.
 %
 % P. K. Sahoo, S. Soltani, and A. K. C. Wong, "A survey of thresholding
@@ -644,7 +644,7 @@ function H = hconvhull(h)
   % References:
   %
   % A. Rosenfeld and P. De La Torre, "Histogram concavity analysis as an aid
-  % in threhold selection," IEEE Transactions on Systems, Man, and
+  % in threshold selection," IEEE Transactions on Systems, Man, and
   % Cybernetics, vol. 13, pp. 231-235, 1983.
 
   len = length(h);
@@ -675,7 +675,7 @@ function H = hconvhull(h)
   end
 endfunction
 
-## Entroy function. Note that the function returns the negative of entropy.
+## Entropy function. Note that the function returns the negative of entropy.
 function x = negativeE(y,j)
   ## used by the maxentropy method only
   y = y(1:j+1);

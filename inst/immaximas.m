@@ -106,7 +106,7 @@ function varargout = immaximas(im, radius, thresh)
       c = im(ind);
       a = (im(indminus1) + im(indplus1))/2 - c;
       b = a + c - im(indminus1);
-      shift = -w*b./(2*a); # Maxima of quadradic 
+      shift = -w*b./(2*a); # Maxima of quadratic 
       
       ## Move point   
       sub{d} += shift;

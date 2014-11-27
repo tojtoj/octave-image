@@ -40,7 +40,7 @@ function gray = rgb2gray (rgb)
   elseif (isimage (rgb) && ndims (rgb) == 3)
     warning ("off", "Octave:broadcast", "local");
 
-    ## mutiply each color by the luminance factor (this is also matlab compatible)
+    ## multiply each color by the luminance factor (this is also matlab compatible)
     ##      0.29894 * red + 0.58704 * green + 0.11402 * blue
     gray = im2double (rgb) .* permute ([0.29894, 0.58704, 0.11402], [1, 3, 2]);
     gray = sum (gray, 3);

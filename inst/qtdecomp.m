@@ -37,7 +37,7 @@
 ## S = qtdecomp(I) decomposes an intensity image @var{I} as described
 ## above. By default it doesn't split a block if all elements are equal.
 ##
-## S = qtdecomp(I, threshold) decomposes an image as decribed, but only
+## S = qtdecomp(I, threshold) decomposes an image as described, but only
 ## splits a block if the maximum value in the block minus the minimum
 ## value is greater than @var{threshold}, which is a value between 0 and
 ## 1. If @var{I} is of class uint8, @var{threshold} is multiplied by 255
@@ -140,7 +140,7 @@ function S = qtdecomp (I, p1, varargin)
     error("qtdecomp: mindim must be smaller than maxdim.");
   endif
 
-  ## See if we have to split a minimum regarless other considerations.
+  ## See if we have to split a minimum regardless other considerations.
   if (maxdim<curr_size)
     initial_splits=ceil(log2(curr_size/maxdim));
     if(initial_splits>0)

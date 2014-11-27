@@ -43,7 +43,7 @@
 ## matrix.  When converting a matrix into blocks with @code{im2col}, there
 ## will be less blocks to account to borders, so if @var{block_size} is the
 ## same in both @code{col2im} and @code{im2col}, @var{A_size} can be the size
-## out the ouput from @code{im2col}.
+## out the output from @code{im2col}.
 ##
 ## @end table
 ##

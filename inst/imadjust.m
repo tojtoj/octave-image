@@ -74,7 +74,7 @@
 ## @item
 ## Prior versions of imadjust allowed @code{[low_in; high_in]} and
 ## @code{[low_out; high_out]} to be row vectors. Compatibility with this
-## behaviour has been keeped, although preferred form is vertical vector
+## behaviour has been kept, although preferred form is vertical vector
 ## (since it extends nicely to 2-by-3 matrices for RGB images and
 ## colormaps).
 ## @item

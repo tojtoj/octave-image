@@ -49,8 +49,8 @@
 ##
 ## This function is meant to be used in an interactive session, and not
 ## programatically.  The properties of an image should be measured from the
-## image variavle itself not from the figure object.  In addition this
-## function is purposedly Matlab incompatible on their return value which
+## image variable itself not from the figure object.  In addition this
+## function is purposely Matlab incompatible on their return value which
 ## returns a cell array of strings which is only useful for display.
 ##
 ## @end deftypefn

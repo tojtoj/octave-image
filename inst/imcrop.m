@@ -55,7 +55,7 @@
 ## @example
 ## @group
 ## nd_img = cat (4, img1, img2, img3, img4);
-## croped = imcrop (nd_img);
+## cropped = imcrop (nd_img);
 ## cropped_1 = cropped(:,:,:,1);
 ## cropped_2 = cropped(:,:,:,2);
 ## cropped_3 = cropped(:,:,:,3);
@@ -67,10 +67,10 @@
 ##
 ## @example
 ## @group
-## [croped_1, rect] = imcrop (img1);
-## cropped_2        = imcrop (img2, rect);
-## cropped_3        = imcrop (img3, rect);
-## cropped_4        = imcrop (img4, rect);
+## [cropped_1, rect] = imcrop (img1);
+## cropped_2         = imcrop (img2, rect);
+## cropped_3         = imcrop (img3, rect);
+## cropped_4         = imcrop (img4, rect);
 ## @end group
 ## @end example
 ##

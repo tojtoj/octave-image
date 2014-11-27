@@ -172,7 +172,7 @@ function B = padarray(A, padsize, varargin)
     ## For a dimension of the input matrix of size 1, since reflect does
     ## not includes the borders, it is not possible to pad singleton dimensions.
     if (reflect && any ((! (A_size -1)) & P_size))
-      error ("padarray: can't add %s padding to sinleton dimensions", pattern);
+      error ("padarray: can't add %s padding to singleton dimensions", pattern);
     endif
 
     ## For symmetric and reflect:

@@ -37,7 +37,7 @@
 ## @item "crop"
 ## The central part of the image of the same size as the input image is returned.
 ## @item "same"
-## The size and coordinate system of the input image is keept.
+## The size and coordinate system, of the input image, are kept.
 ## @end table
 ##
 ## All values of the result that fall outside the original image will

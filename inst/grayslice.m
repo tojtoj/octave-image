@@ -18,10 +18,10 @@
 ## @deftypefn  {Function File} {} grayslice (@var{I})
 ## @deftypefnx {Function File} {} grayslice (@var{I}, @var{n})
 ## @deftypefnx {Function File} {} grayslice (@var{I}, @var{v})
-## Create indexed image from intensitiy image using multilevel thresholding.
+## Create indexed image from intensity image using multilevel thresholding.
 ##
 ## The intensity image @var{I} will be split into multiple threshold levels.
-## For regularly spaced intervals, the number of levels can be specifed as the
+## For regularly spaced intervals, the number of levels can be specified as the
 ## numeric scalar @var{n} (defaults to 10), which will use the intervals:
 ##
 ## @tex
@@ -36,7 +36,7 @@
 ## @end verbatim
 ## @end ifnottex
 ##
-## For irregularly spaced intervales, the numeric vector @var{v} can be
+## For irregularly spaced intervals, the numeric vector @var{v} can be
 ## specified instead.  The values in @var{v} must be in the range [0 1]
 ## independently of the class of @var{I}.  These will be adjusted by
 ## @code{grayslice} according to the image.

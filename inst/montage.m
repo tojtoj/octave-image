@@ -209,7 +209,7 @@ function h = montage (images, varargin)
     p.parse (varargin{:});
   endif
 
-  ## remove unecessary images
+  ## remove unnecessary images
   images = images(:,:,:,p.Results.Indices);
   nImg   = size (images, 4);
 

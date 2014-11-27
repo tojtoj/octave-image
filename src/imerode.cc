@@ -113,7 +113,7 @@ pad_matrix (const T& mt, const strel& se,
 // SE will have an offset of 1 and 2.
 // We match the first element of output with the first from output, and shift
 // their offset values to move to all other points in the input and assign
-// them to the ouput.
+// them to the output.
 //
 // To deal with N dimensional images we have the cumulative dimensions of the
 // input matrix, e.g. for 10x20x4x5 matrix, this would be the array

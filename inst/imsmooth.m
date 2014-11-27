@@ -94,7 +94,7 @@
 ##   = exp(-0.5*d([x0,y0],[x,y])^2/@var{sigma_d}^2)
 ##     * exp(-0.5*d(@var{I}(x0,y0),@var{I}(x,y))^2/@var{sigma_r}^2),
 ## @end example
-## with @code{d} being the Euclidian distance function. The two paramteres
+## with @code{d} being the Euclidian distance function. The two parameters
 ## @var{sigma_d} and @var{sigma_r} control the amount of smoothing. @var{sigma_d}
 ## is the size of the spatial smoothing filter, while @var{sigma_r} is the size
 ## of the range filter. When @var{sigma_r} is large the filter behaves almost

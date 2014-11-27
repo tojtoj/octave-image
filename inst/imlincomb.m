@@ -61,7 +61,7 @@ function out = imlincomb (varargin)
 
   out = zeros (size (varargin{2}));
   for i = 1:numel (imgI)
-    ## we keep index the images froom varargin rather than copying to new variable to
+    ## we keep index the images from varargin rather than copying to new variable to
     ## avoid taking up a lot of memory
     if (!isreal (varargin{facI(i)}) || !isscalar (varargin{facI(i)}) || !isfloat (varargin{facI(i)}))
       error ("factor to multiply each image must be a real, floating-point, scalar.");

@@ -31,7 +31,7 @@
 ## The second input argument @var{tmat} must be a (N+1)-by-(N+1)
 ## transformation matrix.  The
 ## (N+1)th column must contain projection coefficients.  As an example a two
-## dimentionnal transform from [x y] coordinates to [u v] coordinates
+## dimensional transform from [x y] coordinates to [u v] coordinates
 ## is represented by a transformation matrix defined so that:
 ##
 ## @example
