@@ -17,6 +17,7 @@
 #ifndef OCTAVE_IMAGE_CONNDEF
 #define OCTAVE_IMAGE_CONNDEF
 
+#include <string>
 #include <stdexcept>
 
 #include <octave/oct.h>
@@ -29,7 +30,7 @@ namespace octave
     class connectivity
     {
       public:
-        connectivity ();
+        connectivity () = default;
 
         //! Will throw if val is bad
         connectivity (const octave_value& val);

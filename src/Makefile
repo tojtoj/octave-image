@@ -1,6 +1,8 @@
 MKOCTFILE ?= mkoctfile -Wall
 OCTAVE ?= octave
 
+FLAGGED_MKOCTFILE = CXXFLAGS=$$($(MKOCTFILE) -p CXXFLAGS)" -std=c++0x" $(MKOCTFILE)
+
 ## We can't link oct files, and Octave's package system does not handle
 ## shared libraries. Because of this, we need to create object files for
 ## our "shared" libraries and statically link to selected oct files.
@@ -18,23 +20,23 @@ CC_FILES = $(patsubst %.oct, %.cc, ${OCT_FILES})
 
 all: ${OCT_FILES}
 
-%.o: %.cc
-	$(MKOCTFILE) -c $<
+%.o: %.cc %.h
+	$(FLAGGED_MKOCTFILE) -c $<
 
 $(conn_dependent): %.oct: %.cc connectivity.o
-	CXXFLAGS=$$($(MKOCTFILE) -p CXXFLAGS)' -std=c++0x' $(MKOCTFILE) $^
+	$(FLAGGED_MKOCTFILE) $^
 
 $(strel_dependent): %.oct: %.cc strel.o
-	$(MKOCTFILE) $^
+	$(FLAGGED_MKOCTFILE) $^
 
 %.oct: %.cc
-	$(MKOCTFILE) $<
+	$(FLAGGED_MKOCTFILE) $<
 
-test: ${OCT_FILES}
+check: ${OCT_FILES}
 	$(eval PKG_ADD = $(shell grep -Pho '(?<=// PKG_ADD: ).*' ${CC_FILES}))
 	for FILE in $(CC_FILES); do \
 		echo "Running tests from $${FILE}"; \
-		$(OCTAVE) --no-window-system --silent --eval '${PKG_ADD} test '$${FILE}; \
+		$(OCTAVE) --no-window-system --silent --eval '${PKG_ADD} addpath ("../inst"), test '$${FILE}; \
 	done
 
 clean:
