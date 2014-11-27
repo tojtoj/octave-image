@@ -1,7 +1,7 @@
 MKOCTFILE ?= mkoctfile -Wall
 OCTAVE ?= octave
 
-FLAGGED_MKOCTFILE = CXXFLAGS=$$($(MKOCTFILE) -p CXXFLAGS)" -std=c++0x" $(MKOCTFILE)
+FLAGGED_MKOCTFILE = CXXFLAGS="@CXXFLAGS@" $(MKOCTFILE)
 
 ## We can't link oct files, and Octave's package system does not handle
 ## shared libraries. Because of this, we need to create object files for

@@ -5,4 +5,5 @@
 set -e      # halt if unhandled error
 
 cd src/
+aclocal     # get macros into aclocal.m4
 autoconf    # generate configure script
