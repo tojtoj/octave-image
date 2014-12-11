@@ -42,12 +42,12 @@ public:
 
   //Give the root representative id for this object, or insert into a
   //new set if none is found
-  octave_idx_type find (octave_idx_type idx)
+  octave_idx_type
+  find (const octave_idx_type idx)
   {
-
     //Insert new element if not found
     auto v = voxels[idx];
-    if (!v)
+    if (! v)
       {
         voxel* new_voxel = new voxel;
         new_voxel->rank = 0;
@@ -55,22 +55,27 @@ public:
         voxels[idx] = new_voxel;
         return idx;
       }
+    else
+      {
+        voxel* elt = v;
+        if (elt->parent != idx)
+          elt->parent = find (elt->parent);
 
-    voxel* elt = v;
-    if (elt->parent != idx)
-      elt->parent = find (elt->parent);
-
-    return elt->parent;
+        return elt->parent;
+      }
   }
 
   //Given two objects, unite the sets to which they belong
-  void unite (octave_idx_type idx1, octave_idx_type idx2)
+  void
+  unite (const octave_idx_type idx1, const octave_idx_type idx2)
   {
-    octave_idx_type root1 = find (idx1), root2 = find (idx2);
+    octave_idx_type root1 = find (idx1);
+    octave_idx_type root2 = find (idx2);
 
     //Check if any union needs to be done, maybe they already are
     //in the same set.
-    voxel *v1 = voxels[root1], *v2 = voxels[root2];
+    voxel *v1 = voxels[root1];
+    voxel *v2 = voxels[root2];
     if (root1 != root2)
       {
         if ( v1->rank > v2->rank)
@@ -85,7 +90,8 @@ public:
       }
   }
 
-  std::vector<octave_idx_type> get_ids()
+  std::vector<octave_idx_type>
+  get_ids () const
   {
     std::vector<octave_idx_type> ids;
 

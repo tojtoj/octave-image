@@ -30,16 +30,9 @@
 #include "connectivity.h"
 using namespace octave::image;
 
-static octave_value_list
-bwlabel_nd (const boolNDArray& BW, const connectivity& conn)
+static union_find
+pre_label (NDArray& L, const connectivity& conn)
 {
-  boolNDArray conn_mask = conn.mask;
-
-  const dim_vector size_vec = BW.dims ();
-
-  // Use temporary array with borders padded with zeros. Labels will
-  // also go in here eventually.
-  NDArray L = conn.create_padded (BW, 0);
   double* L_vec = L.fortran_vec ();
   const octave_idx_type numel = L.numel ();
 
@@ -68,6 +61,13 @@ bwlabel_nd (const boolNDArray& BW, const connectivity& conn)
           nbr -= nbr_numel;
         }
     }
+  return u_f;
+}
+
+static octave_idx_type
+paint_labels (NDArray& L, union_find& u_f)
+{
+  double* L_vec = L.fortran_vec ();
 
   std::unordered_map<octave_idx_type, octave_idx_type> ids_to_label;
   octave_idx_type next_label = 1;
@@ -88,13 +88,29 @@ bwlabel_nd (const boolNDArray& BW, const connectivity& conn)
 
       L_vec[*idx] = label;
     }
+  return ids_to_label.size ();
+}
+
+static octave_value_list
+bwlabel_nd (const boolNDArray& BW, const connectivity& conn)
+{
+  boolNDArray conn_mask = conn.mask;
+
+  const dim_vector size_vec = BW.dims ();
+
+  // Use temporary array with borders padded with zeros. Labels will
+  // also go in here eventually.
+  NDArray L = conn.create_padded (BW, 0);
+
+  union_find u_f = pre_label (L, conn);
+  octave_idx_type n_labels = paint_labels (L, u_f);
 
   // Remove the zero padding...
   conn.unpad (L);
 
   octave_value_list rval;
   rval(0) = L;
-  rval(1) = ids_to_label.size ();
+  rval(1) = n_labels;
   return rval;
 }
 
