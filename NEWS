@@ -36,6 +36,16 @@
     specify the number of elements connected to the center of the
     connectivity array.
 
+ ** The following functions have been completely rewritten and wil perform
+    a lot of faster.
+
+      bwconncomp
+
+   Which indirectly will also cause the following to perform faster:
+
+     bwareaopen
+     bwpropfilt
+
  ** Deprecated functions.
 
     The following functions were deprecated in image 2.2.0 and have been
