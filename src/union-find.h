@@ -1,4 +1,5 @@
 // Copyright (C) 2011 Jordi Gutiérrez Hermoso <jordigh@octave.org>
+// Copyright (C) 2014 Carnë Draug <carandraug@octave.org>
 //
 // This program is free software; you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -13,13 +14,14 @@
 // You should have received a copy of the GNU General Public License along with
 // this program; if not, see <http://www.gnu.org/licenses/>.
 
-// union-find.h++
-
 #include <vector>
 
-struct voxel{
+struct voxel
+{
   octave_idx_type rank;
   octave_idx_type parent;
+
+  voxel () = default;
 };
 
 class union_find
@@ -28,41 +30,30 @@ class union_find
   // http://en.wikipedia.org/wiki/Union-find
 
 private:
-  std::vector<voxel*> voxels;
+  std::vector<voxel> voxels;
 
 public:
 
   union_find (octave_idx_type s) : voxels (s) {};
 
-  ~union_find ()
+  // Use only when adding new elements for the first time
+  void
+  add (const octave_idx_type idx)
   {
-    for (auto v = voxels.begin(); v != voxels.end(); v++)
-      delete *v;
+    voxels[idx].parent  = idx;
+    voxels[idx].rank    = 0;
+    return;
   }
 
-  //Give the root representative id for this object, or insert into a
-  //new set if none is found
+  // Give the root representative id for this object
   octave_idx_type
   find (const octave_idx_type idx)
   {
-    //Insert new element if not found
-    auto v = voxels[idx];
-    if (! v)
-      {
-        voxel* new_voxel = new voxel;
-        new_voxel->rank = 0;
-        new_voxel->parent = idx;
-        voxels[idx] = new_voxel;
-        return idx;
-      }
-    else
-      {
-        voxel* elt = v;
-        if (elt->parent != idx)
-          elt->parent = find (elt->parent);
+    voxel* elt = &voxels[idx];
+    if (elt->parent != idx)
+      elt->parent = find (elt->parent);
 
-        return elt->parent;
-      }
+    return elt->parent;
   }
 
   //Given two objects, unite the sets to which they belong
@@ -74,11 +65,11 @@ public:
 
     //Check if any union needs to be done, maybe they already are
     //in the same set.
-    voxel *v1 = voxels[root1];
-    voxel *v2 = voxels[root2];
     if (root1 != root2)
       {
-        if ( v1->rank > v2->rank)
+        voxel* v1 = &voxels[root1];
+        voxel* v2 = &voxels[root2];
+        if (v1->rank > v2->rank)
           v1->parent = root2;
         else if (v1->rank < v2->rank)
           v2->parent = root1;
@@ -91,12 +82,13 @@ public:
   }
 
   std::vector<octave_idx_type>
-  get_ids () const
+  get_ids (const NDArray& L) const
   {
     std::vector<octave_idx_type> ids;
+    const double* v = L.fortran_vec ();
 
     for (size_t i = 0; i < voxels.size (); i++)
-      if (voxels[i])
+      if (v[i])
         ids.push_back (i);
 
     return ids;

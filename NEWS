@@ -40,11 +40,13 @@
     a lot of faster.
 
       bwconncomp
+      bwlabeln
 
    Which indirectly will also cause the following to perform faster:
 
      bwareaopen
      bwpropfilt
+     regionprops
 
  ** Deprecated functions.
 

@@ -50,7 +50,7 @@ pre_label (NDArray& L, const connectivity& conn)
       if (L_vec[Lidx])
         {
           //Insert this one into its group
-          u_f.find (Lidx);
+          u_f.add (Lidx);
 
           for (octave_idx_type i = 0; i < nbr_numel; i++)
             {
@@ -72,7 +72,7 @@ paint_labels (NDArray& L, union_find& u_f)
   std::unordered_map<octave_idx_type, octave_idx_type> ids_to_label;
   octave_idx_type next_label = 1;
 
-  std::vector<octave_idx_type> idxs = u_f.get_ids ();
+  std::vector<octave_idx_type> idxs = u_f.get_ids (L);
   for (auto idx = idxs.begin (); idx != idxs.end (); idx++)
     {
       octave_idx_type label;
