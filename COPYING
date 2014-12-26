@@ -32,7 +32,6 @@ inst/bestblk.m                          GPLv3+
 inst/blockproc.m                        GPLv3+
 inst/bwarea.m                           GPLv3+
 inst/bwareafilt.m                       GPLv3+
-inst/bwareaopen.m                       GPLv3+
 inst/bwboundaries.m                     GPLv3+
 inst/bwdist.m                           GPLv3+
 inst/bweuler.m                          GPLv3+

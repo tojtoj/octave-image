@@ -19,7 +19,6 @@
 
 // TODO: functions that could be here
 //      * bwareafilt
-//      * bwareaopen
 //      * imfill / bwfill
 //      * bwselect
 //      * labelmatrix
@@ -307,5 +306,140 @@ or with a binary matrix representing a connectivity array.  Defaults to\n\
 %! cc = bwconncomp (a, 4);
 %! assert (rows (cc.PixelIdxList), 1)
 %! assert (columns (cc.PixelIdxList) > 1)
+*/
+
+// PKG_ADD: autoload ("bwareaopen", which ("bwconncomp"));
+// PKG_DEL: autoload ("bwareaopen", which ("bwconncomp"), "remove");
+DEFUN_DLD(bwareaopen, args, , "\
+-*- texinfo -*-\n\
+@deftypefn  {Function File} {} bwareaopen (@var{bw}, @var{lim})\n\
+@deftypefnx {Function File} {} bwareaopen (@var{bw}, @var{lim}, @var{conn})\n\
+Perform area opening.\n\
+\n\
+Remove objects with less than @var{lim} elements from a binary image\n\
+@var{bw}.\n\
+\n\
+Element connectivity @var{conn}, to define the size of objects, can be\n\
+specified with a numeric scalar (number of elements in the neighborhood):\n\
+\n\
+@table @samp\n\
+@item 4 or 8\n\
+for 2 dimensional matrices;\n\
+@item 6, 18 or 26\n\
+for 3 dimensional matrices;\n\
+@end table\n\
+\n\
+or with a binary matrix representing a connectivity array.  Defaults to\n\
+@code{conndef (ndims (@var{bw}), \"maximal\")} which is equivalent to\n\
+@var{conn} of 8 and 26 for 2 and 3 dimensional matrices respectively.\n\
+\n\
+@seealso{bwconncomp, conndef, bwboundaries}\n\
+@end deftypefn")
+{
+  const octave_idx_type nargin = args.length ();
+  if (nargin < 2 || nargin > 3)
+    {
+      print_usage ();
+      return octave_value_list ();
+    }
+
+  boolNDArray BW = args(0).bool_array_value ();
+  if (error_state)
+    {
+      error ("bwareaopen: BW must be a numeric or logical matrix");
+      return octave_value_list ();
+    }
+  const std::vector<octave_idx_type>::size_type lim
+    = args(1).idx_type_value ();
+  if (error_state || lim < 0)
+    {
+      error ("bwareaopen: LIM must be a non-negative scalar integer");
+      return octave_value_list ();
+    }
+
+  connectivity conn;
+  try
+    {
+      conn = (nargin > 2) ? connectivity (args(2)) :
+                            connectivity (BW.ndims (), "maximal");
+    }
+  catch (invalid_connectivity& e)
+    {
+      error ("bwareaopen: MASK %s", e.what ());
+      return octave_value_list ();
+    }
+
+  const std::vector<std::vector<octave_idx_type>> all_cc
+    = connnected_components (BW, conn);
+
+  bool* BW_v = BW.fortran_vec ();
+  for (std::vector<octave_idx_type> cc : all_cc)
+    {
+      if (cc.size () < lim)
+        for (octave_idx_type ind : cc)
+          BW_v[ind] = false;
+    }
+
+  return octave_value (BW);
+}
+
+/*
+%!test
+%! in = [ 0   0   1   0   0   1   0   1   0   0
+%!        0   0   1   0   0   0   0   0   1   1
+%!        1   0   0   0   0   1   1   0   0   0
+%!        1   0   0   0   1   0   0   0   0   0
+%!        1   1   1   1   0   0   0   0   0   1
+%!        0   1   0   1   1   0   0   1   0   0
+%!        1   0   0   0   1   0   0   0   0   0
+%!        0   0   0   1   1   0   0   1   0   0
+%!        0   1   0   1   1   0   0   1   1   0
+%!        0   1   0   1   1   1   0   0   1   0];
+%! assert (bwareaopen (in, 1, 4), logical (in))
+%!
+%! out = [0   0   0   0   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        1   0   0   0   0   0   0   0   0   0
+%!        1   0   0   0   0   0   0   0   0   0
+%!        1   1   1   1   0   0   0   0   0   0
+%!        0   1   0   1   1   0   0   0   0   0
+%!        0   0   0   0   1   0   0   0   0   0
+%!        0   0   0   1   1   0   0   0   0   0
+%!        0   0   0   1   1   0   0   0   0   0
+%!        0   0   0   1   1   1   0   0   0   0];
+%! assert (bwareaopen (logical (in), 10, 4), logical (out))
+%! assert (bwareaopen (in, 10, 4), logical (out))
+%! assert (bwareaopen (in, 10, [0 1 0; 1 1 1; 0 1 0]), logical (out))
+%!
+%! out = [0   0   0   0   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        1   0   0   0   0   1   1   0   0   0
+%!        1   0   0   0   1   0   0   0   0   0
+%!        1   1   1   1   0   0   0   0   0   0
+%!        0   1   0   1   1   0   0   0   0   0
+%!        1   0   0   0   1   0   0   0   0   0
+%!        0   0   0   1   1   0   0   0   0   0
+%!        0   0   0   1   1   0   0   0   0   0
+%!        0   0   0   1   1   1   0   0   0   0];
+%! assert (bwareaopen (in, 10, 8), logical (out))
+%! assert (bwareaopen (in, 10, ones (3)), logical (out))
+%! assert (bwareaopen (in, 10), logical (out))
+%!
+%! out = [0   0   0   0   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        1   0   0   0   0   0   0   0   0   0
+%!        1   0   0   0   0   0   0   0   0   0
+%!        1   1   1   1   0   0   0   0   0   0
+%!        0   1   0   1   1   0   0   0   0   0
+%!        0   0   0   0   1   0   0   0   0   0
+%!        0   0   0   1   1   0   0   1   0   0
+%!        0   0   0   1   1   0   0   1   1   0
+%!        0   0   0   1   1   1   0   0   1   0];
+%! assert (bwareaopen (in, 4, [1 1 0; 1 1 1; 0 1 1]), logical (out))
+
+%!error bwareaopen ("not an image", 78, 8)
+%!error bwareaopen (rand (10) > 0.5, 10, 100)
+%!error bwareaopen (rand (10) > 0.5, 10, "maximal")
+%!error bwareaopen (rand (10) > 0.5, 10, [1 1 1; 0 1 1; 0 1 0])
 */
 
