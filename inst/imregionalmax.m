@@ -37,9 +37,15 @@
 ## @seealso{immaximas, imreconstruct, imregionalmin}
 ## @end deftypefn
 
-function bw = imregionalmax (img, conn = conndef (ndims (img), "maximal"))
+function bw = imregionalmax (img, conn)
   if (nargin < 1 || nargin > 2)
     print_usage ();
+  endif
+
+  if (nargin < 2)
+    conn = conndef (ndims (im), "maximal");
+  else
+    conn = conndef (conn);
   endif
 
   if (islogical (img))

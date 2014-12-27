@@ -33,9 +33,15 @@
     imperspectivewarp functions now use 0 instead of NA for the default
     extrapolation value.
 
- ** The conndef function has a new signature with a single argument to
-    specify the number of elements connected to the center of the
-    connectivity array.
+ ** The conndef function has new function signatures so that it covers all
+    common ways of defining an connectivity array.  The following will
+    return the same matrix:
+
+        mask = conndef (2, "minimal")
+        mask = conndef (4)
+        mask = conndef ([0 1 0; 1 1 1; 0 1 0])
+
+    and would throw a detailed error in case of an incorrect connectivity.
 
  ** The following functions have been completely rewritten and wil perform
     a lot of faster.

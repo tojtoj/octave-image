@@ -49,11 +49,9 @@ function varargout = bwperim (bw, conn)
 
   nDims = ndims (bw);
   if (nargin < 2)
-    ## Defining default connectivity here because it's dependent
-    ## on the first argument
     conn = conndef (nDims, "minimal");
   else
-    conn = make_conn ("bwperim", 2, nDims, conn);
+    conn = conndef (conn);
   endif
 
   ## Make sure bw is logical;

@@ -34,7 +34,7 @@ connectivity::connectivity (const octave_value& val)
       catch (invalid_connectivity& e)
         {throw;} // so it does not get caught by the parent invalid_conversion
       catch (invalid_conversion& e)
-        {throw invalid_connectivity ("must be logical or in [4 6 8 18 26]");}
+        {throw invalid_connectivity ("must be logical or in the set [4 6 8 18 26]");}
     }
   return;
 }

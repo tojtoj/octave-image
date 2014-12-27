@@ -7,7 +7,6 @@ inst/private/is_double_image.m          GPLv3+
 inst/private/isimage.m                  GPLv3+
 inst/private/ispart.m                   GPLv3+
 inst/private/istform.m                  GPLv3+
-inst/private/make_conn.m                GPLv3+
 inst/private/pad_for_sliding_filter.m   GPLv3+
 inst/private/prepare_strel.m            GPLv3+
 inst/private/ycbcrfunc.m                GPLv3+

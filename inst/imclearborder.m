@@ -55,11 +55,7 @@ function im = imclearborder (im, conn)
   if (nargin < 2)
     conn = conndef (ndims (im), "maximal");
   else
-    try
-      iptcheckconn (conn, "imclearborder", "CONN");
-    catch
-      conn = conndef (conn);
-    end_try_catch
+    conn = conndef (conn);
   endif
 
   bg_val  = cast (getrangefromclass (im)(1), class (im));

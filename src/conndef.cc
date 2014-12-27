@@ -27,6 +27,7 @@ using namespace octave::image;
 DEFUN_DLD(conndef, args, , "\
 -*- texinfo -*-\n\
 @deftypefn  {Loadable Function} {} conndef (@var{conn})\n\
+@deftypefnx {Loadable Function} {} conndef (@var{mask})\n\
 @deftypefnx {Loadable Function} {} conndef (@var{ndims}, @var{type})\n\
 Create connectivity array.\n\
 \n\
@@ -48,7 +49,7 @@ Neighbours touch the central element in any way. Equivalent to\n\
 \n\
 @end table\n\
 \n\
-or the number of connected elements to the center element, @var{conn},\n\
+the number of connected elements to the center element, @var{conn},\n\
 in which case the following are valid:\n\
 \n\
 @table @asis\n\
@@ -69,6 +70,8 @@ Three-dimensional 26-connected neighborhood.\n\
 \n\
 @end table\n\
 \n\
+or a connectivity array itself, in which case it checks for its validity\n\
+and returns itself.  In such case, it is equivalent to @code{iptcheckconn}.\n\
 \n\
 @seealso{iptcheckconn, strel}\n\
 @end deftypefn")
@@ -80,18 +83,12 @@ Three-dimensional 26-connected neighborhood.\n\
       print_usage ();
       return octave_value ();
     }
-  const octave_idx_type arg0 = args(0).idx_type_value (true);
-  if (error_state || arg0 < 1)
-    {
-      error ("conndef: NDIMS and CONN must be a positive integer");
-      return octave_value ();
-    }
 
   connectivity conn;
   if (nargin == 1)
     {
       try
-        {conn = connectivity (arg0);}
+        {conn = connectivity (args(0));}
       catch (invalid_connectivity& e)
         {
           error ("conndef: CONN %s", e.what ());
@@ -100,6 +97,12 @@ Three-dimensional 26-connected neighborhood.\n\
     }
   else
     {
+      const octave_idx_type arg0 = args(0).idx_type_value (true);
+      if (error_state || arg0 < 1)
+        {
+          error ("conndef: NDIMS must be a positive integer");
+          return octave_value ();
+        }
       const std::string type = args(1).string_value ();
       if (error_state)
         {
@@ -172,7 +175,7 @@ Three-dimensional 26-connected neighborhood.\n\
 %!error conndef (char (2), "minimal")
 %!error conndef ("minimal", 3)
 %!error <TYPE must be "maximal" or "minimal"> conndef (3, "invalid")
-%!error <CONN must be in the set> conndef (10)
+%!error <CONN must be logical or in the set> conndef (10)
 
 %!assert (conndef (2, "minimal"), conndef (4))
 %!assert (conndef (2, "maximal"), conndef (8))

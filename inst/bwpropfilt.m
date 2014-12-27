@@ -87,14 +87,8 @@ function bwfiltered = bwpropfilt (bw, varargin)
   endif
 
   if (valid_nargin (next_idx))
-    conn = varargin{next_idx};
-    try
-      iptcheckconn (conn, "bwpropfilt", "CONN");
-    catch
-      conn = conndef (conn);
-    end_try_catch
+    conn = conndef (varargin{next_idx++});
 
-    next_idx++;
     if (valid_nargin (next_idx))
       print_usage ();
     endif
