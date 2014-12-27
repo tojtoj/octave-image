@@ -79,6 +79,7 @@ Morhophological Operations
  bwareaopen
  conndef
  imbothat
+ imclearborder
  imclose
  imdilate
  imerode

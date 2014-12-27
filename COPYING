@@ -71,6 +71,7 @@ inst/imadjust.m                         GPLv3+
 inst/imattributes                       GPLv3+
 inst/imbothat.m                         GPLv3+
 inst/imcast.m                           GPLv3+
+inst/imclearborder.m                    GPLv3+
 inst/imclose.m                          GPLv3+
 inst/imcomplement.m                     GPLv3+
 inst/imcrop.m                           GPLv3+
