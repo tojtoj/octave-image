@@ -59,19 +59,25 @@ function im = imclearborder (im, conn)
   endif
 
   bg_val  = cast (getrangefromclass (im)(1), class (im));
-  marker  = get_borders (im, bg_val);
+  marker  = get_borders (im, conn, bg_val);
   border_elems = imreconstruct (marker, im, conn) == im;
   im(border_elems) = bg_val;
 
 endfunction
 
-function borders = get_borders (im, val)
+function borders = get_borders (im, conn, val)
   im_size = size (im);
-  n_dims  = ndims (im);
   borders = repmat (val, im_size);
 
-  tmp_idx = repmat ({":"}, [1 n_dims]);
-  for dim = 1:n_dims
+  tmp_idx       = repmat ({":"}, [1 ndims(im)]);
+  tmp_conn_idx  = repmat ({":"}, [1 ndims(conn)]);
+  for dim = 1:min (ndims (im), ndims (conn))
+    conn_idx = tmp_conn_idx;
+    conn_idx{dim} = [1 3];
+    if (im_size(dim) == 1 || ! any (conn(conn_idx{:})(:)))
+      continue
+    endif
+
     idx = tmp_idx;
     idx{dim} = [1 im_size(dim)];
     borders(idx{:}) = im(idx{:});
@@ -126,6 +132,12 @@ endfunction
 %! assert (imclearborder (a, 8), a8)
 %! assert (imclearborder (a, ones (3)), a8)
 
-
-
-
+%!test
+%! a = false (5, 5, 3);
+%! a(2:4,2:4,:) = true;
+%! assert (imclearborder (a, 4), a)
+%!
+%! a(1,2) = true;
+%! a4 = a;
+%! a4(:,:,1) = false;
+%! assert (imclearborder (a, 4), a4)
