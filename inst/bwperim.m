@@ -43,29 +43,40 @@ function varargout = bwperim (bw, conn)
 
   if (nargin < 1 || nargin > 2)
     print_usage ();
-  elseif (! ismatrix (bw) || ! (isnumeric (bw) || islogical (bw)))
-    error("bwperim: BW must be a numeric matrix");
   endif
 
-  nDims = ndims (bw);
+  if (! ismatrix (bw) || ! (isnumeric (bw) || islogical (bw)))
+    error("bwperim: BW must be a numeric matrix");
+  endif
+  bw = logical (bw);
+
   if (nargin < 2)
-    conn = conndef (nDims, "minimal");
+    conn = conndef (ndims (bw), "minimal");
   else
     conn = conndef (conn);
   endif
 
-  ## Make sure bw is logical;
-  bw = logical (bw);
-
   ## Recover the elements that would get removed by erosion
   perim = (! imerode (bw, conn)) & bw;
 
-  ## Get the borders back (they are removed during erosion
-  tmp_idx = repmat ({":"}, [1 nDims]);
+  ## Get the borders back which are removed during erosion
+  ## FIXME this is a bit too convoluted and not elegant at all. I am also
+  ##        unsure if it is correct for N dimensional stuff and unusual
+  ##        connectivities.  We should probably be using the output from
+  ##        bwboundaries() but bwboundaries() seems buggy in the case of
+  ##        holes.
+  tmp_idx       = repmat ({":"}, [1 ndims(perim)]);
+  tmp_conn_idx  = repmat ({":"}, [1 ndims(conn)]);
   p_size  = size (perim);
-  for dim = 1:nDims
-    idx       = tmp_idx;
-    idx{dim}  = [1 p_size(dim)];
+  for dim = 1:min (ndims (perim), ndims (conn))
+    conn_idx = tmp_conn_idx;
+    conn_idx{dim} = [1 3];
+    if (p_size(dim) == 1 || any (conn(conn_idx{:})(:)))
+      continue
+    endif
+
+    idx = tmp_idx;
+    idx{dim} = [1 p_size(dim)];
     perim(idx{:}) = bw(idx{:});
   endfor
 
