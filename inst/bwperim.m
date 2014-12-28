@@ -71,7 +71,7 @@ function varargout = bwperim (bw, conn)
   for dim = 1:min (ndims (perim), ndims (conn))
     conn_idx = tmp_conn_idx;
     conn_idx{dim} = [1 3];
-    if (p_size(dim) == 1 || any (conn(conn_idx{:})(:)))
+    if (p_size(dim) == 1 || ! any (conn(conn_idx{:})(:)))
       continue
     endif
 
@@ -236,3 +236,12 @@ endfunction
 %!error bwperim ("text")
 %!error bwperim (rand (10), 5)
 %!error bwperim (rand (10), "text")
+
+%!test
+%! a = false (5);
+%! a(1:4,2:4) = true;
+%!
+%! p = false (5);
+%! p(1:4,[2 4]) = true;
+%! assert (bwperim (a, [0 0 0; 1 1 1; 0 0 0]), p)
+
