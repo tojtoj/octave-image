@@ -135,6 +135,7 @@ inst/roicolor.m                         GPLv3+
 inst/std2.m                             GPLv3+
 inst/stdfilt.m                          GPLv3+
 inst/stretchlim.m                       GPLv3+
+inst/subimage.m                         GPLv3+
 inst/tiff_tag_read.m                    GPLv3+
 inst/tformfwd.m                         GPLv3+
 inst/tforminv.m                         GPLv3+

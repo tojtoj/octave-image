@@ -11,6 +11,7 @@
       imreconstruct
       imregionalmax
       imregionalmin
+      subimage
 
  ** The implementation of normxcorr2 has been changed. The new method is
     Matlab compatible and will return values in the range [-1 1].
