@@ -25,7 +25,6 @@
 
 #include <string>
 #include <vector>
-#include <queue>
 
 #include <octave/oct.h>
 #include <oct-map.h>
@@ -51,17 +50,15 @@ connnected_components (const boolNDArray& BW, const connectivity& conn)
       if (! *BW_vec)
         continue;
 
-      std::vector<octave_idx_type> conn_comp;
-      std::queue<octave_idx_type> to_visit;
-      to_visit.push (0);
+      // We want a queue but we will mimic one with a vector because in the
+      // end all elements that go in the queue go in the vector anyway.
+      std::vector<octave_idx_type> conn_comp {0};
       *BW_vec = false;
 
-      while (! to_visit.empty ())
+      std::vector<octave_idx_type>::size_type front = 0;
+      while (front < conn_comp.size ())
         {
-          octave_idx_type base_offset = to_visit.front ();
-          to_visit.pop ();
-
-          conn_comp.push_back (i + base_offset);
+          octave_idx_type base_offset = conn_comp[front++];
 
           for (octave_idx_type j = 0; j < n_offsets; j++)
             {
@@ -69,10 +66,14 @@ connnected_components (const boolNDArray& BW, const connectivity& conn)
               if (BW_vec[this_offset])
                 {
                   BW_vec[this_offset] = false;
-                  to_visit.push (this_offset);
+                  conn_comp.push_back (this_offset);
                 }
             }
         }
+
+      for (octave_idx_type& offset : conn_comp)
+        offset += i;
+
       all_components.push_back (conn_comp);
     }
 
