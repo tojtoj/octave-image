@@ -76,6 +76,7 @@
       im2single
       im2uint8
       im2uint16
+      label2rgb
 
 
  Summary of important user-visible changes for image 2.2.2 (2014/10/06):
