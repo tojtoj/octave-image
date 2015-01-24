@@ -21,7 +21,7 @@
 ## Compute peak signal-to-noise ratio.
 ##
 ## Computes the peak signal-to-noise ratio for image @var{A}, using
-## @var[ref} as reference.  @var{A} and @var{ref} must be of same size
+## @var{ref} as reference.  @var{A} and @var{ref} must be of same size
 ## and class.
 ##
 ## The optional value @var{peak} defines the highest value for the image
