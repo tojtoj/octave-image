@@ -70,8 +70,8 @@ function LOW_HIGH = stretchlim(image, TOL)
   if (nargin<1 || nargin>2)
     print_usage;
   endif
-  
-  if(!ismatrix(image) || ischar(image))
+
+  if(! isimage (image) )
     error("stretchlim: image should be a matrix");
   endif
   

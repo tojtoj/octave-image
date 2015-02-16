@@ -45,8 +45,8 @@ function varargout = bwperim (bw, conn)
     print_usage ();
   endif
 
-  if (! ismatrix (bw) || ! (isnumeric (bw) || islogical (bw)))
-    error("bwperim: BW must be a numeric matrix");
+  if (! isnumeric (bw) && ! islogical (bw))
+    error("bwperim: BW must be a numeric or logical matrix");
   endif
   bw = logical (bw);
 

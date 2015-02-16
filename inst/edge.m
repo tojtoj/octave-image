@@ -319,7 +319,7 @@ function [bw, out_threshold, g45_out, g135_out] = edge (im, method, varargin)
     #####################################
     case "zerocross"
       ## Get the filter
-      if (nargin == 4 && ismatrix(varargin{2}))
+      if (nargin == 4 && isnumeric (varargin{2}))
         f = varargin{2};
       else
         error("edge: a filter must be given as the fourth argument when 'zerocross' is used");
@@ -360,7 +360,7 @@ function [bw, out_threshold, g45_out, g135_out] = edge (im, method, varargin)
       ## Get thresholds
       if (nargin > 2 && isscalar(varargin{1}))
         thresh = [0.4*varargin{1}, varargin{1}];
-      elseif (nargin > 2 && ismatrix (varargin{1}) && length (varargin{1}(:)) == 2)
+      elseif (nargin > 2 && isnumeric (varargin{1}) && numel (varargin{1}) == 2)
         thresh = varargin{1}(:);
       else
         tmp = mean(abs(Es(:)));

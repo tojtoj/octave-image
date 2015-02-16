@@ -46,7 +46,7 @@ function [bound, labels, num_labels] = bwboundaries (bw, conn=8, holes="holes")
   if (nargin < 1)
     error ("bwboundaries: not enough input arguments");
   endif
-  if (!ismatrix (bw) || ndims (bw) != 2)
+  if (! ismatrix (bw))
     error ("bwboundaries: first input argument must be a NxM matrix");
   endif
   if (!isscalar (conn) || (conn != 4 && conn != 8))

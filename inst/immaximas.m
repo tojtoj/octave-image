@@ -66,8 +66,8 @@ function varargout = immaximas(im, radius, thresh)
   if (nargin <= 2)
     thresh = [];
   endif
-  if (!ismatrix(im))
-    error("immaximas: first input argument must be an array");
+  if (! isnumeric (im))
+    error("immaximas: IM must be a numeric array");
   endif
   if (!isscalar(radius))
     error("immaximas: second input argument must be a scalar or an empty matrix");

@@ -70,8 +70,8 @@
 function S = qtdecomp (I, p1, varargin)
   if (nargin < 1)
     print_usage;
-  elseif (!ismatrix(I) || size(I,1)!=size(I,2))
-    error("qtdecomp: I should be a square matrix.");
+  elseif (! issquare (I))
+    error("qtdecomp: I should be square.");
   endif
 
   ## current size (assumed to be square)

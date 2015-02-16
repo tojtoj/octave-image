@@ -79,7 +79,7 @@ function A = col2im (B, block_size, A_size, block_type = "sliding")
 
   if (nargin < 3 || nargin > 4)
     print_usage ();
-  elseif (! ismatrix (B) || ! (isnumeric (B) || islogical (B)))
+  elseif (! isnumeric (B) && ! islogical (B))
     error ("col2im: B must be a numeric of logical matrix or vector");
   elseif (! isnumeric (block_size) || ! isvector (block_size))
     error("col2im: BLOCK_SIZE must be a numeric vector");

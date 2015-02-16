@@ -20,7 +20,7 @@ function [p, block_size, padval] = im2col_check (func, nargin, A, varargin)
 
   if (nargin < 2)
     print_usage (func);
-  elseif (! ismatrix (A) || ! (isnumeric (A) || islogical (A)))
+  elseif (! isnumeric (A) && ! islogical (A))
     error ("%s: A must be a numeric of logical matrix", func);
   endif
   p = 1;  # varargin param being processsed

@@ -192,8 +192,8 @@ function J = imsmooth(I, name = "Gaussian", varargin)
   if (nargin == 0)
     print_usage();
   endif
-  if (!ismatrix(I))
-    error("imsmooth: first input argument must be an image");
+  if (! isimage (I))
+    error("imsmooth: I must be an image");
   endif
   [imrows, imcols, imchannels, tmp] = size(I);
   if ((imchannels != 1 && imchannels != 3) || tmp != 1)
@@ -401,7 +401,7 @@ function J = imsmooth(I, name = "Gaussian", varargin)
       for k = 1:3
         if (isscalar (varargin {k}))
           varargin {k} = repmat (varargin {k}, imrows, imcols);
-        elseif (ismatrix (varargin {k}) && ndims (varargin {k}) == 2)
+        elseif (isnumeric (varargin {k}) && ismatrix (varargin {k}))
           if (rows (varargin {k}) != imrows || columns (varargin {k}) != imcols)
             error (["imsmooth: %s input argument must have same number of rows "
                     "and columns as the input image"], arg_names {k});

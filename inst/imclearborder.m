@@ -48,8 +48,8 @@ function im = imclearborder (im, conn)
 
   if (nargin < 1 || nargin > 2)
     print_usage ();
-  elseif (! ismatrix (im))
-    error ("imclearborder: IM must be a matrix");
+  elseif (! isimage (im))
+    error ("imclearborder: IM must be an image");
   endif
 
   if (nargin < 2)

@@ -150,13 +150,10 @@
 
 function SE = strel (shape, varargin)
 
-  if (nargin < 1 || nargin > 4 || (! ischar (shape) && ! ismatrix (shape)))
-    print_usage;
-  endif
-
-  if (! ischar (shape))
-    varargin(2:end+1) = varargin(:);
-    varargin(1) = shape;
+  if (nargin < 1 || nargin > 4 || (ischar (shape) && nargin < 2))
+    print_usage ();
+  elseif (! ischar (shape))
+    varargin = horzcat ({shape}, varargin);
     shape = "arbitrary";
   endif
   nvar = numel (varargin);

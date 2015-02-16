@@ -43,12 +43,12 @@ function retval = ordfiltn (A, nth, domain, varargin)
   ## Check input
   if (nargin < 3)
     print_usage ();
-  elseif (! ismatrix (A))
-    error ("ordfiltn: first input must be an array");
+  elseif (! isnumeric (A) && ! islogical (A))
+    error ("ordfiltn: A must be a numeric or logical array");
   elseif (! isscalar (nth) || nth <= 0 || fix (nth) != nth)
     error ("ordfiltn: second input argument must be a positive integer");
-  elseif (! ismatrix (domain) && ! isscalar (domain))
-    error ("ordfiltn: third input argument must be an array or a scalar");
+  elseif (! isnumeric (domain) && ! islogical (domain))
+    error ("ordfiltn: DOMAIN must be a numeric or logical array or scalar");
   elseif (isscalar (domain) && (domain <= 0 || fix (domain) != domain))
     error ("ordfiltn: third input argument must be a positive integer, when it is a scalar");
   endif
@@ -70,7 +70,7 @@ function retval = ordfiltn (A, nth, domain, varargin)
     opt = varargin{idx};
     if (ischar (opt) || isscalar (opt))
       padding = opt;
-    elseif (ismatrix (opt) && size_equal (opt, domain))
+    elseif (isnumeric (opt) && size_equal (opt, domain))
       S = opt;
     else
       error ("ordfiltn: unrecognized option from input argument #%i and class %s", 3 + idx, class (opt));

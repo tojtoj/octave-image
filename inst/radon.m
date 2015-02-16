@@ -31,11 +31,11 @@ function [RT,xp] = radon (I,theta)
   elseif (nargin == 1)
     theta = 0:179;
   endif
-  
-  if (!ismatrix(I) || ndims(I) != 2)
-    error("radon: first input must be a MxN matrix");
+
+  if (! isnumeric (I) || ndims (I) != 2)
+    error("radon: I must be a MxN numeric matrix");
   endif
-  
+
   if (!isvector(theta))
     error("radon: second input must be a vector");
   endif

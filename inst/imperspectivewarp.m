@@ -64,7 +64,7 @@ function [warped, valid] = imperspectivewarp(im, P, interp = "linear", bbox = "l
   endif
   interp = interp_method (interp);
   
-  if (ismatrix(P) && ndims(P) == 2)
+  if (isnumeric (P) && ismatrix (P))
     if (issquare(P) && rows(P) == 3) # 3x3 matrix
       if (P(3,3) != 0)
         P /= P(3,3);
