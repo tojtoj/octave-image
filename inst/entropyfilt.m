@@ -57,7 +57,7 @@ function retval = entropyfilt (I, domain = true (9), padding = "symmetric", vara
   if (! isnumeric (domain) && ! islogical (domain))
     error ("entropyfilt: DOMAIN must be a logical matrix");
   endif
-  domain = (domain > 0);
+  domain = logical (domain);
 
   ## Get number of histogram bins
   if (islogical (I))

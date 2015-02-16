@@ -52,7 +52,7 @@ function retval = rangefilt (I, domain = true (3), padding = "symmetric", vararg
   if (! isnumeric (domain) || ! islogical (domain))
     error ("rangefilt: DOMAIN must be a logical array");
   endif
-  domain = (domain > 0);
+  domain = logical (domain);
   
   ## Pad image
   pad = floor (size (domain)/2);
