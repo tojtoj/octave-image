@@ -65,9 +65,15 @@
 ## positive integer.
 ##
 ## @end deftypefn
-## @deftypefn {Function File} {} strel ("disk", @var{radius})
+## @deftypefn  {Function File} {} strel ("disk", @var{radius})
+## @deftypefnx {Function File} {} strel ("disk", @var{radius}, @var{n})
 ## Create disk shaped flat structuring element.  @var{radius} must be a positive
 ## integer.
+##
+## The optional @var{n} argument *must* have a value of zero but the default
+## value is 4.  This is to prevent future backwards incompatibilty since
+## @sc{Matlab} default is also 4 but at the moment only 0 has been
+## implemented.
 ##
 ## @end deftypefn
 ## @deftypefn {Function File} {} strel ("hypercube", @var{n}, @var{edge})
@@ -153,6 +159,7 @@ function SE = strel (shape, varargin)
     varargin(1) = shape;
     shape = "arbitrary";
   endif
+  nvar = numel (varargin);
 
   ## because the order that these are created matters, we make them all here
   SE        = struct;
@@ -243,17 +250,30 @@ function SE = strel (shape, varargin)
       SE.flat  = true;
 
     case "disk"
-      if (numel (varargin) == 1)
-        radius = varargin{1};
-      else
-        ## TODO implement second option for number of periodic lines approximation
-        error ("strel: no RADIUS specified for disk shape");
+      if (nvar < 1 || nvar > 2)
+        error ("strel: disk shape takes 1 or 2 arguments");
       endif
+
+      radius = varargin{1};
       if (! is_positive_integer (radius))
         error ("strel: RADIUS must be a positive integer");
       endif
 
-      SE.nhood = fspecial ("disk", radius) > 0;
+      n = 4;
+      if (nvar > 1)
+        n = varargin{2};
+        if (! isnumeric (n) && ! isscalar (n) && any (n != [0 4 6 8]))
+          error ("strel: N for disk shape must be 0, 4, 6, or 8");
+        endif
+      endif
+      ## TODO implement approximation by periodic lines
+      if (n != 0)
+        error ("strel: N for disk shape not yet implemented, use N of 0");
+      endif
+
+      [x, y] = meshgrid (-radius:radius, -radius:radius);
+      r = sqrt (x.^2 + y.^2);
+      SE.nhood = r <= radius;
       SE.flat  = true;
 
     case "hypercube"
@@ -442,7 +462,7 @@ function SE = strel (shape, varargin)
       else
         error ("strel: no OFFSET specified for pair shape");
       endif
-      if (! ismatrix (offset) || numel (offset) != 2 || ! isnumeric (offset))
+      if (! isnumeric (offset) || numel (offset) != 2)
         error ("strel: OFFSET must be a 2 element vector");
       elseif (any (fix (offset) != offset))
         error ("strel: OFFSET values must be integers");
@@ -465,7 +485,7 @@ function SE = strel (shape, varargin)
       endif
       if (! is_positive_integer (p))
         error ("strel: P must be a positive integer");
-      elseif (! ismatrix (v) || numel (v) != 2 || ! isnumeric (v))
+      elseif (! isnumeric (v) || numel (v) != 2)
         error ("strel: V must be a 2 element vector");
       elseif (any (fix (v) != v))
         error ("strel: values of V must be integers");
@@ -485,8 +505,7 @@ function SE = strel (shape, varargin)
       else
         error ("strel: no DIMENSIONS specified for rectangle shape");
       endif
-      if (! ismatrix (SE.opt.dimensions) || numel (SE.opt.dimensions) != 2 ||
-          ! isnumeric (SE.opt.dimensions))
+      if (! isnumeric (SE.opt.dimensions) || numel (SE.opt.dimensions) != 2)
         error ("strel: DIMENSIONS must be a 2 element vector");
       elseif (! is_positive_integer (SE.opt.dimensions(1)) ||
               ! is_positive_integer (SE.opt.dimensions(2)))
@@ -583,7 +602,7 @@ endfunction
 %!                   0 1 1 1 1 1 0
 %!                   0 1 1 1 1 1 0
 %!                   0 0 0 1 0 0 0]);
-%! assert (getnhood (strel ("disk", 3)), shape);
+%! assert (getnhood (strel ("disk", 3, 0)), shape);
 
 %!test
 %! shape = logical ([1 1 1]);

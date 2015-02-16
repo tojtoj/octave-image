@@ -46,6 +46,13 @@
 
     and would throw a detailed error in case of an incorrect connectivity.
 
+ ** Creating disk shaped strel objects must now specify the N argument for
+    number of periodic lines used to approximate a disk.  The value used
+    must be zero to obtain the same results as previous releases of the
+    image package.  No other value is at the moment valid, and this is to
+    prevent future backwards incompatibility since Matlab default is 4.
+    Replace any `strel ("disk", radius)' with `strel ("disk", radius, 0)'
+
  ** The following functions have been completely rewritten and wil perform
     a lot of faster.
 
