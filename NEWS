@@ -12,6 +12,8 @@
       imreconstruct
       imregionalmax
       imregionalmin
+      otf2psf
+      psf2otf
       psnr
       subimage
 

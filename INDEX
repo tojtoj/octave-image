@@ -153,5 +153,7 @@ Utilities
  iptcheckconn
  iptcheckmap
  iptnum2ordinal
+ otf2psf
  padarray
  phantom
+ psf2otf

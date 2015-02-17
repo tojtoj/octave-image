@@ -120,8 +120,10 @@ inst/nlfilter.m                         GPLv3+
 inst/normxcorr2.m                       GPLv3+
 inst/ordfilt2.m                         GPLv3+
 inst/ordfiltn.m                         GPLv3+
+inst/otf2psf.m                          GPLv3+
 inst/padarray.m                         GPLv3+
 inst/phantom.m                          GPLv3+
+inst/psf2otf.m                          GPLv3+
 inst/psnr.m                             GPLv3+
 inst/poly2mask.m                        GPLv3+
 inst/qtdecomp.m                         GPLv3+
