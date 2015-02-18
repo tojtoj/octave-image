@@ -5,6 +5,7 @@
 
       bwareafilt
       bwpropfilt
+      fftconvn
       imattributes
       imcast
       imclearborder

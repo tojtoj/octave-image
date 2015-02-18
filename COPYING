@@ -50,6 +50,7 @@ inst/entropy.m                          GPLv3+
 inst/fchcode.m                          GPLv3+
 inst/findbounds.m                       GPLv3+
 inst/fftconv2.m                         FreeBSD
+inst/fftconvn.m                         GPLv3+
 inst/fspecial.m                         GPLv3+
 inst/getrangefromclass.m                GPLv3+
 inst/grayslice.m                        GPLv3+

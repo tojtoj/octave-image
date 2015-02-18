@@ -1,8 +1,9 @@
 image >> Image processing
 Analysis and Statistics
+ corr2
  edge
  fftconv2
- corr2
+ fftconvn
  mean2
  std2
  entropy
