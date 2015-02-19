@@ -175,6 +175,9 @@ endfunction
 %!   test_shapes (randi (255, s, s), randi (255, 52, 52), 0.1)
 %! endfor
 
-## test without integers
-
+## test with other classes
+%!test test_shapes (randi (255, 100, 100, "uint8"), randi (255, 10, 10, "uint8"), 0.1)
+%!test test_shapes (randi (255, 100, 100, "uint8"), randi (255, 10, 10), 0.1)
+%!test test_shapes (randi (255, 100, 100, "single"), randi (255, 10, 10, "single"), 0.9)
+%!test test_shapes (randi (255, 100, 100, "single"), randi (255, 10, 10), 0.9)
 
