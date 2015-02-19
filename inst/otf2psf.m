@@ -16,7 +16,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn  {Function File} {} otf2psf (@var{otf})
-## @deftypefn  {Function File} {} otf2psf (@var{otf}, @var{outsize})
+## @deftypefnx {Function File} {} otf2psf (@var{otf}, @var{outsize})
 ## Compute PSF from OTF.
 ##
 ## Returns the Point Spread Function (OTF) of the Optical Transfer
