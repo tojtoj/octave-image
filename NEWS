@@ -5,6 +5,7 @@
 
       bwareafilt
       bwpropfilt
+      edgetaper
       fftconvn
       imattributes
       imcast

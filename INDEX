@@ -149,6 +149,7 @@ Types and Type conversions
  rgb2gray
 Utilities
  checkerboard
+ edgetaper
  getrangefromclass
  imattributes
  iptcheckconn

@@ -45,6 +45,7 @@ inst/colorgradient.m                    public domain
 inst/corr2.m                            GPLv3+
 inst/cp2tform.m                         GPLv3+
 inst/edge.m                             GPLv3+
+inst/edgetaper.m                        GPLv3+
 inst/entropyfilt.m                      GPLv3+
 inst/entropy.m                          GPLv3+
 inst/fchcode.m                          GPLv3+
