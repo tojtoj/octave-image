@@ -39,8 +39,7 @@
 ## Using the FFT may be faster but this is not always the case and can
 ## be a lot worse, specially for smalls @var{A} and @var{B}.  This performance
 ## increase also comes at the cost of increased memory usage, as well as a loss
-## of precision (which is unimportant in many cases and negligible when
-## dealing with integers such as most images).
+## of precision.
 ##
 ## @example
 ## @group
@@ -108,8 +107,6 @@ function C = fftconvn (A, B, shape = "full")
   fft_size = 2 .^ arrayfun (@nextpow2, A_size + B_size - 1);
 
   warning ("off", "Octave:broadcast", "local");
-  ## FIXME: we must index fft_size otherwise fftn complains, even if extra
-  ##        fft_size are 1's.  Should we fix this upstream?
   C = ifftn (fftn (A, fft_size(1:ndims(A))) .* fftn (B, fft_size(1:ndims(B))));
   if (iscomplex (C) && isreal (A) && isreal (B))
     C = real (C);
