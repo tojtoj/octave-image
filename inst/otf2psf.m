@@ -56,10 +56,8 @@ function psf = otf2psf (otf, outsize)
     prepad  = floor (pad);
     postpad = ceil  (pad);
 
-    idx = cell (ndims (otf), 1);
-    for i = 1:ndims (otf)
-      idx(i) = (1+prepad(i)):(insize(i)-postpad(i));
-    endfor
+    idx = arrayfun (@colon, prepad + 1, insize - postpad,
+                    "UniformOutput", false);
     psf = psf(idx{:});
   endif
 

@@ -101,10 +101,7 @@ function C = fftconvn (A, B, shape = "full")
   nd = max (ndims (A), ndims (B));
   A_size = get_sizes (A, nd);
   B_size = get_sizes (B, nd);
-
-  ## FIXME see https://savannah.gnu.org/bugs/index.php?44291 for arrayfun
-  ##        will be fixed when 4.0 is released
-  fft_size = 2 .^ arrayfun (@nextpow2, A_size + B_size - 1);
+  fft_size = 2 .^ nextpow2 (A_size + B_size - 1);
 
   warning ("off", "Octave:broadcast", "local");
   C = ifftn (fftn (A, fft_size(1:ndims(A))) .* fftn (B, fft_size(1:ndims(B))));
@@ -141,7 +138,7 @@ endfunction
 
 ## starts and ends must have same length
 function idx = get_ndim_idx (starts, ends)
-  idx = arrayfun (@(x, y) x:y, starts, ends, "UniformOutput", false);
+  idx = arrayfun (@colon, starts, ends, "UniformOutput", false);
 endfunction
 
 %!function test_shapes (a, b, precision)
