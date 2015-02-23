@@ -21,7 +21,7 @@
 ## for the form of the structure) that can be further used to
 ## transform coordinates from one space (here denoted "RW" for "real
 ## world") to another (here denoted "AP" for "apparent"). The transform
-## is infered from two n-by-2 arrays, @var{rw_pt} and @var{ap_pt}, wich
+## is infered from two n-by-2 arrays, @var{rw_pt} and @var{ap_pt}, which
 ## contain the coordinates of n control points in the two 2D spaces.
 ## Transform coefficients are stored
 ## in @var{T}.tdata. Interpretation of transform coefficients depends on the
