@@ -43,7 +43,7 @@ function bw = imregionalmin (img, conn)
   endif
 
   if (nargin < 2)
-    conn = conndef (ndims (im), "maximal");
+    conn = conndef (ndims (img), "maximal");
   else
     conn = conndef (conn);
   endif
@@ -90,6 +90,7 @@ endfunction
 %!    0    0    0    0    0    0
 %!    0    0    0    0    0    0
 %!    1    0    0    0    1    0]);
+%! assert (imregionalmin (a), a8)
 %! assert (imregionalmin (a, 8), a8)
 %! assert (imregionalmin (uint8 (a), 8), a8)
 %! assert (imregionalmin (int8 (a), 8), a8)
@@ -120,6 +121,7 @@ endfunction
 %!   0   0   0   1   0   0
 %!   0   0   0   0   0   0
 %!   0   0   0   0   0   0]);
+%! assert (imregionalmin (a), a8)
 %! assert (imregionalmin (a, 8), a8)
 %! assert (imregionalmin (int8 (a), 8), a8)
 

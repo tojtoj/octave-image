@@ -43,7 +43,7 @@ function bw = imregionalmax (img, conn)
   endif
 
   if (nargin < 2)
-    conn = conndef (ndims (im), "maximal");
+    conn = conndef (ndims (img), "maximal");
   else
     conn = conndef (conn);
   endif
@@ -82,4 +82,5 @@ endfunction
 %!    0    0    0    0    0    0
 %!    0    0    0    0    0    1];
 %! assert (imregionalmax (a, 8), logical (a8))
+%! assert (imregionalmax (a), logical (a8))
 
