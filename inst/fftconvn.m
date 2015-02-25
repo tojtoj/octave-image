@@ -64,7 +64,7 @@
 ## @var{B} so their lengths are a power of two on all dimensions.
 ## This may further increase memory usage but will also increase
 ## performance.  In this example, the computation time will remain constant
-## until @code{size (@var {A}) + size (@var{B}) -1} is greater than 2048
+## until @code{size (@var{A}) + size (@var{B}) -1} is greater than 2048
 ## after which it will remain constant again until it reaches 4096.
 ##
 ## @example
