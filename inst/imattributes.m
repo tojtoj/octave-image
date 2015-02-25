@@ -103,8 +103,6 @@ function attr = imattributes (imgh = gcf ())
 
 endfunction
 
-## The tests for the correct class will all fail until 4.2 is released.
-
 %!shared x, map, img, rgb, bw
 %! [x, map] = imread ("default.img");
 %! rgb = ind2rgb (x, map);

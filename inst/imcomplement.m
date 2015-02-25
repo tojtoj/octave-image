@@ -26,14 +26,15 @@
 ## @item floating point
 ## Since floating point images are meant to have values in the range [0 1],
 ## this is equivalent @code{A -1}.  This leads to values within the range
-## to be inverted while others to equally distance from the limits.
+## to be inverted while others to stay equally distant from the limits.
 ##
 ## @item logical
 ## Equivalent to @code{! A}
 ##
 ## @item integer
-## Inverts the values within the range of the data.  This is a different
-## depending whether it's signed or unsigned integers class.
+## Inverts the values within the range of the data type.  This is
+## equivalent to @code{bitcmp (@var{A})}.
+##
 ## @end table
 ##
 ## @seealso{imadd, imdivide, imlincomb, immultiply, imsubtract}
@@ -52,10 +53,7 @@ function B = imcomplement (A)
   elseif (isinteger (A))
     if (intmin (class (A)) < 0)
       ## for signed integers, we use bitcmp
-      ## TODO: bitcmp is broken in core (but fixed on 79d4783a9978). Replace
-      ##       with bitcmp once we are dependent on that Octave version
-      nbits = sizeof (A) / numel (A) * 8;
-      B = bitxor (A, bitpack (true (nbits, 1), class (A)));
+      B = bitcmp (A);
     else
       ## this is currently more efficient than bitcmp (but hopefully core
       ## will change)
