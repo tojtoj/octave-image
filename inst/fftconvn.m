@@ -103,7 +103,6 @@ function C = fftconvn (A, B, shape = "full")
   B_size = get_sizes (B, nd);
   fft_size = 2 .^ nextpow2 (A_size + B_size - 1);
 
-  warning ("off", "Octave:broadcast", "local");
   C = ifftn (fftn (A, fft_size(1:ndims(A))) .* fftn (B, fft_size(1:ndims(B))));
   if (iscomplex (C) && isreal (A) && isreal (B))
     C = real (C);

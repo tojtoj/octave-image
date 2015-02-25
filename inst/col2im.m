@@ -130,7 +130,6 @@ function A = col2im (B, block_size, A_size, block_type = "sliding")
       last_blk = stride .* (blocks -1);
 
       ind = 1;
-      warning ("off", "Octave:broadcast", "local");
       for dim = 1:numel(A_size)
         ind = ind(:) .+ (0:cum_blk_size(dim):end_blk(dim));
         ind = ind(:) .+ (0:stride(dim):last_blk(dim));

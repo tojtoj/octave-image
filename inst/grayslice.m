@@ -63,17 +63,16 @@ function sliced = grayslice (I, n = 10)
   else
     error ("grayslice: V or N must be numeric vector or scalar respectively");
   endif
+  v = imcast (v, class (I));
 
   ## Broadcasting has a much higher memory usage but performs a lot faster
   ## than a for loop.  See cset a67048847848 for a more memory friendly
   ## version (performs ~5x times slower but the memory footprint is numel(v)
   ## times smaller for uint8 images)
-  warning ("off", "Octave:broadcast", "local")
-  v = imcast (v, class (I));
   sliced_tmp = reshape (sum (v(:) < vec (I, 2)), size (I));
 
   if (n <= 256)
-    sliced_tmp = uint8(sliced_tmp);
+    sliced_tmp = uint8 (sliced_tmp);
   else
     ## remember that indexed images of floating point class have indices base 1
     sliced_tmp++;

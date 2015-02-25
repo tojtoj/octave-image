@@ -96,7 +96,6 @@ function imgt = edgetaper (img, psf)
   inds = sub2ind (xpsf_size, subs{:});
   weights = xpsf(inds);
 
-  warning ("off", "Octave:broadcast", "local");
   imgt = (img .* weights) + (blurred .* (1 - weights));
 
   imgt = cast (imgt, class (img));

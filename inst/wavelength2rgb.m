@@ -93,8 +93,6 @@ function rgb = wavelength2rgb (wavelength, out_class = "double", gamma = 0.8)
   ## we already initialized the matrix with zeros()
   get_rgb_mask = @(mask) repmat (mask, [ones(1, ndims (mask) - size_adjust) 3]);
 
-  warning ("off", "Octave:broadcast", "local");
-
   mask    = wavelength >= 380 & wavelength < 440;
   rgbmask = get_rgb_mask (mask);
   rgb(rgbmask & Rmask) = -(wavelength(mask) - 440) / 60; # 60 comes from 440-380
