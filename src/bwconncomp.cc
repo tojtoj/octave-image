@@ -33,7 +33,7 @@
 using namespace octave::image;
 
 static std::vector<std::vector<octave_idx_type>>
-connnected_components (const boolNDArray& BW, const connectivity& conn)
+connected_components (const boolNDArray& BW, const connectivity& conn)
 {
   boolNDArray BW_pad = conn.create_padded (BW, false);
   bool* BW_vec = BW_pad.fortran_vec ();
@@ -233,7 +233,7 @@ or with a binary matrix representing a connectivity array.  Defaults to\n\
     }
 
   const std::vector<std::vector<octave_idx_type>> all_cc
-    = connnected_components (BW, conn);
+    = connected_components (BW, conn);
 
   static const char *fields[] =
   {
@@ -371,7 +371,7 @@ or with a binary matrix representing a connectivity array.  Defaults to\n\
     }
 
   const std::vector<std::vector<octave_idx_type>> all_cc
-    = connnected_components (BW, conn);
+    = connected_components (BW, conn);
 
   bool* BW_v = BW.fortran_vec ();
   for (std::vector<octave_idx_type> cc : all_cc)
