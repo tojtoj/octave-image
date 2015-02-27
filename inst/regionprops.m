@@ -1,6 +1,6 @@
 ## Copyright (C) 2010 Søren Hauberg <soren@hauberg.org>
 ## Copyright (C) 2012 Jordi Gutiérrez Hermoso <jordigh@octave.org>
-## Copyright (C) 2015 Hartmut Gimpel <hartmut.gimpel@gmx.net>
+## Copyright (C) 2015 Hartmut Gimpel <hg_code@gmx.de>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
