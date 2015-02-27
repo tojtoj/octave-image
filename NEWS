@@ -40,6 +40,11 @@
     imperspectivewarp functions now use 0 instead of NA for the default
     extrapolation value.
 
+ ** The regionprops function now supports the "Eccentricity",
+    "MajorAxisLength", "MinorAxisLength", and properties.  The "Orientation"
+    property has also been rewritten for Matlab compatibility and may yeld
+    different results than previous versions.
+
  ** The conndef function has new function signatures so that it covers all
     common ways of defining an connectivity array.  The following will
     return the same matrix:

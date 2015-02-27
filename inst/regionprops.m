@@ -1,5 +1,6 @@
 ## Copyright (C) 2010 Søren Hauberg <soren@hauberg.org>
 ## Copyright (C) 2012 Jordi Gutiérrez Hermoso <jordigh@octave.org>
+## Copyright (C) 2015 Hartmut Gimpel <hartmut.gimpel@gmx.net>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -15,7 +16,7 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {@var{props} = } regionprops (@var{BW})
+## @deftypefn  {Function File} {@var{props} = } regionprops (@var{BW})
 ## @deftypefnx {Function File} {@var{props} = } regionprops (@var{BW}, @var{properties}, @dots{})
 ## @deftypefnx {Function File} {@var{props} = } regionprops (@var{L}, @var{properties}, @dots{})
 ## @deftypefnx {Function File} {@var{props} = } regionprops (@dots{}, @var{I}, @var{properties}, @dots{})
@@ -44,6 +45,11 @@
 ## @item "Centroid"
 ## The center coordinate of the object.
 ##
+## @item "Eccentricity"
+## A scalar value between o and 1 defining how round the region is.  The
+## region is fitted to an ellipse, so this value is the ratio between the
+## @code{MajorAxisLength} and @code{MinorAxisLength}.
+##
 ## @item "EulerNumber"
 ## @itemx "euler_number"
 ## The Euler number of the object (see @code{bweuler} for details).
@@ -61,7 +67,12 @@
 ## the object with all holes removed.
 ##
 ## @item "Image"
-## An image with the same size as the bounding box that contains the original pixels.
+## An image with the same size as the bounding box that contains the original
+## pixels.
+##
+## @item "MajorAxisLength"
+## The region is fitted to an ellipse so this value represents the length
+## of the major axis of the ellipse.
 ##
 ## @item "MaxIntensity"
 ## @itemx "max_intensity"
@@ -75,12 +86,20 @@
 ## @itemx "min_intensity"
 ## The minimum intensity inside the object.
 ##
+## @item "MinorAxisLength"
+## The region is fitted to an ellipse so this value represents the length
+## of the minor axis of the ellipse.
+##
 ## @item "Perimeter"
 ## The length of the boundary of the object.
 ##
 ## @item "PixelIdxList"
 ## @itemx "pixel_idx_list"
 ## The indices of the pixels in the object.
+##
+## @item "Orientation"
+## A scalar value between -90 and 90 representing the orientation of the
+## ellipse fitted to the region.
 ##
 ## @item "PixelList"
 ## @itemx "pixel_list"
@@ -145,7 +164,8 @@ function retval = regionprops (bw, varargin)
                "Centroid", "PixelIdxList", "FilledArea", "PixelList",...
                "FilledImage", "Image", "MaxIntensity", "MinIntensity",...
                "WeightedCentroid", "MeanIntensity", "PixelValues",...
-               "Orientation"};
+               "Orientation", "Eccentricity", "MajorAxisLength", ...
+               "MinorAxisLength"};
 
   if (ismember ("basic", properties))
     properties = union (properties, {"Area", "Centroid", "BoundingBox"});
@@ -290,50 +310,86 @@ function retval = regionprops (bw, varargin)
           retval (k).PixelValues = I(L == k)(:);
         endfor
 
-      case "orientation"
+      case "majoraxislength"
         if (N > 2)
-          warning ("regionprops: skipping orientation for Nd image");
+          warning ("regionprops: skipping majoraxislength for ND image");
+          break
+        endif
+
+        for k = 1:num_labels
+          [Y, X] = find (L == k);
+
+          if (numel (Y) > 1)
+            ## calculate (centralised) second moment of region
+            C = cov ([X(:), Y(:)], 1);    # option 1 for normalisation with n instead of n-1
+            C = C + 1/12 .* eye (rows (C)); # centralised second moment of 1 pixel is 1/12
+            lambda = eig (C);
+            retval(k).MajorAxisLength = 4 * sqrt (max (lambda));
+          else
+            retval(k).MajorAxisLength = 1;
+          endif
+        endfor
+
+      case "minoraxislength"
+        if (N > 2)
+          warning ("regionprops: skipping minoraxislength for ND image");
           break
         endif
 
         for k = 1:num_labels
           [Y, X] = find (L == k);
           if (numel (Y) > 1)
-            C = cov ([X(:), Y(:)]);
+            ## see case majoraxislength for explanations
+            C = cov ([X(:), Y(:)], 1);
+            C = C + 1/12 .* eye (rows (C));
+            lambda = eig (C);
+            retval(k).MinorAxisLength = 4 * sqrt (min (lambda));
+          else
+            retval(k).MinorAxisLength = 1;
+          endif
+        endfor
+
+      case "eccentricity"
+        if (N > 2)
+          warning ("regionprops: skipping eccentricity for ND image");
+          break
+        endif
+
+        for k = 1:num_labels
+          [Y, X] = find (L == k);
+          if (numel (Y) > 1)
+            ## see case majoraxislength for explanations
+            C = cov ([X(:), Y(:)], 1);
+            C = C + 1/12 .* eye (rows (C));
+            lambda = eig (C);
+            major =  2 * sqrt (max (lambda));
+            minor =  2 * sqrt (min (lambda));
+            retval(k).Eccentricity = sqrt (1- (minor/major)^2);
+          else
+            retval(k).Eccentricity = 0; # a circle has 0 eccentricity
+          endif
+        endfor
+
+      case "orientation"
+        if (N > 2)
+          warning ("regionprops: skipping orientation for ND image");
+          break
+        endif
+
+        for k = 1:num_labels
+          [Y, X] = find (L == k);
+          if (numel (Y) > 1)
+            ## see case majoraxislength for explanations
+            C = cov ([X(:), Y(:)], 1);
+            C = C + 1/12 .* eye (rows (C));
             [V, lambda] = eig (C);
             [max_val, max_idx] = max (diag (lambda));
-            v = V (:, max_idx);
-            retval (k).Orientation = 180 - 180 * atan2 (v (2), v (1)) / pi;
+            max_vec = V(:, max_idx);
+            retval(k).Orientation = -(180/pi) * atan (max_vec(2) / max_vec(1));
           else
-            retval (k).Orientation = 0; # XXX: What does the other brand do?
+            retval(k).Orientation = 0;
           endif
         endfor
-
-      %{
-      case "majoraxislength"
-        for k = 1:num_labels
-          [Y, X] = find (L == k);
-          if (numel (Y) > 1)
-            C = cov ([X(:), Y(:)]);
-            lambda = eig (C);
-            retval (k).MajorAxisLength = (max (lambda));
-          else
-            retval (k).MajorAxisLength = 1;
-          endif
-        endfor
-
-      case "minoraxislength"
-        for k = 1:num_labels
-          [Y, X] = find (L == k);
-          if (numel (Y) > 1)
-            C = cov ([X(:), Y(:)]);
-            lambda = eig (C);
-            retval (k).MinorAxisLength = (min (lambda));
-          else
-            retval (k).MinorAxisLength = 1;
-          endif
-        endfor
-      %}
 
       #case "extrema"
       #case "convexarea"
@@ -341,7 +397,6 @@ function retval = regionprops (bw, varargin)
       #case "solidity"
       #case "conveximage"
       #case "subarrayidx"
-      #case "eccentricity"
       #case "equivdiameter"
 
       otherwise
@@ -427,3 +482,37 @@ endfunction
 %! assert (props(1).WeightedCentroid(2), 2, 10*eps)
 
 %!assert (size (regionprops ([1 0 0; 0 0 2], "Area")), [2, 1])
+
+%!test
+%! a = eye (4);
+%! t = regionprops (a, "majoraxislength");
+%! assert (t.MajorAxisLength, 6.4291, 1e-3);
+%! t = regionprops (a, "minoraxislength");
+%! assert(t.MinorAxisLength, 1.1547 , 1e-3);
+%! t = regionprops (a, "eccentricity");
+%! assert (t.Eccentricity, 0.98374 , 1e-3);
+%! t = regionprops (a, "orientation");
+%! assert (t.Orientation, -45);
+
+%!test
+%! b = ones (5);
+%! t = regionprops (b, "majoraxislength");
+%! assert (t.MajorAxisLength, 5.7735 , 1e-3);
+%! t = regionprops (b, "minoraxislength");
+%! assert (t.MinorAxisLength, 5.7735 , 1e-3);
+%! t = regionprops (b, "eccentricity");
+%! assert (t.Eccentricity, 0);
+%! t = regionprops (b, "orientation");
+%! assert (t.Orientation, 0);
+
+%!test
+%! c = [0 0 1; 0 1 1; 1 1 0];
+%! t = regionprops (c, "minoraxislength");
+%! assert (t.MinorAxisLength, 1.8037 , 1e-3);
+%! t = regionprops (c, "majoraxislength");
+%! assert (t.MajorAxisLength, 4.1633 , 1e-3);
+%! t = regionprops (c, "eccentricity");
+%! assert (t.Eccentricity, 0.90128 , 1e-3);
+%! t = regionprops (c, "orientation");
+%! assert (t.Orientation, 45);
+
