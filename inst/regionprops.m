@@ -46,9 +46,8 @@
 ## The center coordinate of the object.
 ##
 ## @item "Eccentricity"
-## A scalar value between o and 1 defining how round the region is.  The
-## region is fitted to an ellipse, so this value is the ratio between the
-## @code{MajorAxisLength} and @code{MinorAxisLength}.
+## The eccentricity of the ellipse that has the same normalized
+## second central moments as the object (value between 0 and 1).
 ##
 ## @item "EulerNumber"
 ## @itemx "euler_number"
@@ -71,8 +70,9 @@
 ## pixels.
 ##
 ## @item "MajorAxisLength"
-## The region is fitted to an ellipse so this value represents the length
-## of the major axis of the ellipse.
+## @itemx "major_axis_length"
+## The length of the major axis of the ellipse that has the same
+## normalized second central moments as the object.
 ##
 ## @item "MaxIntensity"
 ## @itemx "max_intensity"
@@ -87,8 +87,9 @@
 ## The minimum intensity inside the object.
 ##
 ## @item "MinorAxisLength"
-## The region is fitted to an ellipse so this value represents the length
-## of the minor axis of the ellipse.
+## @itemx "minor_axis_length"
+## The length of the minor axis of the ellipse that has the same
+## normalized second central moments as the object.
 ##
 ## @item "Perimeter"
 ## The length of the boundary of the object.
@@ -98,8 +99,9 @@
 ## The indices of the pixels in the object.
 ##
 ## @item "Orientation"
-## A scalar value between -90 and 90 representing the orientation of the
-## ellipse fitted to the region.
+## The angle between the x-axis and the major axis of the ellipse that
+## has the same normalized second central moments as the object
+## (value in degrees between -90 and 90).
 ##
 ## @item "PixelList"
 ## @itemx "pixel_list"
