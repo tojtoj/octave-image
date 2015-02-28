@@ -113,6 +113,10 @@ function ret = imadjust (image, in = stretchlim (image), out = [0;1], gamma = 1)
     in=[0;1];               ## default in
   endif
 
+  if (isempty (out))
+    out=[0;1];               ## default out
+  endif
+
   simage=size(image);
   if (length(simage)==3 && simage(3)==3)
     ## image is rgb
