@@ -327,7 +327,7 @@ function bw2 = bwmorph (bw, operation, n = 1)
       ## only true elements, or elements surrounded by true elements
       ## will have a values >= connectivity.
       loop_once = true;
-      kernel = double (draw_nd_cross (bw));
+      kernel = conndef (ndims (bw), "minimal");
       connectivity = nnz (kernel) -1;
       kernel(ceil (numel (kernel) /2)) = connectivity;
       morph = @(x) convn (x, kernel, "same") >= connectivity;
@@ -362,7 +362,7 @@ function bw2 = bwmorph (bw, operation, n = 1)
       ## number of dimensions) from the kernel center, and -1 per each of the
       ## connectivity. If all are true, its value will go down to 0.
       loop_once = true;
-      kernel = - double (draw_nd_cross (bw));
+      kernel = - conndef (ndims (bw), "minimal");
       kernel(ceil (numel (kernel) /2)) = nnz (kernel) -1;
       morph = @(x) convn (x, kernel, "same") > 0;
 
@@ -573,20 +573,6 @@ function bw2 = bwmorph (bw, operation, n = 1)
 
 endfunction
 
-function nd_cross = draw_nd_cross (bw)
-  ## FIXME there must be an easier way to do this. Also, this should
-  ##       probably be a shape in @strel
-  origin = false (repmat (3, 1, ndims (bw)));
-  center = ceil (numel (origin) /2);
-  origin(center) = true;
-  nd_cross = origin;
-  for dim = 1:ndims (bw)
-    se_size      = ones (1, ndims (bw));
-    se_size(dim) = 3;
-    nd_cross    |= imdilate (origin, true (se_size));
-  endfor
-endfunction
-
 %!demo
 %! bwmorph (true (11), "shrink", Inf)
 %! # Should return 0 matrix with 1 pixel set to 1 at (6,6)
@@ -755,3 +741,4 @@ endfunction
 %!   0   0   0   0   0
 %!   0   0   0   0   0];
 %! assert (bwmorph (in, "shrink"), logical (out));
+
