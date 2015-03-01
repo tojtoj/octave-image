@@ -30,41 +30,59 @@ help:
 
 $(RELEASE_DIR): .hg/dirstate
 	@echo "Creating package version $(VERSION) release ..."
+	-rm -rf $@
 	hg archive --exclude ".hg*" --exclude "Makefile" --type files "$@"
 	cd "$@" && rm -rf "devel/" && ./bootstrap && rm -rf "src/autom4te.cache"
+	chmod -R a+rX,u+w,go-w $@
 
 $(RELEASE_TARBALL): $(RELEASE_DIR)
-	tar -czf "$@" "$<"
+	tar cf - --posix "$<" | gzip -9n > "$@"
 
-$(HTML_TARBALL): install
+$(HTML_DIR): install
 	@echo "Generating HTML documentation. This may take a while ..."
-	$(OCTAVE) --silent --eval 'pkg load generate_html; '\
-	'generate_package_html ("${PACKAGE}", "${HTML_DIR}", "octave-forge")'
-	tar -czf "$@" "$(PACKAGE)-html"
+	-rm -rf "$@"
+	$(OCTAVE) --silent \
+	  --eval "pkg load generate_html; " \
+	  --eval "pkg load $(PACKAGE);" \
+	  --eval 'generate_package_html ("${PACKAGE}", "$@", "octave-forge");'
+	chmod -R a+rX,u+w,go-w $@
+
+$(HTML_TARBALL): $(HTML_DIR)
+	tar cf - --posix "$<" | gzip -9n > "$@"
 
 dist: $(RELEASE_TARBALL)
 html: $(HTML_TARBALL)
 
-release: dist html md5
+release: dist html
 	md5sum $(RELEASE_TARBALL) $(HTML_TARBALL)
 	@echo "Upload @ https://sourceforge.net/p/octave/package-releases/new/"
-	@echo "Execute: hg tag \"release-$(VERSION)\"" 
+	@echo 'Execute: hg tag "release-${VERSION}"'
 
+## Note that in development versions this target may fail if we are dependent
+## on unreleased versions.  This is by design, to force possible developers
+## to set this up by hand (either using the "-nodeps" option" or changing the
+## dependencies on DESCRIPTION.
 install: $(RELEASE_TARBALL)
 	@echo "Installing package locally ..."
-	$(OCTAVE) --silent --eval 'pkg ("install", make"${RELEASE_TARBALL}")'
+	$(OCTAVE) --silent --eval 'pkg ("install", "${RELEASE_TARBALL}")'
 
 all: $(CC_SOURCES)
 	cd src/ && ./configure
 	$(MAKE) -C src/
 
 check: all
-	$(OCTAVE) --no-window-system --silent --eval 'addpath ("inst/"); '\
-	'addpath ("src/"); ${PKG_ADD} runtests ("inst/"); runtests ("src/");'
+	$(OCTAVE) --no-window-system --silent \
+	  --eval 'addpath (fullfile ([pwd filesep "inst"]));' \
+	  --eval 'addpath (fullfile ([pwd filesep "src"]));' \
+	  --eval '${PKG_ADD}' \
+	  --eval 'runtests ("inst"); runtests ("src");'
 
 run: all
-	$(OCTAVE) --no-window-system --silent --persist --eval \
-	'addpath ("inst/"); addpath ("src/"); ${PKG_ADD}'
+	$(OCTAVE) --silent --persist --eval \
+	'addpath ("inst/"); addpath ("src/"); ${PKG_ADD}' \
+	  --eval 'addpath (fullfile ([pwd filesep "inst"]));' \
+	  --eval 'addpath (fullfile ([pwd filesep "src"]));'
+	  --eval '${PKG_ADD}'
 
 clean:
 	rm -rf $(RELEASE_DIR) $(RELEASE_TARBALL) $(HTML_TARBALL) $(HTML_DIR)
