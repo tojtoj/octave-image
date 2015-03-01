@@ -737,3 +737,19 @@ endfunction
 %!                 1  1  1  1  1
 %!                 1  1  1  1  1]);
 %!assert (bwmorph (in, "spur", Inf), out);
+
+## bug #44396
+%!test
+%! in = [
+%!   0   0   0   1   0
+%!   1   1   1   1   0
+%!   0   0   1   1   0
+%!   0   0   1   1   0
+%!   0   0   0   1   0];
+%! out = [
+%!   0   0   0   0   0
+%!   0   1   1   0   0
+%!   0   0   0   1   0
+%!   0   0   0   0   0
+%!   0   0   0   0   0];
+%! assert (bwmorph (in, "shrink"), logical (out));
