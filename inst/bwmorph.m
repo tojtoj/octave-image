@@ -592,7 +592,7 @@ endfunction
 %! # Should return 0 matrix with 1 pixel set to 1 at (6,6)
 
 ## Test skel-lantuejoul using Gozalez&Woods example (fig 8.39)
-%!shared slBW, rslBW
+%!test
 %! slBW = logical ([  0   0   0   0   0   0   0
 %!                    0   1   0   0   0   0   0
 %!                    0   0   1   1   0   0   0
@@ -618,10 +618,10 @@ endfunction
 %!                    0   0   0   0   0   0   0
 %!                    0   0   0   0   0   0   0
 %!                    0   0   0   0   0   0   0]);
-%!assert (bwmorph (slBW, "skel-lantuejoul",   1), [rslBW(1:5,:); false(7, 7)]);
-%!assert (bwmorph (slBW, "skel-lantuejoul",   2), [rslBW(1:8,:); false(4, 7)]);
-%!assert (bwmorph (slBW, "skel-lantuejoul",   3), rslBW);
-%!assert (bwmorph (slBW, "skel-lantuejoul", Inf), rslBW);
+%! assert (bwmorph (slBW, "skel-lantuejoul",   1), [rslBW(1:5,:); false(7, 7)]);
+%! assert (bwmorph (slBW, "skel-lantuejoul",   2), [rslBW(1:8,:); false(4, 7)]);
+%! assert (bwmorph (slBW, "skel-lantuejoul",   3), rslBW);
+%! assert (bwmorph (slBW, "skel-lantuejoul", Inf), rslBW);
 
 ## Test for bug #39293
 %!test
@@ -654,7 +654,7 @@ endfunction
 ## this makes sense to be an error but for Matlab compatibility, it is not
 %!assert (bwmorph (magic (10), "dilate"), imdilate (logical (magic (10)), ones (3)));
 
-%!shared in, out, se
+%!test
 %! in = logical ([1  1  0  0  1  0  1  0  0  0  1  1  1  0  1  1  0  1  0  0
 %!                1  1  1  0  1  0  1  1  1  1  0  1  0  1  0  0  0  0  0  0
 %!                0  1  1  1  0  1  1  0  0  0  1  1  0  0  1  1  0  0  1  0
@@ -677,18 +677,19 @@ endfunction
 %!                0  1  1  0  0  1  0  0  1  1  0  0  1  0  0  1  0  0  0  1]);
 %! se = strel ("arbitrary", ones (3));
 %!
-%!assert (bwmorph (in, "dilate"), imdilate (in, se));
-%!assert (bwmorph (in, "dilate", 3), imdilate (imdilate (imdilate (in, se), se), se));
-%!assert (bwmorph (in, "bothat"), imbothat (in, se));
-%!assert (bwmorph (in, "tophat"), imtophat (in, se));
-%!assert (bwmorph (in, "open"), imopen (in, se));
-%!assert (bwmorph (in, "close"), imclose (in, se));
-%!
+%! assert (bwmorph (in, "dilate"), imdilate (in, se));
+%! assert (bwmorph (in, "dilate", 3), imdilate (imdilate (imdilate (in, se), se), se));
+%! assert (bwmorph (in, "bothat"), imbothat (in, se));
+%! assert (bwmorph (in, "tophat"), imtophat (in, se));
+%! assert (bwmorph (in, "open"), imopen (in, se));
+%! assert (bwmorph (in, "close"), imclose (in, se));
+
 %!assert (bwmorph ([1 0 0; 1 0 1; 0 0 1], "bridge"), logical ([1 1 0; 1 1 1; 0 1 1]));
 %!assert (bwmorph ([0 0 0; 1 0 1; 0 0 1], "clean"), logical ([0 0 0; 0 0 1; 0 0 1]));
 %!assert (bwmorph ([0 0 0; 0 1 0; 0 0 0], "clean"), false (3));
 %!assert (bwmorph ([0 1 0; 1 0 0; 0 0 0], "diag"), logical ([1 1 0; 1 1 0; 0 0 0]));
-%!
+
+%!test
 %! in  = logical ([0  1  0  1  0
 %!                 1  1  1  0  1
 %!                 1  0  0  1  0
@@ -699,10 +700,11 @@ endfunction
 %!                 1  0  0  1  0
 %!                 1  1  1  1  1
 %!                 1  1  1  1  1]);
-%!assert (bwmorph (in, "fill"), out);
-%!
+%! assert (bwmorph (in, "fill"), out);
+
 %!assert (bwmorph ([1 1 1; 0 1 0; 1 1 1], "hbreak"), logical ([1 1 1; 0 0 0; 1 1 1]));
-%!
+
+%!test
 %! in  = logical ([0  1  0  0  0
 %!                 1  0  0  1  0
 %!                 1  0  1  0  0
@@ -714,14 +716,14 @@ endfunction
 %!                 1  0  1  0  0
 %!                 1  1  0  1  1
 %!                 1  1  1  1  1]);
-%!assert (bwmorph (in, "remove"), out);
+%! assert (bwmorph (in, "remove"), out);
 %!
 %! out = logical ([0  1  0  0  0
 %!                 1  0  0  1  0
 %!                 1  0  1  0  0
 %!                 1  1  0  1  1
 %!                 1  1  1  1  1]);
-%!assert (bwmorph (in, "remove", Inf), out);
+%! assert (bwmorph (in, "remove", Inf), out);
 %!
 %! ## tests for spur are failing (matlab incompatible)
 %! out = logical ([0  1  0  0  0
@@ -729,14 +731,14 @@ endfunction
 %!                 1  0  1  0  0
 %!                 1  1  1  1  1
 %!                 1  1  1  1  1]);
-%!assert (bwmorph (in, "spur"), out);
+%! assert (bwmorph (in, "spur"), out);
 %!
 %! out = logical ([0  1  0  0  0
 %!                 1  0  0  0  0
 %!                 1  0  0  0  0
 %!                 1  1  1  1  1
 %!                 1  1  1  1  1]);
-%!assert (bwmorph (in, "spur", Inf), out);
+%! assert (bwmorph (in, "spur", Inf), out);
 
 ## bug #44396
 %!test
