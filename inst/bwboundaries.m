@@ -38,7 +38,7 @@
 ## If two or more output arguments are requested, the algorithm also returns
 ## the labelled image computed by @code{bwlabel} in @var{labels}. The number
 ## of labels in this image is optionally returned in @var{num_labels}.
-## @seealso{boundary, bwlabel}
+## @seealso{bwlabel, bwlabeln, bwperim, fchcode}
 ## @end deftypefn
 
 function [bound, labels, num_labels] = bwboundaries (bw, conn=8, holes="holes")
