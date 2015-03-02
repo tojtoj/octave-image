@@ -78,7 +78,7 @@ check: all
 	  --eval 'runtests ("inst"); runtests ("src");'
 
 run: all
-	$(OCTAVE) --silent --persist --eval \
+	$(OCTAVE) --no-gui --silent --persist --eval \
 	'addpath ("inst/"); addpath ("src/"); ${PKG_ADD}' \
 	  --eval 'addpath (fullfile ([pwd filesep "inst"]));' \
 	  --eval 'addpath (fullfile ([pwd filesep "src"]));' \
