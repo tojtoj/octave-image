@@ -9,6 +9,7 @@ syntax: regexp
 (^|/).*\.oct$
 (^|/).*\.octlink$
 (^|/)octave-core$
+(^|/)octave-workspace$
 (^|/).*\.tar\.gz$
 
 ## Files generated automatically by autoconf and the configure script
