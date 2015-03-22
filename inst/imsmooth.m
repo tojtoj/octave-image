@@ -500,3 +500,27 @@ function J = mean_shift(I, s1, s2)
   J = I(ms);
 endfunction
 #}
+
+%!test
+%! ## checking Bilateral Filter
+%!
+%! ##  constant image remain the same after Bilateral Filter
+%! A = uint8(255*ones(128,128));
+%! B = uint8(imsmooth(A, 'Bilateral', 2, 10));
+%! assert (A,B);
+%!
+%! ## Bilateral Filter does not smear outlayers
+%! A = zeros(256,256);
+%! A(128,128) = 256;
+%! ## bilateral filter does not smear outlayers
+%! B = imsmooth(A, 'Bilateral', 2, 10);
+%! assert (A,B,1.e-140);
+%!
+%! ## When sigma_r is large the filter behaves almost
+%! ## like the isotropic Gaussian filter
+%!
+%! A0 = fspecial ('gaussian',100,100);
+%! A = uint8(A0/max(max(A0))*255);
+%! B1 = imsmooth(A, 'Bilateral', 2, 100);
+%! B2 = imsmooth(A, 'Gaussian', 2);
+%! assert (B1,B2);

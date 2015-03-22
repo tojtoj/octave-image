@@ -93,6 +93,7 @@
       im2single
       im2uint8
       im2uint16
+      imsmooth
       label2rgb
 
 
