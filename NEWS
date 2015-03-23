@@ -41,9 +41,10 @@
     extrapolation value.
 
  ** The regionprops function now supports the "Eccentricity",
-    "MajorAxisLength", "MinorAxisLength", and properties.  The "Orientation"
-    property has also been rewritten for Matlab compatibility and may yeld
-    different results than previous versions.
+    "MajorAxisLength", "MinorAxisLength", "EquivDiameter" and "Extrema"
+    properties.  The "Orientation" property has also been rewritten for
+    Matlab compatibility and may yield different results than previous
+    versions.
 
  ** The conndef function has new function signatures so that it covers all
     common ways of defining an connectivity array.  The following will

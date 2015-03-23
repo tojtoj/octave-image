@@ -49,12 +49,21 @@
 ## The eccentricity of the ellipse that has the same normalized
 ## second central moments as the object (value between 0 and 1).
 ##
+## @item "EquivDiameter"
+## @itemx "equiv_diameter"
+## The diameter of a circle with the same area as the object.
+##
 ## @item "EulerNumber"
 ## @itemx "euler_number"
 ## The Euler number of the object (see @code{bweuler} for details).
 ##
 ## @item "Extent"
 ## The area of the object divided by the area of the bounding box.
+##
+## @item "Extrema"
+## Returns an 8-by-2 matrix with the extrema points of the object.
+## The first column holds the returned x- and the second column the y-values. 
+## The order of the 8 points is: top-left, top-right, right-top, right-bottom, bottom-right, bottom-left, left-bottom, left-top.
 ##
 ## @item "FilledArea"
 ## @itemx "filled_area"
@@ -162,12 +171,13 @@ function retval = regionprops (bw, varargin)
 
   properties = lower (properties);
 
-  all_props = {"Area", "EulerNumber", "BoundingBox", "Extent", "Perimeter",...
+  all_props = {"Area", "EquivDiameter", "EulerNumber", ...
+               "BoundingBox", "Extent", "Perimeter",...
                "Centroid", "PixelIdxList", "FilledArea", "PixelList",...
                "FilledImage", "Image", "MaxIntensity", "MinIntensity",...
                "WeightedCentroid", "MeanIntensity", "PixelValues",...
                "Orientation", "Eccentricity", "MajorAxisLength", ...
-               "MinorAxisLength"};
+               "MinorAxisLength", "Extrema"};
 
   if (ismember ("basic", properties))
     properties = union (properties, {"Area", "Centroid", "BoundingBox"});
@@ -220,6 +230,16 @@ function retval = regionprops (bw, varargin)
         for k = 1:num_labels
           retval (k).Area = local_area (L == k);
         endfor
+
+      case "equivdiameter"
+        if (N > 2)
+          warning ("regionprops: skipping equivdiameter for Nd image");
+        else
+          for k = 1:num_labels
+            area = local_area (L == k);
+            retval (k).EquivDiameter = sqrt (4*area/pi);
+          endfor
+        endif
 
       case "eulernumber"
         for k = 1:num_labels
@@ -322,11 +342,8 @@ function retval = regionprops (bw, varargin)
           [Y, X] = find (L == k);
 
           if (numel (Y) > 1)
-            ## calculate (centralised) second moment of region
-            C = cov ([X(:), Y(:)], 1);    # option 1 for normalisation with n instead of n-1
-            C = C + 1/12 .* eye (rows (C)); # centralised second moment of 1 pixel is 1/12
-            lambda = eig (C);
-            retval(k).MajorAxisLength = 4 * sqrt (max (lambda));
+            [major, ~, ~] = local_ellipsefit (X, Y);
+            retval(k).MajorAxisLength = major;
           else
             retval(k).MajorAxisLength = 1;
           endif
@@ -341,11 +358,8 @@ function retval = regionprops (bw, varargin)
         for k = 1:num_labels
           [Y, X] = find (L == k);
           if (numel (Y) > 1)
-            ## see case majoraxislength for explanations
-            C = cov ([X(:), Y(:)], 1);
-            C = C + 1/12 .* eye (rows (C));
-            lambda = eig (C);
-            retval(k).MinorAxisLength = 4 * sqrt (min (lambda));
+            [~, minor, ~] = local_ellipsefit (X, Y);
+            retval(k).MinorAxisLength = minor;
           else
             retval(k).MinorAxisLength = 1;
           endif
@@ -360,12 +374,7 @@ function retval = regionprops (bw, varargin)
         for k = 1:num_labels
           [Y, X] = find (L == k);
           if (numel (Y) > 1)
-            ## see case majoraxislength for explanations
-            C = cov ([X(:), Y(:)], 1);
-            C = C + 1/12 .* eye (rows (C));
-            lambda = eig (C);
-            major =  2 * sqrt (max (lambda));
-            minor =  2 * sqrt (min (lambda));
+            [major, minor, ~] = local_ellipsefit (X, Y);
             retval(k).Eccentricity = sqrt (1- (minor/major)^2);
           else
             retval(k).Eccentricity = 0; # a circle has 0 eccentricity
@@ -381,25 +390,62 @@ function retval = regionprops (bw, varargin)
         for k = 1:num_labels
           [Y, X] = find (L == k);
           if (numel (Y) > 1)
-            ## see case majoraxislength for explanations
-            C = cov ([X(:), Y(:)], 1);
-            C = C + 1/12 .* eye (rows (C));
-            [V, lambda] = eig (C);
-            [max_val, max_idx] = max (diag (lambda));
-            max_vec = V(:, max_idx);
-            retval(k).Orientation = -(180/pi) * atan (max_vec(2) / max_vec(1));
+            [~, ~, major_vec] = local_ellipsefit (X, Y);
+            retval(k).Orientation = -(180/pi) * atan (major_vec(2) / major_vec(1));
           else
             retval(k).Orientation = 0;
           endif
         endfor
 
-      #case "extrema"
+      case "extrema"
+        if (N > 2)
+          warning ("regionprops: skipping extrema for Nd image");
+        else
+          for k = 1:num_labels
+            pixelidxlist =  find (L == k);
+            if length(pixelidxlist) == 0
+              retval (k).Extrema = repmat (0.5, [8 2]); # for ML compatibility
+            else
+              [pixel_R, pixel_C] = ind2sub (size (L), pixelidxlist);
+
+              top_r = min (pixel_R); # small "r" and "c" for scalars and capital "R" and "C" for vectors
+              top_R = pixel_C (pixel_R == top_r);
+              top_left_c = min (top_R) - 0.5; # add/substract 0.5 to all values for corner of pixles (as in ML)
+              top_right_c = max (top_R) + 0.5;
+              top_r = top_r - 0.5;
+
+              right_c = max (pixel_C);
+              right_C = pixel_R (pixel_C == right_c);
+              right_top_r = min (right_C) - 0.5;
+              right_bottom_r = max (right_C) + 0.5;
+              right_c = right_c + 0.5;
+
+              bottom_r = max (pixel_R);
+              bottom_R = pixel_C (pixel_R == bottom_r);
+              bottom_right_c = max (bottom_R) + 0.5;
+              bottom_left_c = min (bottom_R) - 0.5;
+              bottom_r = bottom_r + 0.5;
+
+              left_c = min (pixel_C);
+              left_C = pixel_R (pixel_C == left_c);
+              left_bottom_r = max (left_C) + 0.5;
+              left_top_r = min (left_C) - 0.5;
+              left_c = left_c - 0.5;
+
+              # return 8x2 matrix with x-values in first column and y-values in second column
+              retval(k).Extrema = [top_left_c top_r; top_right_c top_r; ...
+                right_c right_top_r; right_c right_bottom_r; ...
+                bottom_right_c bottom_r; bottom_left_c bottom_r; ...
+                left_c left_bottom_r; left_c left_top_r];                
+            endif
+          endfor
+        endif
+
       #case "convexarea"
       #case "convexhull"
       #case "solidity"
       #case "conveximage"
       #case "subarrayidx"
-      #case "equivdiameter"
 
       otherwise
         error ("regionprops: unsupported property '%s'", property);
@@ -435,6 +481,17 @@ function C = all_coords (bw, flip = true, singleton = false)
   if (rows (C) == 1 && !singleton)
     C = [C; C];
   endif
+endfunction
+
+function [major, minor, major_vec] = local_ellipsefit (X, Y)
+  ## calculate (centralised) second moment of region with pixels [X, Y]
+  C = cov ([X(:), Y(:)], 1);    # option 1 for normalisation with n instead of n-1
+  C = C + 1/12 .* eye (rows (C)); # centralised second moment of 1 pixel is 1/12
+  [V, lambda] = eig (C);
+  lambda_d = 4 .* sqrt (diag (lambda));
+  [major, major_idx] = max (lambda_d);
+  major_vec = V(:, major_idx);
+  minor = min(lambda_d);
 endfunction
 
 %!test
@@ -495,6 +552,8 @@ endfunction
 %! assert (t.Eccentricity, 0.98374 , 1e-3);
 %! t = regionprops (a, "orientation");
 %! assert (t.Orientation, -45);
+%! t = regionprops (a, "equivdiameter");
+%! assert (t.EquivDiameter, 2.2568,  1e-3);
 
 %!test
 %! b = ones (5);
@@ -506,6 +565,8 @@ endfunction
 %! assert (t.Eccentricity, 0);
 %! t = regionprops (b, "orientation");
 %! assert (t.Orientation, 0);
+%! t = regionprops (b, "equivdiameter");
+%! assert (t.EquivDiameter, 5.6419,  1e-3);
 
 %!test
 %! c = [0 0 1; 0 1 1; 1 1 0];
@@ -517,4 +578,11 @@ endfunction
 %! assert (t.Eccentricity, 0.90128 , 1e-3);
 %! t = regionprops (c, "orientation");
 %! assert (t.Orientation, 45);
+% t = regionprops (c, "equivdiameter");
+% assert (t.EquivDiameter, 2.5231,  1e-3);
 
+%!test
+%! f = [0 0 0 0; 1 1 1 1; 0 1 1 1; 0 0 0 0];
+%! t = regionprops (f, "Extrema");
+%! shouldbe = [0.5  1.5; 4.5  1.5; 4.5 1.5; 4.5 3.5; 4.5 3.5; 1.5 3.5; 0.5 2.5; 0.5  1.5];
+%! assert (t.Extrema, shouldbe,  eps);
