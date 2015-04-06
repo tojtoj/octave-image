@@ -185,7 +185,7 @@
 ## @item 'skel'
 ## Algorithm used here is described in Pratt's book. When applying it to
 ## the "circles" image in MATLAB documentation, results are not the
-## same. Perhaps MATLAB uses Blum's algoritm (for further info please
+## same. Perhaps MATLAB uses Blum's algorithm (for further info please
 ## read comments in code).
 ## @item 'skel-pratt'
 ## This option is not available in MATLAB.
