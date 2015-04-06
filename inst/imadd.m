@@ -53,7 +53,7 @@ function img = imadd (img, val, out_class = class (img))
 
   ## this is matlab imcompatible on purpose. We are compatible and return double
   ## anyway, even if both input are logical (and wether this is correct is
-  ## already debatable), but if the user forcelly requests output class to be
+  ## already debatable), but if the user forcedly requests output class to be
   ## logical, then he must be expecting it (matlab returns double anyway and
   ## ignores request).
 

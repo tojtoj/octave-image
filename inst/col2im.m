@@ -43,7 +43,7 @@
 ## matrix.  When converting a matrix into blocks with @code{im2col}, there
 ## will be less blocks to account to borders, so if @var{block_size} is the
 ## same in both @code{col2im} and @code{im2col}, @var{A_size} can be the size
-## out the ouput from @code{im2col}.
+## out the output from @code{im2col}.
 ##
 ## @end table
 ##
@@ -79,7 +79,7 @@ function A = col2im (B, block_size, A_size, block_type = "sliding")
 
   if (nargin < 3 || nargin > 4)
     print_usage ();
-  elseif (! ismatrix (B) || ! (isnumeric (B) || islogical (B)))
+  elseif (! isnumeric (B) && ! islogical (B))
     error ("col2im: B must be a numeric of logical matrix or vector");
   elseif (! isnumeric (block_size) || ! isvector (block_size))
     error("col2im: BLOCK_SIZE must be a numeric vector");
@@ -130,7 +130,6 @@ function A = col2im (B, block_size, A_size, block_type = "sliding")
       last_blk = stride .* (blocks -1);
 
       ind = 1;
-      warning ("off", "Octave:broadcast", "local");
       for dim = 1:numel(A_size)
         ind = ind(:) .+ (0:cum_blk_size(dim):end_blk(dim));
         ind = ind(:) .+ (0:stride(dim):last_blk(dim));

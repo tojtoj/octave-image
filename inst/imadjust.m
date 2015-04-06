@@ -74,7 +74,7 @@
 ## @item
 ## Prior versions of imadjust allowed @code{[low_in; high_in]} and
 ## @code{[low_out; high_out]} to be row vectors. Compatibility with this
-## behaviour has been keeped, although preferred form is vertical vector
+## behaviour has been kept, although preferred form is vertical vector
 ## (since it extends nicely to 2-by-3 matrices for RGB images and
 ## colormaps).
 ## @item
@@ -100,16 +100,21 @@ function ret = imadjust (image, in = stretchlim (image), out = [0;1], gamma = 1)
     print_usage;
   endif
 
-  if !(ismatrix(image))
+  if (! isimage (image) && ! iscolormap (image))
     error ("imadjust(image,...) first parameter must be a image matrix or colormap");
   endif
 
-  if !((ismatrix(in) || isempty(in)) && (ismatrix(out) || isempty(out)) )
-    print_usage;
+  ## IN and OUT can be empty to use default values
+  if (! isnumeric (in) || ! isnumeric (out))
+    error ("imadjust: IN and OUT must be numeric arrays");
   endif
 
-  if (isempty(in))
+  if (isempty (in))
     in=[0;1];               ## default in
+  endif
+
+  if (isempty (out))
+    out=[0;1];               ## default out
   endif
 
   simage=size(image);

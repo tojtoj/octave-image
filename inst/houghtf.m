@@ -75,8 +75,8 @@ function [accum, R] = houghtf(bw, varargin)
     error("houghtf: not enough input arguments");
   endif
 
-  if (!ismatrix(bw) || ndims(bw) != 2)
-    error("houghtf: first arguments must be a 2-dimensional matrix");
+  if (! ismatrix (bw))
+    error("houghtf: BW must be a 2-dimensional matrix");
   endif
 
   if (nargin > 1)

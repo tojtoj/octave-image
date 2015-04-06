@@ -38,7 +38,7 @@ function bw = bwhitmiss(im, varargin)
   if (nargin != 2 && nargin != 3)
     print_usage();
   endif
-  if (!ismatrix(im) || !isreal(im))
+  if (! isreal(im))
     error("bwhitmiss: first input argument must be a real matrix");
   endif
 

@@ -31,7 +31,12 @@
 ## @deftypefnx{Function File} {[@var{r}, @var{c}] =} immaximas (@var{im}, @var{radius}, @var{thresh})
 ## @deftypefnx{Function File} {[@var{r}, @var{c}, @dots{}] =} immaximas (@dots{})
 ## @deftypefnx{Function File} {[@dots{}, @var{val}] =} immaximas (@dots{})
-## Finds local spatial maximas of the given image. A local spatial maxima is
+## Find local spatial maximas.
+##
+## Local spatial maximas should not be mistaken with regional maxima.
+## See @code{imregionalmax} for the later.
+##
+## A local spatial maxima is
 ## defined as an image point with a value that is larger than all neighbouring
 ## values in a square region of width 2*@var{radius}+1. By default @var{radius}
 ## is 1, such that a 3 by 3 neighbourhood is searched. If the @var{thresh} input
@@ -47,7 +52,7 @@
 ## then the last output will contain the image values at the maximas. Currently
 ## this value is not interpolated.
 ##
-## @seealso{ordfilt2, ordfiltn}
+## @seealso{imregionalmax, ordfilt2, ordfiltn}
 ## @end deftypefn
 
 function varargout = immaximas(im, radius, thresh)
@@ -61,8 +66,8 @@ function varargout = immaximas(im, radius, thresh)
   if (nargin <= 2)
     thresh = [];
   endif
-  if (!ismatrix(im))
-    error("immaximas: first input argument must be an array");
+  if (! isnumeric (im))
+    error("immaximas: IM must be a numeric array");
   endif
   if (!isscalar(radius))
     error("immaximas: second input argument must be a scalar or an empty matrix");
@@ -101,7 +106,7 @@ function varargout = immaximas(im, radius, thresh)
       c = im(ind);
       a = (im(indminus1) + im(indplus1))/2 - c;
       b = a + c - im(indminus1);
-      shift = -w*b./(2*a); # Maxima of quadradic 
+      shift = -w*b./(2*a); # Maxima of quadratic 
       
       ## Move point   
       sub{d} += shift;

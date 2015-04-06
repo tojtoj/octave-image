@@ -91,7 +91,6 @@ function B = im2col (A, varargin)
   ## After all the input check, start the actual im2col. The idea is to
   ## calculate the linear indices for each of the blocks (using broadcasting
   ## for each dimension), and then reshape it with one block per column.
-  warning ("off", "Octave:broadcast", "local");
 
   switch (tolower (block_type))
     case "distinct"

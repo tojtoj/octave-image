@@ -24,7 +24,7 @@ function se = prepare_strel (func, se)
   ## Since imerode and imdilate will create a strel object out of the SE
   ## we pass them, we can create it now ourselves.
   if (! strcmpi (class (se), "strel"))
-    if (! ismatrix (se) || any (se(:) == 1 & se(:) == 0))
+    if (! islogical (se) && (isnumeric (se) && any (se(:) != 1 & se(:) != 0)))
       error ("%s: SE must be a strel object or matrix of 0 and 1", func);
     endif
     se = strel ("arbitrary", se);

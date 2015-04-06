@@ -20,345 +20,97 @@
 // Jeffrey E. Boyd and Carnë Draug for bwlabel_2d
 // Jordi Gutiérrez Hermoso for bwlabel_nd
 
-#include <octave/oct.h>
 #include <vector>
-#include <set>
 #include <algorithm>
-#include "union-find.h++"
-
-#include "config.h"
-
-#if defined (HAVE_UNORDERED_MAP)
 #include <unordered_map>
-#elif defined (HAVE_TR1_UNORDERED_MAP)
-#include <tr1/unordered_map>
-#else
-#error Must have the TR1 or C++11 unordered_map header
-#endif
 
-typedef Array<octave_idx_type> coord;
+#include <octave/oct.h>
+#include "union-find.h"
 
-bool operator== (const coord& a, const coord& b)
+#include "connectivity.h"
+using namespace octave::image;
+
+static union_find
+pre_label (NDArray& L, const connectivity& conn)
 {
-  if (a.nelem () != b.nelem())
-    return false;
-  for (octave_idx_type i = 0; i < a.nelem (); i++)
-    if (  a(i) !=  b(i) )
-      return false;
-
-  return true;
-}
-
-//Lexicographic order for coords
-bool operator< (const coord& a, const coord& b)
-{
-  octave_idx_type na = a.nelem (), nb = b.nelem ();
-  if (na < nb)
-    return true;
-  if (na > nb)
-    return false;
-  octave_idx_type i = 0;
-  while (a(i) == b(i) && i < na)
-    {
-      i++;
-    }
-
-  if (i == na          //They're equal, but this is strict order
-      || a(i) > b(i) )
-    return false;
-
-  return true;
-}
-
-// A few basic utility functions
-//{
-inline
-coord
-to_coord (const dim_vector& dv,
-          octave_idx_type k)
-{
-  octave_idx_type n = dv.length ();
-  coord retval ( dim_vector (n, 1));
-  for (octave_idx_type j = 0; j < n; j++)
-    {
-      retval(j) = k % dv(j);
-      k /= dv(j);
-    }
-  return retval;
-}
-
-inline
-octave_idx_type
-coord_to_pad_idx (const dim_vector& dv,
-                  const coord& c)
-{
-  octave_idx_type idx = 0;
-  octave_idx_type mul = 1;
-  for (octave_idx_type j = 0; j < dv.length (); j++)
-    {
-      idx += mul*c(j);
-      mul *= dv(j) + 2;
-    }
-  return idx;
-}
-
-inline
-coord
-operator- (const coord& a, const coord& b)
-{
-  octave_idx_type na = a.nelem ();
-  coord retval( dim_vector(na,1) );
-  for (octave_idx_type i = 0; i < na; i++)
-    {
-      retval(i) = a(i) - b(i);
-    }
-  return retval;
-}
-
-
-inline
-coord
-operator- (const coord& a)
-{
-  octave_idx_type na = a.nelem ();
-  coord retval (dim_vector(na,1) );
-  for (octave_idx_type i = 0; i < na; i++)
-    {
-      retval(i) = -a(i);
-    }
-  return retval;
-}
-//}
-
-std::set<octave_idx_type>
-populate_neighbours(const boolNDArray& conn_mask,
-                    const dim_vector& size_vec)
-{
-  std::set<octave_idx_type> neighbours_idx;
-  std::set<coord> neighbours;
-
-  dim_vector conn_size = conn_mask.dims ();
-  coord centre (dim_vector(conn_size.length (), 1), 1);
-  coord zero (dim_vector(conn_size.length (), 1), 0);
-  for (octave_idx_type idx = 0; idx < conn_mask.nelem (); idx++)
-    {
-      if (conn_mask(idx))
-        {
-          coord aidx = to_coord (conn_size, idx) - centre;
-
-          //The zero coordinates are the centre, and the negative ones
-          //are the ones reflected about the centre, and we don't need
-          //to consider those.
-          if( aidx == zero || neighbours.find(-aidx) != neighbours.end() )
-            continue;
-
-          neighbours.insert (aidx);
-
-          neighbours_idx.insert (coord_to_pad_idx(size_vec, aidx));
-         }
-    }
-  return neighbours_idx;
-}
-
-boolNDArray
-get_mask(int N){
-  bool* mask_ptr;
-  octave_idx_type n;
-
-  static bool mask4[] = {0, 1, 0,
-                         1, 0, 1,
-                         0, 1, 0};
-
-  static bool mask8[] = {1, 1, 1,
-                         1, 0, 1,
-                         1, 1, 1};
-
-  static bool mask6[] = {0, 0, 0,
-                         0, 1, 0,
-                         0, 0, 0,
-
-                         0, 1, 0,
-                         1, 0, 1,
-                         0, 1, 0,
-
-                         0, 0, 0,
-                         0, 1, 0,
-                         0, 0, 0};
-
-  static bool mask18[] = {0, 1, 0,
-                          1, 1, 1,
-                          0, 1, 0,
-
-                          1, 1, 1,
-                          1, 0, 1,
-                          1, 1, 1,
-
-                          0, 1, 0,
-                          1, 1, 1,
-                          0, 1, 0};
-
-  static bool mask26[] = {1, 1, 1,
-                          1, 1, 1,
-                          1, 1, 1,
-
-                          1, 1, 1,
-                          1, 0, 1,
-                          1, 1, 1,
-
-                          1, 1, 1,
-                          1, 1, 1,
-                          1, 1, 1};
-
-  switch (N){
-  case 4:
-    n = 2;
-    mask_ptr = mask4;
-    break;
-  case 8:
-    n = 2;
-    mask_ptr = mask8;
-    break;
-  case 6:
-    n = 3;
-    mask_ptr = mask6;
-    break;
-  case 18:
-    n = 3;
-    mask_ptr = mask18;
-    break;
-  case 26:
-    n = 3;
-    mask_ptr = mask26;
-    break;
-  default:
-    panic_impossible ();
-  }
-
-  boolNDArray conn_mask;
-  if (n == 2)
-    {
-      conn_mask.resize (dim_vector (3, 3));
-      for (octave_idx_type i = 0; i < 9; i++)
-        conn_mask(i) = mask_ptr[i];
-
-    }
-  else
-    {
-      conn_mask.resize (dim_vector (3, 3, 3));
-      for (octave_idx_type i = 0; i < 27; i++)
-        conn_mask(i) = mask_ptr[i];
-    }
-
-  return conn_mask;
-}
-
-boolNDArray
-get_mask (const boolNDArray& BW)
-{
-  dim_vector mask_dims = BW.dims();
-  for (auto i = 0; i < mask_dims.length (); i++)
-    mask_dims(i) = 3;
-
-  return boolNDArray (mask_dims, 1);
-}
-
-octave_idx_type
-get_padded_index (octave_idx_type r,
-                  const dim_vector& dv)
-{
-  // This function converts a linear index from the unpadded array
-  // into a linear index of the array with zero padding around it. I
-  // worked it out on paper, but if you want me to explain this, I'd
-  // have to work it out again. ;-) --jgh
-
-  octave_idx_type mult = 1;
-  octave_idx_type padded = 0;
-  for (octave_idx_type j = 0; j < dv.length (); j++)
-    {
-      padded += mult*(r % dv(j) + 1);
-      mult *= dv(j) + 2;
-      r /= dv(j);
-    }
-  return padded;
-}
-
-static octave_value_list
-bwlabel_nd (const boolNDArray& BW, const boolNDArray& conn_mask)
-{
-  octave_value_list rval;
-
-  dim_vector size_vec = BW.dims ();
-  auto neighbours = populate_neighbours(conn_mask, size_vec);
-
-  // Use temporary array with borders padded with zeros. Labels will
-  // also go in here eventually.
-  dim_vector padded_size = size_vec;
-  for (octave_idx_type j = 0; j < size_vec.length (); j++)
-    padded_size(j) += 2;
-
-  NDArray L (padded_size, 0);
-
-  // L(2:end-1, 2:end, ..., 2:end-1) = BW
-  L.insert(BW, coord (dim_vector (size_vec.length (), 1), 1));
-
   double* L_vec = L.fortran_vec ();
-  union_find u_f (L.nelem ());
+  const octave_idx_type numel = L.numel ();
 
-  for (octave_idx_type BWidx = 0; BWidx < BW.nelem (); BWidx++)
+  const Array<octave_idx_type> neighbours
+    = conn.negative_neighbourhood (L.dims ());
+  const octave_idx_type* nbr = neighbours.fortran_vec ();
+  const octave_idx_type nbr_numel = neighbours.numel ();
+
+  union_find u_f (numel);
+  for (octave_idx_type Lidx = 0; Lidx < numel; Lidx++)
     {
-      octave_idx_type Lidx = get_padded_index (BWidx, size_vec);
-
+      // The boundary is always zero, so we'll always skip it, so
+      // we're never considering the neighbours of the boundary. Thus,
+      // there is no possibility of out-of-bounds error below.
       if (L_vec[Lidx])
         {
           //Insert this one into its group
-          u_f.find (Lidx);
+          u_f.add (Lidx);
 
-          //Replace this with C++0x range-based for loop later
-          //(implemented in gcc 4.6)
-          for (auto nbr = neighbours.begin (); nbr != neighbours.end (); nbr++)
+          for (octave_idx_type i = 0; i < nbr_numel; i++)
             {
-              octave_idx_type n = *nbr + Lidx;
-              if (L_vec[n] )
+              octave_idx_type n = *nbr++ + Lidx;
+              if (L_vec[n])
                 u_f.unite (n, Lidx);
             }
+          nbr -= nbr_numel;
         }
     }
+  return u_f;
+}
 
-#ifdef USE_UNORDERED_MAP_WITH_TR1
-  using std::tr1::unordered_map;
-#else
-  using std::unordered_map;
-#endif
+static octave_idx_type
+paint_labels (NDArray& L, union_find& u_f)
+{
+  double* L_vec = L.fortran_vec ();
 
-  unordered_map<octave_idx_type, octave_idx_type> ids_to_label;
+  std::unordered_map<octave_idx_type, octave_idx_type> ids_to_label;
   octave_idx_type next_label = 1;
 
-  auto idxs  = u_f.get_ids ();
-
-  //C++0x foreach later
+  std::vector<octave_idx_type> idxs = u_f.get_ids (L);
   for (auto idx = idxs.begin (); idx != idxs.end (); idx++)
     {
       octave_idx_type label;
       octave_idx_type id = u_f.find (*idx);
       auto try_label = ids_to_label.find (id);
-      if( try_label == ids_to_label.end ())
+      if (try_label == ids_to_label.end ())
         {
           label = next_label++;
           ids_to_label[id] = label;
         }
       else
-          label = try_label -> second;
+        label = try_label->second;
 
       L_vec[*idx] = label;
     }
+  return ids_to_label.size ();
+}
+
+static octave_value_list
+bwlabel_nd (const boolNDArray& BW, const connectivity& conn)
+{
+  boolNDArray conn_mask = conn.mask;
+
+  const dim_vector size_vec = BW.dims ();
+
+  // Use temporary array with borders padded with zeros. Labels will
+  // also go in here eventually.
+  NDArray L = conn.create_padded (BW, 0);
+
+  union_find u_f = pre_label (L, conn);
+  octave_idx_type n_labels = paint_labels (L, u_f);
 
   // Remove the zero padding...
-  Array<idx_vector> inner_slice (dim_vector (size_vec.length (), 1));
-  for (octave_idx_type i = 0; i < padded_size.length (); i++)
-    inner_slice(i) = idx_vector (1, padded_size(i) - 1);
+  conn.unpad (L);
 
-  rval(0) = L.index (inner_slice);
-  rval(1) = ids_to_label.size ();
+  octave_value_list rval;
+  rval(0) = L;
+  rval(1) = n_labels;
   return rval;
 }
 
@@ -620,61 +372,264 @@ See, for example, http://en.wikipedia.org/wiki/Union-find\n\
   boolNDArray BW = args(0).bool_array_value ();
   dim_vector size_vec = BW.dims ();
 
-  //Connectivity mask
-  boolNDArray conn_mask;
-  if (nargin == 2)
+  connectivity conn;
+  try
     {
-      if (args(1).is_real_scalar ())
-        {
-          double N = args(1).scalar_value ();
-          if (size_vec.length () == 2 && N != 4 && N != 8)
-            error ("bwlabeln: for 2d arrays, scalar N must be 4 or 8");
-          else if (size_vec.length () == 3 && N != 6 && N != 18 && N != 26)
-            error ("bwlabeln: for 3d arrays, scalar N must be 4 or 8");
-          else if (size_vec.length () > 3)
-            error ("bwlabeln: for higher-dimensional arrays, N must be a "
-                   "connectivity mask");
-          else
-            conn_mask = get_mask (N);
-        }
-      else if (args(1).is_numeric_type () || args(1).is_bool_type ())
-        {
-          conn_mask = args(1).bool_array_value ();
-          dim_vector conn_mask_dims = conn_mask.dims ();
-          if (conn_mask_dims.length () != size_vec.length ())
-            error ("bwlabeln: connectivity mask N must have the same "
-                   "dimensions as BW");
-          for (octave_idx_type i = 0; i < conn_mask_dims.length (); i++)
-            {
-              if (conn_mask_dims(i) != 3)
-                {
-                  error ("bwlabeln: connectivity mask N must have all "
-                         "dimensions equal to 3");
-                }
-            }
-        }
-      else
-        error ("bwlabeln: second input argument must be a real scalar "
-               "or a connectivity array");
+      conn = (nargin == 2) ? connectivity (args(1)) :
+                             connectivity (BW.ndims (), "maximal");
     }
-  else
-    // Get the maximal mask that has same number of dims as BW.
-    conn_mask = get_mask (BW);
-
-  if (error_state)
-    return rval;
+  catch (invalid_connectivity& e)
+    {
+      error ("bwlabeln: MASK %s", e.what ());
+      return octave_value ();
+    }
 
   // The implementation in bwlabel_2d is faster so use it if we can
   const octave_idx_type ndims = BW.ndims ();
-  if (ndims == 2 && boolMatrix (conn_mask) == get_mask (4))
+  if (ndims == 2 && boolMatrix (conn.mask) == connectivity (4).mask)
     rval = bwlabel_2d (BW, 4);
-  else if (ndims == 2 && boolMatrix (conn_mask) == get_mask (8))
+  else if (ndims == 2 && boolMatrix (conn.mask) == connectivity (8).mask)
     rval = bwlabel_2d (BW, 8);
   else
-    rval = bwlabel_nd (BW, conn_mask);
+    rval = bwlabel_nd (BW, conn);
 
   return rval;
 }
+
+/*
+%!shared a2d, a3d
+%! a2d = [1   0   0   0   0   0   1   0   0   1
+%!        1   0   0   1   0   1   0   1   0   1
+%!        1   0   1   0   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0   1   0   0   0   0   0   0   0   0
+%!        1   1   0   1   1   1   0   0   0   0
+%!        1   1   0   1   0   0   0   1   0   0
+%!        1   1   0   0   0   0   1   0   1   0
+%!        1   1   0   0   0   0   0   0   0   0
+%!        1   1   0   0   0   1   1   0   0   1];
+%!
+%! a3d = a2d;
+%! a3d(:,:,2) = [
+%!        0   0   0   0   0   0   0   0   0   0
+%!        1   0   0   1   1   0   0   1   0   0
+%!        0   0   0   1   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0   1   0   0   0   0   0   0   0   0
+%!        1   1   0   0   1   1   0   0   0   0
+%!        1   1   0   1   0   0   0   0   0   0
+%!        1   0   0   0   0   0   1   0   0   0
+%!        0   1   0   0   0   0   0   0   0   1
+%!        1   1   0   0   0   0   1   0   0   0];
+%!
+%! a3d(:,:,3) = [
+%!        1   0   0   0   0   0   0   0   0   0
+%!        0   1   0   1   1   0   0   1   0   0
+%!        0   0   0   1   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0   0   0   1   1   1   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        1   0   0   0   0   0   0   0   0   0
+%!        1   1   0   0   0   0   0   0   0   1
+%!        1   1   0   0   0   0   0   0   0   0];
+
+%!test
+%! label2dc4 = [
+%!        1   0   0   0   0   0   8   0   0  13
+%!        1   0   0   4   0   6   0  10   0  13
+%!        1   0   3   0   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0   2   0   0   0   0   0   0   0   0
+%!        2   2   0   5   5   5   0   0   0   0
+%!        2   2   0   5   0   0   0  11   0   0
+%!        2   2   0   0   0   0   9   0  12   0
+%!        2   2   0   0   0   0   0   0   0   0
+%!        2   2   0   0   0   7   7   0   0  14];
+%! assert (bwlabeln (a2d, 4), label2dc4)
+%! assert (bwlabeln (a2d, [0 1 0; 1 1 1; 0 1 0]), label2dc4)
+%! assert (bwlabeln (a2d, conndef (2, "minimal")), label2dc4)
+%! assert (bwlabeln (a2d, conndef (3, "minimal")), label2dc4)
+
+%!test
+%! label2dc8 = [
+%!        1   0   0   0   0   0   5   0   0   8
+%!        1   0   0   3   0   5   0   5   0   8
+%!        1   0   3   0   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0   2   0   0   0   0   0   0   0   0
+%!        2   2   0   4   4   4   0   0   0   0
+%!        2   2   0   4   0   0   0   7   0   0
+%!        2   2   0   0   0   0   7   0   7   0
+%!        2   2   0   0   0   0   0   0   0   0
+%!        2   2   0   0   0   6   6   0   0   9];
+%! assert (bwlabeln (a2d, 8), label2dc8)
+%! assert (bwlabeln (a2d, ones (3)), label2dc8)
+%! assert (bwlabeln (a2d, conndef (2, "maximal")), label2dc8)
+%! assert (bwlabeln (a2d, conndef (3, "maximal")), label2dc8)
+
+%!test
+%! label3dc8 = [
+%!        1   0   0   0   0   0   5   0   0   8
+%!        1   0   0   3   0   5   0   5   0   8
+%!        1   0   3   0   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0   2   0   0   0   0   0   0   0   0
+%!        2   2   0   4   4   4   0   0   0   0
+%!        2   2   0   4   0   0   0   7   0   0
+%!        2   2   0   0   0   0   7   0   7   0
+%!        2   2   0   0   0   0   0   0   0   0
+%!        2   2   0   0   0   6   6   0   0   9];
+%! label3dc8(:,:,2) = [
+%!        0   0   0   0   0   0   0   0   0   0
+%!       10   0   0  12  12   0   0  16   0   0
+%!        0   0   0  12   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0  11   0   0   0   0   0   0   0   0
+%!       11  11   0   0  13  13   0   0   0   0
+%!       11  11   0  13   0   0   0   0   0   0
+%!       11   0   0   0   0   0  14   0   0   0
+%!        0  11   0   0   0   0   0   0   0  17
+%!       11  11   0   0   0   0  15   0   0   0];
+%! label3dc8(:,:,3) = [
+%!       18   0   0   0   0   0   0   0   0   0
+%!        0  18   0  20  20   0   0  22   0   0
+%!        0   0   0  20   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0   0   0  21  21  21   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!       19   0   0   0   0   0   0   0   0   0
+%!       19  19   0   0   0   0   0   0   0  23
+%!       19  19   0   0   0   0   0   0   0   0];
+%! assert (bwlabeln (a3d, 8), label3dc8)
+%! assert (bwlabeln (a3d, ones (3, 3)), label3dc8)
+%! assert (bwlabeln (a3d, conndef (2, "maximal")), label3dc8)
+
+%!test
+%! label3dc26 = [
+%!        1   0   0   0   0   0   3   0   0   7
+%!        1   0   0   3   0   3   0   3   0   7
+%!        1   0   3   0   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0   2   0   0   0   0   0   0   0   0
+%!        2   2   0   4   4   4   0   0   0   0
+%!        2   2   0   4   0   0   0   6   0   0
+%!        2   2   0   0   0   0   6   0   6   0
+%!        2   2   0   0   0   0   0   0   0   0
+%!        2   2   0   0   0   5   5   0   0   6];
+%! label3dc26(:,:,2) = [
+%!        0   0   0   0   0   0   0   0   0   0
+%!        1   0   0   3   3   0   0   3   0   0
+%!        0   0   0   3   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0   2   0   0   0   0   0   0   0   0
+%!        2   2   0   0   4   4   0   0   0   0
+%!        2   2   0   4   0   0   0   0   0   0
+%!        2   0   0   0   0   0   6   0   0   0
+%!        0   2   0   0   0   0   0   0   0   6
+%!        2   2   0   0   0   0   5   0   0   0];
+%! label3dc26(:,:,3) = [
+%!        1   0   0   0   0   0   0   0   0   0
+%!        0   1   0   3   3   0   0   3   0   0
+%!        0   0   0   3   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0   0   0   4   4   4   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        2   0   0   0   0   0   0   0   0   0
+%!        2   2   0   0   0   0   0   0   0   6
+%!        2   2   0   0   0   0   0   0   0   0];
+%! assert (bwlabeln (a3d, 26), label3dc26)
+%! assert (bwlabeln (a3d, ones (3, 3, 3)), label3dc26)
+%! assert (bwlabeln (a3d, conndef (3, "maximal")), label3dc26)
+
+%!test
+%! label3dc18 = [
+%!        1   0   0   0   0   0   3   0   0   7
+%!        1   0   0   3   0   3   0   3   0   7
+%!        1   0   3   0   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0   2   0   0   0   0   0   0   0   0
+%!        2   2   0   4   4   4   0   0   0   0
+%!        2   2   0   4   0   0   0   6   0   0
+%!        2   2   0   0   0   0   6   0   6   0
+%!        2   2   0   0   0   0   0   0   0   0
+%!        2   2   0   0   0   5   5   0   0   8];
+%! label3dc18(:,:,2) = [
+%!        0   0   0   0   0   0   0   0   0   0
+%!        1   0   0   3   3   0   0   3   0   0
+%!        0   0   0   3   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0   2   0   0   0   0   0   0   0   0
+%!        2   2   0   0   4   4   0   0   0   0
+%!        2   2   0   4   0   0   0   0   0   0
+%!        2   0   0   0   0   0   6   0   0   0
+%!        0   2   0   0   0   0   0   0   0   8
+%!        2   2   0   0   0   0   5   0   0   0];
+%! label3dc18(:,:,3) = [
+%!        1   0   0   0   0   0   0   0   0   0
+%!        0   1   0   3   3   0   0   3   0   0
+%!        0   0   0   3   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0   0   0   4   4   4   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        2   0   0   0   0   0   0   0   0   0
+%!        2   2   0   0   0   0   0   0   0   8
+%!        2   2   0   0   0   0   0   0   0   0];
+%! assert (bwlabeln (a3d, 18), label3dc18)
+
+%!test
+%! label2dc3 = [
+%!        1   0   0   0   0   0  11   0   0  17
+%!        1   0   0   5   0   8   0  14   0  17
+%!        1   0   4   0   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0   3   0   0   0   0   0   0   0   0
+%!        2   3   0   6   7   9   0   0   0   0
+%!        2   3   0   6   0   0   0  15   0   0
+%!        2   3   0   0   0   0  12   0  16   0
+%!        2   3   0   0   0   0   0   0   0   0
+%!        2   3   0   0   0  10  13   0   0  18];
+%! assert (bwlabeln (a2d, [1 1 1]'), label2dc3)
+%!
+%! label3dc3 = label2dc3;
+%! label3dc3(:,:,2) = [
+%!        0   0   0   0   0   0   0   0   0   0
+%!       19   0   0  24  26   0   0  31   0   0
+%!        0   0   0  24   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0  22   0   0   0   0   0   0   0   0
+%!       20  22   0   0  27  28   0   0   0   0
+%!       20  22   0  25   0   0   0   0   0   0
+%!       20   0   0   0   0   0  29   0   0   0
+%!        0  23   0   0   0   0   0   0   0  32
+%!       21  23   0   0   0   0  30   0   0   0];
+%! label3dc3(:,:,3) = [
+%!       33   0   0   0   0   0   0   0   0   0
+%!        0  35   0  37  39   0   0  42   0   0
+%!        0   0   0  37   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!        0   0   0  38  40  41   0   0   0   0
+%!        0   0   0   0   0   0   0   0   0   0
+%!       34   0   0   0   0   0   0   0   0   0
+%!       34  36   0   0   0   0   0   0   0  43
+%!       34  36   0   0   0   0   0   0   0   0];
+%! assert (bwlabeln (a3d, [1 1 1]'), label3dc3)
+
+%!test
+%! label2dc1 = zeros (size (a2d));
+%! label2dc1(a2d != 0) = 1:nnz (a2d);
+%! assert (bwlabeln (a2d, [1]), label2dc1);
+%! assert (bwlabeln (a2d, [0 1 0]'), label2dc1);
+%!
+%! label3dc1 = zeros (size (a3d));
+%! label3dc1(a3d != 0) = 1:nnz (a3d);
+%! assert (bwlabeln (a3d, [1]), label3dc1);
+%! assert (bwlabeln (a3d, [0 1 0]'), label3dc1);
+*/
 
 // PKG_ADD: autoload ("bwlabel", which ("bwlabeln"));
 // PKG_DEL: autoload ("bwlabel", which ("bwlabeln"), "remove");
@@ -736,9 +691,9 @@ can be changed through the argument @var{n} that can be either 4, 6, or 8.\n\
 %!shared in
 %! in = rand (10) > 0.8;
 %!assert (bwlabel (in, 4), bwlabeln (in, 4));
-%!assert (bwlabel (in, 4), bwlabeln (in, [0 1 0; 1 0 1; 0 1 0]));
+%!assert (bwlabel (in, 4), bwlabeln (in, [0 1 0; 1 1 1; 0 1 0]));
 %!assert (bwlabel (in, 8), bwlabeln (in, 8));
-%!assert (bwlabel (in, 8), bwlabeln (in, [1 1 1; 1 0 1; 1 1 1]));
+%!assert (bwlabel (in, 8), bwlabeln (in, [1 1 1; 1 1 1; 1 1 1]));
 
 %!assert (bwlabel (logical ([0 1 0; 0 0 0; 1 0 1])), [0 2 0; 0 0 0; 1 0 3]);
 %!assert (bwlabel ([0 1 0; 0 0 0; 1 0 1]), [0 2 0; 0 0 0; 1 0 3]);

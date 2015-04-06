@@ -44,15 +44,15 @@ function retval = rangefilt (I, domain = true (3), padding = "symmetric", vararg
   if (nargin == 0)
     error ("rangefilt: not enough input arguments");
   endif
-  
-  if (!ismatrix (I))
-    error ("rangefilt: first input must be a matrix");
+
+  if (! isnumeric (I) || ! islogical (I))
+    error ("rangefilt: I must be a numeric or logical array");
   endif
-  
-  if (!ismatrix (domain))
-    error ("rangefilt: second input argument must be a logical matrix");
+
+  if (! isnumeric (domain) || ! islogical (domain))
+    error ("rangefilt: DOMAIN must be a logical array");
   endif
-  domain = (domain > 0);
+  domain = logical (domain);
   
   ## Pad image
   pad = floor (size (domain)/2);

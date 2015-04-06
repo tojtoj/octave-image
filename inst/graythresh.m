@@ -159,7 +159,7 @@ function [varargout] = graythresh (img, algo = "otsu", varargin)
   endif
 
   ## we only need to do this if the input is an image. If an histogram, is
-  ## supplieed, no need to do any of this
+  ## supplied, no need to do any of this
   if (!hist_in)
     ## if image is uint we do nothing. If it's int, then we convert to uint since
     ## it may mess up calculations later. If it's double we need some bins so we
@@ -205,7 +205,7 @@ function [thresh] = otsu (ihist, compute_good)
   ## there's not many pages explaining it either. For that, one really needs to
   ## check the paper.
   ##
-  ## The implemententation on the link above assumes that threshold is to be
+  ## The implementation on the link above assumes that threshold is to be
   ## made for values "greater or equal than" but that is not the case (in im2bw
   ## and also not ImageJ) so we subtract 1 at the end.
 
@@ -264,22 +264,17 @@ endfunction
 function T = maxentropy(y)
   n = numel (y) - 1;
 
-  dz_warn = warning ("query", "divide-by-zero");
-  unwind_protect
-    warning ("off", "Octave:divide-by-zero");
-    ## The threshold is chosen such that the following expression is minimized.
-    sumY = sum (y);
-    negY = negativeE (y, n);
-    for j = 0:n
-      sumA = partial_sumA (y, j);
-      negE = negativeE (y, j);
-      sum_diff = sumY - sumA;
-      vec(j+1) = negE/sumA - log10 (sumA) + (negY-negE)/(sum_diff) - log10 (sum_diff);
-    end
-  unwind_protect_cleanup
-    ## restore broadcats warning status
-    warning (dz_warn.state, "Octave:divide-by-zero");
-  end_unwind_protect
+  warning ("off", "Octave:divide-by-zero", "local");
+
+  ## The threshold is chosen such that the following expression is minimized.
+  sumY = sum (y);
+  negY = negativeE (y, n);
+  for j = 0:n
+    sumA = partial_sumA (y, j);
+    negE = negativeE (y, j);
+    sum_diff = sumY - sumA;
+    vec(j+1) = negE/sumA - log10 (sumA) + (negY-negE)/(sum_diff) - log10 (sum_diff);
+  end
 
   [~,ind] = min (vec);
   T{1} = ind-1;
@@ -355,53 +350,48 @@ function [Tout] = minerror_iter (y, T)
 
   Tprev = NaN;
 
-  dz_warn = warning ("query", "divide-by-zero");
-  unwind_protect
-    warning ("off", "Octave:divide-by-zero");
-    sumA = partial_sumA (y, n);
-    sumB = partial_sumB (y, n);
-    sumC = partial_sumC (y, n);
-    while T ~= Tprev
-      % Calculate some statistics.
-      sumAT = partial_sumA (y, T);
-      sumBT = partial_sumB (y, T);
-      sumCT = partial_sumC (y, T);
-      sumAdiff = sumA - sumAT;
+  warning ("off", "Octave:divide-by-zero", "local");
 
-      mu = sumBT/sumAT;
-      nu = (sumB-sumBT)/(sumAdiff);
-      p = sumAT/sumA;
-      q = (sumAdiff) / sumA;
-      sigma2 = sumCT/sumAT-mu^2;
-      tau2 = (sumC-sumCT) / (sumAdiff) - nu^2;
+  sumA = partial_sumA (y, n);
+  sumB = partial_sumB (y, n);
+  sumC = partial_sumC (y, n);
+  while T ~= Tprev
+    % Calculate some statistics.
+    sumAT = partial_sumA (y, T);
+    sumBT = partial_sumB (y, T);
+    sumCT = partial_sumC (y, T);
+    sumAdiff = sumA - sumAT;
 
-      % The terms of the quadratic equation to be solved.
-      w0 = 1/sigma2-1/tau2;
-      w1 = mu/sigma2-nu/tau2;
-      w2 = mu^2/sigma2 - nu^2/tau2 + log10((sigma2*q^2)/(tau2*p^2));
+    mu = sumBT/sumAT;
+    nu = (sumB-sumBT)/(sumAdiff);
+    p = sumAT/sumA;
+    q = (sumAdiff) / sumA;
+    sigma2 = sumCT/sumAT-mu^2;
+    tau2 = (sumC-sumCT) / (sumAdiff) - nu^2;
 
-      % If the next threshold would be imaginary, return with the current one.
-      sqterm = w1^2-w0*w2;
-      if sqterm < 0
-        warning('MINERROR:NaN','Warning: th_minerror_iter did not converge.')
-        break
-      endif
+    % The terms of the quadratic equation to be solved.
+    w0 = 1/sigma2-1/tau2;
+    w1 = mu/sigma2-nu/tau2;
+    w2 = mu^2/sigma2 - nu^2/tau2 + log10((sigma2*q^2)/(tau2*p^2));
 
-      % The updated threshold is the integer part of the solution of the
-      % quadratic equation.
-      Tprev = T;
-      T = floor((w1+sqrt(sqterm))/w0);
+    % If the next threshold would be imaginary, return with the current one.
+    sqterm = w1^2-w0*w2;
+    if sqterm < 0
+      warning('MINERROR:NaN','Warning: th_minerror_iter did not converge.')
+      break
+    endif
 
-      % If the threshold turns out to be NaN, return with the previous threshold.
-      if isnan(T)
-        warning('MINERROR:NaN','Warning: th_minerror_iter did not converge.')
-        T = Tprev;
-      end
-    endwhile
-  unwind_protect_cleanup
-    ## restore broadcats warning status
-    warning (dz_warn.state, "Octave:divide-by-zero");
-  end_unwind_protect
+    % The updated threshold is the integer part of the solution of the
+    % quadratic equation.
+    Tprev = T;
+    T = floor((w1+sqrt(sqterm))/w0);
+
+    % If the threshold turns out to be NaN, return with the previous threshold.
+    if isnan(T)
+      warning('MINERROR:NaN','Warning: th_minerror_iter did not converge.')
+      T = Tprev;
+    end
+  endwhile
   Tout{1} = T;
 endfunction
 #{
@@ -622,7 +612,7 @@ function E = hbalance(y,ind)
 % References:
 %
 % A. Rosenfeld and P. De La Torre, "Histogram concavity analysis as an aid
-% in threhold selection," IEEE Transactions on Systems, Man, and
+% in threshold selection," IEEE Transactions on Systems, Man, and
 % Cybernetics, vol. 13, pp. 231-235, 1983.
 %
 % P. K. Sahoo, S. Soltani, and A. K. C. Wong, "A survey of thresholding
@@ -644,7 +634,7 @@ function H = hconvhull(h)
   % References:
   %
   % A. Rosenfeld and P. De La Torre, "Histogram concavity analysis as an aid
-  % in threhold selection," IEEE Transactions on Systems, Man, and
+  % in threshold selection," IEEE Transactions on Systems, Man, and
   % Cybernetics, vol. 13, pp. 231-235, 1983.
 
   len = length(h);
@@ -675,7 +665,7 @@ function H = hconvhull(h)
   end
 endfunction
 
-## Entroy function. Note that the function returns the negative of entropy.
+## Entropy function. Note that the function returns the negative of entropy.
 function x = negativeE(y,j)
   ## used by the maxentropy method only
   y = y(1:j+1);

@@ -41,7 +41,6 @@ function [offsets, heights] = getneighbors (se)
   ## of a column), if the input is just a row vector. We need to make sure
   ## that we always get a column for ind2sub().
   [sub{1:se_ndims}] = ind2sub (se_size, find (se.nhood)(:));
-  warning ("off", "Octave:broadcast", "local");
   offsets = cell2mat (sub) - floor ((se_size + 1) / 2);
 
   heights = getheight (se)(se.nhood);

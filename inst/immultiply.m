@@ -20,7 +20,7 @@
 ##
 ## If @var{a} and @var{b} are two images of same size and class, the images are
 ## multiplied. Alternatively, if @var{b} is a floating-point scalar, @var{a} is
-## multiplie by it.
+## multiplied by it.
 ##
 ## The class of @var{out} will be the same as @var{a} unless @var{a} is logical
 ## in which case @var{out} will be double. Alternatively, it can be
@@ -38,7 +38,7 @@ function img = immultiply (img, val, out_class = class (img))
   endif
   [img, val] = imarithmetics ("immultiply", img, val, out_class, nargin);
 
-  ## have to check how matlab behaves in this situtation. Their documentation
+  ## have to check how matlab behaves in this situation. Their documentation
   ## does not say anything but add and subtract silently ignore it and return
   ## double anyway. This may be done in the call to imarithmetics
   if (nargin > 2 && strcmpi (out_class, "logical"))

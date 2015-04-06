@@ -94,7 +94,7 @@
 ##   = exp(-0.5*d([x0,y0],[x,y])^2/@var{sigma_d}^2)
 ##     * exp(-0.5*d(@var{I}(x0,y0),@var{I}(x,y))^2/@var{sigma_r}^2),
 ## @end example
-## with @code{d} being the Euclidian distance function. The two paramteres
+## with @code{d} being the Euclidian distance function. The two parameters
 ## @var{sigma_d} and @var{sigma_r} control the amount of smoothing. @var{sigma_d}
 ## is the size of the spatial smoothing filter, while @var{sigma_r} is the size
 ## of the range filter. When @var{sigma_r} is large the filter behaves almost
@@ -192,8 +192,8 @@ function J = imsmooth(I, name = "Gaussian", varargin)
   if (nargin == 0)
     print_usage();
   endif
-  if (!ismatrix(I))
-    error("imsmooth: first input argument must be an image");
+  if (! isimage (I))
+    error("imsmooth: I must be an image");
   endif
   [imrows, imcols, imchannels, tmp] = size(I);
   if ((imchannels != 1 && imchannels != 3) || tmp != 1)
@@ -401,7 +401,7 @@ function J = imsmooth(I, name = "Gaussian", varargin)
       for k = 1:3
         if (isscalar (varargin {k}))
           varargin {k} = repmat (varargin {k}, imrows, imcols);
-        elseif (ismatrix (varargin {k}) && ndims (varargin {k}) == 2)
+        elseif (isnumeric (varargin {k}) && ismatrix (varargin {k}))
           if (rows (varargin {k}) != imrows || columns (varargin {k}) != imcols)
             error (["imsmooth: %s input argument must have same number of rows "
                     "and columns as the input image"], arg_names {k});
@@ -500,3 +500,27 @@ function J = mean_shift(I, s1, s2)
   J = I(ms);
 endfunction
 #}
+
+%!test
+%! ## checking Bilateral Filter
+%!
+%! ##  constant image remain the same after Bilateral Filter
+%! A = uint8(255*ones(128,128));
+%! B = uint8(imsmooth(A, 'Bilateral', 2, 10));
+%! assert (A,B);
+%!
+%! ## Bilateral Filter does not smear outlayers
+%! A = zeros(256,256);
+%! A(128,128) = 256;
+%! ## bilateral filter does not smear outlayers
+%! B = imsmooth(A, 'Bilateral', 2, 10);
+%! assert (A,B,1.e-140);
+%!
+%! ## When sigma_r is large the filter behaves almost
+%! ## like the isotropic Gaussian filter
+%!
+%! A0 = fspecial ('gaussian',100,100);
+%! A = uint8(A0/max(max(A0))*255);
+%! B1 = imsmooth(A, 'Bilateral', 2, 100);
+%! B2 = imsmooth(A, 'Gaussian', 2);
+%! assert (B1,B2);

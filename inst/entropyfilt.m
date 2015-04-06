@@ -50,15 +50,15 @@ function retval = entropyfilt (I, domain = true (9), padding = "symmetric", vara
     error ("entropyfilt: not enough input arguments");
   endif
   
-  if (!ismatrix (I))
-    error ("entropyfilt: first input must be a matrix");
+  if (! isnumeric (I))
+    error ("entropyfilt: I must be numeric");
   endif
-  
-  if (!ismatrix (domain))
-    error ("entropyfilt: second input argument must be a logical matrix");
+
+  if (! isnumeric (domain) && ! islogical (domain))
+    error ("entropyfilt: DOMAIN must be a logical matrix");
   endif
-  domain = (domain > 0);
-  
+  domain = logical (domain);
+
   ## Get number of histogram bins
   if (islogical (I))
     nbins = 2;

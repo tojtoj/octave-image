@@ -22,7 +22,7 @@
 ##
 ## The second argument can either be @var{n}, a scalar that specifies the number
 ## of bins; or @var{cmap}, a colormap in which case @var{X} is expected to be
-## an indexed image. If not specified, @var{n} defauls to 2 for binary images,
+## an indexed image. If not specified, @var{n} defaults to 2 for binary images,
 ## and 256 for grayscale images.
 ##
 ## If output is requested, @var{counts} is the number of counts for each bin and

@@ -68,7 +68,7 @@ bilateral (const MatrixType &im, const double sigma_d, const double sigma_r)
           double k = 0;
           for (octave_idx_type i = 0; i < num_planes; i++)
             {
-              val[i] = im (r,c,i);
+              val[i] = im (r+s,c+s,i);
               sum[i] = 0;
             }
           for (octave_idx_type kr = 0; kr < 2*s+1; kr++)

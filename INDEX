@@ -1,8 +1,9 @@
 image >> Image processing
 Analysis and Statistics
+ corr2
  edge
  fftconv2
- corr2
+ fftconvn
  mean2
  std2
  entropy
@@ -18,7 +19,9 @@ Analysis and Statistics
  imgradientxy
  imhist
  immaximas
+ immse
  normxcorr2
+ psnr
  rangefilt
  regionprops
  stdfilt
@@ -33,7 +36,7 @@ Arithmetics
 Black and white image functions
  applylut
  bwarea
- bwborder
+ bwareafilt
  bwboundaries
  bwconncomp
  bwdist
@@ -44,6 +47,7 @@ Black and white image functions
  bwlabeln
  bwmorph
  bwperim
+ bwpropfilt
  bwselect
  fchcode
  labelmatrix
@@ -55,6 +59,7 @@ Colour maps and Colour controls
  ycbcr2rgb
 Display
  montage
+ subimage
 Enhancement and Restoration
  histeq
  imadjust
@@ -74,15 +79,18 @@ Filtering and Transforms
  nonmax_supress
  radon
  rho_filter
- uintlut
 Morhophological Operations
  bwareaopen
  conndef
  imbothat
+ imclearborder
  imclose
  imdilate
  imerode
  imopen
+ imreconstruct
+ imregionalmax
+ imregionalmin
  imtophat
  mmgradm
  @strel/getheight
@@ -97,7 +105,6 @@ Read/write
  analyze75info
  analyze75read
  analyze75write
- readexif
  tiff_tag_read
 Region-based and block processing
  bestblk
@@ -112,12 +119,10 @@ Region-based and block processing
 Spatial transformations
  cp2tform
  imcrop
- impad
  imperspectivewarp
  imremap
  imresize
  imrotate
- imrotate_Fourier
  imshear
  imtranslate
  maketform
@@ -133,6 +138,7 @@ Types and Type conversions
  im2single
  im2uint8
  im2uint16
+ imcast
  imdither
  isbw
  isgray
@@ -143,11 +149,13 @@ Types and Type conversions
  rgb2gray
 Utilities
  checkerboard
+ edgetaper
  getrangefromclass
+ imattributes
  iptcheckconn
  iptcheckmap
- iptchecknargin
- iptcheckstrs
  iptnum2ordinal
+ otf2psf
  padarray
  phantom
+ psf2otf

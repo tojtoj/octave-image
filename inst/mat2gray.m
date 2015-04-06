@@ -53,8 +53,8 @@ function in = mat2gray (in, scale)
 
   if (nargin < 1 || nargin > 2)
     print_usage;
-  elseif (!ismatrix (in) || ischar(in))
-    error ("mat2gray: first argument must be a matrix");
+  elseif (! isnumeric (in) && ! islogical (in))
+    error ("mat2gray: IN must be a matrix");
   elseif (nargin == 2 && (!isvector (scale) || numel (scale) != 2))
     error ("mat2gray: second argument must be a vector with 2 elements");
   endif

@@ -69,7 +69,6 @@ function h = montage (images, varargin)
   if (nargin < 1)
     print_usage ();
   endif
-  warning ("off", "Octave:broadcast", "local");
 
   if (iscellstr (images))
     ## we are using cellfun instead of passing the "all" option
@@ -182,14 +181,14 @@ function h = montage (images, varargin)
 
   ## FIXME: inputParser was first implemented in the general package in the
   ##        old @class type which allowed for a very similar interface to
-  ##        Matlab.  classdef was implemented in the upcoming 4.2 release,
+  ##        Matlab.  classdef was implemented in the upcoming 4.0 release,
   ##        which enabled inputParser to be implemented exactly the same and
   ##        it is now part of Octave core.  To prevent issues while all this
   ##        versions are available, we check if the inputParser being used
   ##        is in a @inputParser directory.
   ##
-  ##        Remove all this checks once we are no longer dependent on Octave
-  ##        versions older than 4.2.
+  ##        Remove all this checks once the general package has been released
+  ##        again without the @inputParser class
 
   if (strfind (which ("inputParser"), ["@inputParser" filesep "inputParser.m"]))
     p = p.addParamValue ("DisplayRange",    [], @(x) isnumeric (x) && any (numel (x) == [0 2]));
@@ -209,7 +208,7 @@ function h = montage (images, varargin)
     p.parse (varargin{:});
   endif
 
-  ## remove unecessary images
+  ## remove unnecessary images
   images = images(:,:,:,p.Results.Indices);
   nImg   = size (images, 4);
 

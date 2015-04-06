@@ -40,8 +40,8 @@ function accum = hough_circle(bw, r)
     error("hough_circle: wrong number of input arguments");
   endif
 
-  if (!ismatrix(bw) || ndims(bw) != 2)
-    error("hough_circle: first arguments must be a 2-dimensional matrix");
+  if (! ismatrix (bw))
+    error("hough_circle: BW must be a 2-dimensional matrix");
   endif
 
   if (!isvector(r) || !isreal(r) || any(r<0))
