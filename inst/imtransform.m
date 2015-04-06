@@ -39,12 +39,12 @@
 ## elements vector [minval maxval]. Default: [1 rows(@var{A})]
 ##
 ## @item "xdata"
-## Specifies the requiered output space horizontal limits. Value must
+## Specifies the required output space horizontal limits. Value must
 ## be a two elements vector [minval maxval]. Default: estimated using
 ## udata, vdata and findbounds function.
 ##
 ## @item "ydata"
-## Specifies the requiered output space vertical limits. Value must
+## Specifies the required output space vertical limits. Value must
 ## be a two elements vector [minval maxval]. Default: estimated using
 ## udata, vdata and findbounds function.
 ##
@@ -200,7 +200,7 @@ function [varargout] = imtransform (im, T, varargin)
     endif
   endif
   
-  ## Ouput/Input pixels
+  ## Output/Input pixels
   if (isempty (imsize))
     if (isempty (xyscale))
       xyscale = [(diff (udata) / columns (im)) (diff (vdata) / rows (im))];

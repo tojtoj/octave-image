@@ -48,15 +48,15 @@ function retval = stdfilt (I, domain = true (3), padding = "symmetric", varargin
     error ("stdfilt: not enough input arguments");
   endif
   
-  if (!ismatrix (I))
+  if (! isimage (I))
     error ("stdfilt: first input must be a matrix");
   endif
-  
-  if (!ismatrix (domain))
+
+  if (! isnumeric (domain) || ! islogical (domain))
     error ("stdfilt: second input argument must be a logical matrix");
   endif
-  domain = (domain > 0);
-  
+  domain = logical (domain);
+
   ## Pad image
   pad = floor (size (domain)/2);
   I = padarray (I, pad, padding, varargin {:});

@@ -41,8 +41,7 @@
 ##     @end itemize
 ##
 ##   @var{extrapval} sets the value used for extrapolation. The default value
-##      is @code{NA} for images represented using doubles, and 0 otherwise.
-##      This argument is ignored of Fourier interpolation is used.
+##      is 0.  This argument is ignored of Fourier interpolation is used.
 ##
 ## Output parameters:
 ##
@@ -57,7 +56,7 @@
 ##                  not available if Fourier interpolation is used.
 ## @end deftypefn
 
-function [imgPost, H, valid] = imrotate (imgPre, thetaDeg, interp = "nearest", bbox = "loose", extrapval = NA)
+function [imgPost, H, valid] = imrotate (imgPre, thetaDeg, interp = "nearest", bbox = "loose", extrapval = 0)
 
   if (nargin < 2 || nargin > 5)
     print_usage ();
@@ -154,10 +153,7 @@ function [imgPost, H, valid] = imrotate (imgPre, thetaDeg, interp = "nearest", b
     endif
     valid = NA;
 
-    ## we probably should do this in a safer way... but hardcoding the list of
-    ## im2xxxx functions might not be a good idea since it then it requires to
-    ## be added here if a new im2xxx function is implemented
-    imgPost = feval (["im2" in_class], imgPost);
+    imgPost = imcast (imgPost, in_class);
   else
     [imgPost, valid] = imperspectivewarp(imgPre, H, interp, bbox, extrapval);
   endif

@@ -105,16 +105,13 @@ function A = imnoise (A, stype, a, b)
   endswitch
 
   if (fix_class)
-    ## we probably should do this in a safer way... but hardcoding the list of
-    ## im2xxxx functions might not be a good idea since it then it requires to
-    ## be added here if a new im2xxx function is implemented
-    A = feval (["im2" in_class], A);
+    A = imcast (A, in_class);
   elseif (isfloat (A))
     ## this includes not even cases where the noise made it go outside of the
     ## [0 1] range, but also images that were already originally outside that
     ## range. This is by design and matlab compatibility. And we do this after
-    ## fixing class because the im2XX functions already take care of such
-    ## adjustemt
+    ## fixing class because the imcast functions already take care of such
+    ## adjustment
     A(A < 0) = cast (0, class (A));
     A(A > 1) = cast (1, class (A));
   endif

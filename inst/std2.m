@@ -13,7 +13,6 @@
 ## You should have received a copy of the GNU General Public License along with
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
-
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{s}= std2 (@var{I})
 ## Returns the standard deviation for a 2d real type matrix.
@@ -27,8 +26,8 @@ function s = std2 (I)
     print_usage ();
   endif
 
-  if !(ismatrix(I) && isreal(I))
-    error("std2: argument must be a real type matrix");
+  if (! isreal (I))
+    error("std2: I be a real type array");
   endif
 
   s = std (I(:));

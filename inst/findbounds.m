@@ -23,7 +23,7 @@
 ## an estimation of the bounds in the output space @var{outbnd} 
 ## (2-by-ndims_out). For instance two dimensionnal bounds could 
 ## be represented as : [xmin ymin; xmax ymax]. If @var{T} does not
-## define a forward trasform (i.e. for 'polynomial'), the output
+## define a forward transform (i.e. for 'polynomial'), the output
 ## bounds are infered using fsolve and the inverse transform.
 ##
 ## @seealso{maketform, cp2tform, tformfwd}

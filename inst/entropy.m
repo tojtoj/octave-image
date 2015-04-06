@@ -40,8 +40,8 @@ function retval = entropy (I, nbins = 0)
     error ("entropy: not enough input arguments");
   endif
   
-  if (!ismatrix (I))
-    error ("entropy: first input must be a matrix");
+  if (! isnumeric (I))
+    error ("entropy: I must be numeric");
   endif
   
   if (!isscalar (nbins))

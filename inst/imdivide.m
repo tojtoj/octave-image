@@ -44,12 +44,8 @@ function img = imdivide (img, val, out_class = class (img))
     warning ("Ignoring request to return logical as output of division.");
   endif
 
-  warn = warning ("query", "Octave:divide-by-zero");
-  unwind_protect
-    img = img ./ val;
-  unwind_protect_cleanup
-    warning (warn.state, "Octave:divide-by-zero")
-  end_unwind_protect
+  warning ("off", "Octave:divide-by-zero", "local");
+  img = img ./ val;
 
 endfunction
 

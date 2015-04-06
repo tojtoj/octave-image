@@ -26,14 +26,15 @@
 ## @item floating point
 ## Since floating point images are meant to have values in the range [0 1],
 ## this is equivalent @code{A -1}.  This leads to values within the range
-## to be inverted while others to equally distance from the limits.
+## to be inverted while others to stay equally distant from the limits.
 ##
 ## @item logical
 ## Equivalent to @code{! A}
 ##
 ## @item integer
-## Inverts the values within the range of the data.  This is a different
-## depending whether it's signed or unsigned integers class.
+## Inverts the values within the range of the data type.  This is
+## equivalent to @code{bitcmp (@var{A})}.
+##
 ## @end table
 ##
 ## @seealso{imadd, imdivide, imlincomb, immultiply, imsubtract}
@@ -49,19 +50,15 @@ function B = imcomplement (A)
     B = 1 - A;
   elseif (islogical (A))
     B = ! A;
-  elseif (any (isa (A, {"int8", "int16", "int32", "int64"})))
-    ## Signed integers are different. We have all this extra work to avoid
-    ## conversion into another class which may not fit in memory. And seems
-    ## like it it still performs faster.
-    cl = class (A);
-    B = zeros (size (A), cl);
-    m = (A != intmin (cl));
-
-    B(! m) = intmax (cl);
-    B(m)   = -A -1;
-
   elseif (isinteger (A))
-    B = intmax (class (A)) - A;
+    if (intmin (class (A)) < 0)
+      ## for signed integers, we use bitcmp
+      B = bitcmp (A);
+    else
+      ## this is currently more efficient than bitcmp (but hopefully core
+      ## will change)
+      B = intmax (class (A)) - A;
+    endif
   else
     error("imcomplement: A must be an image but is of class `%s'", class (A));
   endif

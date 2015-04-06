@@ -75,7 +75,8 @@ function rgb = label2rgb (L, cmap = @jet, background = "w", order = "noshuffle")
   ## Convert map to a matrix if needed
   num_objects = max (L(:));
   if (ischar (cmap) || isa (cmap, "function_handle"))
-    cmap = feval (cmap, num_objects);
+    ## cast to double because of bug #44070
+    cmap = feval (cmap, double (num_objects));
   endif
 
   num_colors = rows (cmap);

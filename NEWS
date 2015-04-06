@@ -1,3 +1,102 @@
+ Summary of important user-visible changes for image 2.4.0 (yyyy/mm/dd):
+-------------------------------------------------------------------------
+
+ ** The following functions are new:
+
+      bwareafilt
+      bwpropfilt
+      edgetaper
+      fftconvn
+      imattributes
+      imcast
+      imclearborder
+      immse
+      imreconstruct
+      imregionalmax
+      imregionalmin
+      otf2psf
+      psf2otf
+      psnr
+      subimage
+
+ ** The implementation of normxcorr2 has been changed. The new method is
+    Matlab compatible and will return values in the range [-1 1].
+
+ ** The image package is no longer dependent on the signal package.
+
+ ** The disk shaped filter of fspecial has been changed for Matlab
+    compatibility. The elements on the border of the disk are now
+    weighted by how much of them is covered by the disk. Note that
+    this change is backwards incompatible.
+
+ ** The following functions will display the output image as a figure
+    instead of printing to the command line, when there are no output
+    arguments:
+
+      grayslice
+      im2bw
+
+ ** For better compatibility with Matlab, the imrotate, imremap, and
+    imperspectivewarp functions now use 0 instead of NA for the default
+    extrapolation value.
+
+ ** The regionprops function now supports the "Eccentricity",
+    "MajorAxisLength", "MinorAxisLength", "EquivDiameter" and "Extrema"
+    properties.  The "Orientation" property has also been rewritten for
+    Matlab compatibility and may yield different results than previous
+    versions.
+
+ ** The conndef function has new function signatures so that it covers all
+    common ways of defining an connectivity array.  The following will
+    return the same matrix:
+
+        mask = conndef (2, "minimal")
+        mask = conndef (4)
+        mask = conndef ([0 1 0; 1 1 1; 0 1 0])
+
+    and would throw a detailed error in case of an incorrect connectivity.
+
+ ** Creating disk shaped strel objects must now specify the N argument for
+    number of periodic lines used to approximate a disk.  The value used
+    must be zero to obtain the same results as previous releases of the
+    image package.  No other value is at the moment valid, and this is to
+    prevent future backwards incompatibility since Matlab default is 4.
+    Replace any `strel ("disk", radius)' with `strel ("disk", radius, 0)'
+
+ ** The following functions have been completely rewritten and wil perform
+    a lot of faster.
+
+      bwconncomp
+      bwlabeln
+
+   Which indirectly will also cause the following to perform faster:
+
+     bwareaopen
+     bwpropfilt
+     regionprops
+
+ ** Deprecated functions.
+
+    The following functions were deprecated in image 2.2.0 and have been
+    removed from image 2.4.0.
+
+      bwborder              iptchecknargin        readexif
+      impad                 iptcheckstrs
+      imrotate_Fourier      uintlut
+
+ ** Other functions that have been changed for smaller bugfixes, increased
+    Matlab compatibility, or performance:
+
+      grayslice
+      im2double
+      im2int16
+      im2single
+      im2uint8
+      im2uint16
+      imsmooth
+      label2rgb
+
+
  Summary of important user-visible changes for image 2.2.2 (2014/10/06):
 -------------------------------------------------------------------------
 

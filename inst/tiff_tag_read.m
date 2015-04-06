@@ -50,7 +50,7 @@
 ## @group
 ## ## read value 258, 262, 254 o IFD 1 (`val' and `off' will be a 1x3 matrix)
 ## [val, off] = tiff_tag_read (filepath, [258 262 254]);
-## if (off(1) == -1), error ("something happpened: %s", val); endif
+## if (off(1) == -1), error ("something happened: %s", val); endif
 ## off(2,1)   # will be 1 if val(2,1) is an offset to a file position or 2 if tag was not found
 ## val(2,1)   # value of tag 262 on IFD 1
 ## @end group
@@ -86,8 +86,8 @@
 ##
 ## Explanation of the TIFF file structure:
 ##
-## The idea of multi-page images meeds to be understood first. These allow one file
-## to have multiple images. This may sound strange but consider situtations such as
+## The idea of multi-page images needs to be understood first. These allow one file
+## to have multiple images. This may sound strange but consider situations such as
 ## an MRI scan (one file can then contain one scan which is multiple images across
 ## one of the axis) or time-lapse experiment (where one file is not unlike a movie).
 ## TIFF files support this by being like a container of single images, called IFD
@@ -136,7 +136,7 @@
 ##                      10 --> FLOAT (single IEEE precision)
 ##                      11 --> DOUBLE (double IEEE precision)
 ##     bytes 04-07 --> number of values (count)
-##     bytes 08-11 --> file offset (from the beggining of file) or value (only if
+##     bytes 08-11 --> file offset (from the beginning of file) or value (only if
 ##                     it fits in 4 bytes). It is possible that the offset is for
 ##                     a structure and not a value so we return the offset
 ##

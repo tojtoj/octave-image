@@ -42,7 +42,7 @@
 ##
 ## @item "Prewitt"
 ## Finds the edges in @var{im} using the Prewitt approximation to the
-## derivatives. This method works just like "Sobel" except a different aproximation
+## derivatives. This method works just like "Sobel" except a different approximation
 ## the gradient is used.
 ##
 ## @item "Roberts"
@@ -123,11 +123,11 @@
 ## @item params(1)==0 or 4 or 8
 ## Perform x connected dilatation (step 3).
 ## @item params(2)
-## Dilatation coeficient (threshold) in step 3.
+## Dilatation coefficient (threshold) in step 3.
 ## @item params(3)
 ## Length of edge extention convolution (step 2).
 ## @item params(4)
-## Coeficient of extention convolution in step 2.
+## Coefficient of extention convolution in step 2.
 ## @end table
 ## defaults = [8, 1, 3, 3]
 ##
@@ -319,7 +319,7 @@ function [bw, out_threshold, g45_out, g135_out] = edge (im, method, varargin)
     #####################################
     case "zerocross"
       ## Get the filter
-      if (nargin == 4 && ismatrix(varargin{2}))
+      if (nargin == 4 && isnumeric (varargin{2}))
         f = varargin{2};
       else
         error("edge: a filter must be given as the fourth argument when 'zerocross' is used");
@@ -360,7 +360,7 @@ function [bw, out_threshold, g45_out, g135_out] = edge (im, method, varargin)
       ## Get thresholds
       if (nargin > 2 && isscalar(varargin{1}))
         thresh = [0.4*varargin{1}, varargin{1}];
-      elseif (nargin > 2 && ismatrix (varargin{1}) && length (varargin{1}(:)) == 2)
+      elseif (nargin > 2 && isnumeric (varargin{1}) && numel (varargin{1}) == 2)
         thresh = varargin{1}(:);
       else
         tmp = mean(abs(Es(:)));
@@ -425,7 +425,7 @@ function [bw, out_threshold, g45_out, g135_out] = edge (im, method, varargin)
   endif
 endfunction
 
-## An auxilary function that parses the 'direction' argument from 'varargin'
+## An auxiliary function that parses the 'direction' argument from 'varargin'
 function direction = get_direction(varargin)
   if (nargin >= 2)
     direction = varargin{2};
@@ -441,7 +441,7 @@ function direction = get_direction(varargin)
   endif
 endfunction
 
-## An auxilary function that performs a very simple thinning.
+## An auxiliary function that performs a very simple thinning.
 ## Strength is an image containing the edge strength.
 ## bw contains a 1 in (r,c) if
 ##  1) strength(r,c) is greater than both neighbours in the
@@ -458,7 +458,7 @@ function bw = simple_thinning(strength)
   bw = x | y;
 endfunction
 
-## Auxilary function. Finds the zero crossings of the 
+## Auxiliary function. Finds the zero crossings of the 
 ## 2-dimensional function f. (By Etienne Grossmann)
 function z = zerocrossings(f)
   z0 = f<0;                 ## Negative

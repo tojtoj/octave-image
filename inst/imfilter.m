@@ -59,18 +59,18 @@ function retval = imfilter(im, f, varargin)
   endif
   
   ## Check image
-  if (!ismatrix(im))
-    error("imfilter: first input argument must be an image");
+  if (! isimage (im))
+    error("imfilter: IM must be an image");
   endif
   [imrows, imcols, imchannels, tmp] = size(im);
   if (tmp != 1 || (imchannels != 1 && imchannels != 3))
     error("imfilter: first input argument must be an image");
   endif
   C = class(im);
-  
+
   ## Check filter (XXX: matlab support 3D filter, but I have no idea what they do with them)
-  if (!ismatrix(f))
-    error("imfilter: second input argument must be a matrix");
+  if (! isnumeric (f))
+    error("imfilter: F must be a numeric array");
   endif
   [frows, fcols, tmp] = size(f);
   if (tmp != 1)

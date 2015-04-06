@@ -38,7 +38,7 @@
 ## If two or more output arguments are requested, the algorithm also returns
 ## the labelled image computed by @code{bwlabel} in @var{labels}. The number
 ## of labels in this image is optionally returned in @var{num_labels}.
-## @seealso{boundary, bwlabel}
+## @seealso{bwlabel, bwlabeln, bwperim, fchcode}
 ## @end deftypefn
 
 function [bound, labels, num_labels] = bwboundaries (bw, conn=8, holes="holes")
@@ -46,7 +46,7 @@ function [bound, labels, num_labels] = bwboundaries (bw, conn=8, holes="holes")
   if (nargin < 1)
     error ("bwboundaries: not enough input arguments");
   endif
-  if (!ismatrix (bw) || ndims (bw) != 2)
+  if (! ismatrix (bw))
     error ("bwboundaries: first input argument must be a NxM matrix");
   endif
   if (!isscalar (conn) || (conn != 4 && conn != 8))

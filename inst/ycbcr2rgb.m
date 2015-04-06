@@ -20,7 +20,7 @@
 ## @deftypefnx {Function File} {@dots{} =} ycbcr2rgb (@dots{}, @var{standard})
 ## Convert YCbCr color space to RGB.
 ##
-## The convertion changes the image @var{YCbCr} or colormap @var{YCbCrmap},
+## The conversion changes the image @var{YCbCr} or colormap @var{YCbCrmap},
 ## from the YCbCr (luminance, chrominance blue, and chrominance red)
 ## color space to RGB values.  @var{YCbCr} must be of class double, single,
 ## uint8, or uint16.

@@ -59,37 +59,44 @@ function BW = im2bw (img, cmap, thres = 0.5)
 
   if (islogical (img))
     warning ("im2bw: IMG is already binary so nothing is done");
-    BW = img;
-    return
-  endif
+    tmp = img;
 
-  ## Convert img to gray scale
-  if (nargin == 3)
-    ## indexed image (we already checked that is indeed indexed earlier)
-    img = ind2gray (img, cmap);
-  elseif (isrgb (img))
-    img = rgb2gray (img);
   else
-    ## Everything else, we do nothing, no matter how many dimensions
+    ## Convert img to gray scale
+    if (nargin == 3)
+      ## indexed image (we already checked that is indeed indexed earlier)
+      img = ind2gray (img, cmap);
+    elseif (isrgb (img))
+      img = rgb2gray (img);
+    else
+      ## Everything else, we do nothing, no matter how many dimensions
+    endif
+
+    ## Convert the threshold value to same image class to do the thresholding which
+    ## is faster than converting the image to double and keep the threshold value
+    switch (class (img))
+      case {"double", "single", "logical"}
+        ## do nothing
+      case {"uint8"}
+        thres = im2uint8 (thres);
+      case {"uint16"}
+        thres = im2uint16 (thres);
+      case {"int16"}
+        thres = im2int16 (thres);
+      otherwise
+        ## we should have never got here in the first place anyway
+        error("im2bw: unsupported image class");
+    endswitch
+
+    tmp = (img > thres); # matlab compatible (not "greater than or equal")
   endif
 
-  ## Convert the threshold value to same image class to do the thresholding which
-  ## is faster than converting the image to double and keep the threshold value
-  switch (class (img))
-    case {"double", "single"}
-      ## do nothing
-    case {"uint8"}
-      thres = im2uint8 (thres);
-    case {"uint16"}
-      thres = im2uint16 (thres);
-    case {"int16"}
-      thres = im2int16 (thres);
-    otherwise
-      ## we should have never got here in the first place anyway
-      error("im2bw: unsupported image class");
-  endswitch
+  if (nargout > 0)
+    BW = tmp;
+  else
+    imshow (tmp);
+  endif
 
-  BW = (img > thres); # matlab compatible (not "greater than or equal")
 endfunction
 
 %!assert(im2bw ([0 0.4 0.5 0.6 1], 0.5), logical([0 0 0 1 1])); # basic usage

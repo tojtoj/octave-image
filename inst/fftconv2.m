@@ -22,8 +22,9 @@
 ## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## -*- texinfo -*-
-## @deftypefn  {Function File} {} fftconv2 (@var{a}, @var{b}, @var{shape})
-## @deftypefnx {Function File} {} fftconv2 (@var{v1}, @var{v2}, @var{a}, @var{shape})
+## @deftypefn  {Function File} {} fftconv2 (@var{a}, @var{b})
+## @deftypefnx {Function File} {} fftconv2 (@var{v1}, @var{v2}, @var{a})
+## @deftypefnx {Function File} {} fftconv2 (@dots{}, @var{shape})
 ## Convolve 2 dimensional signals using the FFT.
 ##
 ## This method is faster but less accurate than @var{conv2} for large @var{a}
@@ -37,31 +38,30 @@ function X = fftconv2 (varargin)
     print_usage ();
   endif
 
-  shape     = "full";
-  rowcolumn = false;
-
-  if (nargin > 2 && ismatrix (varargin{3}) && ! ischar (varargin{3}))
-    ## usage: fftconv2 (v1, v2, a[, shape])
-    rowcolumn = true;
-    v1        = varargin{1}(:);
-    v2        = varargin{2}(:)';
-    orig_a    = varargin{3};
-    if (nargin == 4)
-      shape = varargin{4};
-    endif
-
+  nargs = nargin; # nargin minus the shape option
+  if (ischar (varargin{end}))
+    shape = varargin{end};
+    nargs--;
   else
+    shape = "full";
+  endif
+
+  rowcolumn = false;
+  if (nargs == 2)
     ## usage: fftconv2(a, b[, shape])
     a = varargin{1};
     b = varargin{2};
-    if (nargin == 3)
-      shape = varargin{3};
+  elseif (nargs == 3)
+    ## usage: fftconv2 (v1, v2, a[, shape])
+    rowcolumn = true;
+    if (! isnumeric (varargin{3}) && ! islogical (varargin{3}))
+      error ("fftconv2: A must be a numeric or logical array");
     endif
-
-  endif
-
-  if (! ischar (shape))
-    error ("fftconv2: SHAPE must be a string");
+    v1      = vec (varargin{1});
+    v2      = vec (varargin{2}, 2);
+    orig_a  = varargin{3};
+  else
+    print_usage ();
   endif
 
   if (rowcolumn)
