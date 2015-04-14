@@ -95,7 +95,7 @@ function [varargout] = imtransform (im, T, varargin)
   xdata = ydata = [];
   xyscale = [];
   imsize = [];
-  fillvalues = ones (1, imdepth) * NaN;
+  fillvalues = zeros (1, imdepth);
 
   if (isempty (varargin))
     xydata = findbounds (T, [udata vdata]);
@@ -199,7 +199,7 @@ function [varargout] = imtransform (im, T, varargin)
       endif
     endif
   endif
-  
+
   ## Output/Input pixels
   if (isempty (imsize))
     if (isempty (xyscale))
@@ -215,8 +215,8 @@ function [varargout] = imtransform (im, T, varargin)
       else
         scalefactor = (diff (ydata) / maximsize(1)) / yscale;
       endif
-      xscale *= scalefactor
-      yscale *= scalefactor
+      xscale *= scalefactor;
+      yscale *= scalefactor;
       xsize = floor (diff (xdata) / xscale);
       ysize = floor (diff (ydata) / yscale);
       warning ("imtransform: output image two large, adjusting the largest dimension to %d", maximsize);
@@ -394,3 +394,11 @@ endfunction
 %! ang = atan (vdata(2) / udata(2));
 %! assert (max (abs (xdata)), diag * abs (cos (theta - ang)),
 %!         max (size (im)) * eps)
+
+## Test default fillvalues
+%!test
+%! im = rand (2);
+%! tmat = [eye(2); 0 0];
+%! T = maketform ("affine", tmat);
+%! im2 = imtransform (im, T, "xdata", [1 3]);
+%! assert (im2(:,3), zeros (2,1))
