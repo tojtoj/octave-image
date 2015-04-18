@@ -22,7 +22,7 @@ help:
 	@echo "   release - Create both of the above and show md5sums"
 	@echo
 	@echo "   install - Install the package in GNU Octave"
-	@echo "   all     - Build all oct files
+	@echo "   all     - Build all oct files"
 	@echo "   check   - Execute package tests (w/o install)"
 	@echo "   run     - Run Octave with development in PATH (no install)"
 	@echo
