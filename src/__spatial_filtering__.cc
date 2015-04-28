@@ -596,8 +596,6 @@ NOT IMPLEMENTED (local binary patterns style)\n\
               GENERAL_ACTION(MT, FUN, ET, NDArray, double, entropy_filt)
       if (args (0).is_bool_matrix ())
         ACTION (boolNDArray, bool_array_value, bool)
-      else if (args (0).is_int8_type ())
-        ACTION (int8NDArray, int8_array_value, octave_int8)
       else if (args (0).is_uint8_type ())
         ACTION (uint8NDArray, uint8_array_value, octave_uint8)
       else
