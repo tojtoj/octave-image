@@ -12,6 +12,9 @@ syntax: regexp
 (^|/)octave-workspace$
 (^|/).*\.tar\.gz$
 
+## Our Makefile target
+^target/
+
 ## Files generated automatically by autoconf and the configure script
 ^src/aclocal\.m4$
 ^src/configure$
