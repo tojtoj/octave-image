@@ -1,10 +1,11 @@
 PACKAGE = $(shell grep "^Name: " DESCRIPTION | cut -f2 -d" ")
 VERSION = $(shell grep "^Version: " DESCRIPTION | cut -f2 -d" ")
 
-RELEASE_DIR     = $(PACKAGE)-$(VERSION)
-RELEASE_TARBALL = $(PACKAGE)-$(VERSION).tar.gz
-HTML_DIR        = $(PACKAGE)-html
-HTML_TARBALL    = $(PACKAGE)-html.tar.gz
+TARGET_DIR      = target/
+RELEASE_DIR     = $(TARGET_DIR)$(PACKAGE)-$(VERSION)
+RELEASE_TARBALL = $(TARGET_DIR)$(PACKAGE)-$(VERSION).tar.gz
+HTML_DIR        = $(TARGET_DIR)$(PACKAGE)-html
+HTML_TARBALL    = $(TARGET_DIR)$(PACKAGE)-html.tar.gz
 
 M_SOURCES   = $(wildcard inst/*.m)
 CC_SOURCES  = $(wildcard src/*.cc)
@@ -28,15 +29,15 @@ help:
 	@echo
 	@echo "   clean   - Remove releases, html documentation, and oct files"
 
+%.tar.gz: %
+	tar -c -f - --posix -C "$(TARGET_DIR)" "$(notdir $<)" | gzip -9n > "$@"
+
 $(RELEASE_DIR): .hg/dirstate
 	@echo "Creating package version $(VERSION) release ..."
-	-rm -rf $@
+	-rm -rf "$@"
 	hg archive --exclude ".hg*" --exclude "Makefile" --type files "$@"
 	cd "$@" && rm -rf "devel/" && ./bootstrap && rm -rf "src/autom4te.cache"
-	chmod -R a+rX,u+w,go-w $@
-
-$(RELEASE_TARBALL): $(RELEASE_DIR)
-	tar cf - --posix "$<" | gzip -9n > "$@"
+	chmod -R a+rX,u+w,go-w "$@"
 
 $(HTML_DIR): install
 	@echo "Generating HTML documentation. This may take a while ..."
@@ -46,9 +47,6 @@ $(HTML_DIR): install
 	  --eval "pkg load $(PACKAGE);" \
 	  --eval 'generate_package_html ("${PACKAGE}", "$@", "octave-forge");'
 	chmod -R a+rX,u+w,go-w $@
-
-$(HTML_TARBALL): $(HTML_DIR)
-	tar cf - --posix "$<" | gzip -9n > "$@"
 
 dist: $(RELEASE_TARBALL)
 html: $(HTML_TARBALL)
@@ -85,6 +83,6 @@ run: all
 	  --eval '${PKG_ADD}'
 
 clean:
-	rm -rf $(RELEASE_DIR) $(RELEASE_TARBALL) $(HTML_TARBALL) $(HTML_DIR)
+	rm -rf $(TARGET_DIR)
 	test -e src/Makefile && $(MAKE) -C src clean
 
