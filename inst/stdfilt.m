@@ -52,7 +52,7 @@ function retval = stdfilt (I, domain = true (3), padding = "symmetric", varargin
     error ("stdfilt: first input must be a matrix");
   endif
 
-  if (! isnumeric (domain) || ! islogical (domain))
+  if (! isnumeric (domain) && ! islogical (domain))
     error ("stdfilt: second input argument must be a logical matrix");
   endif
   domain = logical (domain);
