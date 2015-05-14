@@ -49,13 +49,12 @@
 ## udata, vdata and findbounds function.
 ##
 ## @item "xyscale"
-## Specifies the output scale in outputspace_units/pixel. If a scalar
+## Specifies the size of pixels in the output space. If a scalar
 ## is provided, both vertical and horizontal dimensions are scaled the
 ## same way. If @var{val} is a two element vector, it must indicate
-## consecutively horizontal and vertical scales. Default value is
-## computed using the input space scale provided
-## that the number of pixel of any dimension of the output image does
-## not exceed 20000.
+## consecutively width and height of the output pixels. The default is
+## to use the width and height of input pixels provided
+## that it does not lead to a too large output image.
 ##
 ## @item "size"
 ## Size of the output image (1-by-2 vector). Overrides the effect of
@@ -183,8 +182,6 @@ function [varargout] = imtransform (im, T, varargin)
       else
         error ("imtransform: expect 1 or 2 elements real vector for xyscale");
       endif
-    else
-      xyscale = [(diff (udata) / columns (im)) (diff (vdata) / rows (im))];
     endif
     ## Fillvalues
     tst = strcmp ("fillvalues", props);
@@ -203,12 +200,18 @@ function [varargout] = imtransform (im, T, varargin)
   ## Output/Input pixels
   if (isempty (imsize))
     if (isempty (xyscale))
-      xyscale = [(diff (udata) / columns (im)) (diff (vdata) / rows (im))];
+      nx = columns (im);
+      ny = rows (im);
+      xyscale = [(diff (udata) / (nx - 1)), ...
+                 (diff (vdata) / (ny - 1))];
     endif
     xscale = xyscale(1);
     yscale = xyscale(2);
-    xsize = floor (diff (xdata) / xscale);
-    ysize = floor (diff (ydata) / yscale);
+    xsize = ceil (diff (xdata) / xscale) + 1;
+    ysize = ceil (diff (ydata) / yscale) + 1;
+    ## xyscale takes precedence: recompute x/ydata considering roundoff errors
+    xdata(2) = xdata(1) + (xsize - 1) * xscale;
+    ydata(2) = ydata(1) + (ysize - 1) * yscale;
     if (xsize > maximsize(2) || ysize > maximsize(1))
       if (xsize >= ysize)
         scalefactor = (diff (xdata) / maximsize(2)) / xscale;
@@ -375,9 +378,9 @@ endfunction
 %!test
 %! im = checkerboard (100, 10, 4);
 %! theta = 2 * pi;
-%! T = maketform ('affine', [cos(theta) -sin(theta); ...
+%! T = maketform ("affine", [cos(theta) -sin(theta); ...
 %!                           sin(theta) cos(theta); 0 0]);
-%! im2 = imtransform (im, T, 'nearest');
+%! im2 = imtransform (im, T, "nearest", "xdata", [1 800], "ydata", [1 2000]);
 %! im = im(2:end-1, 2:end-1); %avoid boundaries 
 %! im2 = im2(2:end-1, 2:end-1);
 %! assert (im, im2)
@@ -387,13 +390,14 @@ endfunction
 %! theta = pi/6;
 %! T = maketform ('affine', [cos(theta) -sin(theta); ...
 %!                           sin(theta) cos(theta); 0 0]);
-%! [im2 xdata ydata] = imtransform (im, T);
-%! udata = [1 columns(im)];
-%! vdata = [1 rows(im)];
-%! diag = sqrt (udata(2)^2 + vdata(2)^2);
-%! ang = atan (vdata(2) / udata(2));
-%! assert (max (abs (xdata)), diag * abs (cos (theta - ang)),
-%!         max (size (im)) * eps)
+%! [im2, xdata] = imtransform (im, T);
+%! nu = columns(im);
+%! nv = rows(im);
+%! nx = xdata(2);
+%! diag = sqrt (nu^2 + nv^2);
+%! ang = atan (nv / nu);
+%! assert (nx, diag * abs (cos (theta - ang)),
+%!         diag * 1 / size (im2, 2))
 
 ## Test default fillvalues
 %!test
@@ -402,3 +406,19 @@ endfunction
 %! T = maketform ("affine", tmat);
 %! im2 = imtransform (im, T, "xdata", [1 3]);
 %! assert (im2(:,3), zeros (2,1))
+
+## Test image size when forcing x/ydata
+%!test
+%! im = rand (2);
+%! tmat = [eye(2); 0 0];
+%! T = maketform ('affine', tmat);
+%! im2 = imtransform (im, T, "xdata", [1 3]);
+%! assert (size (im2), [2 3])
+
+## Test image size when forcing xyscale
+%!test
+%! im = rand (2);
+%! tmat = [eye(2); 0 0];
+%! T = maketform ('affine', tmat);
+%! im2 = imtransform (im, T, "xyscale", [0.5 0.5]);
+%! assert (size (im2), [3 3])
