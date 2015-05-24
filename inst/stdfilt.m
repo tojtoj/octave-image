@@ -71,3 +71,7 @@ function retval = stdfilt (I, domain = true (3), padding = "symmetric", varargin
   retval = __spatial_filtering__ (I, domain, "std", I, 0);
 
 endfunction
+
+%!test
+%! im = stdfilt (ones (5));
+%! assert (im, zeros (5));
