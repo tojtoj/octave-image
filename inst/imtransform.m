@@ -242,10 +242,8 @@ function [varargout] = imtransform (im, T, varargin)
     imout(:,:,layer) = interp2 (uu, vv, im(:,:,layer), ...
                                 uui, vvi, interp, fillvalues(layer));
   endfor
-  if (nargout == 1)
-    varargout{1} = imout;
-  else
-    varargout = {imout, xdata, ydata};
+  if (nargout != 0)
+    varargout = {imout, xdata(:).', ydata(:).'};
   endif
 endfunction
 
@@ -361,8 +359,8 @@ endfunction
 %! T = maketform ('affine', incp, outcp);
 %! [im2 xdata ydata] = imtransform (im, T, 'udata', [0 1],
 %!                                  'vdata', [0 1], 'size', [500 500]);
-%! assert (xdata, scl * ([0; 1]))
-%! assert (ydata, scl * ([0; 1]))
+%! assert (xdata, scl * ([0 1]))
+%! assert (ydata, scl * ([0 1]))
 %! assert (size (im2), [500 500])
 
 %!test
