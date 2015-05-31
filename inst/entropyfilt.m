@@ -49,7 +49,7 @@ function retval = entropyfilt (I, domain = true (9), padding = "symmetric", vara
   if (nargin == 0)
     error ("entropyfilt: not enough input arguments");
   endif
-  
+
   if (! isnumeric (I))
     error ("entropyfilt: I must be numeric");
   endif
@@ -65,7 +65,7 @@ function retval = entropyfilt (I, domain = true (9), padding = "symmetric", vara
   else
     nbins = 256;
   endif
-  
+
   ## Convert to 8 or 16 bit integers if needed
   switch (class (I))
     case {"double", "single", "int16", "int32", "int64", "uint16", "uint32", "uint64"}
@@ -82,7 +82,7 @@ function retval = entropyfilt (I, domain = true (9), padding = "symmetric", vara
     otherwise
       error ("entropyfilt: cannot handle images of class '%s'", class (I));
   endswitch
-  size (I)
+
   ## Pad image
   pad = floor (size (domain)/2);
   I = padarray (I, pad, padding, varargin {:});
@@ -92,7 +92,6 @@ function retval = entropyfilt (I, domain = true (9), padding = "symmetric", vara
     idx {k} = (even (k)+1):size (I, k);
   endfor
   I = I (idx {:});
-  size (I)
   ## Perform filtering
   retval = __spatial_filtering__ (I, domain, "entropy", I, nbins);
 

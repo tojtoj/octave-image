@@ -45,11 +45,11 @@ function retval = rangefilt (I, domain = true (3), padding = "symmetric", vararg
     error ("rangefilt: not enough input arguments");
   endif
 
-  if (! isnumeric (I) || ! islogical (I))
+  if (! isnumeric (I) && ! islogical (I))
     error ("rangefilt: I must be a numeric or logical array");
   endif
 
-  if (! isnumeric (domain) || ! islogical (domain))
+  if (! isnumeric (domain) && ! islogical (domain))
     error ("rangefilt: DOMAIN must be a logical array");
   endif
   domain = logical (domain);
@@ -68,3 +68,8 @@ function retval = rangefilt (I, domain = true (3), padding = "symmetric", vararg
   retval = __spatial_filtering__ (I, domain, "range", I, 0);
 
 endfunction
+
+%!test
+%! im = rangefilt (ones (5));
+%! assert (im, zeros (5));
+
