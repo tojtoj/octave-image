@@ -79,6 +79,7 @@ inst/imcrop.m                           GPLv3+
 inst/imdither.m                         GPLv3+
 inst/imdivide.m                         GPLv3+
 inst/imfilter.m                         GPLv3+
+inst/imgetfile.m                        GPLv3+
 inst/imgradient.m                       GPLv3+
 inst/imgradientxy.m                     GPLv3+
 inst/imhist.m                           GPLv3+

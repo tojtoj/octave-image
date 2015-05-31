@@ -152,6 +152,7 @@ Utilities
  edgetaper
  getrangefromclass
  imattributes
+ imgetfile
  iptcheckconn
  iptcheckmap
  iptnum2ordinal
