@@ -72,7 +72,7 @@
 ## @end group
 ## @end example
 ##
-## @seealso{imread, imfinfo, readexif}
+## @seealso{imread, imfinfo}
 ## @end deftypefn
 
 ## Based on the documentation at
