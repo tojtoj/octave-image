@@ -21,6 +21,15 @@
 ## Returns a strel object @var{se} that can be indexed with @code{()} to obtain
 ## the decomposed structuring elements that can be used to "rebuild" @var{se}.
 ##
+## Decomposing a structuring element may lead to faster operations by
+## replacing a single operation with a large @var{se} (large nhood), with
+## multiple operations with smaller @var{se}.
+##
+## Most functions will automatically perform SE decomposition provided a
+## strel object is used (instead of a logical array).  This also requires
+## that specific shapes are specified instead of @qcode{"arbitrary"}, since
+## it may prevent SE decomposition.
+##
 ## @seealso{imdilate, imerode, strel}
 ## @end deftypefn
 
