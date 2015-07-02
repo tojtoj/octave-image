@@ -31,20 +31,9 @@
 ## See individual functions that use the strel object for an interpretation of
 ## non-flat SEs.
 ##
-## Note that if an arbitrary shape is used, it will not be possible to perform
-## structuring element decomposition which may have a performance hit in some
-## cases.  See for example the difference for a square shape:
-## @example
-## @group
-## im = randp (5, 2000) > 15;
-## se = strel ("square", 20);
-## t = cputime (); imdilate (im, se); cputime () - t
-##     @result{} 0.77605
-## se = strel (ones (20));
-## t = cputime (); imdilate (im, se); cputime () - t
-##     @result{} 2.9082
-## @end group
-## @end example
+## Note that if an arbitrary shape is used, it may not be possible to guess
+## it which may prevent shape-based optimizations (structuring element
+## decomposition, see @@strel/getsequence for details).
 ##
 ## @end deftypefn
 ## @deftypefn {Function File} {} strel ("ball", @var{radius}, @var{height})
