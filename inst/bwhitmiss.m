@@ -14,22 +14,48 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} @var{bw2} = bwhitmiss (@var{bw1}, @var{se1}, @var{se1})
-## @deftypefnx{Function File} @var{bw2} = bwhitmiss (@var{bw1}, @var{interval})
-## Perform the binary hit-miss operation.
+## @deftypefn  {Function File} {} bwhitmiss (@var{bw}, @var{se1}, @var{se2})
+## @deftypefnx {Function File} {} bwhitmiss (@var{bw}, @var{interval})
+## Perform binary hit-or-miss transform.
 ##
-## If two structuring elements @var{se1} and @var{se1} are given, the hit-miss
-## operation is defined as
+## This transform returns the set of positions, where the structuring
+## element @var{se1} fits in the foregrond of @var{bw}, while the
+## structuring element @var{se2} misses it completely.  It is equivalent
+## to:
+##
 ## @example
-## bw2 = imerode (bw1, se1) & imerode (! bw1, se2);
+## imerode (@var{bw}, @var{se1}) & imerode (! @var{bw}, @var{se2})
 ## @end example
-## If instead an 'interval' array is given, two structuring elements are computed
-## as
+##
+## For example, the following will remove every pixel with adjacent
+## horizontal foreground pixels:
+##
 ## @example
-## se1 = (interval ==  1)
-## se2 = (interval == -1)
+## >> bw = [ 0   1   0   1   1   0
+##           0   1   0   1   1   0
+##           0   1   0   1   1   0];
+##
+## >> bwhitmiss (bw, [1; 0; 1], [1 0 1])
+##   @result{} ans =
+##
+##           0   1   0   0   0   0
+##           0   1   0   0   0   0
+##           0   1   0   0   0   0
 ## @end example
-## and then the operation is defined as previously.
+##
+## Note that while @var{se1} and @var{se2} must have disjoint neighbourhoods
+## for this transform to be meaningful, no error or warning is throw about
+## it.
+##
+## Alternatively a single array @var{interval} can be defined, of values
+## from @code{[1 0 -1]}.  In this case, the two structuring elements are
+## extracted as:
+##
+## @example
+## @var{se1} = (@var{interval} ==  1)
+## @var{se2} = (@var{interval} == -1)
+## @end example
+##
 ## @seealso{bwmorph}
 ## @end deftypefn
 
