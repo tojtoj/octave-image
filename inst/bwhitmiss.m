@@ -21,7 +21,7 @@
 ## If two structuring elements @var{se1} and @var{se1} are given, the hit-miss
 ## operation is defined as
 ## @example
-## bw2 = erode(bw1, se1) & erode(!bw1, se2);
+## bw2 = imerode (bw1, se1) & imerode (! bw1, se2);
 ## @end example
 ## If instead an 'interval' array is given, two structuring elements are computed
 ## as
@@ -60,8 +60,14 @@ function bw = bwhitmiss(im, varargin)
       error("bwhitmiss: structuring elements can only contain zeros and ones.");
     endif
   endif
-  
+
   ## Perform filtering
-  bw = erode(im, se1) & erode(!im, se2);
+  bw = imerode (im, se1) & imerode (! im, se2);
 
 endfunction
+
+%!test
+%! bw1 = repmat ([0 1 0 1 1], [3 1]);
+%! bw2 = repmat ([0 1 0 0 0], [3 1]);
+%! assert (bwhitmiss (bw1, [1; 0; 1], [1 0 1]), logical (bw2))
+%! assert (bwhitmiss (bw1, [0 1 0; -1 0 -1; 0 1 0]), logical (bw2))
