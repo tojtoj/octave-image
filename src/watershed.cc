@@ -13,9 +13,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <queue>
+
 #include <octave/oct.h>
 #include <octave/error.h>
 #include <octave/parse.h>
+#include <octave/Cell.h>
+#include <octave/oct-map.h>
 
 #include "connectivity.h"
 using namespace octave::image;
@@ -58,12 +62,161 @@ morph_gradient (const T& im, const connectivity& conn)
 }
 
 template<class T>
+static boolNDArray
+imregionalmin (const T& im, const connectivity& conn)
+{
+  octave_value_list args (2);
+  args(0) = im;
+  args(1) = conn.mask;
+  const octave_value regional_min = feval ("imregionalmin", args)(0);
+  return regional_min.bool_array_value ();
+}
+
+static NDArray
+bwlabeln (const boolNDArray& bw, const connectivity& conn)
+{
+  octave_value_list args (2);
+  args(0) = bw;
+  args(1) = conn.mask;
+  const octave_value label = feval ("bwlabeln", args)(0);
+  return label.array_value ();
+}
+
+// Implements watershed in a quite naïve way.  From the wikipedia, named
+// "Meyer's flooding algorithm" (but I could not find the actual paper
+// that reports it).  There are faster (and also nicer results) algorithms,
+// but this is the only one I found that matches Matlab results.
+//
+//  1.  A set of markers, pixels where the flooding shall start, are chosen.
+//      Each is given a different label.
+//  2.  The neighboring pixels of each marked area are inserted into a
+//      priority queue with a priority level corresponding to the gray level
+//      of the pixel.
+//  3.  The pixel with the highest priority level is extracted from the
+//      priority queue. If the neighbors of the extracted pixel that have
+//      already been labeled all have the same label, then the pixel is
+//      labeled with their label. All non-marked neighbors that are not yet
+//      in the priority queue are put into the priority queue.
+//  4.  Redo step 3 until the priority queue is empty.
+
+template<class P>
+class Voxel
+{
+  public:
+    P val;
+    octave_idx_type idx;
+    double label;
+    // We need this to sort elements with the same priority.  We need them
+    // to come out in the same order they went in.
+    octave_idx_type pos;
+
+    Voxel (const P val, const octave_idx_type idx, const double label,
+           const octave_idx_type pos)
+      : val (val), idx (idx), label (label), pos (pos)
+    { }
+
+    inline bool
+    operator<(const Voxel& rhs) const
+    {
+      if (val == rhs.val)
+        return pos > rhs.pos;
+      else
+        return val < rhs.val;
+    }
+};
+
+template<class T>
 NDArray
 watershed (const T& im, const connectivity& conn)
 {
-  NDArray label (im.dims ());
-  return (label);
+  typedef typename T::element_type P;
+
+//  1.  A set of markers, pixels where the flooding shall start, are chosen.
+//      Each is given a different label.
+  const boolNDArray markers = imregionalmin (im, conn);
+  boolNDArray padded_markers = conn.create_padded (markers, false);
+  NDArray label_array = bwlabeln (padded_markers, conn);
+  double* label = label_array.fortran_vec ();
+
+  const T  padded_im_array = conn.create_padded (im, 0);
+  const P* padded_im = padded_im_array.fortran_vec ();
+
+  const Array<octave_idx_type> neighbours_array
+    = conn.deleted_neighbourhood (padded_im_array.dims ());
+  const octave_idx_type* neighbours = neighbours_array.fortran_vec ();
+  const octave_idx_type n_neighbours = neighbours_array.numel ();
+
+  // We need two flags per voxel for this implementation:
+  //  1. Whether a voxel has been labelled or not.  (TODO profile this later,
+  //     maybe it's enough to do label > 0)
+  //  2. Whether a voxel can go into the queue.  Reasons to not go into
+  //    the queue are: it's a padding voxel, it's already in the queue,
+  //    it's already been labelled.
+
+  bool* label_flag = padded_markers.fortran_vec ();
+
+  boolNDArray queue_flag_array (padded_markers);
+  connectivity::set_padding (markers.dims (), padded_markers.dims (),
+                             queue_flag_array, true);
+  bool* queue_flag = queue_flag_array.fortran_vec ();
+
+  const octave_idx_type n = padded_im_array.numel ();
+  octave_idx_type pos = 0;
+
+//  2.  The neighboring pixels of each marked area are inserted into a
+//      priority queue with a priority level corresponding to the gray level
+//      of the pixel.
+  std::priority_queue<Voxel<P>> q;
+  for (octave_idx_type i = 0; i < n; i++)
+    if (label_flag[i])
+      for (octave_idx_type j = 0; j < n_neighbours; j++)
+        {
+          const octave_idx_type ij = i + neighbours[j];
+          if (! queue_flag[ij])
+            {
+              queue_flag[ij] = true;
+              q.push (Voxel<P> (padded_im[ij], ij, label[i], pos++));
+            }
+        }
+
+//  3.  The pixel with the highest priority level is extracted from the
+//      priority queue. If the neighbors of the extracted pixel that have
+//      already been labeled all have the same label, then the pixel is
+//      labeled with their label. All non-marked neighbors that are not yet
+//      in the priority queue are put into the priority queue.
+//  4.  Redo step 3 until the priority queue is empty.
+  while (! q.empty ())
+    {
+      Voxel<P> v = q.top ();
+      q.pop ();
+
+      const double l = v.label;
+      bool all = true;
+      for (octave_idx_type j = 0; j < n_neighbours; j++)
+        {
+          const octave_idx_type ij = v.idx + neighbours[j];
+          if (label_flag[ij])
+            {
+              if (label[ij] != l)
+                all = false;
+            }
+          else if (! queue_flag[ij])
+            {
+              queue_flag[ij] = true;
+              q.push (Voxel<P> (padded_im[ij], ij, l, pos++));
+            }
+        }
+      if (all)
+        {
+          label[v.idx] = l;
+          label_flag[v.idx] = true;
+        }
+    }
+
+  conn.unpad (label_array);
+  return label_array;
 }
+
 
 DEFUN_DLD(watershed, args, , "\
 -*- texinfo -*-\n\
