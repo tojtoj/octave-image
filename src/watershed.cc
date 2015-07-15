@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <functional>
 #include <queue>
 
 #include <octave/oct.h>
@@ -92,7 +93,7 @@ bwlabeln (const boolNDArray& bw, const connectivity& conn)
 //  2.  The neighboring pixels of each marked area are inserted into a
 //      priority queue with a priority level corresponding to the gray level
 //      of the pixel.
-//  3.  The pixel with the highest priority level is extracted from the
+//  3.  The pixel with the lowest priority level is extracted from the
 //      priority queue. If the neighbors of the extracted pixel that have
 //      already been labeled all have the same label, then the pixel is
 //      labeled with their label. All non-marked neighbors that are not yet
@@ -116,12 +117,12 @@ class Voxel
     { }
 
     inline bool
-    operator<(const Voxel& rhs) const
+    operator>(const Voxel& rhs) const
     {
       if (val == rhs.val)
         return pos > rhs.pos;
       else
-        return val < rhs.val;
+        return val > rhs.val;
     }
 };
 
@@ -166,7 +167,7 @@ watershed (const T& im, const connectivity& conn)
 //  2.  The neighboring pixels of each marked area are inserted into a
 //      priority queue with a priority level corresponding to the gray level
 //      of the pixel.
-  std::priority_queue<Voxel<P>> q;
+  std::priority_queue<Voxel<P>, std::vector<Voxel<P>>, std::greater<Voxel<P>>> q;
   for (octave_idx_type i = 0; i < n; i++)
     if (label_flag[i])
       for (octave_idx_type j = 0; j < n_neighbours; j++)
@@ -179,7 +180,7 @@ watershed (const T& im, const connectivity& conn)
             }
         }
 
-//  3.  The pixel with the highest priority level is extracted from the
+//  3.  The pixel with the lowest priority level is extracted from the
 //      priority queue. If the neighbors of the extracted pixel that have
 //      already been labeled all have the same label, then the pixel is
 //      labeled with their label. All non-marked neighbors that are not yet
