@@ -106,14 +106,12 @@ class Voxel
   public:
     P val;
     octave_idx_type idx;
-    double label;
     // We need this to sort elements with the same priority.  We need them
     // to come out in the same order they went in.
     octave_idx_type pos;
 
-    Voxel (const P val, const octave_idx_type idx, const double label,
-           const octave_idx_type pos)
-      : val (val), idx (idx), label (label), pos (pos)
+    Voxel (const P val, const octave_idx_type idx, const octave_idx_type pos)
+      : val (val), idx (idx), pos (pos)
     { }
 
     inline bool
@@ -124,6 +122,50 @@ class Voxel
       else
         return val > rhs.val;
     }
+};
+
+// As part of this algorithm, we will check the neighbourhood for existing
+// labels.  We don't know in advance the number of labeled neighbours, or
+// where the first label will be.  But we do know the length of the
+// neighbourhood.
+class LabelsCollection
+{
+  private:
+    double* data = NULL;
+    octave_idx_type count = 0;
+
+    // Disable default and copy constructor and assignment
+    LabelsCollection (void);
+    LabelsCollection (LabelsCollection const& other);
+    LabelsCollection& operator=(LabelsCollection const& other);
+
+  public:
+    LabelsCollection (const octave_idx_type n) : data (new double[n])
+    { }
+
+    inline void
+    push_back (const double l)
+    { data[count++] = l; }
+
+    inline double
+    label (void) const
+    { return *data; }
+
+    inline bool
+    all_equal (void) const
+    {
+      for (octave_idx_type i = 0; i < count; i++)
+        if (data[0] != data[i])
+          return false;
+      return true;
+    }
+
+    inline void
+    reset (void)
+    { count = 0; }
+
+    ~LabelsCollection (void)
+    { delete [] data; }
 };
 
 template<class T>
@@ -176,7 +218,7 @@ watershed (const T& im, const connectivity& conn)
           if (! queue_flag[ij])
             {
               queue_flag[ij] = true;
-              q.push (Voxel<P> (padded_im[ij], ij, label[i], pos++));
+              q.push (Voxel<P> (padded_im[ij], ij, pos++));
             }
         }
 
@@ -186,30 +228,27 @@ watershed (const T& im, const connectivity& conn)
 //      labeled with their label. All non-marked neighbors that are not yet
 //      in the priority queue are put into the priority queue.
 //  4.  Redo step 3 until the priority queue is empty.
+  LabelsCollection lc (n_neighbours);
   while (! q.empty ())
     {
       Voxel<P> v = q.top ();
       q.pop ();
 
-      const double l = v.label;
-      bool all = true;
+      lc.reset ();
       for (octave_idx_type j = 0; j < n_neighbours; j++)
         {
           const octave_idx_type ij = v.idx + neighbours[j];
           if (label_flag[ij])
-            {
-              if (label[ij] != l)
-                all = false;
-            }
+            lc.push_back(label[ij]);
           else if (! queue_flag[ij])
             {
               queue_flag[ij] = true;
-              q.push (Voxel<P> (padded_im[ij], ij, l, pos++));
+              q.push (Voxel<P> (padded_im[ij], ij, pos++));
             }
         }
-      if (all)
+      if (lc.all_equal ())
         {
-          label[v.idx] = l;
+          label[v.idx] = lc.label ();
           label_flag[v.idx] = true;
         }
     }
