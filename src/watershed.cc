@@ -99,9 +99,14 @@ bwlabeln (const boolNDArray& bw, const connectivity& conn)
 //      labeled with their label. All non-marked neighbors that are not yet
 //      in the priority queue are put into the priority queue.
 //  4.  Redo step 3 until the priority queue is empty.
+//
+// There is a detail missing on the description above.  On step 3, if the
+// labeled neighbours do *not* have the same label, should the non-labeled
+// neighbours be added to the queue?  Apparently not.
 
 template<class P>
-class Voxel
+class
+Voxel
 {
   public:
     P val;
@@ -128,24 +133,46 @@ class Voxel
 // labels.  We don't know in advance the number of labeled neighbours, or
 // where the first label will be.  But we do know the length of the
 // neighbourhood.
-class LabelsCollection
+template<class T>
+class
+Collection
 {
-  private:
-    double* data = NULL;
-    octave_idx_type count = 0;
-
-    // Disable default and copy constructor and assignment
-    LabelsCollection (void);
-    LabelsCollection (LabelsCollection const& other);
-    LabelsCollection& operator=(LabelsCollection const& other);
-
   public:
-    LabelsCollection (const octave_idx_type n) : data (new double[n])
+    Collection (const octave_idx_type n) : data (new T[n])
     { }
 
+    ~Collection (void)
+    { delete [] data; }
+
+    inline octave_idx_type
+    numel (void) const
+    { return count; }
+
     inline void
-    push_back (const double l)
-    { data[count++] = l; }
+    push_back (const T val)
+    { data[count++] = val; }
+
+    inline void
+    reset (void)
+    { count = 0; }
+
+  protected:
+    T* data = NULL;
+    octave_idx_type count = 0;
+
+  private:
+    // Disable default and copy constructor and assignment
+    Collection (void);
+    Collection (Collection const& other);
+    Collection& operator = (Collection const& other);
+};
+
+
+class
+LabelsCollection : public Collection<double>
+{
+  public:
+    using Collection<double>::Collection;
 
     inline double
     label (void) const
@@ -159,14 +186,19 @@ class LabelsCollection
           return false;
       return true;
     }
-
-    inline void
-    reset (void)
-    { count = 0; }
-
-    ~LabelsCollection (void)
-    { delete [] data; }
 };
+
+class
+IdxCollection : public Collection<octave_idx_type>
+{
+  public:
+    using Collection<octave_idx_type>::Collection;
+
+    inline octave_idx_type
+    operator [] (octave_idx_type i) const
+    { return data[i]; }
+};
+
 
 template<class T>
 NDArray
@@ -228,28 +260,37 @@ watershed (const T& im, const connectivity& conn)
 //      labeled with their label. All non-marked neighbors that are not yet
 //      in the priority queue are put into the priority queue.
 //  4.  Redo step 3 until the priority queue is empty.
+//
+// There is a detail missing on the description above.  On step 3, if the
+// labeled neighbours do *not* have the same label, should the non-labeled
+// neighbours be added to the queue?  Apparently not.
   LabelsCollection lc (n_neighbours);
+  IdxCollection ic (n_neighbours);
   while (! q.empty ())
     {
       Voxel<P> v = q.top ();
       q.pop ();
 
       lc.reset ();
+      ic.reset ();
       for (octave_idx_type j = 0; j < n_neighbours; j++)
         {
           const octave_idx_type ij = v.idx + neighbours[j];
           if (label_flag[ij])
             lc.push_back(label[ij]);
           else if (! queue_flag[ij])
-            {
-              queue_flag[ij] = true;
-              q.push (Voxel<P> (padded_im[ij], ij, pos++));
-            }
+            ic.push_back(ij);
         }
-      if (lc.all_equal ())
+      if (lc.numel () > 0 && lc.all_equal ())
         {
           label[v.idx] = lc.label ();
           label_flag[v.idx] = true;
+          for (octave_idx_type i = 0; i < ic.numel (); i++)
+            {
+              const octave_idx_type ij = ic[i];
+              queue_flag[ij] = true;
+              q.push (Voxel<P> (padded_im[ij], ij, pos++));
+            }
         }
     }
 
@@ -431,12 +472,6 @@ or with a binary matrix representing a connectivity array.  Defaults to\n\
 %!     2   255    31    30
 %!     1     2   255     5];
 %!
-%! labeled8 = [
-%!     1     1     0     3
-%!     1     1     0     3
-%!     0     0     0     0
-%!     2     2     0     4
-%!     2     2     0     4];
 %! labeled4 = [
 %!     1     1     0     4
 %!     1     0     3     0
@@ -450,10 +485,28 @@ or with a binary matrix representing a connectivity array.  Defaults to\n\
 %!     2     0     0     0
 %!     2     2     0     4];
 %!
-%! assert (watershed (im), labeled8);
-%! assert (watershed (im, 8), labeled8);
 %! assert (watershed (im, 4), labeled4);
 %! assert (watershed (im, [1 1 0; 1 1 1; 0 1 1]), labeled_weird);
+
+## The following test is required for Matlab compatibility.  There must be
+## something specific about their implementation that causes it to return
+## this value.  Even when solving it on paper, we get different results.
+%!test
+%! im = [
+%!     2     3    30     2
+%!     3    30     3    30
+%!   255    31    30     4
+%!     2   255    31    30
+%!     1     2   255     5];
+%!
+%! labeled8 = [
+%!     1     1     0     3
+%!     1     1     0     3
+%!     0     0     0     0
+%!     2     2     0     4
+%!     2     2     0     4];
+%! assert (watershed (im), labeled8);
+%! assert (watershed (im, 8), labeled8);
 
 %!test
 %! im = [
