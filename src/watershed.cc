@@ -599,4 +599,30 @@ or with a binary matrix representing a connectivity array.  Defaults to\n\
 %! assert (watershed (im, 8), labeled8);
 %! assert (watershed (im, 4), labeled4);
 %! assert (watershed (im, [1 1 0; 1 1 1; 0 1 1]), labeled_weird);
+
+## This test is failing for Matlab compatibility
+%!test
+%! im_full = [
+%!   1   2  10   3   8   7   5
+%!   3   2   5  10   8   1   4
+%!   1   8   2   3   8   3   6];
+%!
+%! matlab_result_full = [
+%!   1   1   0   3   0   4   4
+%!   0   0   0   0   0   4   4
+%!   2   2   2   0   4   4   4];
+%!
+%! assert (watershed (im_crop), matlab_result_crop);
+%!
+%! im_crop = [
+%!       2  10   3   8   7   5
+%!       2   5  10   8   1   4
+%!       8   2   3   8   3   6];
+%!
+%! matlab_result_crop = [
+%!       1   0   2   0   3   3
+%!       1   0   0   0   3   3
+%!       1   1   1   0   3   3];
+%!
+%! assert (watershed (im_crop), matlab_result_crop);
 */
