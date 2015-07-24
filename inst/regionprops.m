@@ -16,11 +16,34 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn  {Function File} {@var{props} = } regionprops (@var{BW})
-## @deftypefnx {Function File} {@var{props} = } regionprops (@var{BW}, @var{properties}, @dots{})
-## @deftypefnx {Function File} {@var{props} = } regionprops (@var{L}, @var{properties}, @dots{})
-## @deftypefnx {Function File} {@var{props} = } regionprops (@dots{}, @var{I}, @var{properties}, @dots{})
-## Compute object properties in a binary image.
+## @deftypefn  {Function File} {} regionprops (@var{BW})
+## @deftypefnx {Function File} {} regionprops (@var{L})
+## @deftypefnx {Function File} {} regionprops (@var{CC})
+## @deftypefnx {Function File} {} regionprops (@dots{}, @var{properties})
+## @deftypefnx {Function File} {} regionprops (@dots{}, @var{I}, @var{properties})
+## Compute properties of image regions.
+##
+## Individual regions can be defined in three different ways, depending on
+## the type of the first argument:
+##
+## @table @asis
+## @item @var{BW}
+## A binary image.  Each region is a connected component as computed by
+## @code{bwconnmp()} using the maximal connectivity for the number of
+## dimensions of @var{bw} (see @code{conndef()} for details).
+##
+## @item @var{L}
+## A labelled image.  Each region is the collection of all positive
+## elements with the same value.  This allows computing properties of
+## regions that would otherwise be considered separate or connected.
+##
+## Note that an image with a single label, whose region is not really
+## connected, will be treated like a binary image.
+##
+## @item @var{CC}
+## A @code{bwconnmp()} structure.
+##
+## @end itemize
 ##
 ## @code{regionprops} computes various properties of the individual objects (as
 ## identified by @code{bwlabel}) in the binary image @var{BW}. The result is a
@@ -141,6 +164,149 @@
 ##
 ## @seealso{bwlabel, bwperim, bweuler}
 ## @end deftypefn
+
+function props = regionprops (bw, varargin)
+  if (nargin < 1)
+    print_usage ();
+  endif
+
+  if (isstruct (bw))
+    if (! isempty (setxor (fieldnames (bw), {"Connectivity", "ImageSize", ...
+                                             "NumObjects", "PixelIdxList"})))
+      error ("regionprops: CC is an invalid bwconnmp() struct");
+    endif
+    cc = bw;
+  elseif (islogical (bw) || all ((bw == logical (bw))(:)))
+    cc = bwconncomp (bw);
+  elseif (isnumeric (bw))
+    if (isinteger (bw))
+      if (intmin (class (bw)) < 0 && any (bw < 0))
+        error ("regionprops: L must be non-negative integers only");
+      endif
+    else
+      if (any (bw < 0) || any (fix (bw) != bw))
+        error ("regionprops: L must be non-negative integers only");
+      endif
+    endif
+    l_idx = find (bw);
+    cc = struct ("ImageSize", size (bw), "NumObjects", max (bw(:)),
+                 "PixelIdxList", accumarray (bw(l_idx), l_idx, [], @(x) {x}));
+  else
+    error ("regionprops: no valid BW, CC, or L input");
+  endif
+  is_2d = numel (cc.ImageSize) == 2;
+
+  next_idx = 1;
+  has_gray = false;
+  if (numel (varargin) && isnumeric (varargin{1}))
+    next_idx++;
+    has_gray = true;
+    img = varargin{1};
+    sz  = size (img);
+    if (! size_equal (sz, cc.ImageSize) || any (sz != cc.ImageSize))
+      error ("regionprops: BW and I sizes must be equal");
+    endif
+  endif
+
+  if (numel (varargin) >= next_idx)
+    if (iscell (varargin{next_idx}))
+      properties = varargin{next_idx++};
+      if (numel (varargin) >= next_idx)
+        print_usage ();
+      endif
+    else
+      properties = varargin(next_idx++:end);
+    endif
+    if (! iscellstr (properties))
+      error ("regionprops: PROPERTIES must be a string or a cell array of strings");
+    endif
+    properties = tolower (strrep (properties, "_", ""));
+  else
+    properties = {"basic"};
+  endif
+
+  if (any (strcmp ("basic", properties)))
+    properties(end+1:end+3) = {"area", "centroid", "boundingbox"};
+  endif
+  if (any (strcmp ("all", properties)))
+    properties(end+1:end+9) = {
+      "area",
+      "boundingbox",
+      "centroid",
+      "filledarea",
+      "filledimage",
+      "image",
+      "pixelidxlist",
+      "pixellist",
+      "subarrayidx",
+    };
+    if (is_2d)
+      properties(end+1:end+13) = {
+        "convexarea",
+        "convexhull",
+        "conveximage",
+        "eccentricity",
+        "equivdiameter",
+        "eulernumber",
+        "extent",
+        "extrema",
+        "majoraxislength",
+        "minoraxislength",
+        "orientation",
+        "perimeter",
+        "solidity",
+      };
+    endif
+    if (has_gray)
+      properties(end+1:end+5) = {
+        "maxintensity",
+        "meanintensity",
+        "minintensity",
+        "pixelvalues",
+        "weightedcentroid",
+      };
+    endif
+  endif
+  properties(strcmp ("basic", properties) | strcmp ("all", properties)) = []
+  ## We do not bother with removing duplicates because that's automatically
+  ## handled in the loop.
+
+  props = struct ();
+  for idx = 1:numel (properties);
+    switch (properties{idx})
+      case "area"
+      case "boundingbox"
+      case "centroid"
+      case "filledarea"
+      case "filledimage"
+      case "image"
+      case "pixelidxlist"
+      case "pixellist"
+      case "subarrayidx"
+      case "convexarea"
+      case "convexhull"
+      case "conveximage"
+      case "eccentricity"
+      case "equivdiameter"
+      case "eulernumber"
+      case "extent"
+      case "extrema"
+      case "majoraxislength"
+      case "minoraxislength"
+      case "orientation"
+      case "perimeter"
+      case "solidity"
+      case "maxintensity"
+      case "meanintensity"
+      case "minintensity"
+      case "pixelvalues"
+      case "weightedcentroid"
+      otherwise
+        error ("regionprops: unknown property `%s'", properties{idx});
+    endswitch
+  endfor
+
+endfunction
 
 function retval = regionprops (bw, varargin)
   ## Check input
@@ -586,3 +752,13 @@ endfunction
 %! t = regionprops (f, "Extrema");
 %! shouldbe = [0.5  1.5; 4.5  1.5; 4.5 1.5; 4.5 3.5; 4.5 3.5; 1.5 3.5; 0.5 2.5; 0.5  1.5];
 %! assert (t.Extrema, shouldbe,  eps);
+
+## Test guessing between labelled and binary image
+%!assert (regionprops ([1 0 1; 1 0 1], "Area"), struct ("Area", 4))
+%!assert (regionprops ([1 0 2; 1 1 2], "Area"), struct ("Area", {3; 2}))
+
+## Test missing labels
+%!assert (regionprops ([1 0 3; 1 1 3], "Area"), struct ("Area", {3; 0; 2}))
+
+%!error <L must be non-negative integers> regionprops ([1 -2   0 3])
+%!error <L must be non-negative integers> regionprops ([1  1.5 0 3])
