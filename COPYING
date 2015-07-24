@@ -168,3 +168,4 @@ src/__spatial_filtering__.cc            GPLv3+
 src/strel.cc                            GPLv3+
 src/strel.h                             GPLv3+
 src/union-find.h++                      GPLv3+
+src/watershed.cc                        GPLv3+
