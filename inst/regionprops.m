@@ -1,6 +1,7 @@
 ## Copyright (C) 2010 Søren Hauberg <soren@hauberg.org>
 ## Copyright (C) 2012 Jordi Gutiérrez Hermoso <jordigh@octave.org>
 ## Copyright (C) 2015 Hartmut Gimpel <hg_code@gmx.de>
+## Copyright (C) 2015 Carnë Draug <carandraug@octave.org>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -267,45 +268,174 @@ function props = regionprops (bw, varargin)
       };
     endif
   endif
-  properties(strcmp ("basic", properties) | strcmp ("all", properties)) = []
-  ## We do not bother with removing duplicates because that's automatically
-  ## handled in the loop.
+  properties(strcmp ("basic", properties) | strcmp ("all", properties)) = [];
 
-  props = struct ();
-  for idx = 1:numel (properties);
-    switch (properties{idx})
-      case "area"
-      case "boundingbox"
-      case "centroid"
-      case "filledarea"
-      case "filledimage"
-      case "image"
-      case "pixelidxlist"
-      case "pixellist"
-      case "subarrayidx"
-      case "convexarea"
-      case "convexhull"
-      case "conveximage"
-      case "eccentricity"
-      case "equivdiameter"
-      case "eulernumber"
-      case "extent"
-      case "extrema"
-      case "majoraxislength"
-      case "minoraxislength"
-      case "orientation"
-      case "perimeter"
-      case "solidity"
-      case "maxintensity"
-      case "meanintensity"
-      case "minintensity"
-      case "pixelvalues"
-      case "weightedcentroid"
-      otherwise
-        error ("regionprops: unknown property `%s'", properties{idx});
-    endswitch
-  endfor
+  dependencies = struct (
+    "area",             {{}},
+    "boundingbox",      {{}},
+    "centroid",         {{}},
+    "filledarea",       {{}},
+    "filledimage",      {{}},
+    "image",            {{}},
+    "pixelidxlist",     {{}},
+    "pixellist",        {{}},
+    "subarrayidx",      {{}},
+    "convexarea",       {{}},
+    "convexhull",       {{}},
+    "conveximage",      {{}},
+    "eccentricity",     {{}},
+    "equivdiameter",    {{}},
+    "eulernumber",      {{}},
+    "extent",           {{}},
+    "extrema",          {{}},
+    "majoraxislength",  {{}},
+    "minoraxislength",  {{}},
+    "orientation",      {{}},
+    "perimeter",        {{}},
+    "solidity",         {{}},
+    "maxintensity",     {{}},
+    "meanintensity",    {{}},
+    "minintensity",     {{}},
+    "pixelvalues",      {{}},
+    "weightedcentroid", {{}}
+  );
 
+  props = repmat (struct (), cc.NumObjects, 1)
+
+  while (! isempty (properties))
+    pname = properties{end};
+    deps = dependencies.(pname);
+    missing_deps = deps(! isfield (props, deps));
+    if (! isempty (missing_deps))
+      properties(end+1:end+numel(missing_deps)) = missing_deps;
+    elseif (isfield (props, pname))
+      properties( end) = [];
+    else
+      properties(end) = [];
+      switch (pname)
+        case "area"
+          props.area = regionprops_area (cc);
+        case "boundingbox"
+          props.boundingbox = regionprops_bounding_box (cc);
+        case "centroid"
+          props.centroid = regionprops_centroid (cc);
+        case "filledarea"
+        case "filledimage"
+        case "image"
+        case "pixelidxlist"
+        case "pixellist"
+          props.pixellist = regionprops_pixellist (cc);
+        case "subarrayidx"
+        case "convexarea"
+        case "convexhull"
+        case "conveximage"
+        case "eccentricity"
+        case "equivdiameter"
+        case "eulernumber"
+        case "extent"
+        case "extrema"
+        case "majoraxislength"
+        case "minoraxislength"
+        case "orientation"
+        case "perimeter"
+        case "solidity"
+        case "maxintensity"
+          props.maxintensity = regionprops_max_intensity (cc, img);
+        case "meanintensity"
+        case "minintensity"
+          props.minintensity = regionprops_min_intensity (cc, img);
+        case "pixelvalues"
+        case "weightedcentroid"
+          props.weightedcentroid = regionprops_weighted_centroid (cc, img);
+        otherwise
+          error ("regionprops: unknown property `%s'", pname);
+      endswitch
+    endif
+  endwhile
+
+endfunction
+
+function area = regionprops_area (cc)
+  area = cellfun (@numel, cc.PixelIdxList);
+endfunction
+
+function centroid = regionprops_centroid (cc)
+  nd = numel (cc.ImageSize);
+  idx = cell2mat (cc.PixelIdxList(:));
+  sub = cell2mat (nthargout (1:nd, @ind2sub, cc.ImageSize, idx));
+  sub(:,[1 2]) = sub(:,[2 1]); # swap x y coordinates
+
+  no = cc.NumObjects;
+  rn = 1:no;
+  weighted_sub = sub ./ vec (repelems (area, [rn; area]));
+  centroid = accumarray (accum_subs(:), weighted_sub(:), [no nd])
+endfunction
+
+function bounding_box = regionprops_bounding_box (cc)
+  nd = numel (cc.ImageSize);
+  idx = cell2mat (cc.PixelIdxList(:));
+  sub = cell2mat (nthargout (1:nd, @ind2sub, cc.ImageSize, idx));
+  sub(:,[1 2]) = sub(:,[2 1]); # swap x y coordinates
+
+  no = cc.NumObjects;
+  rn = 1:no;
+  area = cellfun (@numel, cc.PixelIdxList);
+  accum_subs = vec (repelems (rn, [rn; area])) .+ [0:no:(no*nd-1)];
+
+  init_corner = accumarray (accum_subs(:) , sub(:), [no nd], @min);
+  end_corner  = accumarray (accum_subs(:) , sub(:), [no nd], @max);
+  bounding_box = [(init_corner - 0.5) (end_corner - init_corner)];
+endfunction
+
+function pixel_list = regionprops_pixellist (cc)
+  nd = numel (cc.ImageSize);
+  idx = cell2mat (cc.PixelIdxList(:));
+  sub = cell2mat (nthargout (1:nd, @ind2sub, cc.ImageSize, idx));
+  sub(:,[1 2]) = sub(:,[2 1]); # swap x y coordinates
+
+  pixel_list = mat2cell (sub, cellfun (@numel, cc.PixelIdxList));
+endfunction
+
+function max_intensity = regionprops_max_intensity (cc, img)
+  Area = cellfun (@numel, cc.PixelIdxList);
+  all_ind = cell2mat (cc.PixelIdxList(:));
+  no = cc.NumObjects;
+  rn = 1:no;
+  subs = vec (repelems (rn, [rn; Area]));
+  max_intensity = accumarray (subs, img(all_ind), [no 1], @max);
+endfunction
+
+function min_intensity = regionprops_min_intensity (cc, img)
+  Area = cellfun (@numel, cc.PixelIdxList);
+  all_ind = cell2mat (cc.PixelIdxList(:));
+  no = cc.NumObjects;
+  rn = 1:no;
+  subs = vec (repelems (rn, [rn; Area]));
+  min_intensity = accumarray (subs, img(all_ind), [no 1], @min);
+endfunction
+
+function weighted_centroid = regionprops_weighted_centroid (cc, img)
+  Area = cellfun (@numel, cc.PixelIdxList);
+
+  no = cc.NumObjects;
+  sz = cc.ImageSize;
+  nd = numel (sz);
+  rn = 1:no;
+  R = [rn; Area];
+
+  idx = cell2mat (cc.PixelIdxList(:));
+  sub = cell2mat (nthargout (1:nd, @ind2sub, sz, idx));
+
+  vals = im(idx);
+  subs = vec (repelems (rn, R));
+
+  totals = repelems (accumarray (subs, vals), R);
+  weighted_sub = sub .* (double (vals) ./ vec (totals));
+  weighted_centroid = accumarray (vec (repmat (subs, [1 nd]) .+ [0:no:(no*nd-1)]),
+                                  vec (weighted_sub), [no nd]);
+
+  ## Swap X and Y coordinates for Matlab compatibility
+  weighted_centroid(:,[1 2]) = weighted_centroid(:,[2 1]);
 endfunction
 
 function retval = regionprops (bw, varargin)
@@ -659,6 +789,41 @@ function [major, minor, major_vec] = local_ellipsefit (X, Y)
   major_vec = V(:, major_idx);
   minor = min(lambda_d);
 endfunction
+
+%!shared bw2d
+%! bw2d = logical ([
+%!  0 1 0 1 1 0
+%!  0 1 1 0 1 1
+%!  0 1 0 0 0 0
+%!  0 0 0 1 1 1
+%!  0 0 1 1 0 1]);
+
+%!function c = get_2d_centroid_for (idx)
+%!  subs = ind2sub ([5 6], idx);
+%!  m = false ([5 6]);
+%!  m(idx) = true;
+%!  y = sum ((1:5)' .* sum (m, 2) /sum (m(:)));
+%!  x = sum ((1:6)  .* sum (m, 1) /sum (m(:)));
+%!  c = [x y];
+%!endfunction
+
+%!test
+%! props = struct ("Area", {8, 6},
+%!                 "Centroid", {get_2d_centroid_for([6 7 8 12 16 21 22 27]), ...
+%!                              get_2d_centroid_for([15 19 20 24 29 30])},
+%!                 "BoundingBox", {[1.5 0.5 5 3], [2.5 3.5 4 2]});
+%!assert (regionprops (bw, "basic"), props)
+%!assert (regionprops (bwconncomp (bw, 8), "basic"), props)
+%!assert (regionprops (bwlabeln (bw, 8), "basic"), props)
+
+%!test
+%! props = struct ("Area", {4, 6, 4},
+%!                 "Centroid", {get_2d_centroid_for([6 7 8 12]), ...
+%!                              get_2d_centroid_for([15 19 20 24 29 30]), ...
+%!                              get_2d_centroid_for([16 21 22 27])},
+%!                 "BoundingBox", {[1.5 0.5 2 3] [2.5 3.5 4 2] [2.5 0.5 3 2]});
+%!assert (regionprops (bwconncomp (bw, 4), "basic"), props)
+%!assert (regionprops (bwlabeln (bw, 4), "basic"), props)
 
 %!test
 %! c = regionprops ([0 0 1], 'centroid');
