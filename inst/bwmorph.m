@@ -113,7 +113,7 @@
 ## It uses the same algorithm as skel-pratt but this could change for
 ## compatibility in the future.
 ##
-## @item skel-lantuejol
+## @item skel-lantuejoul
 ## Performs a skeletonization operation as described in Gonzalez & Woods
 ## "Digital Image Processing" pp 538-540. The text references Lantuejoul
 ## as author of this algorithm.
