@@ -41,8 +41,8 @@
 ## [x y] =  [xx./zz yy./zz];
 ## @end example
 ## 
-## Alternatively the transform can be specified using a quadilateral
-## coordinates (typically the 4 corners of the
+## Alternatively the transform can be specified using the coordinates
+## of a quadilateral (typically the 4 corners of the
 ## image) in the input space (@var{inc}, 4-by-ndims_in matrix) and in
 ## the output space (@var{outc}, 4-by-ndims_out matrix).  This is
 ## equivalent to building the transform using
@@ -56,8 +56,8 @@
 ## (N+1)-by-(N) transformation matrix. If present, the (N+1)th column  must
 ## contain [zeros(N,1); 1] so that projection is suppressed.
 ##
-## Alternatively the transform can be specified a using a triangle
-## coordinates (typically the 3 corners of the
+## Alternatively the transform can be specified using the coordinates
+## of a triangle (typically the 3 corners of the
 ## image)  in the input space (@var{inc}, 3-by-ndims_in matrix) and in
 ## the  output space (@var{outc}, 3-by-ndims_out matrix). This is
 ## equivalent to building the transform using "T = cp2tform (@var{inc}, @var{outc},
