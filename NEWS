@@ -1,8 +1,17 @@
- Summary of important user-visible changes for image 2.4.1 (yyyy/mm/dd):
+ Summary of important user-visible changes for image 2.4.1 (2015/08/07):
 -------------------------------------------------------------------------
+
+ ** Image 2.4.1 is a bug fixing release.
 
  ** Fixed regression on bwhitmiss which was completely broken since
     version 2.2.0.
+
+ ** Fixed regressions on rangefilt and stdfilt which made them always
+    throw an error.
+
+ ** Removed broken support for signed integers to entropyfilt().  Not
+    only it was returning incorrect values and ocasional endless loops,
+    it failed to build in some architectures.
 
 
  Summary of important user-visible changes for image 2.4.0 (2015/04/06):
