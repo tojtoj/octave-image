@@ -29,22 +29,55 @@
 ##
 ## @table @asis
 ## @item @var{BW}
-## A binary image.  Each region is a connected component as computed by
-## @code{bwconnmp()} using the maximal connectivity for the number of
-## dimensions of @var{bw} (see @code{conndef()} for details).
+## A binary image.  Must be of class logical.  Individual regions will be
+## the connected component as computed by @code{bwconnmp()} using the
+## maximal connectivity for the number of dimensions of @var{bw} (see
+## @code{conndef()} for details).
+##
+## @var{bw} must really be of class logical.  If not, even if it is a
+## numeric array of 0's and 1's, it will be treated as a labelled image
+## with a single discontinuous region.  For example:
+##
+## @example
+## ## Handled as binary image with 3 regions
+## bw = logical ([
+##   1 0 1 0 1
+##   1 0 1 0 1
+## ]);
+##
+## ## Handled as labelled image with 1 region
+## bw = [
+##   1 0 1 0 1
+##   1 0 1 0 1
+## ];
+## @end example
 ##
 ## @item @var{L}
 ## A labelled image.  Each region is the collection of all positive
 ## elements with the same value.  This allows computing properties of
 ## regions that would otherwise be considered separate or connected.
+## For example:
 ##
-## Note that an image with a single label, whose region is not really
-## connected, will be treated like a binary image.
+## @example
+## ## Recognizes 4 regions
+## l = [
+##   1 2 3 4
+##   1 2 3 4
+## ];
+##
+## ## Recognizes 2 (discontinuous) regions
+## l = [
+##   1 2 1 2
+##   1 2 1 2
+## ];
+## @end example
 ##
 ## @item @var{CC}
-## A @code{bwconnmp()} structure.
+## A @code{bwconnmp()} structure.  This is a struct with the following
+## 4 fields: Connectivity, ImageSize, NumObjects, and PixelIdxList.  See
+## @code{bwconncomp} for details.
 ##
-## @end itemize
+## @end table
 ##
 ## @code{regionprops} computes various properties of the individual objects (as
 ## identified by @code{bwlabel}) in the binary image @var{BW}. The result is a
@@ -177,7 +210,7 @@ function props = regionprops (bw, varargin)
       error ("regionprops: CC is an invalid bwconnmp() struct");
     endif
     cc = bw;
-  elseif (islogical (bw) || all ((bw == logical (bw))(:)))
+  elseif (islogical (bw))
     cc = bwconncomp (bw);
   elseif (isnumeric (bw))
     if (isinteger (bw))
@@ -824,6 +857,12 @@ endfunction
 %!                 "BoundingBox", {[1.5 0.5 2 3] [2.5 3.5 4 2] [2.5 0.5 3 2]});
 %!assert (regionprops (bwconncomp (bw, 4), "basic"), props)
 %!assert (regionprops (bwlabeln (bw, 4), "basic"), props)
+
+## This it is treated as labeled image with a single discontiguous region.
+%!assert (regionprops (double (bw), "basic"),
+%!        struct ("Area", 14,
+%!                "Centroid", get_2d_centroid_for (find (bw2d)),
+%!                "BoundingBox", [1.5 0.5 5 5])
 
 %!test
 %! c = regionprops ([0 0 1], 'centroid');
