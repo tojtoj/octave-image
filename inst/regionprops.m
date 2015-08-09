@@ -323,8 +323,9 @@ function props = regionprops (bw, varargin)
   dependencies = struct (
     "area",             {{}},
     "accum_subs",       {{"area"}},
-    "boundingbox",      {{"pixellist", "accum_subs"}},
-    "centroid",         {{"accum_subs", "pixellist", "area"}},
+    "accum_subs_nd",    {{"accum_subs"}},
+    "boundingbox",      {{"pixellist", "accum_subs_nd"}},
+    "centroid",         {{"accum_subs_nd", "pixellist", "area"}},
     "filledarea",       {{}},
     "filledimage",      {{}},
     "image",            {{}},
@@ -344,11 +345,12 @@ function props = regionprops (bw, varargin)
     "orientation",      {{}},
     "perimeter",        {{}},
     "solidity",         {{}},
-    "maxintensity",     {{"pixelidxlist", "area"}},
-    "meanintensity",    {{}},
-    "minintensity",     {{"pixelidxlist", "area"}},
+    "maxintensity",     {{"accum_subs", "pixelidxlist"}},
+    "meanintensity",    {{"total_intensity", "area"}},
+    "minintensity",     {{"accum_subs", "pixelidxlist"}},
     "pixelvalues",      {{"pixelidxlist"}},
-    "weightedcentroid", {{"pixellist", "pixelidxlist", "area"}}
+    "total_intensity",  {{"accum_subs", "pixelidxlist"}},
+    "weightedcentroid", {{"accum_subs_nd", "total_intensity", "pixellist", "pixelidxlist", "area"}}
   );
 
   to_measure = properties;
@@ -381,12 +383,14 @@ function props = regionprops (bw, varargin)
         values.area = rp_area (cc);
       case "accum_subs"
         values.accum_subs = rp_accum_subs (cc, values.area);
+      case "accum_subs_nd"
+        values.accum_subs_nd = rp_accum_subs_nd (cc, values.accum_subs);
       case "boundingbox"
         values.boundingbox = rp_bounding_box (cc, values.pixellist,
-                                              values.accum_subs);
+                                              values.accum_subs_nd);
       case "centroid"
         values.centroid = rp_centroid (cc, values.pixellist, values.area,
-                                       values.accum_subs);
+                                       values.accum_subs_nd);
       case "filledarea"
       case "filledimage"
       case "image"
@@ -409,18 +413,30 @@ function props = regionprops (bw, varargin)
       case "perimeter"
       case "solidity"
       case "maxintensity"
-        values.maxintensity = rp_max_intensity (cc, img, values.area,
-                                                values.pixelidxlist);
+        values.maxintensity = rp_max_intensity (cc, img,
+                                                values.pixelidxlist,
+                                                values.accum_subs);
       case "meanintensity"
+        values.meanintensity = rp_mean_intensity (cc, values.total_intensity,
+                                                  values.area);
+
       case "minintensity"
-        values.minintensity = rp_min_intensity (cc, img, values.area,
-                                                values.pixelidxlist);
+        values.minintensity = rp_min_intensity (cc, img,
+                                                values.pixelidxlist,
+                                                values.accum_subs);
       case "pixelvalues"
         values.pixelvalues = rp_pixel_values (cc, img, values.pixelidxlist);
+      case "total_intensity"
+        values.total_intensity = rp_total_intensity (cc, img,
+                                                     values.pixelidxlist,
+                                                     values.accum_subs);
       case "weightedcentroid"
-        values.weightedcentroid = rp_weighted_centroid (cc, img, values.area,
+        values.weightedcentroid = rp_weighted_centroid (cc, img,
                                                         values.pixellist,
-                                                        values.pixelidxlist);
+                                                        values.pixelidxlist,
+                                                        values.total_intensity,
+                                                        values.accum_subs_nd,
+                                                        values.area);
       otherwise
         error ("regionprops: unknown property `%s'", pname);
     endswitch
@@ -466,6 +482,7 @@ function props = regionprops (bw, varargin)
       case "maxintensity"
         [props.MaxIntensity] = num2cell (values.maxintensity){:};
       case "meanintensity"
+        [props.MeanIntensity] = num2cell (values.meanintensity){:};
       case "minintensity"
         [props.MinIntensity] = num2cell (values.minintensity){:};
       case "pixelvalues"
@@ -481,21 +498,21 @@ function props = regionprops (bw, varargin)
 endfunction
 
 function area = rp_area (cc)
-  area = cellfun (@numel, cc.PixelIdxList);
+  area = cellfun (@numel, cc.PixelIdxList(:));
 endfunction
 
-function centroid = rp_centroid (cc, pixel_list, area, accum_subs)
+function centroid = rp_centroid (cc, pixel_list, area, subs_nd)
   nd = numel (cc.ImageSize);
   no = cc.NumObjects;
-  weighted_sub = pixel_list ./ vec (repelems (area, [1:no; area]));
-  centroid = accumarray (accum_subs(:), weighted_sub(:), [no nd]);
+  weighted_sub = pixel_list ./ vec (repelems (area, [1:no; vec(area, 2)]));
+  centroid = accumarray (subs_nd, weighted_sub(:), [no nd]);
 endfunction
 
-function bounding_box = rp_bounding_box (cc, pixel_list, accum_subs)
+function bounding_box = rp_bounding_box (cc, pixel_list, subs_nd)
   nd = numel (cc.ImageSize);
   no = cc.NumObjects;
-  init_corner = accumarray (accum_subs(:) , pixel_list(:), [no nd], @min) - 0.5;
-  end_corner  = accumarray (accum_subs(:) , pixel_list(:), [no nd], @max) + 0.5;
+  init_corner = accumarray (subs_nd, pixel_list(:), [no nd], @min) - 0.5;
+  end_corner  = accumarray (subs_nd, pixel_list(:), [no nd], @max) + 0.5;
   bounding_box = [(init_corner) (end_corner - init_corner)];
 endfunction
 
@@ -513,49 +530,54 @@ function pixel_values = rp_pixel_values (cc, img, idx)
   pixel_values = img(idx);
 endfunction
 
-function max_intensity = rp_max_intensity (cc, img, area, idx)
-  no = cc.NumObjects;
-  rn = 1:no;
-  subs = vec (repelems (rn, [rn; area]));
-  max_intensity = accumarray (subs, img(idx), [no 1], @max);
+function max_intensity = rp_max_intensity (cc, img, idx, subs)
+  max_intensity = accumarray (subs, img(idx), [cc.NumObjects 1], @max);
 endfunction
 
-function min_intensity = rp_min_intensity (cc, img, area, idx)
-  no = cc.NumObjects;
-  rn = 1:no;
-  subs = vec (repelems (rn, [rn; area]));
-  min_intensity = accumarray (subs, img(idx), [no 1], @min);
+function mean_intensity = rp_mean_intensity (cc, totals, area)
+  mean_intensity = totals ./ area;
 endfunction
 
-function weighted_centroid = rp_weighted_centroid (cc, img, area, pixel_list,
-                                                   pixel_idx_list)
+function min_intensity = rp_min_intensity (cc, img, idx, subs)
+  min_intensity = accumarray (subs, img(idx), [cc.NumObjects 1], @min);
+endfunction
+
+function weighted_centroid = rp_weighted_centroid (cc, img, pixel_list,
+                                                   pixel_idx_list, totals,
+                                                   subs_nd, area)
   no = cc.NumObjects;
   nd = numel (cc.ImageSize);
-  rn = 1:no;
-  R  = [rn; area];
+  rep_totals = vec (repelems (totals, [1:no; vec(area, 2)]));
 
   vals = img(pixel_idx_list);
-  subs = vec (repelems (rn, R));
-
-  totals = repelems (accumarray (subs, vals), R);
-  weighted_pixel_list = pixel_list .* (double (vals) ./ vec (totals));
-  weighted_centroid = accumarray (vec (repmat (subs, [1 nd]) .+ [0:no:(no*nd-1)]),
-                                  weighted_pixel_list(:), [no nd]);
+  weighted_pixel_list = pixel_list .* (double (vals) ./ rep_totals);
+  weighted_centroid = accumarray (subs_nd, weighted_pixel_list(:), [no nd]);
 endfunction
 
 
 ##
 ## Intermediary steps -- no match to specific property
-## 
+##
 
-## Creates subscripts for use with accumarray
-function accum_subs = rp_accum_subs (cc, area)
-  nd = numel (cc.ImageSize);
-  no = cc.NumObjects;
-  rn = 1:no;
-  accum_subs = vec (repelems (rn, [rn; area])) .+ [0:no:(no*nd-1)];
+## Creates subscripts for use with accumarray, when computing a column vector.
+function subs = rp_accum_subs (cc, area)
+  rn = 1:cc.NumObjects;
+  R  = [rn; vec(area, 2)];
+  subs = vec (repelems (rn, R));
 endfunction
 
+## Creates subscripts for use with accumarray, when computing something
+## with a column per number of dimensions
+function subs_nd = rp_accum_subs_nd (cc, subs)
+  nd = numel (cc.ImageSize);
+  no = cc.NumObjects;
+  subs_nd = vec (subs .+ [0:no:(no*nd-1)]);
+endfunction
+
+## Total/Integrated density of each region.
+function totals = rp_total_intensity (cc, img, idx, subs)
+  totals = accumarray (subs, img(idx), [cc.NumObjects 1]);
+endfunction
 
 function retval = old_regionprops (bw, varargin)
 
@@ -613,11 +635,6 @@ function retval = old_regionprops (bw, varargin)
           idx = arrayfun (@(x,y) x:y, min (C), max (C), "unif", 0);
           idx = substruct ("()", idx);
           retval (k).Image = subsref (tmp, idx);
-        endfor
-
-      case "meanintensity"
-        for k = 1:num_labels
-          retval (k).MeanIntensity = mean (I(L == k)(:));
         endfor
 
       case "majoraxislength"
@@ -899,6 +916,15 @@ endfunction
 %! x = sum (img(2,ix) .* (ix)) / sum (img(2,ix));
 %! assert (props(1).WeightedCentroid(1), x, 10*eps)
 %! assert (props(1).WeightedCentroid(2), 2, 10*eps)
+
+%!assert (regionprops (bw2d, gray2d, "MeanIntensity"),
+%!        struct ("MeanIntensity", {mean([4 0 5 4 7 5 3 7])
+%!                                  mean([7 5 2 8 6 5])}))
+
+%!assert (regionprops (bwlabel (bw2d, 4), gray2d, "MeanIntensity"),
+%!        struct ("MeanIntensity", {mean([4 0 5 4])
+%!                                  mean([7 5 2 8 6 5])
+%!                                  mean([7 5 3 7])}))
 
 ## Test dimensionality of struct array
 %!assert (size (regionprops ([1 0 0; 0 0 2], "Area")), [2, 1])
