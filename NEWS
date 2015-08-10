@@ -6,7 +6,13 @@
       imgetfile
       impyramid
       imquantize
+      lab2rgb
+      lab2xyz
+      rgb2lab
+      rgb2xyz
       watershed
+      xyz2lab
+      xyz2rgb
 
  ** For better compatibility with Matlab, the imtransform function now
     uses 0 instead of NA for the default extrapolation value.
