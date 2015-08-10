@@ -147,9 +147,15 @@ Types and Type conversions
  isgray
  isind
  isrgb
+ lab2rgb
+ lab2xyz
  label2rgb
  mat2gray
  rgb2gray
+ rgb2lab
+ rgb2xyz
+ xyz2lab
+ xyz2rgb
 Utilities
  checkerboard
  edgetaper
