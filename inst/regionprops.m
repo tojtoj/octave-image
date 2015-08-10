@@ -176,7 +176,7 @@
 ## @item @qcode{"PixelList"}
 ## The subscript indices for the elements of each region.  This is a p-by-Q
 ## matrix where p is the number of elements and Q is the number of
-## dimensions.  Each row is of the form @qcode{[x y z @dots{}]}.
+## dimensions.  Each row is of the form @code{[x y z @dots{}]}.
 ##
 ## @item @qcode{"PixelValues"}
 ## The actual pixel values inside each region in a column vector.
