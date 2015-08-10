@@ -9,6 +9,10 @@
  ** For better compatibility with Matlab, the imtransform function now
     uses 0 instead of NA for the default extrapolation value.
 
+ ** The regionprops function now computes the new properties:
+
+      SubarrayIdx
+
 
  Summary of important user-visible changes for image 2.4.0 (2015/04/06):
 -------------------------------------------------------------------------
