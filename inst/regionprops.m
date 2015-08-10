@@ -182,6 +182,11 @@
 ## The actual pixel values inside each region in a column vector.
 ## Requires a grayscale image @var{I}.
 ##
+## @item @qcode{"SubarrayIdx"}
+## A cell array with subscript indices for the bounding box.  This can
+## be used as @code{@var{I}(@var{props}(@var{p}).SubarrayIdx@{:@})}, where
+## @var{p} is one of the regions, to extract the image in its bounding box.
+##
 ## @item @qcode{"WeightedCentroid"}
 ## The coordinates for the region centre of mass when using the intensity
 ## of each element as weight.  This is a row vector with one element per
@@ -340,7 +345,7 @@ function props = regionprops (bw, varargin)
     "image",            {{}},
     "pixelidxlist",     {{}},
     "pixellist",        {{"pixelidxlist"}},
-    "subarrayidx",      {{}},
+    "subarrayidx",      {{"boundingbox"}},
     "convexarea",       {{}},
     "convexhull",       {{}},
     "conveximage",      {{}},
@@ -408,6 +413,7 @@ function props = regionprops (bw, varargin)
       case "pixellist"
         values.pixellist = rp_pixel_list (cc, values.pixelidxlist);
       case "subarrayidx"
+        values.subarrayidx = rp_subarray_idx (cc, values.boundingbox);
       case "convexarea"
       case "convexhull"
       case "conveximage"
@@ -475,6 +481,8 @@ function props = regionprops (bw, varargin)
       case "pixellist"
         [props.PixelList] = mat2cell (values.pixellist, Area){:};
       case "subarrayidx"
+        [props.SubarrayIdx] = mat2cell (values.subarrayidx,
+                                        ones (cc.NumObjects, 1)){:};
       case "convexarea"
       case "convexhull"
       case "conveximage"
@@ -549,6 +557,20 @@ endfunction
 
 function min_intensity = rp_min_intensity (cc, img, idx, subs)
   min_intensity = accumarray (subs, img(idx), [cc.NumObjects 1], @min);
+endfunction
+
+function subarray_idx = rp_subarray_idx (cc, bounding_box)
+  nd = columns (bounding_box) / 2;
+  bb_limits = bounding_box;
+  ## Swap x y coordinates back to row and column
+  bb_limits(:,[1 2 [1 2]+nd]) = bounding_box(:,[2 1 [2 1]+nd]);
+  ## Set initial coordinates (it is faster to add 0.5 than to call ceil())
+  bb_limits(:,1:nd) += 0.5;
+  ## Set the end coordinates
+  bb_limits(:,(nd+1):end) += bb_limits(:,1:nd);
+  bb_limits(:,(nd+1):end) -= 1;
+  subarray_idx = arrayfun (@colon, bb_limits(:,1:nd), bb_limits(:,(nd+1):end),
+                           "UniformOutput", false);
 endfunction
 
 function weighted_centroid = rp_weighted_centroid (cc, img, pixel_list,
@@ -935,8 +957,26 @@ endfunction
 %!                                  mean([7 5 2 8 6 5])
 %!                                  mean([7 5 3 7])}))
 
-## Test dimensionality of struct array
-%!assert (size (regionprops ([1 0 0; 0 0 2], "Area")), [2, 1])
+%!assert (regionprops (bw2d, "SubarrayIdx"),
+%!        struct ("SubarrayIdx", {{[1 2 3], [2 3 4 5 6]}
+%!                                {[4 5], [3 4 5 6]}}))
+
+%!assert (regionprops (bwlabel (bw2d, 4), "SubarrayIdx"),
+%!        struct ("SubarrayIdx", {{[1 2 3], [2 3]}
+%!                                {[4 5], [3 4 5 6]}
+%!                                {[1 2], [4 5 6]}}))
+
+%!test
+%! out = struct ("Image", {logical([1 0 1 1 0; 1 1 0 1 1; 1 0 0 0 0])
+%!                         logical([0 1 1 1; 1 1 0 1])}));
+%! assert (regionprops (bw2d, "Image"), out)
+%! assert (regionprops (bw2d, gray2d, "Image"), out)
+%! assert (regionprops (bwlabel (bw2d) "Image"), out)
+
+%!assert (regionprops (bwlabel (bw2d, 4), "Image")
+%!        struct ("Image", {logical([1 0; 1 1; 1 0])
+%!                          logical([0 1 1 1; 1 1 0 1])
+%!                          logical([1 1 0; 0 1 1])}))
 
 %!test
 %! a = eye (4);
@@ -989,6 +1029,9 @@ endfunction
 
 ## Test missing labels
 %!assert (regionprops ([1 0 3; 1 1 3], "Area"), struct ("Area", {3; 0; 2}))
+
+## Test dimensionality of struct array
+%!assert (size (regionprops ([1 0 0; 0 0 2], "Area")), [2, 1])
 
 %!error <L must be non-negative integers> regionprops ([1 -2   0 3])
 %!error <L must be non-negative integers> regionprops ([1  1.5 0 3])
