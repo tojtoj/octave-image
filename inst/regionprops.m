@@ -342,7 +342,7 @@ function props = regionprops (bw, varargin)
     "centroid",         {{"accum_subs_nd", "pixellist", "area"}},
     "filledarea",       {{}},
     "filledimage",      {{}},
-    "image",            {{}},
+    "image",            {{"subarrayidx", "accum_subs", "pixelidxlist"}},
     "pixelidxlist",     {{}},
     "pixellist",        {{"pixelidxlist"}},
     "subarrayidx",      {{"boundingbox"}},
@@ -408,6 +408,8 @@ function props = regionprops (bw, varargin)
       case "filledarea"
       case "filledimage"
       case "image"
+        values.image = rp_image (cc, bw, values.pixelidxlist,
+                                 values.accum_subs, values.subarrayidx);
       case "pixelidxlist"
         values.pixelidxlist = rp_pixel_idx_list (cc);
       case "pixellist"
@@ -434,7 +436,6 @@ function props = regionprops (bw, varargin)
       case "meanintensity"
         values.meanintensity = rp_mean_intensity (cc, values.total_intensity,
                                                   values.area);
-
       case "minintensity"
         values.minintensity = rp_min_intensity (cc, img,
                                                 values.pixelidxlist,
@@ -476,13 +477,13 @@ function props = regionprops (bw, varargin)
       case "filledarea"
       case "filledimage"
       case "image"
+        [props.Image] = values.image{:};
       case "pixelidxlist"
         [props.PixelIdxList] = mat2cell (values.pixelidxlist, Area){:};
       case "pixellist"
         [props.PixelList] = mat2cell (values.pixellist, Area){:};
       case "subarrayidx"
-        [props.SubarrayIdx] = mat2cell (values.subarrayidx,
-                                        ones (cc.NumObjects, 1)){:};
+        [props.SubarrayIdx] = values.subarrayidx{:};
       case "convexarea"
       case "convexhull"
       case "conveximage"
@@ -533,6 +534,35 @@ function bounding_box = rp_bounding_box (cc, pixel_list, subs_nd)
   bounding_box = [(init_corner) (end_corner - init_corner)];
 endfunction
 
+function bb_images = rp_image (cc, bw, idx, subs, subarray_idx)
+  ## For this property, we must remember to remove elements from other
+  ## regions (remember that bounding boxes may overlap).  We do that by
+  ## creating a labelled image, extracting the bounding boxes, and then
+  ## comparing elements.
+
+  no = cc.NumObjects;
+  ## If BW is numeric then it already is a labeled image.
+  if (isnumeric (bw))
+    L = bw;
+  else
+    if (no < 255)
+      cls = "uint8";
+    elseif (no < 65535)
+      cls = "uint16"
+    elseif (no < 4294967295)
+      cls = "uint32";
+    else
+      cls = "double";
+    endif
+    L = zeros (cc.ImageSize, cls);
+    L(idx) = subs;
+  endif
+  sub_structs = num2cell (struct ("type", "()", "subs", subarray_idx));
+  bb_images = cellfun (@subsref, {L}, sub_structs, "UniformOutput", false);
+  bb_images = cellfun (@eq, bb_images, num2cell (1:no)(:),
+                       "UniformOutput", false);
+endfunction
+
 function idx = rp_pixel_idx_list (cc)
   idx = cell2mat (cc.PixelIdxList(:));
 endfunction
@@ -571,6 +601,7 @@ function subarray_idx = rp_subarray_idx (cc, bounding_box)
   bb_limits(:,(nd+1):end) -= 1;
   subarray_idx = arrayfun (@colon, bb_limits(:,1:nd), bb_limits(:,(nd+1):end),
                            "UniformOutput", false);
+  subarray_idx = mat2cell (subarray_idx, ones (cc.NumObjects, 1));
 endfunction
 
 function weighted_centroid = rp_weighted_centroid (cc, img, pixel_list,
@@ -657,15 +688,6 @@ function retval = old_regionprops (bw, varargin)
       case "filledimage"
         for k = 1:num_labels
           retval (k).FilledImage = bwfill (L == k, "holes");
-        endfor
-
-      case "image"
-        for k = 1:num_labels
-          tmp = (L == k);
-          C = all_coords (tmp, false);
-          idx = arrayfun (@(x,y) x:y, min (C), max (C), "unif", 0);
-          idx = substruct ("()", idx);
-          retval (k).Image = subsref (tmp, idx);
         endfor
 
       case "majoraxislength"
@@ -815,7 +837,7 @@ function [major, minor, major_vec] = local_ellipsefit (X, Y)
   minor = min(lambda_d);
 endfunction
 
-%!shared bw2d, gray2d
+%!shared bw2d, gray2d, bw2d_over_bb, bw2d_insides
 %! bw2d = logical ([
 %!  0 1 0 1 1 0
 %!  0 1 1 0 1 1
@@ -829,6 +851,26 @@ endfunction
 %!  0 5 3 4 8 1
 %!  9 2 0 5 8 6
 %!  8 9 7 2 2 5];
+%!
+%! ## For testing overlapping bounding boxes
+%! bw2d_over_bb = logical ([
+%!  0 1 1 1 0 1 1
+%!  1 1 0 0 0 0 1
+%!  1 0 0 1 1 0 1
+%!  1 0 0 1 1 0 0
+%!  0 0 0 1 1 1 1]);
+%!
+%! ## For testing when there's regions inside regions
+%! bw2d_insides = logical ([
+%!  0 0 0 0 0 0 0 0
+%!  0 1 1 1 1 1 1 0
+%!  0 1 0 0 0 0 1 0
+%!  0 1 0 1 1 0 1 0
+%!  0 1 0 1 1 0 1 0
+%!  0 1 0 0 0 0 1 0
+%!  0 1 1 1 1 1 1 0
+%!  0 0 0 0 0 0 0 0]);
+
 
 %!function c = get_2d_centroid_for (idx)
 %!  subs = ind2sub ([5 6], idx);
@@ -968,15 +1010,34 @@ endfunction
 
 %!test
 %! out = struct ("Image", {logical([1 0 1 1 0; 1 1 0 1 1; 1 0 0 0 0])
-%!                         logical([0 1 1 1; 1 1 0 1])}));
+%!                         logical([0 1 1 1; 1 1 0 1])});
 %! assert (regionprops (bw2d, "Image"), out)
 %! assert (regionprops (bw2d, gray2d, "Image"), out)
-%! assert (regionprops (bwlabel (bw2d) "Image"), out)
+%! assert (regionprops (bwlabel (bw2d), "Image"), out)
 
-%!assert (regionprops (bwlabel (bw2d, 4), "Image")
+%!assert (regionprops (bwlabel (bw2d, 4), "Image"),
 %!        struct ("Image", {logical([1 0; 1 1; 1 0])
 %!                          logical([0 1 1 1; 1 1 0 1])
 %!                          logical([1 1 0; 0 1 1])}))
+
+## Test overlapping bounding boxes
+%!test
+%! out = struct ("Image", {logical([0 1 1 1; 1 1 0 0; 1 0 0 0; 1 0 0 0])
+%!                         logical([1 1 0 0; 1 1 0 0; 1 1 1 1])
+%!                         logical([1 1; 0 1; 0 1])});
+%! assert (regionprops (bw2d_over_bb, "Image"), out)
+%! assert (regionprops (bwlabel (bw2d_over_bb), "Image"), out)
+
+%!test
+%! out = struct ("Image", {logical([1 1 1 1 1 1
+%!                                  1 0 0 0 0 1
+%!                                  1 0 0 0 0 1
+%!                                  1 0 0 0 0 1
+%!                                  1 0 0 0 0 1
+%!                                  1 1 1 1 1 1])
+%!                         logical([1 1; 1 1])});
+%! assert (regionprops (bw2d_insides, "Image"), out)
+%! assert (regionprops (bwlabel (bw2d_insides), "Image"), out)
 
 %!test
 %! a = eye (4);
