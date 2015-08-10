@@ -24,15 +24,21 @@
 ## @deftypefnx {Function File} {} regionprops (@dots{}, @var{I}, @var{properties})
 ## Compute properties of image regions.
 ##
-## Individual regions can be defined in three different ways, depending on
-## the type of the first argument:
+## Measures several properties for each region within an image.  Returns
+## a struct array, one element per region, whose field names are the
+## measured properties.
+##
+## Individual regions can be defined in three different ways, a binary
+## image, a labelled image, or a bwconncomp struct, each providing
+## different advantages.
 ##
 ## @table @asis
 ## @item @var{BW}
 ## A binary image.  Must be of class logical.  Individual regions will be
-## the connected component as computed by @code{bwconnmp()} using the
+## the connected component as computed by @code{bwconnmp} using the
 ## maximal connectivity for the number of dimensions of @var{bw} (see
-## @code{conndef()} for details).
+## @code{conndef} for details).  For alternative connectivities, call
+## @code{bwconncomp} directly and use its output instead.
 ##
 ## @var{bw} must really be of class logical.  If not, even if it is a
 ## numeric array of 0's and 1's, it will be treated as a labelled image
@@ -79,121 +85,124 @@
 ##
 ## @end table
 ##
-## @code{regionprops} computes various properties of the individual objects (as
-## identified by @code{bwlabel}) in the binary image @var{BW}. The result is a
-## structure array containing an entry per property per object.
-##
-## The optional grayscale image @var{I} is used for pixel value measurements
-## (MaxIntensity, MinIntensity, MeanIntensity, PixelValues and WeightedCentroid).
-##
-## The following properties can be computed:
+## The properties to be measured can be defined via a cell array or a
+## comma separated list or strings.  Some of the properties are only
+## supported if the matching grayscale image @var{I} is also supplied.
+## Others are only supported for 2 dimensional images.  See the list
+## below for details on each property limitation.  If none is specified,
+## it defaults to the @qcode{"basic"} set of properties.
 ##
 ## @table @asis
-## @item "Area"
-## The number of pixels in the object.
+## @item @qcode{"Area"}
+## The number of pixels in the region.  Note that this differs from
+## @code{bwarea} where each pixel has different weights.
 ##
-## @item "BoundingBox"
-## @itemx "bounding_box"
-## The bounding box of the object. This is represented as a 4-vector where the
-## first two entries are the @math{x} and @math{y} coordinates of the upper left
-## corner of the bounding box, and the two last entries are the width and the
-## height of the box.
+## @item @qcode{"BoundingBox"}
+## The smalles rectangle that encloses the region.  This is represented
+## as a row vector such as
+## @code{[x y z @dots{} x_length y_length z_length @dots{}]}.
 ##
-## @item "Centroid"
-## The center coordinate of the object.
+## The first half corresponds to the lower coordinates of each dimension
+## while the second half, to the length in that dimension.  For the two
+## dimensional case, the first 2 elements correspond to the coordinates
+## of the upper left corner of the bounding box, while the two last entries
+## are the width and the height of the box.
 ##
-## @item "Eccentricity"
+## @item @qcode{"Centroid"}
+## The coordinates for the region centre of mass.  This is a row vector
+## with one element per dimension, such as @code{[x y z @dots{}]}.
+##
+## @item @qcode{"Eccentricity"}
 ## The eccentricity of the ellipse that has the same normalized
-## second central moments as the object (value between 0 and 1).
+## second central moments as the region (value between 0 and 1).
 ##
-## @item "EquivDiameter"
-## @itemx "equiv_diameter"
+## @item @qcode{"EquivDiameter"}
 ## The diameter of a circle with the same area as the object.
 ##
-## @item "EulerNumber"
-## @itemx "euler_number"
-## The Euler number of the object (see @code{bweuler} for details).
+## @item @qcode{"EulerNumber"}
+## The Euler number of the region (see @code{bweuler} for details).
 ##
-## @item "Extent"
+## @item @qcode{"Extent"}
 ## The area of the object divided by the area of the bounding box.
 ##
-## @item "Extrema"
+## @item @qcode{"Extrema"}
 ## Returns an 8-by-2 matrix with the extrema points of the object.
-## The first column holds the returned x- and the second column the y-values. 
-## The order of the 8 points is: top-left, top-right, right-top, right-bottom, bottom-right, bottom-left, left-bottom, left-top.
+## The first column holds the returned x- and the second column the y-values.
+## The order of the 8 points is: top-left, top-right, right-top, right-bottom,
+## bottom-right, bottom-left, left-bottom, left-top.
 ##
-## @item "FilledArea"
-## @itemx "filled_area"
+## @item @qcode{"FilledArea"}
 ## The area of the object including possible holes.
 ##
-## @item "FilledImage"
-## @itemx "filled_image"
+## @item @qcode{"FilledImage"}
 ## A binary image with the same size as the object's bounding box that contains
 ## the object with all holes removed.
 ##
-## @item "Image"
+## @item @qcode{"Image"}
 ## An image with the same size as the bounding box that contains the original
 ## pixels.
 ##
-## @item "MajorAxisLength"
-## @itemx "major_axis_length"
+## @item @qcode{"MajorAxisLength"}
 ## The length of the major axis of the ellipse that has the same
 ## normalized second central moments as the object.
 ##
-## @item "MaxIntensity"
-## @itemx "max_intensity"
-## The maximum intensity inside the object.
+## @item @qcode{"MaxIntensity"}
+## The maximum intensity value inside each region.
+## Requires a grayscale image @var{I}.
 ##
-## @item "MeanIntensity"
-## @itemx "mean_intensity"
-## The mean intensity inside the object.
+## @item @qcode{"MeanIntensity"}
+## The mean intensity value inside each region.
+## Requires a grayscale image @var{I}.
 ##
-## @item "MinIntensity"
-## @itemx "min_intensity"
-## The minimum intensity inside the object.
+## @item @qcode{"MinIntensity"}
+## The minimum intensity value inside each region.
+## Requires a grayscale image @var{I}.
 ##
-## @item "MinorAxisLength"
-## @itemx "minor_axis_length"
+## @item @qcode{"MinorAxisLength"}
 ## The length of the minor axis of the ellipse that has the same
 ## normalized second central moments as the object.
 ##
-## @item "Perimeter"
-## The length of the boundary of the object.
-##
-## @item "PixelIdxList"
-## @itemx "pixel_idx_list"
-## The indices of the pixels in the object.
-##
-## @item "Orientation"
+## @item @qcode{"Orientation"}
 ## The angle between the x-axis and the major axis of the ellipse that
 ## has the same normalized second central moments as the object
 ## (value in degrees between -90 and 90).
 ##
-## @item "PixelList"
-## @itemx "pixel_list"
-## The actual pixel values inside the object. This is only useful for grey scale
-## images.
+## @item @qcode{"Perimeter"}
+## The length of the boundary of the object.
 ##
-## @item "PixelValues"
-## @itemx "pixel_values"
-## The pixel values inside the object represented as a vector.
+## @item @qcode{"PixelIdxList"}
+## The linear indices for the elements of each region in a column vector.
 ##
-## @item "WeightedCentroid"
-## @itemx "weighted_centroid"
-## The centroid of the object where pixel values are used as weights.
+## @item @qcode{"PixelList"}
+## The subscript indices for the elements of each region.  This is a p-by-Q
+## matrix where p is the number of elements and Q is the number of
+## dimensions.  Each row is of the form @qcode{[x y z @dots{}]}.
+##
+## @item @qcode{"PixelValues"}
+## The actual pixel values inside each region in a column vector.
+## Requires a grayscale image @var{I}.
+##
+## @item @qcode{"WeightedCentroid"}
+## The coordinates for the region centre of mass when using the intensity
+## of each element as weight.  This is a row vector with one element per
+## dimension, such as @code{[x y z @dots{}]}.
+## Requires a grayscale image @var{I}.
+##
 ## @end table
 ##
-## The requested properties can either be specified as several input arguments
-## or as a cell array of strings. As a short-hand it is also possible to give
-## the following strings as arguments.
+## In addition, the strings @qcode{"basic"} and @qcode{"all"} can be
+## used to select a subset of the properties:
 ##
 ## @table @asis
-## @item "basic"
-## The following properties are computed: @t{"Area"}, @t{"Centroid"} and
-## @t{"BoundingBox"}. This is the default.
+## @item @qcode{"basic"} (default)
+## Compute @qcode{"Area"}, @qcode{"Centroid"}, and @qcode{"BoundingBox"}.
 ##
-## @item "all"
-## All properties are computed.
+## @item @qcode{"all"}
+## Computes all possible properties for the image, i.e., it will not
+## compute properties that require grayscale unless the grayscale image
+## is available, and it will not compute properties that are limited to
+## 2 dimensions, unless the image is 2 dimensions.
+##
 ## @end table
 ##
 ## @seealso{bwlabel, bwperim, bweuler}
