@@ -79,6 +79,7 @@ inst/imcrop.m                           GPLv3+
 inst/imdither.m                         GPLv3+
 inst/imdivide.m                         GPLv3+
 inst/imfilter.m                         GPLv3+
+inst/imgetfile.m                        GPLv3+
 inst/imgradient.m                       GPLv3+
 inst/imgradientxy.m                     GPLv3+
 inst/imhist.m                           GPLv3+
@@ -167,3 +168,4 @@ src/__spatial_filtering__.cc            GPLv3+
 src/strel.cc                            GPLv3+
 src/strel.h                             GPLv3+
 src/union-find.h++                      GPLv3+
+src/watershed.cc                        GPLv3+

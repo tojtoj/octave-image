@@ -101,6 +101,7 @@ Morhophological Operations
  @strel/reflect
  @strel/strel
  @strel/translate
+ watershed
 Read/write
  analyze75info
  analyze75read
@@ -152,6 +153,7 @@ Utilities
  edgetaper
  getrangefromclass
  imattributes
+ imgetfile
  iptcheckconn
  iptcheckmap
  iptnum2ordinal

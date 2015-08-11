@@ -53,6 +53,16 @@ namespace octave
         template<class T>
         void unpad (T& image) const;
 
+        //! Return a logical mask of elements that are part of the padding.
+        static boolNDArray padding_mask (const dim_vector& size,
+                                         const dim_vector& padded_size);
+
+        //! Set the padding elements to a specific value.
+        template<class T, class P>
+        static void set_padding (const dim_vector& size,
+                                 const dim_vector& padded_size,
+                                 T& im, const P& val);
+
         template<class P>
         static P min_value (void);
 
@@ -140,6 +150,38 @@ octave::image::connectivity::min_value (void)
     return false;
   else
     return P(-octave_Inf);
+}
+
+template<class T, class P>
+void
+octave::image::connectivity::set_padding (const dim_vector& size,
+                                          const dim_vector& padded_size,
+                                          T& im, const P& val)
+{
+  P* im_v = im.fortran_vec ();
+
+  const Array<octave_idx_type> lengths = padding_lengths (size, padded_size);
+  const octave_idx_type* lengths_v = lengths.fortran_vec ();
+
+  const octave_idx_type* strides_v = size.to_jit ();
+  const octave_idx_type row_stride = strides_v[0];
+
+  std::function<void(const octave_idx_type)> fill;
+  fill = [&] (const octave_idx_type dim) -> void
+  {
+    for (octave_idx_type i = 0; i < lengths_v[dim]; i++, im_v++)
+      *im_v = val;
+
+    if (dim == 0)
+      im_v += row_stride;
+    else
+      for (octave_idx_type i = 0; i < strides_v[dim]; i++)
+        fill (dim -1);
+
+    for (octave_idx_type i = 0; i < lengths_v[dim]; i++, im_v++)
+      *im_v = val;
+  };
+  fill (im.ndims () -1);
 }
 
 #endif
