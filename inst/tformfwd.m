@@ -18,10 +18,10 @@
 ## @deftypefn  {Function File} {[@var{UV}] =} tformfwd (@var{T}, @var{XY})
 ## @deftypefnx {Function File} {[@var{U}, @var{V}] =} tformfwd (@var{T}, @var{X}, @var{Y})
 ## 
-## Given to dimensionnal coordinates from one space, returns two 
-## dimensionnal coordinates in the other space, as defined in 
+## Given two dimensional coordinates from one space, returns two 
+## dimensional coordinates in the other space, as defined in 
 ## the transform structure @var{T}. Input and output coordinates 
-## may be gigen either as a n-by-2 arrays, or as two n-by-1 vectors.
+## may be given either as a n-by-2 arrays, or as two n-by-1 vectors.
 ## @seealso{maketform, cp2tform, tforminv}
 ## @end deftypefn
 
