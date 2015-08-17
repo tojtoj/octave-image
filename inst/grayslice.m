@@ -65,12 +65,7 @@ function sliced = grayslice (I, n = 10)
   endif
   v = imcast (v, class (I));
 
-  ## Broadcasting has a much higher memory usage but performs a lot faster
-  ## than a for loop.  See cset a67048847848 for a more memory friendly
-  ## version (performs ~5x times slower but the memory footprint is numel(v)
-  ## times smaller for uint8 images)
-  sliced_tmp = reshape (sum (v(:) < vec (I, 2)), size (I));
-
+  sliced_tmp = lookup (v, I);
   if (n <= 256)
     sliced_tmp = uint8 (sliced_tmp);
   else
