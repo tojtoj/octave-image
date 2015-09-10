@@ -15,13 +15,17 @@
 ## <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn  {Function File} {[@var{UV}] =} tformfwd (@var{T}, @var{XY})
-## @deftypefnx {Function File} {[@var{U}, @var{V}] =} tformfwd (@var{T}, @var{X}, @var{Y})
+## @deftypefn  {Function File} {[@var{XY}] =} tformfwd (@var{T}, @var{UV})
+## @deftypefnx {Function File} {[@var{X}, @var{Y}] =} tformfwd (@var{T}, @var{U}, @var{V})
 ## 
-## Given two dimensional coordinates from one space, returns two 
-## dimensional coordinates in the other space, as defined in 
-## the transform structure @var{T}. Input and output coordinates 
-## may be given either as a n-by-2 arrays, or as two n-by-1 vectors.
+## Given a transform structure @var{T}, transform coordinates @var{UV}
+## in the input space into coordinates @var{XY} in the output space.
+##
+## Input and output coordinates may be given/retrieved either as a
+## n-by-2 array, or as two n-by-1 vectors. 
+##
+## The function makes use of the "forward_fcn" field of the transform
+## structure @var{T}, which should thus be defined. 
 ## @seealso{maketform, cp2tform, tforminv}
 ## @end deftypefn
 
@@ -48,6 +52,7 @@ function varargout = tformfwd (T, varargin)
     endif
     XX = [varargin{1} varargin{2}];
   endif
+
   UU = T.forward_fcn(XX, T);
   if (nargin == 3)
     varargout{1} = UU(:,1);

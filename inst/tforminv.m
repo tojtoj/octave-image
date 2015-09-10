@@ -16,12 +16,17 @@
 
 ## -*- texinfo -*-
 ## @deftypefn  {Function File} {[@var{UV}] =} tforminv (@var{T}, @var{XY})
-## @deftypefnx {Function File} {[@var{U}, @var{V}] =} tforminvfwd (@var{T}, @var{X}, @var{Y})
+## @deftypefnx {Function File} {[@var{U}, @var{V}] =} tforminv (@var{T}, @var{X}, @var{Y})
 ## 
-## Given to dimensionnal coordinates from one space, returns two 
-## dimensionnal coordinates in the other space, as defined in 
-## the transform structure @var{T}. Input and output coordinates 
-## may be gigen either as a n-by-2 arrays, or as two n-by-1 vectors.
+## 
+## Given a transform structure @var{T}, transform coordinates @var{XY}
+## in the output space into coordinates @var{UV} in the input space.
+##
+## Input and output coordinates may be given/retrieved either as a
+## n-by-2 array, or as two n-by-1 vectors. 
+##
+## The function makes use of the "inverse_fcn" field of the transform
+## structure @var{T}, which should thus be defined.
 ## @seealso{maketform, cp2tform, tformfwd}
 ## @end deftypefn
 
