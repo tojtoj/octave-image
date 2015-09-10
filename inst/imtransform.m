@@ -15,36 +15,36 @@
 ## <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn  {Function File} {@var{B} =} imtransform (@var{A}, @var{T})
-## @deftypefnx {Function File} {@var{B} =} imtransform (@var{A}, @var{T}, @var{interp})
-## @deftypefnx {Function File} {@var{B} =} imtransform (@dots{}, @var{prop}, @var{val})
-## @deftypefnx {Function File} {[@var{B}, @var{xdata}, @var{ydata}] =} imtransform (@dots{})
+## @deftypefn  {Function File} {@var{IM_OUT} =} imtransform (@var{IM_IN}, @var{T})
+## @deftypefnx {Function File} {@var{IM_OUT} =} imtransform (@var{IM_IN}, @var{T}, @var{interp})
+## @deftypefnx {Function File} {@var{IM_OUT} =} imtransform (@dots{}, @var{prop}, @var{val})
+## @deftypefnx {Function File} {[@var{IM_OUT}, @var{xdata}, @var{ydata}] =} imtransform (@dots{})
 ## Transform image.
 ##
-## Given an image @var{A} in one space, returns an image @var{B}
+## Given an image @var{IM_IN}, return an image @var{IM_OUT}
 ## resulting from the forward transform defined in the transformation
-## structure @var{T}.  An additionnal input argument @var{interp},
+## structure @var{T}.  An additional input argument @var{interp},
 ## 'bicubic', 'bilinear' (default) or 'nearest',
 ## specifies the interpolation method to be used.  Finally, the
-## transformation can be tuned using  @var{prop}/@var{val} pairs.  The
-## following properties are supported:
+## transform can be tuned using  @var{prop}/@var{val} pairs.  The
+## following properties @var{prop} are supported:
 ## 
 ## @table @asis
 ## @item "udata"
-## Specifies the input space horizontal limits. Value must be a two
-## elements vector [minval maxval]. Default: [1 columns(@var{A})]
+## Specifies the input space horizontal limits. @var{val} must be a two
+## elements vector [minval maxval]. Default: [1 columns(@var{IM_IN})]
 ##
 ## @item "vdata"
-## Specifies the input space vertical limits. Value must be a two
-## elements vector [minval maxval]. Default: [1 rows(@var{A})]
+## Specifies the input space vertical limits. @var{val} must be a two
+## elements vector [minval maxval]. Default: [1 rows(@var{IM_IN})]
 ##
 ## @item "xdata"
-## Specifies the required output space horizontal limits. Value must
+## Specifies the required output space horizontal limits. @var{val} must
 ## be a two elements vector [minval maxval]. Default: estimated using
 ## udata, vdata and findbounds function.
 ##
 ## @item "ydata"
-## Specifies the required output space vertical limits. Value must
+## Specifies the required output space vertical limits. @var{val} must
 ## be a two elements vector [minval maxval]. Default: estimated using
 ## udata, vdata and findbounds function.
 ##
@@ -61,8 +61,8 @@
 ## "xyscale" property. 
 ##
 ## @item "fillvalues"
-## Color of the areas where no interpolation where possible, e.g. when
-## coorfinates of points in the output space are out of the limits of
+## Color of the areas where no interpolation is possible, e.g. when
+## coordinates of points in the output space are out of the limits of
 ## the input space. @var{val} must be coherent with the input image
 ## format: for grayscale and indexed images (2D) @var{val} must be
 ## scalar, for RGB (n-by-m-by-3) @var{val} must be a 3 element vector.
