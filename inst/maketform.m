@@ -18,21 +18,35 @@
 ## @deftypefn  {Function File} {@var{T} =} maketform (@var{ttype}, @var{tmat})
 ## @deftypefnx {Function File} {@var{T} =} maketform (@var{ttype}, @var{inc}, @var{outc})
 ## @deftypefnx {Function File} {@var{T} =} maketform ("custom", @var{ndims_in}, @var{ndims_out}, @var{forward_fcn}, @var{inverse_fcn}, @var{tdata})
-## Create structure for spatial transformations.
+## Create a transform structure @var{T} to be used for spatial
+## transformations between an input space and an output space.
 ##
-## Returns a transform structure containing fields @var{ndims_in},
-## @var{ndims_out}, @var{forward_fcn}, @var{inverse_fcn} and @var{tdata}.  The
-## content of each field depends on the requested transform type @var{ttype}:
+## The fields of the transform structure are:
+##
+## @table @asis
+## @item @qcode{"ndims_in"}, @qcode{"ndims_out"}: the number of
+## dimensions of the input and output space.
+##
+## @item @qcode{"forward_fcn"}, @qcode{"inverse_fcn"}: the callback
+## functions that are called for forward (input to output) and inverse
+## transform.
+##
+## @item @qcode{"tdata"}: an inverse transform matrix or a structure
+## containing forward and inverse transform matrices. 
+## @end table
+##
+## The content of each field depends on the requested transform type
+## @var{ttype}:
 ##
 ## @table @asis
 ## @item "projective"
-## A ndims_in = N -> @var{ndims_out} = N projective transformation structure
+## A ndims_in = ndims_out = N projective transform structure
 ## is returned.
-## The second input argument @var{tmat} must be a (N+1)-by-(N+1)
-## transformation matrix.  The
-## (N+1)th column must contain projection coefficients.  As an example a two
-## dimensional transform from [x y] coordinates to [u v] coordinates
-## is represented by a transformation matrix defined so that:
+## If a second input argument @var{tmat} is provided, it must be a
+## (N+1)-by-(N+1) inverse transformation matrix.  The (N+1)th column must
+## contain projection coefficients.  As an example a two 
+## dimensional inverse transform from [x y] coordinates to [u v] coordinates
+## is represented by an inverse transformation matrix defined so that:
 ##
 ## @example
 ## [xx yy zz] = [u v 1] * [a d g;
@@ -42,7 +56,7 @@
 ## @end example
 ## 
 ## Alternatively the transform can be specified using the coordinates
-## of a quadilateral (typically the 4 corners of the
+## of a quadrilateral (typically the 4 corners of the
 ## image) in the input space (@var{inc}, 4-by-ndims_in matrix) and in
 ## the output space (@var{outc}, 4-by-ndims_out matrix).  This is
 ## equivalent to building the transform using
@@ -50,18 +64,19 @@
 ##
 ## @item "affine"
 ## Affine is a subset of projective transform (see above).  A
-## @var{ndims_in} = N -> @var{ndims_out} = N affine transformation structure is
+## ndims_in = ndims_out = N affine transformation structure is
 ## returned.
-## The second input argument @var{tmat} must be a (N+1)-by-(N+1) or
-## (N+1)-by-(N) transformation matrix. If present, the (N+1)th column  must
-## contain [zeros(N,1); 1] so that projection is suppressed.
+## If a second input argument @var{tmat} is provided, it must be a
+## (N+1)-by-(N+1) or (N+1)-by-(N) transformation matrix. If present, the
+## (N+1)th column  must contain [zeros(N,1); 1] so that projection is
+## suppressed.
 ##
 ## Alternatively the transform can be specified using the coordinates
-## of a triangle (typically the 3 corners of the
+## of a triangle (typically 3 corners of the
 ## image)  in the input space (@var{inc}, 3-by-ndims_in matrix) and in
 ## the  output space (@var{outc}, 3-by-ndims_out matrix). This is
-## equivalent to building the transform using "T = cp2tform (@var{inc}, @var{outc},
-## 'affine')".
+## equivalent to building the transform using 
+## @code{T = cp2tform (@var{inc}, @var{outc}, "affine")}.
 ## 
 ## @item "custom"
 ## For user defined transforms every field of the transform structure
