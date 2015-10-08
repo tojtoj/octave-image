@@ -23,7 +23,7 @@ AC_CACHE_CHECK([whether templated lambda functions accept '&const int'],
     [_cv_template_lambda_accepts_ref_const_inst=no])
 ])
 if test $_cv_template_lambda_accepts_ref_const_inst = no; then
-  AC_MSG_ERROR([
+  AC_MSG_WARN([
     Your C++ compiler (are you using GCC 5.0 or 5.1?) has a bug that
     prevents it from building the Octave Forge image package.  But you
     can fix it very easily.  See https://savannah.gnu.org/bugs/?45096
