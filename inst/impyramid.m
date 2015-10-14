@@ -1,4 +1,5 @@
 ## Copyright (C) 2015 Avinoam Kalma <a.kalma@gmail.com>
+## Copyright (C) 2015 Carnë Draug <carandraug@octave.org>
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -20,7 +21,9 @@
 ##
 ## Create image which is one level up or down in the Gaussian
 ## pyramid.  @var{direction} must be @qcode{"reduce"} or
-## @qcode{"expand"}.
+## @qcode{"expand"}.  These operations are only done in the first
+## two dimensions, so that even if @var{im} is a N dimensional
+## array, only the number of rows and columns will change.
 ##
 ## The @qcode{"reduce"} stage is done by low-pass filtering and
 ## subsampling of 1:2 in each axis.  If the size of the original
@@ -61,60 +64,66 @@ function imp = impyramid (im, direction)
 
   if (nargin != 2)
     print_usage ();
-  elseif (! isnumeric (im))
-    error ("impyramid: IM must be numeric.")
-  elseif (ndims (im) != 2 && ndims (im) != 3)
-    error ("impyramid: IM should have 2 or 3 dimensions.")
+  elseif (! isnumeric (im) && ! isbool (im))
+    error ("impyramid: IM must be numeric or logical")
   endif
 
-  ## FIXME: impyramid handles only 2&3 dimensions images.
-  ## it should handle n dimensional input
-  ## see https://savannah.gnu.org/patch/?8612#comment1 item #3.
-
-  direction = tolower (direction);
-  ndim = ndims (im);
-
-  ## low pass filter to be used
+  ## low pass filters to be used
   alpha = 0.375;
-  filt = [0.25-alpha/2 0.25 alpha 0.25 0.25-alpha/2];
+  filt_horz = [(0.25-alpha/2)  0.25  alpha  0.25  (0.25-alpha/2)];
+  filt_vert = filt_horz.';
 
-  r = rows (im);
-  c = columns (im);
-
-  switch (direction)
+  nd = ndims (im);
+  sz = size (im);
+  cl = class (im);
+  switch (tolower (direction))
     case "reduce"
-      ##  perform horizontal low pass filtering
-      im1 = imfilter (im, filt, "replicate");
-      ##  perform vertical low pass filtering
-      im2 = imfilter (im1, filt', "replicate");
+      ## horizontal low pass filtering
+      im = padarray (im, floor (size (filt_horz) /2), "replicate");
+      im = convn (im, filt_horz, "valid");
+      im = cast (im, cl);
 
-      ##  subsampling
-      if (ndim == 2)
-        imp = im2(1:2:r,1:2:c);
-      else
-        imp = im2(1:2:r,1:2:c,:);
-      end
+      ## vertical low pass filtering
+      im = padarray (im, floor (size (filt_vert) /2), "replicate");
+      im = convn (im, filt_vert, "valid");
+      im = cast (im, cl);
+
+      ## subsampling
+      idx = repmat ({":"}, 1, nd);
+      idx([1 2]) = {1:2:sz(1), 1:2:sz(2)};
+      imp = im(idx{:});
 
     case "expand"
-      if (ndim == 2)
-      ## creating image with dimensions that are twice
-        im1 = zeros (2*r-1,2*c-1, class(im));
-        ## put original image in odd pixels
-        im1 (1:2:2*r-1,1:2:2*c-1) = im;
-      else
-        ## creating image with the correct dimensions
-        im1 = zeros (2*r-1,2*c-1, size(im,3), class(im));
-        ## put original image in odd pixels
-        im1 (1:2:2*r-1,1:2:2*c-1,:) = im;
-      endif
-      ##  perform horizontal low pass filtering
-      im2 = 2*imfilter (im1, filt);
-      ##  perform vertical low pass filtering
-      imp = 2*imfilter (im2, filt');
+      ## Create image, twice the size (rows and columns only),
+      ## with the original image on the odd pixels.
+      imp_sz = sz .* postpad ([2 2], nd, 1);
+      imp_sz([1 2]) -= 1;
+      imp = zeros (imp_sz, cl);
+      idx = repmat ({":"}, 1, nd);
+      idx([1 2]) = {1:2:imp_sz(1), 1:2:imp_sz(2)};
+      imp(idx{:}) = im;
+
+      ## horizontal low pass filtering
+      imp = padarray (imp, floor (size (filt_horz) /2));
+      imp = convn (imp, filt_horz, "valid");
+      imp = cast (imp, cl);
+      imp *= 2;
+
+      ## vertical low pass filtering
+      imp = padarray (imp, floor (size (filt_vert) /2));
+      imp = convn (imp, filt_vert, "valid");
+      imp = cast (imp, cl);
+      imp *= 2;
+
     otherwise
-      error ("impyramid: direction must be 'reduce' or 'expand'")
+      error ("impyramid: DIRECTION must be 'reduce' or 'expand'")
   endswitch
 endfunction
+
+## Note that there are small differences, 1 and 2 gray levels, between
+## the results here (the ones we get in Octave), and the ones we should
+## have for Matlab compatibility.  This is specially true for elements
+## in the border, and worse when expanding.
 
 %!test
 %! in = [116  227  153   69  146  194   59  130  139  106
@@ -125,12 +134,13 @@ endfunction
 %!        54  158  143   77   26  168  113  229  165  225
 %!         9   47  133  135  130  207  236   43   19   73];
 %!
-%! reduced = [114   139   131   103   110
-%!             97   122   140   110   100
-%!            103   123   112   124   122
-%!             47   107   134   153    94];
+%! reduced = [
+%!   114   139   131   103   110
+%!    97   122   140   110   100
+%!   103   123   112   124   122
+%!    47   107   134   153    94];
 %!
-%! expand = [
+%! expanded = [
 %!    88  132  160  154  132  108   94  102  120  138  138  100   66   74   96  112  116  104   78
 %!    62   98  128  142  146  154  154  140  126  126  122   86   54   58   82  114  132  112   74
 %!    36   54   74  100  130  168  184  156  118  104   92   64   40   44   66  100  122  104   66
@@ -146,4 +156,22 @@ endfunction
 %!    16   34   58   86  108  114  110  106  112  138  170  184  172  126   74   48   44   60   68];
 %!
 %! assert (impyramid (uint8 (in), "reduce"), uint8 (reduced))
-%! assert (impyramid (uint8 (in), "expand"), uint8 (expand))
+%! assert (impyramid (uint8 (in), "expand"), uint8 (expanded))
+
+## Test that that reduction and expansion are done in the
+## first 2 dimensions only.
+%!test
+%! in = randi ([0 255], [40 39 3 5], "uint8");
+%! red = impyramid (in, "reduce");
+%! for p = 1:3
+%!   for n = 1:5
+%!     assert (red(:,:,p,n), impyramid (in(:,:,p,n), "reduce"))
+%!   endfor
+%! endfor
+%!
+%! exp = impyramid (in, "expand");
+%! for p = 1:3
+%!   for n = 1:5
+%!     assert (exp(:,:,p,n), impyramid (in(:,:,p,n), "expand"))
+%!   endfor
+%! endfor
