@@ -78,14 +78,14 @@ function imp = impyramid (im, direction)
   cl = class (im);
   switch (tolower (direction))
     case "reduce"
-      ## horizontal low pass filtering
-      im = padarray (im, floor (size (filt_horz) /2), "replicate");
-      im = convn (im, filt_horz, "valid");
-      im = cast (im, cl);
-
       ## vertical low pass filtering
       im = padarray (im, floor (size (filt_vert) /2), "replicate");
       im = convn (im, filt_vert, "valid");
+
+      ## horizontal low pass filtering
+      im = padarray (im, floor (size (filt_horz) /2), "replicate");
+      im = convn (im, filt_horz, "valid");
+
       im = cast (im, cl);
 
       ## subsampling
@@ -106,14 +106,14 @@ function imp = impyramid (im, direction)
       ## horizontal low pass filtering
       imp = padarray (imp, floor (size (filt_horz) /2));
       imp = convn (imp, filt_horz, "valid");
-      imp = cast (imp, cl);
       imp *= 2;
 
       ## vertical low pass filtering
       imp = padarray (imp, floor (size (filt_vert) /2));
       imp = convn (imp, filt_vert, "valid");
-      imp = cast (imp, cl);
       imp *= 2;
+
+      imp = cast (imp, cl);
 
     otherwise
       error ("impyramid: DIRECTION must be 'reduce' or 'expand'")
@@ -135,10 +135,17 @@ endfunction
 %!         9   47  133  135  130  207  236   43   19   73];
 %!
 %! reduced = [
-%!   114   139   131   103   110
-%!    97   122   140   110   100
-%!   103   123   112   124   122
-%!    47   107   134   153    94];
+%!     114  139  131  103  111
+%!      97  122  141  110   99
+%!     103  123  112  123  121
+%!      47  107  134  153   94];
+%!
+%! ## this is what we should return if we were Matlab compatible
+%! reduced_matlab = [
+%!     114  139  131  103  111
+%!      97  122  141  111  100
+%!     103  123  112  123  122
+%!      47  107  134  153   94];
 %!
 %! expanded = [
 %!    88  132  160  154  132  108   94  102  120  138  138  100   66   74   96  112  116  104   78
@@ -154,6 +161,22 @@ endfunction
 %!    58   98  132  140  130  110   82   62   62  102  142  144  138  154  168  164  156  170  162
 %!    36   68  100  120  130  122  106   92   96  134  174  182  172  156  136  116  104  122  124
 %!    16   34   58   86  108  114  110  106  112  138  170  184  172  126   74   48   44   60   68];
+%!
+%! ## this is what we should return if we were Matlab compatible
+%! expanded_matlab = [
+%!   115  154  185  178  150  122  105  116  138  159  158  117   78   86  112  129  133  120  103
+%!    69   98  128  141  146  152  152  139  125  127  121   87   55   58   81  113  131  112   84
+%!    40   54   74  100  131  167  184  157  119  104   92   64   41   44   66  100  121  103   74
+%!    76   69   65   75   97  130  153  148  131  122  108   80   61   79  103  105   98   97   98
+%!   120  105   88   77   78   96  121  143  155  154  140  112   98  124  143  109   74   91  123
+%!   117  129  134  119  107  125  153  173  180  172  156  143  138  146  140   96   60   83  122
+%!    99  139  170  157  139  156  181  188  180  164  151  154  156  140  112   81   65   84  110
+%!   101  136  163  153  133  132  138  136  130  122  120  130  133  108   82   86   99  104  104
+%!   103  126  143  136  116   97   81   73   73   82   94  105  105   87   78  108  138  133  116
+%!    90  116  139  139  122   96   69   52   53   80  109  114  111  116  128  148  163  164  160
+%!    66   99  131  140  131  109   83   62   62  102  142  144  138  154  169  164  157  169  184
+%!    41   68   99  121  130  122  107   92   95  133  173  182  172  156  135  114  105  121  142
+%!    21   38   64   98  124  131  127  123  129  160  194  212  199  144   82   52   48   65   85];
 %!
 %! assert (impyramid (uint8 (in), "reduce"), uint8 (reduced))
 %! assert (impyramid (uint8 (in), "expand"), uint8 (expanded))
@@ -175,3 +198,53 @@ endfunction
 %!     assert (exp(:,:,p,n), impyramid (in(:,:,p,n), "expand"))
 %!   endfor
 %! endfor
+
+%!test
+%! in = repmat (uint8 (255), [10 10]);
+%! assert (impyramid (in, "reduce"), repmat (uint8 (255), [5 5]))
+%! assert (impyramid (in, "expand"), repmat (uint8 (255), [19 19]))
+
+## This test is failing because it uses the expected Matlab results
+%!test
+%! in = logical ([
+%!   1  0  1  1  0  0  1  1  0  0
+%!   1  1  0  0  0  1  0  0  1  0
+%!   0  1  1  0  1  1  1  1  1  1
+%!   1  0  1  0  1  0  1  0  1  1
+%!   1  1  1  0  0  0  1  1  1  1
+%!   0  0  1  1  0  0  1  0  0  0
+%!   0  0  1  1  0  1  1  0  1  1
+%!   1  1  0  0  1  0  0  0  1  0
+%!   1  1  1  1  1  1  0  1  0  0
+%!   1  1  0  0  1  0  0  0  1  0]);
+%!
+%! reduced = logical ([
+%!   1  1  0  1  0
+%!   1  1  0  1  1
+%!   1  1  0  1  1
+%!   0  1  0  0  0
+%!   1  1  1  0  0]);
+%!
+%! expanded = logical ([
+%!   1  1  0  0  1  1  1  0  0  0  0  0  1  1  1  0  0  0  0
+%!   1  1  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+%!   1  1  1  1  0  0  0  0  0  0  1  1  0  0  0  1  1  0  0
+%!   1  1  1  1  0  0  0  0  0  1  1  1  1  0  1  1  1  1  1
+%!   0  1  1  1  1  0  0  0  1  1  1  1  1  1  1  1  1  1  1
+%!   0  0  1  1  1  0  0  0  1  1  1  1  1  1  1  1  1  1  1
+%!   1  1  0  1  1  0  0  0  1  0  0  1  1  1  0  1  1  1  1
+%!   1  1  1  1  1  0  0  0  0  0  0  0  1  1  1  1  1  1  1
+%!   1  1  1  1  1  1  0  0  0  0  0  0  1  1  1  1  1  1  1
+%!   0  0  1  1  1  1  0  0  0  0  0  0  1  1  1  0  0  0  0
+%!   0  0  0  1  1  1  1  0  0  0  0  1  1  1  0  0  0  0  0
+%!   0  0  0  0  1  1  1  0  0  0  0  1  1  0  0  0  0  0  0
+%!   0  0  0  0  1  1  1  0  0  0  1  1  1  0  0  0  1  1  1
+%!   0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  1  1  1
+%!   1  1  1  1  0  0  0  1  1  1  0  0  0  0  0  0  1  0  0
+%!   1  1  1  1  1  0  1  1  1  1  0  0  0  0  0  0  0  0  0
+%!   1  1  1  1  1  1  1  1  1  1  1  0  0  0  1  0  0  0  0
+%!   1  1  1  1  1  0  1  1  1  1  0  0  0  0  0  0  0  0  0
+%!   1  1  1  1  0  0  0  1  1  1  0  0  0  0  0  0  1  0  0]);
+%!
+%! assert (impyramid (in, "reduce"), reduced)
+%! assert (impyramid (in, "expand"), expanded)
