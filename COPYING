@@ -91,6 +91,7 @@ inst/imnoise.m                          GPLv3+
 inst/imopen.m                           GPLv3+
 inst/imperspectivewarp.m                GPLv3+
 inst/impixel.m                          GPLv3+
+inst/impyramid.m                        GPLv3+
 inst/imregionalmax.m                    GPLv3+
 inst/imregionalmin.m                    GPLv3+
 inst/imremap.m                          GPLv3+

@@ -121,6 +121,7 @@ Spatial transformations
  cp2tform
  imcrop
  imperspectivewarp
+ impyramid
  imremap
  imresize
  imrotate
