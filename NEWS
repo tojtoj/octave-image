@@ -4,6 +4,7 @@
  ** The following functions are new:
 
       imgetfile
+      impyramid
       watershed
 
  ** For better compatibility with Matlab, the imtransform function now
