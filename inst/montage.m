@@ -33,7 +33,9 @@
 ## @item DisplayRange
 ## A vector with 2 or 0 elements setting the highest and lowest value for
 ## display range.  It is interpreted like the @var{limits} argument to
-## @code{imshow}.
+## @code{imshow}.  Of special significance is that an empty array uses the
+## image minimum and maximum values for limits.  Defaults to the limits of
+## the image data type, i.e., the range returned by @code{getrangefromclass}.
 ##
 ## @item Indices
 ## A vector with the image indices to be displayed.  Defaults to all images,
@@ -190,21 +192,22 @@ function h = montage (images, varargin)
   ##        Remove all this checks once the general package has been released
   ##        again without the @inputParser class
 
+  im_type_range = getrangefromclass (images);
   if (strfind (which ("inputParser"), ["@inputParser" filesep "inputParser.m"]))
-    p = p.addParamValue ("DisplayRange",    [], @(x) isnumeric (x) && any (numel (x) == [0 2]));
+    p = p.addParamValue ("DisplayRange",    im_type_range, @(x) isnumeric (x) && any (numel (x) == [0 2]));
     p = p.addParamValue ("Indices",         1:nImg, @(x) isindex (x, nImg));
     p = p.addParamValue ("Size",            [NaN NaN], @(x) isnumeric (x) && numel (x) == 2);
     p = p.addParamValue ("MarginWidth",     0, @(x) isnumeric (x) && isscalar (x));
-    p = p.addParamValue ("MarginColor",     getrangefromclass (images)(2), @(x) isnumeric (x) && any (numel (x) == [1 3]));
-    p = p.addParamValue ("BackgroundColor", getrangefromclass (images)(1), @(x) isnumeric (x) && any (numel (x) == [1 3]));
+    p = p.addParamValue ("MarginColor",     im_type_range(2), @(x) isnumeric (x) && any (numel (x) == [1 3]));
+    p = p.addParamValue ("BackgroundColor", im_type_range(1), @(x) isnumeric (x) && any (numel (x) == [1 3]));
     p = p.parse (varargin{:});
   else
-    p.addParamValue ("DisplayRange",    [], @(x) isnumeric (x) && any (numel (x) == [0 2]));
+    p.addParamValue ("DisplayRange",    im_type_range, @(x) isnumeric (x) && any (numel (x) == [0 2]));
     p.addParamValue ("Indices",         1:nImg, @(x) isindex (x, nImg));
     p.addParamValue ("Size",            [NaN NaN], @(x) isnumeric (x) && numel (x) == 2);
     p.addParamValue ("MarginWidth",     0, @(x) isnumeric (x) && isscalar (x));
-    p.addParamValue ("MarginColor",     getrangefromclass (images)(2), @(x) isnumeric (x) && any (numel (x) == [1 3]));
-    p.addParamValue ("BackgroundColor", getrangefromclass (images)(1), @(x) isnumeric (x) && any (numel (x) == [1 3]));
+    p.addParamValue ("MarginColor",     im_type_range(2), @(x) isnumeric (x) && any (numel (x) == [1 3]));
+    p.addParamValue ("BackgroundColor", im_type_range(1), @(x) isnumeric (x) && any (numel (x) == [1 3]));
     p.parse (varargin{:});
   endif
 
@@ -279,14 +282,7 @@ function h = montage (images, varargin)
   endif
 
   ## 4) display the image
-  ## because there is no default value for limits in imshow, we call imshow
-  ## in this condition. Actually, the default is dependent on the image type
-  ## which would make this even longer
-  if (any (strcmpi (p.UsingDefaults, "DisplayRange")))
-    tmp_h = imshow (disp_img, p.Results.DisplayRange);
-  else
-    tmp_h = imshow (disp_img);
-  endif
+  tmp_h = imshow (disp_img, p.Results.DisplayRange);
 
   if (nargout > 0)
     h = tmp_h;

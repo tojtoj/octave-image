@@ -18,6 +18,7 @@
     Matlab compatibility, or performance:
 
       grayslice
+      montage
 
 
  Summary of important user-visible changes for image 2.4.1 (2015/08/07):
