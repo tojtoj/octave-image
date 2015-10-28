@@ -58,14 +58,14 @@ Digital Image Processing by Gonzales & Woods (2nd ed., p. 587)\n\
 
   const int r = I.rows ();
   const int c = I.columns ();
-  const int thetas_length = thetas.length ();
+  const int thetas_length = thetas.numel ();
 
   Matrix size (1, 2);
   size (0) = r; size (1) = c;
   const double diag_length = sqrt (size.sumsq ()(0));
   const int nr_bins = 2 * (int)ceil (diag_length) - 1;
   RowVector bins = RowVector (Range(1, nr_bins).matrix_value ()) - ceil (nr_bins/2.0);
-  const int bins_length = bins.length ();
+  const int bins_length = bins.numel ();
 
   Matrix J (bins_length, thetas_length, 0.0);
 
