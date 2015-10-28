@@ -134,7 +134,7 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
           }
        yseed = tmp;
       }
-      npoints= xseed.length ();
+      npoints= xseed.numel ();
       if (nargin >= 4)
         nb = (int)args (3).double_value ();
   } // holes mode?

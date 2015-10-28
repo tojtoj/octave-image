@@ -66,7 +66,7 @@ the different distances and angles to use.\n\
     // Create output NDArray, P
     dim_vector dim = dim_vector();
     dim.resize(4);
-    dim(0) = L; dim(1) = L; dim(2) = d.length(); dim(3) = th.length();
+    dim(0) = L; dim(1) = L; dim(2) = d.numel(); dim(3) = th.numel();
     NDArray P = NDArray(dim, 0);
 
     // Run through image
@@ -79,9 +79,9 @@ the different distances and angles to use.\n\
             
             int i = (int)I(r,c);
 
-            for (int d_idx = 0; d_idx < d.length(); d_idx++) {
+            for (int d_idx = 0; d_idx < d.numel(); d_idx++) {
                 int d_val = (int)d(d_idx);
-                for (int th_idx = 0; th_idx < th.length(); th_idx++) {
+                for (int th_idx = 0; th_idx < th.numel(); th_idx++) {
                     
                     double angle = th(th_idx);
                     
