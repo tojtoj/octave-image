@@ -689,7 +689,10 @@ function retval = old_regionprops (bw, varargin)
           warning ("regionprops: skipping perimeter for Nd image");
         else
           for k = 1:num_labels
-            retval (k).Perimeter = sum (bwperim (L == k) (:));
+            perim_pixels_sorted = bwboundaries (bw, 8){1, 1};
+            dist_xy = diff (perim_pixels_sorted).^2;
+            dist_abs = sqrt (sum (dist_xy, 2));
+            retval(k).Perimeter = sum (dist_abs);
           endfor
         endif
 
@@ -1096,6 +1099,16 @@ endfunction
 %! t = regionprops (f, "Extrema");
 %! shouldbe = [0.5  1.5; 4.5  1.5; 4.5 1.5; 4.5 3.5; 4.5 3.5; 1.5 3.5; 0.5 2.5; 0.5  1.5];
 %! assert (t.Extrema, shouldbe,  eps);
+
+% Test the diameter of a circle of diameter 21.
+%!test
+%! I = zeros (40);
+%! disk = fspecial ('disk',10);
+%! disk = disk./max (disk(:));
+%! I(10:30, 10:30) = disk;
+%! bw = im2bw (I);
+%! props = regionprops (bw, 'Perimeter');
+%! assert (props.Perimeter, 62.2, 0.1);
 
 ## Test guessing between labelled and binary image
 %!assert (regionprops ([1 0 1; 1 0 1], "Area"), struct ("Area", 4))
