@@ -40,6 +40,11 @@
 ##
 ## @end itemize
 ##
+## A common use case wanting to maximize contrast without causing any
+## saturation.  In such case @var{tol} should be 0 (zero).  It is the
+## equivalent to @code{[min(@var{I}(:)); max(@var{I}(:))]} for a single
+## plane.
+##
 ## The return values are of class double and in the range [0 1] regardless
 ## of the input image class.  These values are scaled in the image class
 ## range (see @code{im2double}).
@@ -120,10 +125,16 @@ function low_high = stretchlim (img, tol = [0.01 0.99])
 
   lo_idx = floor (tol(1) * plane_length) + 1;
   hi_idx = ceil (tol(2) * plane_length);
-  lo_hi_idx = [lo_idx; hi_idx] .+ (0:plane_length:(numel(img)-1));
 
-  sorted = sort (img, 1);
-  low_high = sorted(lo_hi_idx);
+  if (lo_idx == 1 && hi_idx == plane_length)
+    ## special case, equivalent to tol [0 1], even if tol was not
+    ## actually [0 1] but the image size would effectively make it.
+    low_high = [min(img, [], 1); max(img, [], 1)];
+  else
+    lo_hi_idx = [lo_idx; hi_idx] .+ (0:plane_length:(numel(img)-1));
+    sorted = sort (img, 1);
+    low_high = sorted(lo_hi_idx);
+  endif
 
   low_high = im2double (low_high);
 endfunction
@@ -149,6 +160,25 @@ endfunction
 
 ## corner case of zero tolerance
 %!assert (stretchlim (0.01:.01:1, 0), [0.01; 1])
+
+%!test
+%! im = rand (5);
+%! assert (stretchlim (im, 0), [min(im(:)); max(im(:))])
+
+%!test
+%! im = rand (5, 5, 3);
+%! assert (stretchlim (im, 0),
+%!         [min(im(:,:,1)(:)) min(im(:,:,2)(:)) min(im(:,:,3)(:));
+%!          max(im(:,:,1)(:)) max(im(:,:,2)(:)) max(im(:,:,3)(:))])
+
+
+## corner case where tol is not zero but the image is so small that
+## it might as well be.
+%!test
+%! im = rand (5);
+%! assert (stretchlim (im, 0.03), [min(im(:)); max(im(:))])
+%! assert (stretchlim (im, 0.0399), [min(im(:)); max(im(:))])
+
 
 ## Test with non double data-types
 %!assert (stretchlim (uint8 (1:100)), im2double (uint8 ([2; 99])))
