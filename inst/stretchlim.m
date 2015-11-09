@@ -92,16 +92,6 @@ function low_high = stretchlim (img, tol = [0.01 0.99])
     error ("stretchlim: I must can only have 3 dimensions at most");
   endif
 
-  np = size (img, 3);
-  low_high = zeros (2, np, class (img));
-  for k = 1:np
-    low_high(:,k) = stretchlim_plane (img(:,:,k), tol);
-  endfor
-
-  low_high = im2double (low_high);
-endfunction
-
-function low_high = stretchlim_plane (plane, tol)
   ## tol is about the percentage of values that will be saturated.
   ## So instead of percentages, we convert to the actual number of
   ## pixels that need to be saturated.  After sorting the values in
@@ -117,12 +107,25 @@ function low_high = stretchlim_plane (plane, tol)
   ## exact percentage of pixels to be saturated.  In such cases, we
   ## must prefer a limit that would saturate less pixels than the
   ## requested, rather than the opposite.
-  n = numel (plane);
-  lo_idx = floor (tol(1) * n) + 1;
-  hi_idx = ceil (tol(2) * n);
+  ##
+  ## We want to compute this for each plane, so we reshape the image
+  ## in order to have each plane into a single column, while respecting
+  ## any other dimensions beyond the 3rd.
 
-  sorted = sort (plane(:));
-  low_high = sorted([lo_idx; hi_idx]);
+  sz = size (img);
+  np = size (img, 3);
+  plane_length = sz(1) * sz(2);
+
+  img = reshape (img, plane_length, []);
+
+  lo_idx = floor (tol(1) * plane_length) + 1;
+  hi_idx = ceil (tol(2) * plane_length);
+  lo_hi_idx = [lo_idx; hi_idx] .+ (0:plane_length:(numel(img)-1));
+
+  sorted = sort (img, 1);
+  low_high = sorted(lo_hi_idx);
+
+  low_high = im2double (low_high);
 endfunction
 
 %!error (stretchlim ());
