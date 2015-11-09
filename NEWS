@@ -20,6 +20,8 @@
     (rather than a saturation that it tries to approximate).  Support
     for N dimensional images has been added.
 
+ ** imadjust() support for N dimensional images.
+
  ** Other functions that have been changed for smaller bugfixes, increased
     Matlab compatibility, or performance:
 
