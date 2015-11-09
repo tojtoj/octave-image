@@ -137,6 +137,13 @@ function low_high = stretchlim (img, tol = [0.01 0.99])
   endif
 
   low_high = im2double (low_high);
+
+  ## This will only happen if the input was floating point and with
+  ## values already outside the [0 1] range (common for users to simply
+  ## convert an uint8 image to double and forget that display is [0 1]
+  ## only).
+  low_high(low_high < 0) = 0;
+  low_high(low_high > 1) = 1;
 endfunction
 
 %!error (stretchlim ());
@@ -275,3 +282,16 @@ endfunction
 %!assert (stretchlim (0.01:.001:1, 0), [0.01; 1])
 %!assert (stretchlim (single (0.01:.001:1)),
 %!         double (single (0.01:.001:1)([10; 982])).')
+
+## Test ignoring floating point values outside [0 1] and how they do
+## count for the fraction of saturated values, but are simply clipped
+## to the [0 1] range
+%!test
+%! assert (stretchlim ([(.05:.05:1) (2:4)], 0.2), [0.25; 0.95], eps)
+%! assert (stretchlim ([(.05:.05:1) (2:5)], 0.2), [0.25; 1])
+%! assert (stretchlim ([(.05:.05:1) (2:6)], 0.2), [0.3; 1])
+%! assert (stretchlim ([(.05:.05:1) (2:7)], 0.2), [0.3; 1])
+
+%!test
+%! assert (stretchlim ([(-6:0) (.05:.05:1)], 0.2), [0; 0.75], eps)
+%! assert (stretchlim ([(-5:0) (.05:.05:1)], 0.2), [0; 0.75], eps)
