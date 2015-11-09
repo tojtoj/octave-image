@@ -54,6 +54,12 @@
 ## It will actually do this for each plane, so an input of size,
 ## @code{[M N P]} will return a @code{[2 P]} matrix.
 ##
+## Higher dimensions of @var{I} are also valid.  As in the 3 dimensional
+## case, the limits for each 2 dimensional plane are returned in a 2 row
+## vector for each 2 dimensional plane, one dimension below.  That is, an
+## input of size @code{[M N P Q R]} will return an array of size
+## @code{[2 P Q R]}.
+##
 ## Note the detail that @var{tol} is the maximum fraction of saturation.
 ## It is rare that there is a value for that exact saturation.  In such
 ## case, @code{stretchlim} will always round down and saturate less.
@@ -93,10 +99,6 @@ function low_high = stretchlim (img, tol = [0.01 0.99])
     endif
   endif
 
-  if (ndims (img) > 3)
-    error ("stretchlim: I must can only have 3 dimensions at most");
-  endif
-
   ## tol is about the percentage of values that will be saturated.
   ## So instead of percentages, we convert to the actual number of
   ## pixels that need to be saturated.  After sorting the values in
@@ -117,11 +119,10 @@ function low_high = stretchlim (img, tol = [0.01 0.99])
   ## in order to have each plane into a single column, while respecting
   ## any other dimensions beyond the 3rd.
 
-  sz = size (img);
-  np = size (img, 3);
+  sz = postpad (size (img), max (3, ndims (img)), 1);
   plane_length = sz(1) * sz(2);
 
-  img = reshape (img, plane_length, []);
+  img = reshape (img, [plane_length sz(3:end)]);
 
   lo_idx = floor (tol(1) * plane_length) + 1;
   hi_idx = ceil (tol(2) * plane_length);
@@ -131,7 +132,8 @@ function low_high = stretchlim (img, tol = [0.01 0.99])
     ## actually [0 1] but the image size would effectively make it.
     low_high = [min(img, [], 1); max(img, [], 1)];
   else
-    lo_hi_idx = [lo_idx; hi_idx] .+ (0:plane_length:(numel(img)-1));
+    strides = reshape ((0:plane_length:(numel(img)-1)), [1 sz(3:end)]);
+    lo_hi_idx = [lo_idx; hi_idx] .+ strides;
     sorted = sort (img, 1);
     low_high = sorted(lo_hi_idx);
   endif
@@ -148,7 +150,7 @@ endfunction
 
 %!error (stretchlim ());
 %!error (stretchlim ("bad parameter"));
-%!error (stretchlim (zeros (10, 10, 3, 2)));
+#%!error (stretchlim (zeros (10, 10, 3, 2)));
 %!error (stretchlim (zeros (10, 10), "bad parameter"));
 %!error (stretchlim (zeros (10, 10), 0.01, 2));
 
@@ -295,3 +297,29 @@ endfunction
 %!test
 %! assert (stretchlim ([(-6:0) (.05:.05:1)], 0.2), [0; 0.75], eps)
 %! assert (stretchlim ([(-5:0) (.05:.05:1)], 0.2), [0; 0.75], eps)
+
+## Test N dimensions
+%!test
+%! im = rand (4, 4, 2, 3, 2);
+%! rv = zeros (2, 2, 3, 2);
+%! for p = 1:2
+%!   for q = 1:3
+%!     for r = 1:2
+%!       rv(:,p,q,r) = stretchlim (im(:,:,p,q,r), 0.25);
+%!     endfor
+%!   endfor
+%! endfor
+%! assert (stretchlim (im, 0.25), rv)
+
+## The same but important because of our special code path for tol == 0
+%!test
+%! im = rand (4, 4, 2, 3, 2);
+%! rv = zeros (2, 2, 3, 2);
+%! for p = 1:2
+%!   for q = 1:3
+%!     for r = 1:2
+%!       rv(:,p,q,r) = stretchlim (im(:,:,p,q,r), 0);
+%!     endfor
+%!   endfor
+%! endfor
+%! assert (stretchlim (im, 0), rv)
