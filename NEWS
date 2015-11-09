@@ -17,7 +17,8 @@
  ** stretchlim() now properly supports integer input and will return
     values in the [0 1] range.  It also no longer performs rounding
     of the saturated fraction, so that TOL is now the saturation limit
-    (rather than a saturation that it tries to approximate).
+    (rather than a saturation that it tries to approximate).  Support
+    for N dimensional images has been added.
 
  ** Other functions that have been changed for smaller bugfixes, increased
     Matlab compatibility, or performance:
