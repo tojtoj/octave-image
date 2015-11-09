@@ -1,205 +1,244 @@
-## Copyright (C) 2004 Josep Mones i Teixidor <jmones@puntbarra.com>
+## Copyright (C) 2004 Josep Monés i Teixidor <jmones@puntbarra.com>
+## Copyright (C) 2015 Carnë Draug <carandraug@octave.org>
 ##
-## This program is free software; you can redistribute it and/or modify it under
-## the terms of the GNU General Public License as published by the Free Software
-## Foundation; either version 3 of the License, or (at your option) any later
-## version.
+## This program is free software; you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 3 of the License, or
+## (at your option) any later version.
 ##
-## This program is distributed in the hope that it will be useful, but WITHOUT
-## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
-## details.
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+## GNU General Public License for more details.
 ##
-## You should have received a copy of the GNU General Public License along with
-## this program; if not, see <http://www.gnu.org/licenses/>.
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {@var{LOW_HIGH} = } stretchlim (@var{I},@var{TOL})
-## @deftypefnx {Function File} {@var{LOW_HIGH} = } stretchlim (@var{I})
-## @deftypefnx {Function File} {@var{LOW_HIGH} = } stretchlim (@var{RGB},@var{TOL})
-## @deftypefnx {Function File} {@var{LOW_HIGH} = } stretchlim (@var{RGB})
-## Finds limits to contrast stretch an image
+## @deftypefn  {Function File} {} stretchlim (@var{I})
+## @deftypefnx {Function File} {} stretchlim (@var{RGB})
+## @deftypefnx {Function File} {} stretchlim (@dots{}, @var{tol})
+## Find limits to contrast stretch an image.
 ##
-## @code{LOW_HIGH=stretchlim(I,TOL)} returns a vector @var{LOW_HIGH}
-## which contains a pair of intensities which can be used in
-## @code{imadjust} to stretch the contrast of an image, first of them
-## will be lower value (@code{imadjust} would assign 0 to it) and second
-## is the upper bound. @var{TOL} specifies the fraction of the image to
-## saturate at lower and upper limits. It can be a vector of length 2:
-## @code{[LOW_FRACT, HIGH_FRACT]}, or it can be a scalar, in that case
-## @code{[LOW_FRACT, HIGH_FRACT]=[TOL, 1-TOL]}.
+## Returns a 2 element column vector, @code{[@var{low}; @var{high}]},
+## with the pair of intensities to contrast stretch @var{I} which
+## saturates at most @var{tol} of the image.  The output of this
+## function matches the input expected by @code{imadjust}.
 ##
-## @var{TOL} can't be larger than 0.50 and for TOL=0 then
-## @code{LOW_HIGH=[min(I(:)), max(I(:))]}.
+## The input argument @var{tol}, controls the fraction of the image to be
+## saturated and defaults to @code{[0.01 0.99]}, i.e., a 1% saturation
+## on both sides of the image histogram.  It can be specified in two ways:
 ##
-## @code{LOW_HIGH=stretchlim(I)} behaves as described but defaults
-## @var{TOL} to @code{[0.01, 0.99]}.
+## @itemize
+## @item a two element vector with lower and higher fraction of the
+## the image to be saturated.  These values must be in the range
+## [0 1], the display range of images of floating point class.
 ##
-## @code{LOW_HIGH=stretchlim(RGB,TOL)} returns a 2-by-3 matrix in
-## @var{LOW_HIGH} of lower and upper values to saturate for each plane
-## of the RGB image in M-by-N-by-3 array @var{RGB}. @var{TOL} is a
-## vector or a scalar, as described above, and the same fractions are
-## applied for each plane.
+## @item a scalar value with the fraction of image to be saturated on
+## each side; e.g., a @var{tol} with a value of @code{0.05} is equivalent
+## to @code{[0.05 0.95]}.  This value must be in the range @code{[0 0.5]}.
 ##
-## @code{LOW_HIGH=stretchlim(RGB)} uses @code{[0.01, 0.99]} as default
-## value for @var{TOL}.
-##
-## @strong{Notes:}
-##
-## Values in @var{LOW_HIGH} are of type double and comprised between 0
-## and 1 regardless class of input image.
-##
-## @strong{Compatibility notes:}
-##
-## @itemize @bullet
-## @item
-## int* and uint* types are still not implemented (waiting for support
-## in Octave 2.1.58).
-## @item
-## This function tries to find limits that are nearer to saturate
-## requested interval. So, for instance, if you requested a 5% and it
-## has to choose between discarding a 1% and a 7%, it will choose the
-## later despite being more than requested. This should be test against
-## MATLAB behaviour.
 ## @end itemize
 ##
-## @seealso{imadjust}
+## The return values are of class double and in the range [0 1] regardless
+## of the input image class.  These values are scaled in the image class
+## range (see @code{im2double}).
+##
+## If the input is a RGB image, i.e., the 3rd dimension has length 3, then
+## it returns a @code{[2 3]} matrix with separate limits for each colour.
+## It will actually do this for each plane, so an input of size,
+## @code{[M N P]} will return a @code{[2 P]} matrix.
+##
+## Note the detail that @var{tol} is the maximum fraction of saturation.
+## It is rare that there is a value for that exact saturation.  In such
+## case, @code{stretchlim} will always round down and saturate less.
+## @var{tol} is the saturation limit.  For example, if @var{tol} is
+## @code{0.10}, but there are only values that will lead to 5 or 11%
+## saturation, it will return the value for a 5% saturation.
+##
+## @seealso{brighten, contrast, histeq, imadjust}
 ## @end deftypefn
 
-function LOW_HIGH = stretchlim(image, TOL)
-  if (nargin<1 || nargin>2)
-    print_usage;
+function low_high = stretchlim (img, tol = [0.01 0.99])
+
+  if (nargin () <1 || nargin () > 2)
+    print_usage ();
   endif
 
-  if(! isimage (image) )
-    error("stretchlim: image should be a matrix");
+  if (! isimage (img))
+    error("stretchlim: I or RGB must be an image");
   endif
-  
-  ## Prepare limits
-  if(nargin==1)
-    low_count=0.01;
-    high_count=0.01;                ## we use this definition in __stretchlim_plane__
-  else
-    if(isscalar(TOL))
-      if(TOL<0 || TOL>=0.5)
-        error("stretchlim: TOL out of bounds. Expected: 0<=TOL<0.5");
+
+  ## Handle tol
+  if (nargin > 1)
+    if (! isnumeric (tol))
+      error ("stretchlim: TOL must be numeric");
+    endif
+
+    if (isscalar (tol))
+      if (min (tol) < 0 || max (tol) > 0.5)
+        error ("stretchlim: TOL must be in the [0 1] range");
       endif
-      low_count=TOL;
-      high_count=TOL;               ## as before...
-    elseif(isvector(TOL))
-      if(length(TOL)!=2)
-        error("stretchlim: TOL length must be 2.");
+      tol = [tol (1-tol)];
+
+    elseif (isvector (tol))
+      if (numel (tol) != 2)
+        error ("stretchlim: TOL must be a 2 element vector");
       endif
-      low_count=TOL(1);
-      high_count=1-TOL(2);          ## as before...
-    else
-      error("stretchlim: TOL contains an invalid value.");
     endif
   endif
 
-  ## well use size of image several times...
-  simage=size(image);
-
-  ## Convert fractions to pixels
-  psimage=prod(simage(1:2));
-  low_count*=psimage;
-  high_count*=psimage;
-
-  if(length(simage)<=2)
-    ## intensity
-    LOW_HIGH=__stretchlim_plane__(image, low_count, high_count);
-  elseif(length(simage)==3 && simage(3)==3)
-    ## RGB
-    LOW_HIGH=zeros(2,3);
-    for i=1:3
-      LOW_HIGH(:,i)=__stretchlim_plane__(image(:,:,i), low_count, ...
-                                         high_count);
-    endfor
-  else
-    error("stretchlim: invalid image.");
+  if (ndims (img) > 3)
+    error ("stretchlim: I must can only have 3 dimensions at most");
   endif
+
+  np = size (img, 3);
+  low_high = zeros (2, np, class (img));
+  for k = 1:np
+    low_high(:,k) = stretchlim_plane (img(:,:,k), tol);
+  endfor
+
+  low_high = im2double (low_high);
 endfunction
 
+function low_high = stretchlim_plane (plane, tol)
+  ## tol is about the percentage of values that will be saturated.
+  ## So instead of percentages, we convert to the actual number of
+  ## pixels that need to be saturated.  After sorting the values in
+  ## the image, that number of pixels simply becomes the index for
+  ## the limits.
+  ##
+  ## Note that the actual intensity value that we set the limits to,
+  ## is not saturated.  Only the values below or above the lower and
+  ## higher limits it will be considered saturated.
+  ##
+  ## And since most images will have repeated values in the pixels,
+  ## chances are that there's not a limit that would cause only the
+  ## exact percentage of pixels to be saturated.  In such cases, we
+  ## must prefer a limit that would saturate less pixels than the
+  ## requested, rather than the opposite.
+  n = numel (plane);
+  lo_idx = floor (tol(1) * n) + 1;
+  hi_idx = ceil (tol(2) * n);
 
-## Processes a plane
-## high_count is defined so that high_count=elements is the same as
-## low_count=elements (and not total_elements-elements)
-function LOW_HIGH = __stretchlim_plane__(plane, low_count, high_count)
-  ## check exceptions
-  if(low_count==0 && high_count==0)
-    LOW_HIGH=[min(plane(:)); max(plane(:))];
-  else
-
-    ## we sort values
-    sorted=sort(plane(:));
-    
-    low=sorted(round(low_count+1));
-    pos=find(sorted>low);
-    if(length(pos)>0)
-      low2=sorted(pos(1));
-      d1=low_count-sum(sorted<low);
-      d2=sum(sorted<low2)-low_count;
-      if(d2<d1)
-        low=low2;
-      endif
-    endif
-      
-    high=sorted(end-round(high_count));
-    pos=find(sorted<high);
-    if(length(pos)>0)
-      high2=sorted(pos(end));
-      d1=high_count-sum(sorted>high);
-      d2=sum(sorted>high2)-high_count;
-      if(d2<d1)
-        high=high2;
-      endif
-    endif
-
-    ## set result variable
-    LOW_HIGH=[low;high];
-  endif
+  sorted = sort (plane(:));
+  low_high = sorted([lo_idx; hi_idx]);
 endfunction
 
-%!demo
-%! stretchlim([1:100])
-%! # This discards 1% of data from each end, 1 and 100.
-%! # So result should be [2;99]
+%!error (stretchlim ());
+%!error (stretchlim ("bad parameter"));
+%!error (stretchlim (zeros (10, 10, 3, 2)));
+%!error (stretchlim (zeros (10, 10), "bad parameter"));
+%!error (stretchlim (zeros (10, 10), 0.01, 2));
 
-%!# some invalid params
-%!error(stretchlim());
-%!error(stretchlim("bad parameter"));
-%!error(stretchlim(zeros(10,10,4)));
-%!error(stretchlim(zeros(10,10,3,2)));
-%!error(stretchlim(zeros(10,10),"bad parameter"));
-%!error(stretchlim(zeros(10,10),0.01,2));
+## default parameters
+%!assert (stretchlim (0.01:.01:1), [0.02; 0.99])
+%!assert (stretchlim (0.01:.01:1), stretchlim (0.01:.01:1, [0.01 0.99]))
+
+## use scalar for tol
+%!assert (stretchlim (0.01:.01:1, 0.15), stretchlim (0.01:.01:1, [0.15 0.85]))
+
+## this is different than Matlab but it looks like it's a Matlab bug
+## (Matlab returns [0.018997482261387; 0.951003280689708])
+## We actually have differences from Matlab which sometimes returns
+## values that are not present in the image.
+%!assert (stretchlim (0.01:.01:1, [0.01,0.95]), [0.02; 0.95], eps)
+
+## corner case of zero tolerance
+%!assert (stretchlim (0.01:.01:1, 0), [0.01; 1])
+
+## Test with non double data-types
+%!assert (stretchlim (uint8 (1:100)), im2double (uint8 ([2; 99])))
+%!assert (stretchlim (uint8 (1:100), .25), im2double (uint8 ([26; 75])))
+%!assert (stretchlim (uint16  (1:1000)), im2double (uint16 ([11; 990])))
+
+%!assert (stretchlim (int16 (-100:100)), im2double (int16 ([-98; 98])))
+%!assert (stretchlim (single (0.01:.01:1)),
+%!         double (single (0.01:.01:1)([2; 99])).')
 
 
-%!# default param
-%!assert(stretchlim([1:100]),[2;99]);
+## non uniform histogram tests
+%!assert (stretchlim (uint8 ([1 repmat(2, [1, 90]) 92:100]), 0.05),
+%!        im2double (uint8 ([2; 95])))
+%!assert (stretchlim (uint8 ([1 repmat(2, [1 4]) 6:100]), 0.05),
+%!        im2double (uint8 ([6; 95])))
 
-%!# scalar TOL
-%!assert(stretchlim([1:100],0.01),[2;99]);
+## test limit rounding (actually, lack of rounding, we always round down)
+## Note that this tests were different in the image package before v2.6.
+## Back then we performed rounding of the fraction that was saturated.
+%!assert (stretchlim (uint8 ([1 repmat(2, [1 5]) 7:100]), 0.05),
+%!        im2double (uint8 ([2; 95])))
+%!assert (stretchlim (uint8 ([1 repmat(2, [1 6]) 8:100]), 0.05),
+%!        im2double (uint8 ([2; 95])))
+%!assert (stretchlim (uint8 ([1 repmat(2, [1 7]) 9:100]), 0.05),
+%!        im2double (uint8 ([2; 95])))
+%!assert (stretchlim (uint8 ([1 repmat(2, [1 8]) 10:100]), 0.05),
+%!        im2double (uint8 ([2; 95])))
 
-%!# vector TOL
-%!assert(stretchlim([1:100],[0.01,0.98]),[2;98]);
+%!assert (stretchlim (uint8 ([1 repmat(2, [1 5]) repmat(3, [1 5]) 9:100]), 0.04),
+%!        im2double (uint8 ([2; 96])))
+%!assert (stretchlim (uint8 ([1 repmat(2, [1 5]) repmat(3, [1 5]) 9:100]), 0.05),
+%!        im2double (uint8 ([2; 95])))
+%!assert (stretchlim (uint8 ([1 repmat(2, [1 5]) repmat(3, [1 5]) 9:100]), 0.06),
+%!        im2double (uint8 ([3; 94])))
+%!assert (stretchlim (uint8 ([1 repmat(2, [1 5]) repmat(3, [1 5]) 9:100]), 0.07),
+%!        im2double (uint8 ([3; 93])))
+%!assert (stretchlim (uint8 ([1 repmat(2, [1 5]) repmat(3, [1 5]) 9:100]), 0.08),
+%!        im2double (uint8 ([3; 92])))
 
-%!# TOL=0
-%!assert(stretchlim([1:100],0),[1;100]);
-
-%!# non uniform histogram tests
-%!assert(stretchlim([1,ones(1,90)*2,92:100],0.05),[2;95]);
-%!assert(stretchlim([1,ones(1,4)*2,6:100],0.05),[6;95]);
-
-%!# test limit rounding...
-%!assert(stretchlim([1,ones(1,5)*2,7:100],0.05),[7;95]); # 6% lost 
-%!assert(stretchlim([1,ones(1,6)*2,8:100],0.05),[8;95]); # 7% lost
-%!assert(stretchlim([1,ones(1,7)*2,9:100],0.05),[9;95]); # 8% lost
-%!assert(stretchlim([1,ones(1,8)*2,10:100],0.05),[2;95]); # now he limit at 2 => 1% lost
-
-%!# test RGB
+## test RGB
 %!test
-%! RGB=zeros(100,1,3);
-%! RGB(:,:,1)=[1:100];
-%! RGB(:,:,2)=[2:2:200];
-%! RGB(:,:,3)=[4:4:400];
-%! assert(stretchlim(RGB),[2,4,8;99,198,396]);
+%! RGB = zeros (100, 1, 3, "uint16");
+%! RGB(:,:,1) = [1:1:100];
+%! RGB(:,:,2) = [2:2:200];
+%! RGB(:,:,3) = [4:4:400];
+%! assert (stretchlim (RGB) , im2double (uint16 ([2 4 8; 99 198 396])))
+
+## test other 3D lengths
+%!test
+%! im6c = zeros (100, 1, 6, "uint16");
+%! im6c(:,:,1) = [1:1:100];
+%! im6c(:,:,2) = [2:2:200];
+%! im6c(:,:,3) = [4:4:400];
+%! im6c(:,:,4) = [8:8:800];
+%! im6c(:,:,5) = [16:16:1600];
+%! im6c(:,:,6) = [32:32:3200];
+%! assert (stretchlim (im6c) ,
+%!         im2double (uint16 ([2 4 8 16 32 64; 99 198 396 792 1584 3168])))
+
+%!test
+%! im = [0 0 .1 .1 .1 .1 .2 .2 .2 .4 .4 .6 .6 .7 .7 .9 .9 .9 1 1];
+%!
+%! assert (stretchlim (im), [0; 1])
+%!
+%! ## Consider the returned lower limit in this test.  A lower limit
+%! ## of 0.1 will saturate two elements (10%), while 0.2 will saturate
+%! ## 6 elements (30%).  Both have the same distance to 20% but returning
+%! ## 0.1 is Matlab compatible.
+%! ## Now looking at the higher limit.  A limit of .9 will saturate
+%! ## 2 elements (10%), while a limit of 0.7 will saturate 5 elements (25%).
+%! ## However, for Matlab compatibility we must return .9 even though
+%! ## 25% would be closer to 20%.
+%! ## Basically, it's not just rounded.
+%! assert (stretchlim (im, .2),  [0.1; 0.9])
+%!
+%! assert (stretchlim (im, .15), [0.1; 0.9])
+%! assert (stretchlim (im, .1),  [0.1; 0.9])
+%! assert (stretchlim (im, .25), [0.1; 0.7])
+%!
+%! ## Reorder the vector of values (real images don't have the values
+%! ## already sorted), just to be sure it all works.
+%! im([6 3 16 11 7 17 14 8 5 19 15 1 2 4 18 13 9 20 10 12]) = im;
+%! assert (stretchlim (im, .2),  [0.1; 0.9])
+%! assert (stretchlim (im, .15), [0.1; 0.9])
+%! assert (stretchlim (im, .1),  [0.1; 0.9])
+%! assert (stretchlim (im, .25), [0.1; 0.7])
+
+## odd length images to test rounding of saturated fraction.  With a 1%
+## fraction to be saturated and 991 elements, that's 9.91 pixels.  Since
+## TOL is the limit, we must saturate the top and bottom 9 pixels (not 10).
+%!assert (stretchlim (0.01:.001:1), [0.019; 0.991], eps)
+%!assert (stretchlim (0.01:.001:1, [0.01,0.95]), [0.019; 0.951], eps)
+%!assert (stretchlim (0.01:.001:1, 0), [0.01; 1])
+%!assert (stretchlim (single (0.01:.001:1)),
+%!         double (single (0.01:.001:1)([10; 982])).')
