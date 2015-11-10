@@ -72,21 +72,23 @@ function BW = im2bw (img, cmap, thres = 0.5)
       ## Everything else, we do nothing, no matter how many dimensions
     endif
 
-    ## Convert the threshold value to same image class to do the thresholding which
-    ## is faster than converting the image to double and keep the threshold value
-    switch (class (img))
-      case {"double", "single", "logical"}
-        ## do nothing
-      case {"uint8"}
-        thres = im2uint8 (thres);
-      case {"uint16"}
-        thres = im2uint16 (thres);
-      case {"int16"}
-        thres = im2int16 (thres);
-      otherwise
-        ## we should have never got here in the first place anyway
-        error("im2bw: unsupported image class");
-    endswitch
+    ## Convert the threshold value to same class as the image which
+    ## is faster and saves more memory than the opposite.
+    if (isinteger (img))
+      ## We do the conversion from double to int ourselves (instead
+      ## of using im2uint* functions), because those functions round
+      ## during the conversion but we need thresh to be the limit.
+      ## See bug #46390.
+      cls = class(img);
+      I_min = double (intmin (cls));
+      I_range = double (intmax (cls)) - I_min;
+      thres = cast (floor ((thres * I_range) + I_min), cls);
+    elseif (isfloat (img) || isbool (img))
+      ## do nothing
+    else
+      ## we should have never got here in the first place anyway
+      error("im2bw: unsupported image class");
+    endif
 
     tmp = (img > thres); # matlab compatible (not "greater than or equal")
   endif
@@ -111,3 +113,14 @@ endfunction
 %! assert (im2bw (logical ([0 1 0])),    logical ([0 1 0]))
 %! assert (im2bw (logical ([0 1 0]), 0), logical ([0 1 0]))
 %! assert (im2bw (logical ([0 1 0]), 1), logical ([0 1 0]))
+
+## bug #46390 (on the rounding/casting of the threshold value)
+%!assert (nnz (im2bw (uint8 ([0:255]), 0.9)), 26)
+
+%!test
+%! img = uint8 ([0:255]);
+%! s = 0;
+%! for i=0:.1:1
+%!   s += nnz (im2bw (img, i));
+%! endfor
+%! assert (s, 1405)
