@@ -16,6 +16,6 @@
 ## simple check used by some functions. Images of the double class must have
 ## all their values between 0 and 1 or be NaN
 
-function bool = is_double_image (img)
-  bool = all ((img(:) >= 0 & img(:) <= 1) | isnan (img(:)));
+function bool = is_float_image (img)
+  bool = min (img(:)) >= 0 && max (img(:)) <= 1;
 endfunction

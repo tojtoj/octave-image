@@ -3,7 +3,7 @@ inst/private/handle_colorspec.m         GPLv3+
 inst/private/im2col_check.m             GPLv3+
 inst/private/imarithmetics.m            GPLv3+
 inst/private/interp_method.m            GPLv3+
-inst/private/is_double_image.m          GPLv3+
+inst/private/is_float_image.m           GPLv3+
 inst/private/isimage.m                  GPLv3+
 inst/private/ispart.m                   GPLv3+
 inst/private/istform.m                  GPLv3+
