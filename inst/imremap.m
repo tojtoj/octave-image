@@ -59,15 +59,14 @@ function [warped, valid] = imremap(im, XI, YI, interp = "linear", extrapval = 0)
     error ("imremap: EXTRAPVAL must be a scalar");
   endif
   interp = interp_method (interp);
-  
+
   ## Interpolate
-  if (size (im, 3) == 1) # Gray
-    warped = grayinterp(im, XI, YI, interp, 0);
-  else # rgb image
-    for i = 3:-1:1
-      warped(:,:,i) = grayinterp(im(:,:,i), XI, YI, interp, 0);
-    endfor
-  endif
+  sz = size (im);
+  n_planes = prod (sz(3:end));
+  for i = 1:n_planes
+    warped(:,:,i) = grayinterp (im(:,:,i), XI, YI, interp, 0);
+  endfor
+
   valid = !isna(warped);
   warped(!valid) = extrapval;
 

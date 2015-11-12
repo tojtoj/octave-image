@@ -62,8 +62,8 @@ function im = imresize (im, scale, method = "cubic")
 
   if (nargin < 2 || nargin > 3)
     print_usage ();
-  elseif (! isimage (im) || (! isrgb (im) && ! isgray (im)))
-    error ("imresize: IM must be a grayscale or RGB image.")
+  elseif (! isimage (im))
+    error ("imresize: IM must be an image")
   elseif (! isnumeric (scale) || any (scale <= 0) || all (isnan (scale)))
     error ("imresize: SCALE or [M N] must be numeric positive values")
   elseif (! ischar (method))
@@ -197,6 +197,13 @@ endfunction
 %!        158   77  168  229  225
 %!        47   135  207   43   73];
 %! assert (imresize (uint8 (in), 0.5, "nearest"), uint8 (out))
+
+## Do not enforce floating point images to be in the [0 1] range (bug #43846)
+%!assert (imresize (repmat (5, [3 3]), 2), repmat (5, [6 6]), eps*100)
+
+## Similarly, do not enforce images to have specific dimensions and only
+## expand on the first 2 dimensions.
+%!assert (imresize (repmat (5, [3 3 2]), 2), repmat (5, [6 6 2]), eps*100)
 
 ## The following are the matlab results. We have slighlty different results but
 ## not by much. If there's would be any fixes, they would have to be on interp2

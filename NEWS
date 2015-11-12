@@ -29,6 +29,8 @@
     Matlab compatibility, or performance:
 
       grayslice
+      imresize
+      imremap
       montage
 
 
