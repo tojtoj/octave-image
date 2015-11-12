@@ -124,3 +124,7 @@ endfunction
 %!   s += nnz (im2bw (img, i));
 %! endfor
 %! assert (s, 1405)
+
+## threshold may be a negative value in the image class so care must
+## taken when casting and rounding it.
+%!assert (nnz (im2bw (int16 ([-128:127]), 0.499)), 194)
