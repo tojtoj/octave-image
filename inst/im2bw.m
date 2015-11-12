@@ -102,7 +102,12 @@ endfunction
 %!assert(im2bw ([0 0.4 0.5 0.6 1], 0.5), logical([0 0 0 1 1])); # basic usage
 %!assert(im2bw (uint8 ([0 100 255]), 0.5), logical([0 0 1]));   # with a uint8 input
 
-## This will issue a warning
-%!assert (im2bw (logical ([0 1 0])),    logical ([0 1 0]))
-%!assert (im2bw (logical ([0 1 0]), 0), logical ([0 1 0]))
-%!assert (im2bw (logical ([0 1 0]), 1), logical ([0 1 0]))
+## We use "bw = im2bw (...)" because otherwise it would display a figure
+%!warning <is already binary so nothing is done> bw = im2bw (logical ([0 1 0]));
+%!warning <is already binary so nothing is done> bw = im2bw (logical ([0 1 0]), 1);
+
+%!test
+%! warning ("off", "all", "local");
+%! assert (im2bw (logical ([0 1 0])),    logical ([0 1 0]))
+%! assert (im2bw (logical ([0 1 0]), 0), logical ([0 1 0]))
+%! assert (im2bw (logical ([0 1 0]), 1), logical ([0 1 0]))
