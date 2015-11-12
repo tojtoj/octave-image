@@ -22,6 +22,9 @@
 
  ** imadjust() support for N dimensional images.
 
+ ** The function is isgray(), isind(), and isrgb() will return for images
+    of class single in addition to double. 
+
  ** Other functions that have been changed for smaller bugfixes, increased
     Matlab compatibility, or performance:
 
