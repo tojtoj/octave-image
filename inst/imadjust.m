@@ -92,7 +92,7 @@
 ## @seealso{stretchlim, brighten}
 ## @end deftypefn
 
-function img = imadjust (img, in, out = [0; 1], gamma = 1)
+function adj = imadjust (img, in, out = [0; 1], gamma = 1)
 
   if (nargin () < 1 || nargin () > 4)
     print_usage ();
@@ -123,17 +123,32 @@ function img = imadjust (img, in, out = [0; 1], gamma = 1)
   if (! isfloat (gamma) || any (gamma < 0))
     error ("imadjust: GAMMA must be a non-negative floating point")
   elseif (isscalar (gamma))
-    gamma = repmat (gamma, [n_planes, 1]);
+    gamma = repmat (gamma, [1 n_planes]);
   elseif (! isequal (size (gamma)(2:end), sz(3:end)))
     error ("imadjust: GAMMA must be a scalar or 1 row per plane")
   endif
 
-  for i = 1:n_planes
-    img(:,:,i) = imadjust_plane (img(:,:,i), in(:,i), out(:,i), gamma(i));
-  endfor
+  ## To make the computations in N dimensions, we make heavy use of
+  ## broadcasting so reshape to have a single value per plane.
+  in = reshape (in, [2 1 sz(3:end)]);
+  out = reshape (out, [2 1 sz(3:end)]);
+  gamma = reshape (gamma, [1 1 sz(3:end)]);
+
+  lo_idx = [1 repmat({":"}, 1, ndims (in))];
+  hi_idx = [2 repmat({":"}, 1, ndims (in))];
+  li = in(lo_idx{:});
+  hi = in(hi_idx{:});
+  lo = out(lo_idx{:});
+  ho = out(hi_idx{:});
+
+  ## Image negative is computed if ho < lo although nothing special is
+  ## needed, since formula automatically handles it.
+  adj = (img < li) .* lo;
+  adj += (img >= li & img < hi) .* (lo + (ho - lo) .* ((img - li) ./ (hi - li)) .^ gamma);
+  adj += (img >= hi) .* ho;
 
   if (was_colormap)
-    img = reshape (img, [sz(1) sz(3)]);
+    adj = reshape (adj, [sz(1) sz(3)]);
   endif
 
 endfunction
@@ -153,20 +168,6 @@ function limits = parse_limits (limits, sz)
       error ("imadjust: IN and OUT must be a 2 row column per plane");
     endif
   endif
-endfunction
-
-## This does all the work. I has a plane; li and hi input low and high
-## values; and lo and ho, output bottom and top values.
-## Image negative is computed if ho<lo although nothing special is
-## needed, since formula automatically handles it.
-function ret = imadjust_plane (I, in, out, gamma)
-  li = in(1);
-  hi = in(2);
-  lo = out(1);
-  ho = out(2);
-  ret = (I < li) .* lo;
-  ret = ret + (I >= li & I < hi) .* (lo + (ho - lo) .* ((I - li) / (hi - li)) .^ gamma);
-  ret = ret + (I >= hi) .* ho;
 endfunction
 
 
