@@ -193,8 +193,8 @@ endfunction
 %!assert (imadjust (linspace (0, 1), [], [.25 .75]), linspace (.25, .75, 100))
 
 ## test with only input arg
-%!assert (sum (abs ((imadjust (linspace (0, 1, 100),[1/99; 98/99])
-%!                   - [0 linspace(0, 1, 98) 1])(:))) < 1e-10)
+%!assert (imadjust (linspace (0, 1, 100),[1/99; 98/99]),
+%!        [0 linspace(0, 1, 98) 1], eps)
 
 ## a test with input and output args
 %!assert (imadjust ([1:100], [50; 90],[-50; -30]),
