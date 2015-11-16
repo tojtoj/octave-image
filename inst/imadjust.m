@@ -24,72 +24,70 @@
 ## @deftypefnx {Function File} {} imadjust (@var{RGB}, @dots{})
 ## Adjust image or colormap intensity (values).
 ##
-## @code{J=imadjust(I)} adjusts intensity image @var{I} values so that
-## 1% of data on lower and higher values (2% in total) of the image is
-## saturated; choosing for that the corresponding lower and higher
-## bounds (using @code{stretchlim}) and mapping them to 0 and 1. @var{J}
-## is an image of the same size as @var{I} which contains mapped values.
-## This is equivalent to @code{imadjust(I,stretchlim(I))}.
+## Returns an image of equal dimensions to @var{I}, @var{cmap}, or
+## @var{RGB}, with its intensity values adjusted, usually for the
+## purpose of increasing the image contrast.
 ##
-## @code{J=imadjust(I,[low_in;high_in])} behaves as described but uses
-## @var{low_in} and @var{high_in} values instead of calculating them. It
-## maps those values to 0 and 1; saturates values lower than first limit
-## to 0 and values higher than second to 1; and finally maps all values
-## between limits linearly to a value between 0 and 1. If @code{[]} is
-## passes as @code{[low_in;high_in]} value, then @code{[0;1]} is taken
-## as a default value.
+## The values are rescaled according to the input and output limits,
+## @var{low_in} and @var{high_in}, and @var{low_out} and @var{high_out}
+## respectively.  The first pair sets the lower and upper limits
+## on the input image, values above and below them being clipped.
+## The second pair sets the lower and upper limits for the output
+## image, the interval to which the image will be scaled after
+## clipping the input limits.
 ##
-## @code{J=imadjust(I,[low_in;high_in],[low_out;high_out])} behaves as
-## described but maps output values between @var{low_out} and
-## @var{high_out} instead of 0 and 1. A default value @code{[]} can also
-## be used for this parameter, which is taken as @code{[0;1]}.
+## For example:
 ##
-## @code{J=imadjust(@dots{},gamma)} takes, in addition of 3 parameters
-## explained above, an extra parameter @var{gamma}, which specifies the
-## shape of the mapping curve between input elements and output
-## elements, which is linear (as taken if this parameter is omitted). If
-## @var{gamma} is above 1, then function is weighted towards lower
-## values, and if below 1, towards higher values.
+## @example
+## imadjust (img, [0.2; 0.9], [0; 1])
+## @end example
 ##
-## @code{newmap=imadjust(map,@dots{})} applies a transformation to a
-## colormap @var{map}, which output is @var{newmap}. This transformation
-## is the same as explained above, just using a map instead of an image.
-## @var{low_in}, @var{high_in}, @var{low_out}, @var{high_out} and
-## @var{gamma} can be scalars, in which case the same values are applied
-## for all three color components of a map; or it can be 1-by-3
-## vectors, to define unique mappings for each component.
+## will clip all values in @var{img} outside the range [0.2 0.9],
+## and then rescale them linearly into the range [0 1].
 ##
-## @code{RGB_out=imadjust(RGB,@dots{})} adjust RGB image @var{RGB} (a
-## M-by-N-by-3 array) the same way as specified in images and colormaps.
-## Here too @var{low_in}, @var{high_in}, @var{low_out}, @var{high_out} and
-## @var{gamma} can be scalars or 1-by-3 matrices, to specify the same
-## mapping for all planes, or unique mappings for each.
+## The input and output limits must be defined as arrays of 2 rows
+## with values in the [0 1] range.  Each 2 rows column corresponds
+## to a single plane in the input image (or each column of a
+## colormap), thus supporting images with any number of dimensions.
+## If the limits have only 2 elements, the same limits are on all planes.
+## This format is matched to @code{stretchlim} which is designed
+## to create the input limits for @code{imadjust}.
 ##
-## The formula used to realize the mapping (if we omit saturation) is:
+## By default, the limits are adjusted to maximize the contrast, using
+## the whole range of values in the image class; and cause a 2%
+## saturation (1% on the lower and upper end of the image).  It is
+## equivalent to:
 ##
-## @code{J = low_out + (high_out - low_out) .* ((I - low_in) / (high_in - low_in)) .^ gamma;}
+## @example
+## imadjust (@var{I}, stretchlim (@var{I}, 0.01), [0; 1])
+## @end example
 ##
-## @strong{Compatibility notes:}
+## For sake of @sc{Matab} compatibility, an empty array in any of
+## the limits is interpreted as @code{[0; 1]}.
 ##
-## @itemize @bullet
-## @item
-## Prior versions of imadjust allowed @code{[low_in; high_in]} and
-## @code{[low_out; high_out]} to be row vectors. Compatibility with this
-## behaviour has been kept, although preferred form is vertical vector
-## (since it extends nicely to 2-by-3 matrices for RGB images and
-## colormaps).
-## @item
-## Previous version of imadjust, if @code{low_in>high_in} it "negated" output.
-## Now it is negated if @code{low_out>high_out}, for compatibility with
-## MATLAB.
-## @item
-## Class of @var{I} is not considered, so limit values are not
-## modified depending on class of the image, just treated "as is". When
-## Octave 2.1.58 is out, limits will be multiplied by 255 for uint8
-## images and by 65535 for uint16 as in MATLAB.
-## @end itemize
-## 
-## @seealso{stretchlim, brighten}
+## If @var{low_out} is higher than @var{high_out}, the output image
+## will be reversed (image negative or complement).
+##
+## The @var{gamma} value shapes the mapping curve between the input
+## and output elements.  It defaults to 1, a linear mapping.  Higher
+## values of @var{gamma} will curve the mapping downwards and to the right,
+## increasing the contrast in the brighter (higher) values of the
+## input image.  Lower values of @var{gamma} will curve the mapping
+## upwards and to the left, increasing the contrast in the darker (lower)
+## values of the input image.
+##
+## As with the limits, @var{gamma} can have different values for each
+## plane, a 1 row column per plane, thus supporting input images with
+## any number of dimensions.  If only a scalar, the same value is used
+## in all planes.
+##
+## The formula used to perform the mapping (omitting saturation) is:
+##
+## @example
+## low_out + (high_out - low_out) .* ((I - low_in) / (high_in - low_in)) .^ gamma
+## @end example
+##
+## @seealso{brighten, contrast, histeq, stretchlim}
 ## @end deftypefn
 
 function adj = imadjust (img, in, out = [0; 1], gamma = 1)
@@ -103,7 +101,7 @@ function adj = imadjust (img, in, out = [0; 1], gamma = 1)
   endif
 
   sz = size (img);
-  if (numel (sz) == 2 && sz(2) == 3 && isa (img, "double"))
+  if (iscolormap (img))
     was_colormap = true;
     img = reshape (img, [sz(1) 1 sz(2)]);
     sz = size (img);
@@ -159,6 +157,8 @@ function limits = parse_limits (limits, sz)
   else
     if (! isfloat (limits))
       error ("imadjust: IN and OUT must be numeric floating-point arrays");
+    elseif (min (limits(:)) < 0 || max (limits(:)) > 1)
+      error ("imadjust: IN and OUT must be on the range [0 1]");
     endif
     ## Only reshape back into 2 row column for a single plane.
     ## Require the correct format otherwise.
@@ -178,6 +178,10 @@ endfunction
 %!error <scalar or 1 row per plane> imadjust ([1:100], [], [], [0; 1]);
 %!error <scalar or 1 row per plane> imadjust (rand (5, 5, 3), [], [], [0 1]);
 %!error <non-negative floating point> imadjust ([1:100], [0; 1], [], -1);
+%!error <be on the range \[0 1]> imadjust ([1:100], [0; 5], []);
+%!error <be on the range \[0 1]> imadjust ([1:100], [-2; 1], []);
+%!error <be on the range \[0 1]> imadjust ([1:100], [], [0; 4]);
+%!error <be on the range \[0 1]> imadjust ([1:100], [], [-2; 1]);
 
 
 ## Test default values to 1% on each end saturated and [] as [0; 1]
@@ -196,91 +200,114 @@ endfunction
 %!assert (imadjust (linspace (0, 1, 100),[1/99; 98/99]),
 %!        [0 linspace(0, 1, 98) 1], eps)
 
-## a test with input and output args
-%!assert (imadjust ([1:100], [50; 90],[-50; -30]),
-%!       [-50*ones(1,49), linspace(-50,-30,90-50+1), -30*ones(1,10)])
-
-## a test with input and output args in a row vector (Compatibility behaviour)
-%!assert (imadjust ([1:100], [50; 90],[-50; -30]),
-%!        [repmat(-50, [1 49]) linspace(-50, -30, 90-50+1) repmat(-30, [1 10])])
-
-## the previous test, "negated"
-%!assert (imadjust ([1:100], [50; 90],[-30; -50]),
-%!        [repmat(-30, [1 49]) linspace(-30, -50, 90-50+1) repmat(-50, [1 10])])
-
-%!shared cm,cmn
-%! cm = [[1:10]' [2:11]' [3:12]'];
-%! cmn = ([[1:10]' [2:11]' [3:12]'] -1)/11;
+%!shared cm
+%! cm = [[0:8]' [1:9]' [2:10]'] / 10;
 
 ## a colormap
-%!assert (imadjust (cmn, [0; 1], [10; 11]), cmn+10)
+%!assert (imadjust (cm, [0; 1], [0.5; 1]), (cm /2) + .5)
+## with params in row
+%!assert (imadjust (cm, [0 1], [0.5 1]), (cm /2) + .5)
 
-## a colormap with params in row (Compatibility behaviour)
-%!assert (imadjust (cmn, [0 1], [10 11]), cmn+10)
+## a colormap, different output adjustment on each channel
+%!assert (imadjust (cm, [0; 1], [.1 .2 .3; .7 .8 .9]),
+%!        (cm*.6) .+ [.1 .2 .3], eps)
 
-## a colormap, different output on each
-%!assert (imadjust (cmn, [0; 1], [10 20 30; 11 21 31]),
-%!        cmn + repmat ([10 20 30], 10, 1))
+## a colormap, different input adjustment on each channel
+%!assert (imadjust (cm, [.2 .4 .6; .7 .8 .9], [0; 1]),
+%!       [[0 0 linspace(0, 1, 6) 1]' ...
+%!        [0 0 0 linspace(0, 1, 5) 1]' ...
+%!        [0 0 0 0 linspace(0, 1, 4) 1]'], eps)
 
-## a colormap, different input on each
-%!assert (imadjust (cm, [2 4 6; 7 9 11], [0; 1]),
-%!       [[0 linspace(0, 1, 6) 1 1 1]' ...
-%!        [0 0 linspace(0, 1, 6) 1 1]' ...
-%!        [0 0 0 linspace(0, 1, 6) 1]'], eps)
-
-## a colormap, different input and output on each
-%!assert (imadjust (cm, [2 4 6; 7 9 11], [0 1 2; 1 2 3]),
-%!        [[0 linspace(0, 1, 6) 1 1 1]' ...
-%!         [0 0 linspace(0, 1, 6) 1 1]'+1 ...
-%!         [0 0 0 linspace(0, 1, 6) 1]'+2], eps)
+### a colormap, different input and output on each
+%!assert (imadjust (cm, [.2 .4 .6; .7 .8 .9], [0 .1 .2; .8 .9 1]),
+%!        [[0 0 linspace(0, .8, 6) .8]' ...
+%!         [.1 .1 .1 linspace(.1, .9, 5) .9]' ...
+%!         [.2 .2 .2 .2 linspace(.2, 1, 4) 1]'], eps)
 
 ## a colormap, different gamma, input and output on each
-%!assert (imadjust (cm, [2 4 6; 7 9 11], [0 1 2; 1 2 3], [1 2 3]),
-%!        [[0 linspace(0, 1, 6) 1 1 1]' ...
-%!         [0 0 linspace(0, 1, 6).^2 1 1]'+1 ...
-%!         [0 0 0 linspace(0, 1, 6).^3 1]'+2], eps)
+%!assert (imadjust (cm, [.2 .4 .6; .7 .8 .9], [0 .1 .2; .8 .9 1], [0.5 1 2]),
+%!        [[0 0 0 (((([.3 .4 .5 .6]-.2)/.5).^.5)*.8) .8 .8]' ...
+%!         [.1 .1 .1 linspace(.1, .9, 5) .9]' ...
+%!         [.2 .2 .2 .2 .2  ((((([.7 .8]-.6)/.3).^2).*.8)+.2) 1 1]'], eps*10)
 
-%!shared iRGB,iRGBn,oRGB
-%! iRGB = zeros (10 ,1, 3);
-%! iRGB(:,:,1) = [1:10]';
-%! iRGB(:,:,2) = [2:11]';
-%! iRGB(:,:,3) = [3:12]';
-%! iRGBn = (iRGB-1) /11;
+## Handling values outside the [0 1] range
+%!test
+%! im = [-0.4:.1:0.8
+%!        0.0:.1:1.2
+%!        0.1:.1:1.3
+%!       -0.4:.2:2.0];
+%!
+%! ## just clipping
+%! assert (imadjust (im, [0; 1], [0; 1]),
+%!         [0 0 0 0 (0:.1:.8)
+%!          (0:.1:1) 1 1
+%!          (.1:.1:1) 1 1 1
+%!          0 0 (0:.2:1) 1 1 1 1 1], eps)
+%!
+%! ## clipping and invert
+%! assert (imadjust (im, [0; 1], [1; 0]),
+%!         [1 1 1 1 (1:-.1:.2)
+%!          (1:-.1:0) 0 0
+%!          (.9:-.1:0) 0 0 0
+%!          1 1 (1:-.2:0) 0 0 0 0 0], eps)
+%!
+%! ## rescale
+%! assert (imadjust (im, [.2; .7], [.1; .9]),
+%!         [1 1 1 1 1 1 1 2.6 4.2 5.8 7.4 9 9
+%!          1 1 1 2.6 4.2 5.8 7.4 9 9 9 9 9 9
+%!          1 1 2.6 4.2 5.8 7.4 9 9 9 9 9 9 9
+%!          1 1 1 1 4.2 7.4 9 9 9 9 9 9 9]/10, eps)
+%!
+%! ## rescale and invert
+%! assert (imadjust (im, [.2; .7], [.9; .1]),
+%!         [9 9 9 9 9 9 9 7.4 5.8 4.2 2.6 1 1
+%!          9 9 9 7.4 5.8 4.2 2.6 1 1 1 1 1 1
+%!          9 9 7.4 5.8 4.2 2.6 1 1 1 1 1 1 1
+%!          9 9 9 9 5.8 2.6 1 1 1 1 1 1 1]/10, eps)
+
+
+%!shared oRGB
 %! oRGB = zeros (10, 1, 3);
 %! oRGB(:,:,1) = [0 linspace(0,1,6) 1 1 1]';
 %! oRGB(:,:,2) = [0 0 linspace(0,1,6) 1 1]';
 %! oRGB(:,:,3) = [0 0 0 linspace(0,1,6) 1]';
 
-## a RGB image
-%!assert (imadjust (iRGBn, [0; 1], [10; 11]), iRGBn+10)
+%!assert (imadjust (oRGB, [0; 1], [0; 1]), oRGB)
 
-## a RGB image, params in row (compatibility behaviour)
-%!assert (imadjust (iRGBn, [0 1], [10 11]), iRGBn+10)
+%!assert (imadjust (oRGB, [.2; .8], [0; 1]),
+%!        reshape ([[0 0 0 1/3 2/3 1 1 1 1 1]'
+%!                  [0 0 0 0 1/3 2/3 1 1 1 1]'
+%!                  [0 0 0 0 0 1/3 2/3 1 1 1]'], [10 1 3]), eps)
 
-## a RGB, different output on each
-%!test
-%! t = iRGBn;
-%! t(:,:,1) += 10;
-%! t(:,:,2) += 20;
-%! t(:,:,3) += 30;
-%! assert (imadjust (iRGBn, [0; 1], [10 20 30; 11 21 31]), t)
+%!assert (imadjust (oRGB, [.2; .8], [.1; .9]),
+%!        reshape ([[.1 .1 .1 (1/3)+(.1/3) (2/3)-(.1/3) .9 .9 .9 .9 .9]'
+%!                  [.1 .1 .1 .1 (1/3)+(.1/3) (2/3)-(.1/3) .9 .9 .9 .9]'
+%!                  [.1 .1 .1 .1 .1 (1/3)+(.1/3) (2/3)-(.1/3) .9 .9 .9]'],
+%!                 [10 1 3]), eps)
 
-## a RGB, different input on each, we need increased tolerance for this test
-%!assert (imadjust (iRGB, [2 4 6; 7 9 11], [0; 1]), oRGB, eps)
+%!assert (imadjust (oRGB, [.2; .8], [.2; .8]),
+%!        reshape ([[2 2 2 4 6 8 8 8 8 8]'
+%!                  [2 2 2 2 4 6 8 8 8 8]'
+%!                  [2 2 2 2 2 4 6 8 8 8]']/10, [10 1 3]), eps)
+
+## aRGB, different output for each channel
+%!assert (imadjust (oRGB, [0; 1], [.1 .2 .3; .9 .8 .7]),
+%!        reshape ([[1 1 2.6 4.2 5.8 7.4 9 9 9 9]'
+%!                  [2 2 2 3.2 4.4 5.6 6.8 8 8 8]'
+%!                  [3 3 3 3 3.8 4.6 5.4 6.2 7 7]']/10, [10 1 3]), eps)
+
+## a RGB, different input for each channel
+%!assert (imadjust (oRGB, [.1 .2 .3; .9 .8 .7], [0; 1]),
+%!        reshape ([[0 0 .125 .375 .625 .875 1 1 1 1]'
+%!                  [0 0 0 0 1/3 2/3 1 1 1 1]'
+%!                  [0 0 0 0 0 .25 .75 1 1 1]'], [10 1 3]), eps*10)
 
 ## a RGB, different input and output on each
-%!test
-%! t = oRGB;
-%! t(:,:,2) += 1;
-%! t(:,:,3) += 2;
-%! assert (imadjust (iRGB, [2 4 6; 7 9 11], [0 1 2;1 2 3]), t, eps)
+%!assert (imadjust (oRGB, [.1 .2 .3; .9 .8 .7], [.2 0 .4; .5 1 .7 ]),
+%!        reshape ([[.2 .2 .2375 .3125 .3875 .4625 .5 .5 .5 .5]'
+%!                  [0 0 0 0 1/3 2/3 1 1 1 1]'
+%!                  [.4 .4 .4 .4 .4 .475 .625 .7 .7 .7]'], [10 1 3]), eps)
 
-## a RGB, different gamma, input and output on each
-%!test
-%! t = oRGB;
-%! t(:,:,2) = t(:,:,2).^2+1;
-%! t(:,:,3) = t(:,:,3).^3+2;
-%! assert (imadjust (iRGB, [2 4 6; 7 9 11], [0 1 2; 1 2 3], [1 2 3]), t, eps)
 
 ## Test for ND dimensional images
 %!test
