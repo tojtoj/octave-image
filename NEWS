@@ -20,7 +20,8 @@
     (rather than a saturation that it tries to approximate).  Support
     for N dimensional images has been added.
 
- ** imadjust() support for N dimensional images.
+ ** imadjust() support for N dimensional images.  It now requires that
+    input and output limits be always specified in a [0 1] range.
 
  ** The function is isgray(), isind(), and isrgb() will return for images
     of class single in addition to double. 
