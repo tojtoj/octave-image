@@ -45,7 +45,7 @@ namespace octave
     class strel
     {
       public:
-        strel (const octave_value& arg);
+        explicit strel (const octave_value& arg);
         strel (const boolNDArray& nhood, const NDArray& height);
         strel (const boolNDArray& nhood, const NDArray& height,
                const Array<octave_idx_type>& origin);

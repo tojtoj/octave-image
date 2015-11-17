@@ -33,9 +33,9 @@ namespace octave
         connectivity () = default;
 
         //! Will throw if val is bad
-        connectivity (const octave_value& val);
-        connectivity (const boolNDArray& mask_arg);
-        connectivity (const octave_idx_type& conn);
+        explicit connectivity (const octave_value& val);
+        explicit connectivity (const boolNDArray& mask_arg);
+        explicit connectivity (const octave_idx_type& conn);
         connectivity (const octave_idx_type& ndims, const std::string& type);
 
         boolNDArray mask;

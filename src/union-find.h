@@ -34,7 +34,7 @@ private:
 
 public:
 
-  union_find (octave_idx_type s) : voxels (s) {};
+  explicit union_find (octave_idx_type s) : voxels (s) {};
 
   // Use only when adding new elements for the first time
   void
