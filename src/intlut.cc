@@ -25,16 +25,17 @@
 
 template<class P>
 static inline P
-intlut_index (const P A, const P lut_vec[])
+intlut_index (const typename P::val_type A, const P lut_vec[])
 {
-  return lut_vec[static_cast<octave_idx_type> (A)];
+  return lut_vec[A];
 }
 
 template<>
 inline octave_int16
-intlut_index (const octave_int16 A, const octave_int16 lut_vec[])
+intlut_index (const typename octave_int16::val_type A,
+              const octave_int16 lut_vec[])
 {
-  return lut_vec[32768 + static_cast<octave_idx_type> (A)];
+  return lut_vec[32768 + A];
 }
 
 template<class T>
@@ -49,8 +50,9 @@ intlut (const T& A, const T& lut)
 
   const octave_idx_type n = A.numel ();
 
+  typedef typename T::element_type::val_type P_val_type;
   for (octave_idx_type i = 0; i < n; i++, B_vec++, A_vec++)
-    *B_vec = intlut_index (*A_vec, lut_vec);
+    *B_vec = intlut_index (static_cast<P_val_type> (*A_vec), lut_vec);
 
   return B;
 }
