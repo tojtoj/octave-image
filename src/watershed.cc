@@ -137,7 +137,7 @@ class
 Collection
 {
   public:
-    Collection (const octave_idx_type n) : data (new T[n])
+    explicit Collection (const octave_idx_type n) : data (new T[n])
     { }
 
     ~Collection (void)
