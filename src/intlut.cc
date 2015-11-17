@@ -19,11 +19,23 @@
 // require conversion of the image to a float just to add 1.
 
 #include <string>
-#include <typeinfo>
-#include <cstddef>
 
 #include <octave/oct.h>
 
+
+template<class P>
+static inline P
+intlut_index (const P A, const P lut_vec[])
+{
+  return lut_vec[static_cast<octave_idx_type> (A)];
+}
+
+template<>
+inline octave_int16
+intlut_index (const octave_int16 A, const octave_int16 lut_vec[])
+{
+  return lut_vec[32768 + static_cast<octave_idx_type> (A)];
+}
 
 template<class T>
 static T
@@ -37,18 +49,9 @@ intlut (const T& A, const T& lut)
 
   const octave_idx_type n = A.numel ();
 
-  // We compare it like this because std::numeric_limits<P>::lowest
-  // does not work for octave_int types
-  if (typeid (T) == typeid (int16NDArray))
-    {
-      for (octave_idx_type i = 0; i < n; i++, B_vec++, A_vec++)
-        *B_vec = lut_vec[32768 + static_cast<octave_idx_type> (*A_vec)];
-    }
-  else // T must be uint8 or uint16
-    {
-      for (octave_idx_type i = 0; i < n; i++, B_vec++, A_vec++)
-        *B_vec = lut_vec[static_cast<octave_idx_type> (*A_vec)];
-    }
+  for (octave_idx_type i = 0; i < n; i++, B_vec++, A_vec++)
+    *B_vec = intlut_index (*A_vec, lut_vec);
+
   return B;
 }
 
