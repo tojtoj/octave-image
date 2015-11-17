@@ -103,7 +103,6 @@ inst/imsubtract.m                       GPLv3+
 inst/imtophat.m                         GPLv3+
 inst/imtransform.m                      GPLv3+
 inst/imtranslate.m                      GPLv3+
-inst/intlut.m                           GPLv3+
 inst/iptcheckmap.m                      GPLv3+
 inst/iptnum2ordinal.m                   GPLv3+
 inst/iradon.m                           GPLv3+
@@ -163,6 +162,7 @@ src/graycomatrix.cc                     FreeBSD
 src/hough_line.cc                       FreeBSD
 src/imerode.cc                          GPLv3+
 src/imreconstruct.cc                    GPLv3+
+src/intlut.m                            GPLv3+
 src/nonmax_supress.cc                   GPLv3+
 src/rotate_scale.cc                     GPLv3+
 src/__spatial_filtering__.cc            GPLv3+
