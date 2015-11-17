@@ -1,6 +1,7 @@
 ## Copyright (C) 1999,2000 Kai Habel <kai.habel@gmx.de>
 ## Copyright (C) 2004 Josep Monés i Teixidor <jmones@puntbarra.com>
 ## Copyright (C) 2015 Carnë Draug <carandraug@octave.org>
+## Copyright (C) 2015 Hartmut Gimpel <hg_code@gmx.de>
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -126,24 +127,43 @@ function adj = imadjust (img, in, out = [0; 1], gamma = 1)
     error ("imadjust: GAMMA must be a scalar or 1 row per plane")
   endif
 
-  ## To make the computations in N dimensions, we make heavy use of
-  ## broadcasting so reshape to have a single value per plane.
-  in = reshape (in, [2 1 sz(3:end)]);
-  out = reshape (out, [2 1 sz(3:end)]);
-  gamma = reshape (gamma, [1 1 sz(3:end)]);
+  if (isfloat (img))
+    ## To make the computations in N dimensions, we make heavy use of
+    ## broadcasting so reshape to have a single value per plane.
+    in = reshape (in, [2 1 sz(3:end)]);
+    out = reshape (out, [2 1 sz(3:end)]);
+    gamma = reshape (gamma, [1 1 sz(3:end)]);
 
-  lo_idx = [1 repmat({":"}, 1, ndims (in))];
-  hi_idx = [2 repmat({":"}, 1, ndims (in))];
-  li = in(lo_idx{:});
-  hi = in(hi_idx{:});
-  lo = out(lo_idx{:});
-  ho = out(hi_idx{:});
+    lo_idx = [1 repmat({":"}, 1, ndims (in))];
+    hi_idx = [2 repmat({":"}, 1, ndims (in))];
+    li = in(lo_idx{:});
+    hi = in(hi_idx{:});
+    lo = out(lo_idx{:});
+    ho = out(hi_idx{:});
 
-  ## Image negative is computed if ho < lo although nothing special is
-  ## needed, since formula automatically handles it.
-  adj = (img < li) .* lo;
-  adj += (img >= li & img < hi) .* (lo + (ho - lo) .* ((img - li) ./ (hi - li)) .^ gamma);
-  adj += (img >= hi) .* ho;
+    ## Image negative is computed if ho < lo although nothing special is
+    ## needed, since formula automatically handles it.
+    adj = (img < li) .* lo;
+    adj += (img >= li & img < hi) .* (lo + (ho - lo) .* ((img - li) ./ (hi - li)) .^ gamma);
+    adj += (img >= hi) .* ho;
+
+  else # must be integer
+    ## We create a LUT and use intlut instead of a simply converting the
+    ## whole image to single or double.  This is mainly for memory
+    ## efficiency but also less computationally intensive.  Do not
+    ## forget that in scientific images, 500MB uint8 images are not
+    ## uncommon so we don't want to convert them to double.
+
+    cls = class(img);
+    lut = linspace (0, 1, double (intmax (cls)) - double (intmin (cls)) + 1);
+
+    adj = zeros (size (img), cls);
+    for i = 1:n_planes
+      lut_adj = imadjust (lut, in(:,i), out(:,i), gamma(i));
+      adj(:,:,i) = intlut (img(:,:,i), imcast (lut_adj, cls));
+    endfor
+
+  endif
 
   if (was_colormap)
     adj = reshape (adj, [sz(1) sz(3)]);
@@ -340,3 +360,80 @@ endfunction
 %!   endfor
 %! endfor
 %! assert (imadjust (img, in, out, gamma), adj)
+
+## Test how empty matrix is not really the default value
+%!test
+%! in = int16 (1:6);
+%! assert (imadjust (in), int16 ([-32768 -19661  -6554   6553  19660  32767]))
+%! assert (imadjust (in, []), in)
+
+##
+## Test images of integer class
+##
+
+%!test
+%! in = uint8([
+%!  35   1   6  26  19  24
+%!   3  32   7  21  23  25
+%!  31   9   2  22  27  20
+%!   8  28  33  17  10  15
+%!  30   5  34  12  14  16
+%!   4  36  29  13  18  11]);
+%! out = uint8([
+%!  12   0   0   1   0   0
+%!   0   8   0   0   0   0
+%!   7   0   0   0   2   0
+%!   0   3   9   0   0   0
+%!   6   0  11   0   0   0
+%!   0  13   4   0   0   0]);
+%! assert (imadjust (in, [.1 .9], [0 1]), out);
+
+%!test
+%! in = uint8([
+%!  140    4   24  104   76   96
+%!   12  128   28   84   92  100
+%!  124   36    8   88  108   80
+%!   32  112  132   68   40   60
+%!  120   20  136   48   56   64
+%!   16  144  116   52   72   44]);
+%! out = uint8([
+%!  143    0    0   98   63   88
+%!    0  128    3   73   83   93
+%!  123   13    0   78  103   68
+%!    8  108  133   53   18   43
+%!  118    0  138   28   38   48
+%!    0  148  113   33   58   23]);
+%! assert (imadjust (in, [.1 .9], [0 1]), out);
+
+%!test
+%! in_u8 = randi ([0 255], 5, 5, 2, 3, "uint8");
+%! in_u16 = randi ([0 65535], 5, 5, 2, 3, "uint16");
+%! in_i16 = randi ([-32768 32767], 5, 5, 2, 3, "int16");
+%! in_u8_d = im2double (in_u8);
+%! in_u16_d = im2double (in_u16);
+%! in_i16_d = im2double (in_i16);
+%!
+%! ## default values
+%! assert (imadjust (in_u8), im2uint8 (imadjust (in_u8_d)))
+%! assert (imadjust (in_u16), im2uint16 (imadjust (in_u16_d)))
+%! assert (imadjust (in_i16), im2int16 (imadjust (in_i16_d)))
+%!
+%! ## single adjustment for all planes
+%! args = {[.3; .7], [.1; .9], [1.5]};
+%! assert (imadjust (in_u8, args{:}), im2uint8 (imadjust (in_u8_d, args{:})))
+%! assert (imadjust (in_u16, args{:}), im2uint16 (imadjust (in_u16_d, args{:})))
+%! assert (imadjust (in_i16, args{:}), im2int16 (imadjust (in_i16_d, args{:})))
+%!
+%! ## single adjustment for all planes (mixed with some complement)
+%! args = {reshape([.2 .3 .25 .1 0 .1; .9 .7 .85 .9 1 .8], [2 2 3]),
+%!         reshape([.1 .2 .05 .9 1 .3; .9 .85 .7 .1 0 .9], [2 2 3]),
+%!         reshape([1 .75 1 1.2 1.5 2], [1 2 3])};
+%! assert (imadjust (in_u8, args{:}), im2uint8 (imadjust (in_u8_d, args{:})))
+%! assert (imadjust (in_u16, args{:}), im2uint16 (imadjust (in_u16_d, args{:})))
+%! assert (imadjust (in_i16, args{:}), im2int16 (imadjust (in_i16_d, args{:})))
+%!
+%! ## test use of [] as limit and negative
+%! args = {[], [.95; 0], 1.25};
+%! assert (imadjust (in_u8, args{:}), im2uint8 (imadjust (in_u8_d, args{:})))
+%! assert (imadjust (in_u16, args{:}), im2uint16 (imadjust (in_u16_d, args{:})))
+%! assert (imadjust (in_i16, args{:}), im2int16 (imadjust (in_i16_d, args{:})))
