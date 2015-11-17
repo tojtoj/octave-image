@@ -59,13 +59,23 @@ intlut (const T& A, const T& lut)
 DEFUN_DLD (intlut, args, , "\
 -*- texinfo -*-\n\
 @deftypefn {Function File} {} intlut (@var{A}, @var{LUT})\n\
-Convert matrix from look up table (LUT).\n\
+Convert integer values with lookup table (LUT).\n\
 \n\
-Replaces the values from the matrix @var{A} with the corresponding\n\
-value from the look up table @var{LUT} (this is the grayscale\n\
-equivalent to an indexed image).\n\
+Replace the values from the array @var{A} with the corresponding\n\
+value from the lookup table @var{LUT}.  This is equivalent as indexing\n\
+@var{LUT} with @var{A}, with a base equal to @var{A} minimum possible\n\
+value, i.e., @code{intmin (@var{A})}.\n\
 \n\
-@var{A}  and @var{LUT} must be of the same class, and uint8, uint16,\n\
+For the simplest case of uint8 and uint16 class, it corresponds to:\n\
+\n\
+@example\n\
+@var{LUT}(double (@var{A}) +1)\n\
+@end example\n\
+\n\
+but without the temporary conversion of @var{A} to floating point\n\
+thus reducing memory usage.\n\
+\n\
+@var{A} and @var{LUT} must be of the same class, and uint8, uint16,\n\
 or int16.  @var{LUT} must have exactly 256 elements for class uint8,\n\
 and 65536 for classes uint16 and int16.  Output is of same class\n\
 as @var{LUT}.\n\
