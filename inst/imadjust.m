@@ -136,19 +136,7 @@ function adj = imadjust (img, in, out = [0; 1], gamma = 1)
     in = reshape (in, [2 1 sz(3:end)]);
     out = reshape (out, [2 1 sz(3:end)]);
     gamma = reshape (gamma, [1 1 sz(3:end)]);
-
-    lo_idx = [1 repmat({":"}, 1, ndims (in))];
-    hi_idx = [2 repmat({":"}, 1, ndims (in))];
-    li = in(lo_idx{:});
-    hi = in(hi_idx{:});
-    lo = out(lo_idx{:});
-    ho = out(hi_idx{:});
-
-    ## Image negative is computed if ho < lo although nothing special is
-    ## needed, since formula automatically handles it.
-    adj = (img < li) .* lo;
-    adj += (img >= li & img < hi) .* (lo + (ho - lo) .* ((img - li) ./ (hi - li)) .^ gamma);
-    adj += (img >= hi) .* ho;
+    adj = imadjust_direct (img, in, out, gamma);
 
   else # must be integer
     ## We create a LUT and use intlut instead of a simply converting the
@@ -160,11 +148,25 @@ function adj = imadjust (img, in, out = [0; 1], gamma = 1)
     cls = class(img);
     lut = linspace (0, 1, double (intmax (cls)) - double (intmin (cls)) + 1);
 
-    adj = zeros (size (img), cls);
-    for i = 1:n_planes
-      lut_adj = imadjust (lut, in(:,i), out(:,i), gamma(i));
-      adj(:,:,i) = intlut (img(:,:,i), imcast (lut_adj, cls));
-    endfor
+    ## If there's a single plane or the adjustment are all the same,
+    ## we only need to create one LUT.
+    if (n_planes == 1 || (all ((in(:,:) == in(:,1))(:))
+                          && all ((out(:,:) == out(:,1))(:))
+                          && all (gamma == gamma(1))))
+      lut = imadjust_direct (lut, in(:,1), out(:,1), gamma(1));
+      adj = intlut (img, imcast (lut, cls));
+    else
+      ## Seems like we have different adjustments for each plane.  We could
+      ## be smarter than loop over each plane.  We could check the unique
+      ## adjustment configurations and loop over them instead.  However,
+      ## I'll guess that if the adjustments are not all equal, they are
+      ## likely all different too so this is simpler.
+      adj = zeros (size (img), cls);
+      for i = 1:n_planes
+        lut_adj = imadjust (lut, in(:,i), out(:,i), gamma(i));
+        adj(:,:,i) = intlut (img(:,:,i), imcast (lut_adj, cls));
+      endfor
+    endif
 
   endif
 
@@ -193,6 +195,41 @@ function limits = parse_limits (limits, sz)
   endif
 endfunction
 
+## The code that actually does imadjust without any input checking and
+## reshaping.  So we can call it from imadjust when we know things are good.
+function adj = imadjust_direct (img, in, out, gamma)
+  max_scale = all ((out == [0; 1])(:));
+  max_scale_complement = all ((out == [1; 0])(:));
+
+  lo_idx = [1 repmat({":"}, 1, ndims (in))];
+  hi_idx = [2 repmat({":"}, 1, ndims (in))];
+
+  li = in(lo_idx{:});
+  hi = in(hi_idx{:});
+
+  if (max_scale)
+    ## This is the most common case.  Used to stretch all the values
+    ## into the [0 1], which can be computed much more efficiently.
+    adj = ((img .- li) ./ (hi - li)) .^ gamma;
+    adj(adj > 1) = 1;
+    adj(adj < 0) = 0;
+  elseif (max_scale_complement)
+    adj = ((img .- li) ./ (hi - li)) .^ gamma;
+    adj = 1 - adj;
+    adj(adj > 1) = 1;
+    adj(adj < 0) = 0;
+
+  else # this covers all cases but may be slower than needed
+    lo = out(lo_idx{:});
+    ho = out(hi_idx{:});
+
+    ## Image negative is computed if ho < lo although nothing special is
+    ## needed, since formula automatically handles it.
+    adj = (img < li) .* lo;
+    adj += (img >= li & img < hi) .* (lo + (ho - lo) .* ((img - li) ./ (hi - li)) .^ gamma);
+    adj += (img >= hi) .* ho;
+  endif
+endfunction
 
 %!error <must be an image or a colormap> imadjust ("bad argument");
 %!error <numeric floating-point arrays> imadjust ([1:100], "bad argument", [], 1);
@@ -288,6 +325,9 @@ endfunction
 %!          9 9 9 7.4 5.8 4.2 2.6 1 1 1 1 1 1
 %!          9 9 7.4 5.8 4.2 2.6 1 1 1 1 1 1 1
 %!          9 9 9 9 5.8 2.6 1 1 1 1 1 1 1]/10, eps)
+
+## adjusting only the gamma and nothing else
+%!assert (imadjust (linspace (0, 1), [], [], 2), linspace (0, 1) .^ 2)
 
 
 %!shared oRGB
