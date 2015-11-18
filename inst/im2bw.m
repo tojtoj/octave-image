@@ -128,3 +128,21 @@ endfunction
 ## threshold may be a negative value in the image class so care must
 ## taken when casting and rounding it.
 %!assert (nnz (im2bw (int16 ([-128:127]), 0.499)), 194)
+%!assert (nnz (im2bw (int16 ([-128:127]), 0.500)), 128)
+%!assert (nnz (im2bw (int16 ([-128:127]), 0.501)), 62)
+
+%!test
+%! img = uint16 ([0:intmax("uint16")]);
+%! s = 0;
+%! for i=0:.1:1
+%!   s += nnz (im2bw (img, i));
+%! endfor
+%! assert (s, 360445)
+
+%!test
+%! img = int16 ([intmin("int16"):intmax("int16")]);
+%! s = 0;
+%! for i=0:.1:1
+%!   s += nnz (im2bw (img, i));
+%! endfor
+%! assert (s, 360445)
