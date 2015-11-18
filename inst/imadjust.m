@@ -99,6 +99,9 @@ function adj = imadjust (img, in, out = [0; 1], gamma = 1)
 
   if (! isimage (img))
     error ("imadjust: I, RGB, or CMAP must be an image or a colormap");
+  elseif (! isnumeric (img))
+    ## isimage() allows for boolean images which imadjust should not
+    error ("imadjust: I, RGB, or CMAP must be numeric");
   endif
 
   sz = size (img);
@@ -202,6 +205,7 @@ endfunction
 %!error <be on the range \[0 1]> imadjust ([1:100], [-2; 1], []);
 %!error <be on the range \[0 1]> imadjust ([1:100], [], [0; 4]);
 %!error <be on the range \[0 1]> imadjust ([1:100], [], [-2; 1]);
+%!error <must be numeric> imadjust (rand (5) > .5);
 
 
 ## Test default values to 1% on each end saturated and [] as [0; 1]
