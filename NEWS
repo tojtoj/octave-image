@@ -39,6 +39,16 @@
       montage
 
 
+ Summary of important user-visible changes for image 2.4.2 (yyyy/mm/dd):
+-------------------------------------------------------------------------
+
+ ** Image 2.4.2 is a bug fixing release.
+
+ ** Fix imcrop() usage when defaulting to current figure and allow the
+    bounding box to be selected by clicking on any two opposite corners
+    of the image.
+
+
  Summary of important user-visible changes for image 2.4.1 (2015/08/07):
 -------------------------------------------------------------------------
 

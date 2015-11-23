@@ -1,4 +1,4 @@
-## Copyright (C) 2014 Carnë Draug <carandraug+dev@gmail.com>
+## Copyright (C) 2014-2015 Carnë Draug <carandraug@octave.org>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -25,13 +25,12 @@
 ## Crop image.
 ##
 ## Displays the image @var{img} in a figure window and waits for the user to
-## select two points defining a bounding box.  First click on the top left
-## and then on the bottom right corner of the region.  For an indexed image, a
+## select two points defining a bounding box.  For an indexed image, a
 ## corresponding colormap can be specified in @var{cmap}.  For multi-dimensional
 ## images (each 2D image is concatenated in the 4th dimension), only the
 ## first image is displayed.
 ##
-## if no image data is given, uses the current figure or figure from graphics
+## If no image data is given, uses the current figure or figure from graphics
 ## handle @var{h}.
 ##
 ## Non-interactive usage is supported if the last input argument is 4 element
@@ -148,9 +147,16 @@ function varargout = imcrop (varargin)
   endif
 
   if (from_fig)
-    cdata = get (h, "cdata");
-    xdata = get (h, "xdata");
-    ydata = get (h, "ydata");
+    hax = get (h, "currentaxes");
+    himage = findobj (hax, "type", "image");
+    if (! isempty (himage))
+      himage = himage(1);
+    else
+      error ("imcrop: expect the current axes to contain an image")
+    endif
+    cdata = get (himage, "cdata");
+    xdata = get (himage, "xdata");
+    ydata = get (himage, "ydata");
   else
     cdata = varargin{1};
     if (! alt_system)
@@ -162,6 +168,12 @@ function varargout = imcrop (varargin)
   ## Finally, crop the image
   if (interactive)
     [x, y] = ginput (2);
+    if (x(2) < x(1))
+      [x(1), x(2)] = deal (x(2), x(1));
+    endif
+    if (y(2) < y(1))
+      [y(1), y(2)] = deal (y(2), y(1));
+    endif
     rect = [x(1) y(1) x(2)-x(1) y(2)-y(1)];
   endif
   i_ini = round ([rect(1) rect(2)]);
