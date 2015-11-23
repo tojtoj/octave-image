@@ -101,6 +101,7 @@ Morhophological Operations
  @strel/reflect
  @strel/strel
  @strel/translate
+ watershed
 Read/write
  analyze75info
  analyze75read
@@ -120,6 +121,7 @@ Spatial transformations
  cp2tform
  imcrop
  imperspectivewarp
+ impyramid
  imremap
  imresize
  imrotate
@@ -152,6 +154,7 @@ Utilities
  edgetaper
  getrangefromclass
  imattributes
+ imgetfile
  iptcheckconn
  iptcheckmap
  iptnum2ordinal

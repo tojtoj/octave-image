@@ -15,55 +15,54 @@
 ## <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn  {Function File} {@var{B} =} imtransform (@var{A}, @var{T})
-## @deftypefnx {Function File} {@var{B} =} imtransform (@var{A}, @var{T}, @var{interp})
-## @deftypefnx {Function File} {@var{B} =} imtransform (@dots{}, @var{prop}, @var{val})
-## @deftypefnx {Function File} {[@var{B}, @var{xdata}, @var{ydata}] =} imtransform (@dots{})
+## @deftypefn  {Function File} {@var{IM_OUT} =} imtransform (@var{IM_IN}, @var{T})
+## @deftypefnx {Function File} {@var{IM_OUT} =} imtransform (@var{IM_IN}, @var{T}, @var{interp})
+## @deftypefnx {Function File} {@var{IM_OUT} =} imtransform (@dots{}, @var{prop}, @var{val})
+## @deftypefnx {Function File} {[@var{IM_OUT}, @var{xdata}, @var{ydata}] =} imtransform (@dots{})
 ## Transform image.
 ##
-## Given an image @var{A} in one space, returns an image @var{B}
+## Given an image @var{IM_IN}, return an image @var{IM_OUT}
 ## resulting from the forward transform defined in the transformation
-## structure @var{T}.  An additionnal input argument @var{interp},
+## structure @var{T}.  An additional input argument @var{interp},
 ## 'bicubic', 'bilinear' (default) or 'nearest',
 ## specifies the interpolation method to be used.  Finally, the
-## transformation can be tuned using  @var{prop}/@var{val} pairs.  The
-## following properties are supported:
+## transform can be tuned using  @var{prop}/@var{val} pairs.  The
+## following properties @var{prop} are supported:
 ## 
 ## @table @asis
 ## @item "udata"
-## Specifies the input space horizontal limits. Value must be a two
-## elements vector [minval maxval]. Default: [1 columns(@var{A})]
+## Specifies the input space horizontal limits. @var{val} must be a two
+## elements vector [minval maxval]. Default: [1 columns(@var{IM_IN})]
 ##
 ## @item "vdata"
-## Specifies the input space vertical limits. Value must be a two
-## elements vector [minval maxval]. Default: [1 rows(@var{A})]
+## Specifies the input space vertical limits. @var{val} must be a two
+## elements vector [minval maxval]. Default: [1 rows(@var{IM_IN})]
 ##
 ## @item "xdata"
-## Specifies the required output space horizontal limits. Value must
+## Specifies the required output space horizontal limits. @var{val} must
 ## be a two elements vector [minval maxval]. Default: estimated using
 ## udata, vdata and findbounds function.
 ##
 ## @item "ydata"
-## Specifies the required output space vertical limits. Value must
+## Specifies the required output space vertical limits. @var{val} must
 ## be a two elements vector [minval maxval]. Default: estimated using
 ## udata, vdata and findbounds function.
 ##
 ## @item "xyscale"
-## Specifies the output scale in outputspace_units/pixel. If a scalar
+## Specifies the size of pixels in the output space. If a scalar
 ## is provided, both vertical and horizontal dimensions are scaled the
 ## same way. If @var{val} is a two element vector, it must indicate
-## consecutively horizontal and vertical scales. Default value is
-## computed using the input space scale provided
-## that the number of pixel of any dimension of the output image does
-## not exceed 20000.
+## consecutively width and height of the output pixels. The default is
+## to use the width and height of input pixels provided
+## that it does not lead to a too large output image.
 ##
 ## @item "size"
 ## Size of the output image (1-by-2 vector). Overrides the effect of
 ## "xyscale" property. 
 ##
 ## @item "fillvalues"
-## Color of the areas where no interpolation where possible, e.g. when
-## coorfinates of points in the output space are out of the limits of
+## Color of the areas where no interpolation is possible, e.g. when
+## coordinates of points in the output space are out of the limits of
 ## the input space. @var{val} must be coherent with the input image
 ## format: for grayscale and indexed images (2D) @var{val} must be
 ## scalar, for RGB (n-by-m-by-3) @var{val} must be a 3 element vector.
@@ -95,7 +94,7 @@ function [varargout] = imtransform (im, T, varargin)
   xdata = ydata = [];
   xyscale = [];
   imsize = [];
-  fillvalues = ones (1, imdepth) * NaN;
+  fillvalues = zeros (1, imdepth);
 
   if (isempty (varargin))
     xydata = findbounds (T, [udata vdata]);
@@ -183,8 +182,6 @@ function [varargout] = imtransform (im, T, varargin)
       else
         error ("imtransform: expect 1 or 2 elements real vector for xyscale");
       endif
-    else
-      xyscale = [(diff (udata) / columns (im)) (diff (vdata) / rows (im))];
     endif
     ## Fillvalues
     tst = strcmp ("fillvalues", props);
@@ -199,24 +196,30 @@ function [varargout] = imtransform (im, T, varargin)
       endif
     endif
   endif
-  
+
   ## Output/Input pixels
   if (isempty (imsize))
     if (isempty (xyscale))
-      xyscale = [(diff (udata) / columns (im)) (diff (vdata) / rows (im))];
+      nx = columns (im);
+      ny = rows (im);
+      xyscale = [(diff (udata) / (nx - 1)), ...
+                 (diff (vdata) / (ny - 1))];
     endif
     xscale = xyscale(1);
     yscale = xyscale(2);
-    xsize = floor (diff (xdata) / xscale);
-    ysize = floor (diff (ydata) / yscale);
+    xsize = ceil (diff (xdata) / xscale) + 1;
+    ysize = ceil (diff (ydata) / yscale) + 1;
+    ## xyscale takes precedence: recompute x/ydata considering roundoff errors
+    xdata(2) = xdata(1) + (xsize - 1) * xscale;
+    ydata(2) = ydata(1) + (ysize - 1) * yscale;
     if (xsize > maximsize(2) || ysize > maximsize(1))
       if (xsize >= ysize)
         scalefactor = (diff (xdata) / maximsize(2)) / xscale;
       else
         scalefactor = (diff (ydata) / maximsize(1)) / yscale;
       endif
-      xscale *= scalefactor
-      yscale *= scalefactor
+      xscale *= scalefactor;
+      yscale *= scalefactor;
       xsize = floor (diff (xdata) / xscale);
       ysize = floor (diff (ydata) / yscale);
       warning ("imtransform: output image two large, adjusting the largest dimension to %d", maximsize);
@@ -239,10 +242,8 @@ function [varargout] = imtransform (im, T, varargin)
     imout(:,:,layer) = interp2 (uu, vv, im(:,:,layer), ...
                                 uui, vvi, interp, fillvalues(layer));
   endfor
-  if (nargout == 1)
-    varargout{1} = imout;
-  else
-    varargout = {imout, xdata, ydata};
+  if (nargout != 0)
+    varargout = {imout, xdata(:).', ydata(:).'};
   endif
 endfunction
 
@@ -358,8 +359,8 @@ endfunction
 %! T = maketform ('affine', incp, outcp);
 %! [im2 xdata ydata] = imtransform (im, T, 'udata', [0 1],
 %!                                  'vdata', [0 1], 'size', [500 500]);
-%! assert (xdata, scl * ([0; 1]))
-%! assert (ydata, scl * ([0; 1]))
+%! assert (xdata, scl * ([0 1]))
+%! assert (ydata, scl * ([0 1]))
 %! assert (size (im2), [500 500])
 
 %!test
@@ -375,9 +376,9 @@ endfunction
 %!test
 %! im = checkerboard (100, 10, 4);
 %! theta = 2 * pi;
-%! T = maketform ('affine', [cos(theta) -sin(theta); ...
+%! T = maketform ("affine", [cos(theta) -sin(theta); ...
 %!                           sin(theta) cos(theta); 0 0]);
-%! im2 = imtransform (im, T, 'nearest');
+%! im2 = imtransform (im, T, "nearest", "xdata", [1 800], "ydata", [1 2000]);
 %! im = im(2:end-1, 2:end-1); %avoid boundaries 
 %! im2 = im2(2:end-1, 2:end-1);
 %! assert (im, im2)
@@ -387,10 +388,35 @@ endfunction
 %! theta = pi/6;
 %! T = maketform ('affine', [cos(theta) -sin(theta); ...
 %!                           sin(theta) cos(theta); 0 0]);
-%! [im2 xdata ydata] = imtransform (im, T);
-%! udata = [1 columns(im)];
-%! vdata = [1 rows(im)];
-%! diag = sqrt (udata(2)^2 + vdata(2)^2);
-%! ang = atan (vdata(2) / udata(2));
-%! assert (max (abs (xdata)), diag * abs (cos (theta - ang)),
-%!         max (size (im)) * eps)
+%! [im2, xdata] = imtransform (im, T);
+%! nu = columns(im);
+%! nv = rows(im);
+%! nx = xdata(2);
+%! diag = sqrt (nu^2 + nv^2);
+%! ang = atan (nv / nu);
+%! assert (nx, diag * abs (cos (theta - ang)),
+%!         diag * 1 / size (im2, 2))
+
+## Test default fillvalues
+%!test
+%! im = rand (2);
+%! tmat = [eye(2); 0 0];
+%! T = maketform ("affine", tmat);
+%! im2 = imtransform (im, T, "xdata", [1 3]);
+%! assert (im2(:,3), zeros (2,1))
+
+## Test image size when forcing x/ydata
+%!test
+%! im = rand (2);
+%! tmat = [eye(2); 0 0];
+%! T = maketform ('affine', tmat);
+%! im2 = imtransform (im, T, "xdata", [1 3]);
+%! assert (size (im2), [2 3])
+
+## Test image size when forcing xyscale
+%!test
+%! im = rand (2);
+%! tmat = [eye(2); 0 0];
+%! T = maketform ('affine', tmat);
+%! im2 = imtransform (im, T, "xyscale", [0.5 0.5]);
+%! assert (size (im2), [3 3])

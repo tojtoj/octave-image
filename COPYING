@@ -3,7 +3,7 @@ inst/private/handle_colorspec.m         GPLv3+
 inst/private/im2col_check.m             GPLv3+
 inst/private/imarithmetics.m            GPLv3+
 inst/private/interp_method.m            GPLv3+
-inst/private/is_double_image.m          GPLv3+
+inst/private/is_float_image.m           GPLv3+
 inst/private/isimage.m                  GPLv3+
 inst/private/ispart.m                   GPLv3+
 inst/private/istform.m                  GPLv3+
@@ -79,6 +79,7 @@ inst/imcrop.m                           GPLv3+
 inst/imdither.m                         GPLv3+
 inst/imdivide.m                         GPLv3+
 inst/imfilter.m                         GPLv3+
+inst/imgetfile.m                        GPLv3+
 inst/imgradient.m                       GPLv3+
 inst/imgradientxy.m                     GPLv3+
 inst/imhist.m                           GPLv3+
@@ -90,6 +91,7 @@ inst/imnoise.m                          GPLv3+
 inst/imopen.m                           GPLv3+
 inst/imperspectivewarp.m                GPLv3+
 inst/impixel.m                          GPLv3+
+inst/impyramid.m                        GPLv3+
 inst/imregionalmax.m                    GPLv3+
 inst/imregionalmin.m                    GPLv3+
 inst/imremap.m                          GPLv3+
@@ -101,7 +103,6 @@ inst/imsubtract.m                       GPLv3+
 inst/imtophat.m                         GPLv3+
 inst/imtransform.m                      GPLv3+
 inst/imtranslate.m                      GPLv3+
-inst/intlut.m                           GPLv3+
 inst/iptcheckmap.m                      GPLv3+
 inst/iptnum2ordinal.m                   GPLv3+
 inst/iradon.m                           GPLv3+
@@ -161,9 +162,11 @@ src/graycomatrix.cc                     FreeBSD
 src/hough_line.cc                       FreeBSD
 src/imerode.cc                          GPLv3+
 src/imreconstruct.cc                    GPLv3+
+src/intlut.m                            GPLv3+
 src/nonmax_supress.cc                   GPLv3+
 src/rotate_scale.cc                     GPLv3+
 src/__spatial_filtering__.cc            GPLv3+
 src/strel.cc                            GPLv3+
 src/strel.h                             GPLv3+
 src/union-find.h++                      GPLv3+
+src/watershed.cc                        GPLv3+

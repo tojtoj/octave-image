@@ -1,17 +1,18 @@
 PACKAGE = $(shell grep "^Name: " DESCRIPTION | cut -f2 -d" ")
 VERSION = $(shell grep "^Version: " DESCRIPTION | cut -f2 -d" ")
 
-RELEASE_DIR     = $(PACKAGE)-$(VERSION)
-RELEASE_TARBALL = $(PACKAGE)-$(VERSION).tar.gz
-HTML_DIR        = $(PACKAGE)-html
-HTML_TARBALL    = $(PACKAGE)-html.tar.gz
+TARGET_DIR      = target/
+RELEASE_DIR     = $(TARGET_DIR)$(PACKAGE)-$(VERSION)
+RELEASE_TARBALL = $(TARGET_DIR)$(PACKAGE)-$(VERSION).tar.gz
+HTML_DIR        = $(TARGET_DIR)$(PACKAGE)-html
+HTML_TARBALL    = $(TARGET_DIR)$(PACKAGE)-html.tar.gz
 
 M_SOURCES   = $(wildcard inst/*.m)
 CC_SOURCES  = $(wildcard src/*.cc)
 OCT_FILES   = $(patsubst %.cc,%.oct,$(CC_SOURCES))
 PKG_ADD     = $(shell grep -Pho '(?<=// PKG_ADD: ).*' $(CC_SOURCES) $(M_SOURCES))
 
-OCTAVE ?= octave
+OCTAVE ?= octave --no-window-system --silent
 
 .PHONY: help dist html release install all check run clean
 
@@ -22,33 +23,31 @@ help:
 	@echo "   release - Create both of the above and show md5sums"
 	@echo
 	@echo "   install - Install the package in GNU Octave"
-	@echo "   all     - Build all oct files
+	@echo "   all     - Build all oct files"
 	@echo "   check   - Execute package tests (w/o install)"
+	@echo "   doctest - Tests only the help text via the doctest package"
 	@echo "   run     - Run Octave with development in PATH (no install)"
 	@echo
 	@echo "   clean   - Remove releases, html documentation, and oct files"
 
+%.tar.gz: %
+	tar -c -f - --posix -C "$(TARGET_DIR)" "$(notdir $<)" | gzip -9n > "$@"
+
 $(RELEASE_DIR): .hg/dirstate
 	@echo "Creating package version $(VERSION) release ..."
-	-rm -rf $@
+	-rm -rf "$@"
 	hg archive --exclude ".hg*" --exclude "Makefile" --type files "$@"
 	cd "$@" && rm -rf "devel/" && ./bootstrap && rm -rf "src/autom4te.cache"
-	chmod -R a+rX,u+w,go-w $@
-
-$(RELEASE_TARBALL): $(RELEASE_DIR)
-	tar cf - --posix "$<" | gzip -9n > "$@"
+	chmod -R a+rX,u+w,go-w "$@"
 
 $(HTML_DIR): install
 	@echo "Generating HTML documentation. This may take a while ..."
 	-rm -rf "$@"
-	$(OCTAVE) --silent \
+	$(OCTAVE) --no-window-system --silent \
 	  --eval "pkg load generate_html; " \
 	  --eval "pkg load $(PACKAGE);" \
 	  --eval 'generate_package_html ("${PACKAGE}", "$@", "octave-forge");'
 	chmod -R a+rX,u+w,go-w $@
-
-$(HTML_TARBALL): $(HTML_DIR)
-	tar cf - --posix "$<" | gzip -9n > "$@"
 
 dist: $(RELEASE_TARBALL)
 html: $(HTML_TARBALL)
@@ -64,27 +63,30 @@ release: dist html
 ## dependencies on DESCRIPTION.
 install: $(RELEASE_TARBALL)
 	@echo "Installing package locally ..."
-	$(OCTAVE) --silent --eval 'pkg ("install", "${RELEASE_TARBALL}")'
+	$(OCTAVE) --eval 'pkg ("install", "${RELEASE_TARBALL}")'
 
 all: $(CC_SOURCES)
 	cd src/ && ./configure
 	$(MAKE) -C src/
 
-check: all
-	$(OCTAVE) --no-window-system --silent \
-	  --eval 'addpath (fullfile ([pwd filesep "inst"]));' \
-	  --eval 'addpath (fullfile ([pwd filesep "src"]));' \
+check: all doctest
+	$(OCTAVE) --path "inst/" --path "src/" \
 	  --eval '${PKG_ADD}' \
 	  --eval 'runtests ("inst"); runtests ("src");'
 
+doctest: all
+	$(OCTAVE) --path "inst/" --path "src/" \
+	  --eval '${PKG_ADD}' \
+	  --eval 'pkg load doctest;' \
+	  --eval "targets = '$(shell (ls inst; ls src | grep .oct) | cut -f2 -d@ | cut -f1 -d.)';" \
+	  --eval "targets = strsplit (targets, ' ');" \
+	  --eval "doctest (targets);"
+
 run: all
-	$(OCTAVE) --no-gui --silent --persist --eval \
-	'addpath ("inst/"); addpath ("src/"); ${PKG_ADD}' \
-	  --eval 'addpath (fullfile ([pwd filesep "inst"]));' \
-	  --eval 'addpath (fullfile ([pwd filesep "src"]));' \
+	$(OCTAVE) --persist --path "inst/" --path "src/" \
 	  --eval '${PKG_ADD}'
 
 clean:
-	rm -rf $(RELEASE_DIR) $(RELEASE_TARBALL) $(HTML_TARBALL) $(HTML_DIR)
+	rm -rf $(TARGET_DIR)
 	test -e src/Makefile && $(MAKE) -C src clean
 

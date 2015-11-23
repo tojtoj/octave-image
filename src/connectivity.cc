@@ -320,7 +320,8 @@ connectivity::ndims (const Array<T>& a)
 
 
 Array<octave_idx_type>
-connectivity::padding_lengths (const dim_vector& size, const dim_vector& padded_size)
+connectivity::padding_lengths (const dim_vector& size,
+                               const dim_vector& padded_size)
 {
   const octave_idx_type ndims = size.length ();
   Array<octave_idx_type> lengths (dim_vector (ndims, 1), 0);
@@ -331,3 +332,11 @@ connectivity::padding_lengths (const dim_vector& size, const dim_vector& padded_
   return lengths;
 }
 
+boolNDArray
+connectivity::padding_mask (const dim_vector& size,
+                            const dim_vector& padded_size)
+{
+  boolNDArray mask (padded_size, false);
+  set_padding (size, padded_size, mask, true);
+  return mask;
+}

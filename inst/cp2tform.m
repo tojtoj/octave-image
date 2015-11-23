@@ -15,29 +15,28 @@
 ## <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn  {Function File} {@var{T} =} cp2tform (@var{rw_pt}, @var{ap_pt}, @var{transtype})
-## @deftypefnx {Function File} {@var{T} =} cp2tform (@var{rw_pt}, @var{ap_pt}, @var{transtype}, @var{opt})
-## Returns a transformation structure @var{T} (see "help maketform"
+## @deftypefn  {Function File} {@var{T} =} cp2tform (@var{in_cp}, @var{out_cp}, @var{ttype})
+## @deftypefnx {Function File} {@var{T} =} cp2tform (@dots{}, @var{opt})
+## Return a transformation structure @var{T} (see "help maketform"
 ## for the form of the structure) that can be further used to
-## transform coordinates from one space (here denoted "RW" for "real
-## world") to another (here denoted "AP" for "apparent"). The transform
-## is inferred from two n-by-2 arrays, @var{rw_pt} and @var{ap_pt}, which
-## contain the coordinates of n control points in the two 2D spaces.
-## Transform coefficients are stored
-## in @var{T}.tdata. Interpretation of transform coefficients depends on the
-## requested transform type @var{transtype}:
+## transform coordinates between an input space and an ouput space.
+##
+## The transform is inferred from two n-by-2 arrays, @var{in_cp} and
+## @var{out_cp}, which contain the coordinates of n control points in
+## the two 2D spaces.
+## Transform coefficients are stored in @var{T}.tdata. Interpretation of
+## transform coefficients depends on the requested transform type @var{ttype}:
 ##
 ## @table @asis
 ## @item "affine"
-## Return both forward (RW->AP) and inverse (AP->RW) transform
-## coefficients @var{T}.tdata.T and @var{T}.tdata.Tinv. Transform
-## coefficients are 3x2 matrices which can
-## be used as follows:
+## Return both forward (input space to output space) and inverse transform
+## coefficients @var{T}.tdata.T and @var{T}.tdata.Tinv. Transform 
+## coefficients are 3x2 matrices which can be used as follows:
 ##
 ## @example
 ## @group
-## @var{rw_pt} = [@var{ap_pt} ones(rows (ap_pt,1))] * Tinv
-## @var{ap_pt} = [@var{rw_pt} ones(rows (rw_pt,1))] * T
+## @var{in_cp} = [@var{out_cp} ones(rows (out_cp,1))] * Tinv
+## @var{out_cp} = [@var{in_cp} ones(rows (in_cp,1))] * T
 ## @end group
 ## @end example
 ## This transformation is well suited when parallel lines in one space
@@ -71,17 +70,17 @@
 ## better suited.
 ## 
 ## @item "projective"
-## Return both forward (RW->AP) and inverse (AP->RW) transform
+## Return both forward (input space to output space) and inverse transform
 ## coefficients @var{T}.tdata.T and @var{T}.tdata.Tinv. Transform
 ## coefficients are 3x3 matrices which  can
 ## be used as follows:
 ##
 ## @example
 ## @group
-## [u v w] = [@var{ap_pt} ones(rows (ap_pt,1))] * Tinv
-## @var{rw_pt} = [u./w, v./w];
-## [x y z] = [@var{rw_pt} ones(rows (rw_pt,1))] * T
-## @var{ap_pt} = [x./z y./z];
+## [u v w] = [@var{out_cp} ones(rows (out_cp,1))] * Tinv
+## @var{in_cp} = [u./w, v./w];
+## [x y z] = [@var{in_cp} ones(rows (in_cp,1))] * T
+## @var{out_cp} = [x./z y./z];
 ## @end group
 ## @end example
 ## This transformation is well suited when parallel lines in one space
@@ -90,24 +89,24 @@
 ## @item "polynomial"
 ## Here the @var{opt} input argument is the order of the polynomial
 ## fit. @var{opt} must be 2, 3 or 4 and input control points number must
-## be respectively at least 6, 10 and 15. Only the inverse transform
-## (AP->RW) is included in  the structure @var{T}.
-## Denoting x and y the apparent coordinates vector and xrw, yrw the
-## the real world coordinates. Inverse transform coefficients are
-## stored in a (6,10 or 15)x2 matrix which can be used as follows:
+## be respectively at least 6, 10 or 15. Only the inverse transform
+## (output space to input space) is included in  the structure @var{T}.
+## Denoting x and y the output space coordinate vector and u, v the
+## the input space coordinates. Inverse transform coefficients are
+## stored in a (6,10 or 15)-by-2 matrix which can be used as follows:
 ##
 ## @example
 ## @group
 ## Second order:  
-## [xrw yrw] = [1 x y x*y x^2 y^2] * Tinv
+## [u v] = [1 x y x*y x^2 y^2] * Tinv
 ## @end group
 ## @group
 ## Third order:   
-## [xrw yrw] = [1 x y x*y x^2 y^2 y*x^2 x*y^2 x^3 y^3] * Tinv
+## [u v] = [1 x y x*y x^2 y^2 y*x^2 x*y^2 x^3 y^3] * Tinv
 ## @end group
 ## @group
 ## Fourth order:  
-## [xrw yrw] = [1 x y x*y x^2 y^2 y*x^2 x*y^2 x^3 y^3 x^3*y x^2*y^2 x*y^3 x^4 y^4] * Tinv
+## [u v] = [1 x y x*y x^2 y^2 y*x^2 x*y^2 x^3 y^3 x^3*y x^2*y^2 x*y^3 x^4 y^4] * Tinv
 ## @end group
 ## @end example
 ## This transform is well suited when lines in one space become curves
@@ -239,7 +238,7 @@ function trans = gettrans (ttype, cap, crw, ord = 0)
       trans = maketform ("custom", ndims_in, ndims_out, ...
                          forward_fcn, inverse_fcn, tmat);
     otherwise
-      error ("cp2tform: invalid TRANSTYPE %s.", ttype);
+      error ("cp2tform: invalid TTYPE %s.", ttype);
     endswitch
 endfunction
 

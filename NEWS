@@ -1,3 +1,44 @@
+ Summary of important user-visible changes for image 2.6.0 (yyyy/mm/dd):
+-------------------------------------------------------------------------
+
+ ** The following functions are new:
+
+      imgetfile
+      impyramid
+      watershed
+
+ ** For better compatibility with Matlab, the imtransform function now
+    uses 0 instead of NA for the default extrapolation value.
+
+ ** The regionprops function now computes the new properties:
+
+      SubarrayIdx
+
+ ** stretchlim() now properly supports integer input and will return
+    values in the [0 1] range.  It also no longer performs rounding
+    of the saturated fraction, so that TOL is now the saturation limit
+    (rather than a saturation that it tries to approximate).  Support
+    for N dimensional images has been added.
+
+ ** imadjust() now supports images of integer class without requiring
+    an intermediary conversion to a floating point class.  Support for
+    N dimensional images has also been added.  It now requires that
+    input and output limits be always specified in a [0 1] range, even
+    if the image of a floating point class.
+
+ ** The function is isgray(), isind(), and isrgb() will return for images
+    of class single in addition to double. 
+
+ ** Other functions that have been changed for smaller bugfixes, increased
+    Matlab compatibility, or performance:
+
+      grayslice
+      im2bw
+      imresize
+      imremap
+      montage
+
+
  Summary of important user-visible changes for image 2.4.2 (yyyy/mm/dd):
 -------------------------------------------------------------------------
 
