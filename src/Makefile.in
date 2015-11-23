@@ -31,5 +31,4 @@ $(strel_dependent): %.oct: %.cc strel.o
 	$(FLAGGED_MKOCTFILE) $<
 
 clean:
-	rm -f *.o octave-core core *.oct *~
-
+	rm -f *.o *.oct *.m octave-core octave-workspace *~
