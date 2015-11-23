@@ -4,6 +4,11 @@ AC_INIT([Octave-Forge image package], [2.5.0+])
 AC_PROG_CXX
 AC_LANG(C++)
 
+AC_ARG_VAR([MKOCTFILE], [Compiler for Octave dynamic-load modules (default=mkoctfile -Wall)])
+if test -z "$MKOCTFILE"; then
+  MKOCTFILE='mkoctfile -Wall'
+fi
+
 AX_CXX_COMPILE_STDCXX_11([], [optional])
 if test "$HAVE_CXX11" != 1; then
   AX_CXX_COMPILE_STDCXX_0X()
