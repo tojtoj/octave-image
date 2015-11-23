@@ -8,6 +8,19 @@ AC_ARG_VAR([MKOCTFILE], [Compiler for Octave dynamic-load modules (default=mkoct
 if test -z "$MKOCTFILE"; then
   MKOCTFILE='mkoctfile -Wall'
 fi
+AC_ARG_VAR([OCTAVE], [Octave executable for the installation (default=octave)])
+if test -z "$OCTAVE"; then
+  OCTAVE=octave
+fi
+
+
+## Starting with Octave 4.2 (and some 4.1.X versions), the function
+## im2double has been moved to Octave core.
+HAS_IM2DOUBLE=`$OCTAVE -qf --eval "printf ('%i', exist ('im2double'))"`
+if test "$HAS_IM2DOUBLE" == 0; then
+  AC_CONFIG_FILES([im2double.m])
+fi
+
 
 AX_CXX_COMPILE_STDCXX_11([], [optional])
 if test "$HAVE_CXX11" != 1; then
@@ -24,6 +37,7 @@ if test "$HAVE_CXX11" != 1; then
     fi
   fi
 fi
+
 
 ## Test for gcc bug #65843 https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65843
 ## which shows up as Octave bug #45096 https://savannah.gnu.org/bugs/?45096
@@ -49,6 +63,7 @@ if test $_cv_template_lambda_accepts_ref_const_inst = no; then
     for details on working around it.
   ])
 fi
+
 
 AC_CONFIG_FILES([Makefile])
 

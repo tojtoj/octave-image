@@ -7,9 +7,11 @@ RELEASE_TARBALL = $(TARGET_DIR)$(PACKAGE)-$(VERSION).tar.gz
 HTML_DIR        = $(TARGET_DIR)$(PACKAGE)-html
 HTML_TARBALL    = $(TARGET_DIR)$(PACKAGE)-html.tar.gz
 
-M_SOURCES   = $(wildcard inst/*.m)
+M_SOURCES   = $(wildcard inst/*.m) $(patsubst %.in,%,$(wildcard src/*.m.in))
 CC_SOURCES  = $(wildcard src/*.cc)
 OCT_FILES   = $(patsubst %.cc,%.oct,$(CC_SOURCES))
+## This has the issue that it won't include PKG_ADD from src/*.m since
+## they may not exist yet to be grepped.
 PKG_ADD     = $(shell grep -Pho '(?<=// PKG_ADD: ).*' $(CC_SOURCES) $(M_SOURCES))
 
 OCTAVE ?= octave --no-window-system --silent
@@ -89,4 +91,3 @@ run: all
 clean:
 	rm -rf $(TARGET_DIR)
 	test -e src/Makefile && $(MAKE) -C src clean
-
