@@ -17,7 +17,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {} impyramid (@var{im}, @var{direction})
-## Compute gaussian pyramid expansion of reduction.
+## Compute gaussian pyramid expansion or reduction.
 ##
 ## Create image which is one level up or down in the Gaussian
 ## pyramid.  @var{direction} must be @qcode{"reduce"} or
@@ -46,13 +46,13 @@
 ## @end group
 ## @end example
 ##
-## The low-pass filter is done according to Burt & Adelson [1]
+## The low-pass filter is defined according to Burt & Adelson [1]
 ## @code{W(i,j) = w(i)w(j)} where
 ## @code{w = [0.25-alpha/2 0.25 alpha 0.25 0.25-alpha/2]} with
 ## @code{alpha = 0.375}
 ##
-## [1] Burt, P. J., & Adelson, E. H. (1983).  The Laplacian pyramid
-## as a compact image code.  IEEE Transactions on Communications,
+## [1] Peter J. Burt and Edward H. Adelson (1983).  The Laplacian Pyramid
+## as a Compact Image Code.  IEEE Transactions on Communications,
 ## vol. COM-31(4), 532-540.
 ##
 ## @seealso{imresize, imfilter}
