@@ -32,13 +32,10 @@
 ## @end table
 ## @end deftypefn
 
-function [imout, idx] = bwselect( im, cols, rows, connect )
+function [imout, idx] = bwselect (im, cols, rows, connect = 8)
 
-if nargin<4
-   connect= 8;
-end
+  [~, idx] = bwfill (! im, cols, rows, connect);
 
-[jnk,idx]= bwfill( ~im, cols,rows, connect );
-
-imout= zeros( size(jnk) );
-imout( idx ) = 1;
+  imout = false (size (im));
+  imout(idx) = true;
+endfunction
