@@ -18,24 +18,6 @@
 #include <stack>
 #include <utility>
 
-static bool any_bad_argument(const octave_value_list& args) {
-  /* TODO: We should check that the matrices have the same size. */
-  int nargin = args.length();
-  if ( (nargin >= 2) && args(0).is_real_matrix() && args(1).is_real_matrix() )
-  {
-      if (nargin == 2) 
-      {
-          return false;
-      } else if (nargin == 4 && args(2).is_real_scalar() && 
-                 args(3).is_real_scalar() )
-      {
-          return false;
-      }
-  }
-  error("Input arguments must be two 2-dimensional matrices of the same size.");
-  return true;
-}
-
 DEFUN_DLD(nonmax_supress,args,nargout,"\
 -*- texinfo -*-\n\
 @deftypefn {Loadable Function} {} nonmax_supress (@var{Es}, @var{Eo})\n\
@@ -59,11 +41,9 @@ Beware...\n\
 ")
 {
   octave_value_list retval;
-  if (any_bad_argument(args)) {
-      return retval;
-  }
+
   std::stack< std::pair<int,int> > S;
-  
+
   /* Neighbourhood directions in radians */
   const double d[4] = {
       0.0,
@@ -82,10 +62,10 @@ Beware...\n\
   } else {
       low = high = 0;
   }
-  
+
   const int rows = Es.rows();
   const int cols = Es.columns();
-  
+
   /****************************
    ** Non-maximum supression **
    ****************************/
@@ -94,7 +74,7 @@ Beware...\n\
       for (int c = 1; c < cols-1; c++) {
           const double orientation = Eo(r,c);
           const double strength = Es(r,c);
-          
+
           int best_d = 0;
           const double dist = fabs( orientation-d[0] );
           for (int i = 1; i < 4; i++) {
@@ -128,7 +108,7 @@ Beware...\n\
   }
 
   if (hysteresis == false) {
-      retval.append(In); 
+      retval.append(In);
       return retval;
   }
 
@@ -143,32 +123,32 @@ Beware...\n\
       const int c = p.second;
       if (r < 0 || r >= rows || c < 0 || c >= cols || out(r,c) == true)
           { continue; }
-      
+
       out(r,c) = true;
       const int dir = (int)Eo(r,c);
       switch (dir) {
           case 0:  // 0 degrees
-              if ( In(r-1,c) > low ) 
+              if ( In(r-1,c) > low )
                   { S.push(std::pair<int,int>(r-1,c)); }
-              if ( In(r+1,c) > low ) 
+              if ( In(r+1,c) > low )
                   { S.push(std::pair<int,int>(r+1,c)); }
               break;
           case 1:  // 45 degrees
-              if ( In(r-1,c-1) > low ) 
+              if ( In(r-1,c-1) > low )
                   { S.push(std::pair<int,int>(r-1,c-1)); }
-              if ( In(r+1,c+1) > low ) 
+              if ( In(r+1,c+1) > low )
                   { S.push(std::pair<int,int>(r+1,c+1)); }
               break;
           case 2:  // 90 degrees
-              if ( In(r,c-1) > low ) 
+              if ( In(r,c-1) > low )
                   { S.push(std::pair<int,int>(r,c-1)); }
-              if ( In(r,c+1) > low ) 
+              if ( In(r,c+1) > low )
                   { S.push(std::pair<int,int>(r,c+1)); }
               break;
           case 3:  // 135 degrees
-              if ( In(r-1,c+1) > low ) 
+              if ( In(r-1,c+1) > low )
                   { S.push(std::pair<int,int>(r-1,c+1)); }
-              if ( In(r+1,c-1) > low ) 
+              if ( In(r+1,c-1) > low )
                   { S.push(std::pair<int,int>(r+1,c-1)); }
               break;
       }
