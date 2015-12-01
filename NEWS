@@ -5,6 +5,7 @@
 
       imgetfile
       impyramid
+      imquantize
       watershed
 
  ** For better compatibility with Matlab, the imtransform function now
