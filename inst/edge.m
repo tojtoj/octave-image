@@ -536,3 +536,55 @@ function [imout, thresh] = andy(im, method, thresh, param2)
    imout = imee;
 
 endfunction
+
+%!test
+%! in = zeros (5);
+%! in(3,3) = 1;
+%!
+%! E = logical ([
+%!    0 0 0 0 0
+%!    0 0 1 0 0
+%!    0 1 0 1 0
+%!    0 0 1 0 0
+%!    0 0 0 0 0]);
+%! assert (edge (in), E)
+%! assert (edge (in, "sobel"), E)
+%! assert (edge (in, "sobel", 0), E)
+%! assert (edge (in, "sobel", 1), false (5))
+%!
+%! V = logical([
+%!    0 0 0 0 0
+%!    0 1 0 1 0
+%!    0 1 0 1 0
+%!    0 1 0 1 0
+%!    0 0 0 0 0]);
+%! assert (edge (in, "sobel", 0, "vertical"), V)
+%!
+%! H = logical ([
+%!    0 0 0 0 0
+%!    0 1 1 1 0
+%!    0 0 0 0 0
+%!    0 1 1 1 0
+%!    0 0 0 0 0]);
+%! assert (edge (in, "sobel", 0, "horizontal"), H)
+%!
+%! V = false (5);
+%! V(3,2) = true;
+%! V(3,4) = true;
+%! assert (edge (in, "sobel", [], "vertical"), V)
+%!
+%! H = false (5);
+%! H(2,3) = true;
+%! H(4,3) = true;
+%! assert (edge (in, "sobel", [], "horizontal"), H)
+
+%!test
+%! A = ones (5);
+%! A(3, 3) = 0;
+%! expected = logical ([
+%!    0  0  0  0  0
+%!    0  0  1  0  0
+%!    0  1  0  1  0
+%!    0  0  1  0  0
+%!    0  0  0  0  0]);
+%! assert (edge (A), expected)
