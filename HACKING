@@ -90,7 +90,9 @@ When applied to m file coding, it boils down to the following:
 
   * 2 space indentation levels.
 
-  * use snake_case, nor camelCase, for naming variables and functions.
+  * use snake_case, not camelCase, for naming variables and functions.
+
+  * use # for comments, ! as 'not' operator, and double quotes for strings.
 
 Tips to use Savannah
 --------------------
