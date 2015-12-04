@@ -100,10 +100,10 @@ function retval = imfilter(im, f, varargin)
   ## Pad the image
   im = padarray(im, floor([frows/2, fcols/2]), pad);
   if (mod(frows,2) == 0)
-    im = im(1:end-1, :, :);
+    im = im(2:end, :, :);
   endif
   if (mod(fcols,2) == 0)
-    im = im(:, 1:end-1, :);
+    im = im(:, 2:end, :);
   endif
   
   ## Do the filtering
@@ -127,3 +127,17 @@ function retval = imfilter(im, f, varargin)
   retval = cast(retval, C);
   
 endfunction
+
+## test padding with even sized filters (bug #45568)
+%!test
+%! I = zeros (6);
+%! I(2:3,2:3) = 1;
+%! F = zeros (4);
+%! F(2,2:3) = 1;
+%! result = [0 0 0 0 0 0
+%!           1 2 1 0 0 0
+%!           1 2 1 0 0 0
+%!           0 0 0 0 0 0
+%!           0 0 0 0 0 0
+%!           0 0 0 0 0 0];
+%! assert (imfilter (I, F), result)
