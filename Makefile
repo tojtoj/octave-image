@@ -38,8 +38,9 @@ help:
 $(RELEASE_DIR): .hg/dirstate
 	@echo "Creating package version $(VERSION) release ..."
 	-rm -rf "$@"
-	hg archive --exclude ".hg*" --exclude "Makefile" --type files "$@"
-	cd "$@" && rm -rf "devel/" && ./bootstrap && rm -rf "src/autom4te.cache"
+	hg archive --exclude ".hg*" --exclude "Makefile" --exclude "HACKING" \
+	  --exclude "devel" --type files "$@"
+	cd "$@" && ./bootstrap && rm -rf "src/autom4te.cache"
 	chmod -R a+rX,u+w,go-w "$@"
 
 $(HTML_DIR): install
