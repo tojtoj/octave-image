@@ -1,4 +1,5 @@
 ## Copyright (C) 2005 Søren Hauberg <soren@hauberg.org>
+## Copyright (C) 2015 Carnë Draug <carandraug@octave.org>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
 ## the terms of the GNU General Public License as published by the Free Software
@@ -118,8 +119,6 @@ function f = fspecial (type, arg1, arg2)
 
   if (nargin < 1)
     print_usage ();
-  elseif (! ischar (type))
-    error ("fspecial: first argument must be a string");
   endif
 
   switch lower (type)
@@ -224,29 +223,41 @@ function f = fspecial (type, arg1, arg2)
       endif
 
     case "gaussian"
-      ## Get hsize
-      if (nargin > 1 && isreal (arg1))
-        if (length (arg1 (:)) == 1)
-          hsize = [arg1, arg1];
-        elseif (length (arg1 (:)) == 2)
-          hsize = arg1;
+      ## fspecial ("gaussian", lengths = [3 3], sigma = 0.5)
+
+      if (nargin < 2)
+        lengths = [3 3];
+      else
+        validateattributes (arg1, {"numeric"}, {">", 0, "integer"},
+                            "fspecial (\"gaussian\")", "HSIZE");
+        nd = numel (arg1);
+        if (nd == 1)
+          lengths = [arg1 arg1];
+          nd = 2;
+        elseif (nd == 2)
+          ## TODO add support for more dimensions
+          lengths = arg1(:).';
         else
-          error ("fspecial: second argument must be a scalar or a vector of two scalars");
+          error ("fspecial (\"gaussian\"): HSIZE must be a 1 or 2 elements vector");
         endif
-      else
-        hsize = [3, 3];
       endif
-      ## Get sigma
-      if (nargin > 2 && isreal (arg2) && length (arg2 (:)) == 1)
-        sigma = arg2;
-      else
+
+      if (nargin < 3)
         sigma = 0.5;
+      else
+        ## TODO add support for different sigmas for each dimension
+        validateattributes (arg2, {"numeric"}, {">", 0, "scalar"},
+                            "fspecial (\"gaussian\")", "SIGMA");
+        sigma = arg2;
       endif
-      h1 = hsize (1)-1; h2 = hsize (2)-1; 
-      [x, y] = meshgrid(0:h2, 0:h1);
-      x = x-h2/2; y = y-h1/2;
-      gauss = exp( -( x.^2 + y.^2 ) / (2*sigma^2) );
-      f = gauss / sum (gauss (:));
+
+      h1 = lengths(1) -1;
+      h2 = lengths(2) -1;
+      [x, y] = meshgrid (0:h2, 0:h1);
+      x = x - (h2/2);
+      y = y - (h1/2);
+      gauss = exp (- (x.^2 + y.^2) / (2 * (sigma.^2)));
+      f = gauss / sum (gauss(:));
 
     case "laplacian"
       ## Get alpha
@@ -348,6 +359,9 @@ function f = fspecial (type, arg1, arg2)
   endswitch
 endfunction
 
+##
+## Tests for disk shape
+##
 
 ## Test that the disk filter's error does not grow unreasonably large
 %!test
@@ -377,3 +391,113 @@ endfunction
 %!     endfor
 %!   endfor
 %! endfor
+
+##
+## Tests for gaussian shape
+##
+
+%!error <HSIZE must be greater than 0>
+%!  fspecial ("gaussian", 0)
+%!error <HSIZE must be integer>
+%!  fspecial ("gaussian", 3.9)
+
+%!assert (fspecial ("gaussian"), fspecial ("gaussian", 3, 0.5))
+%!assert (fspecial ("gaussian"), fspecial ("gaussian", [3 3], 0.5))
+
+%!test
+%! c = ([-1:1].^2) .+ ([-1:1]'.^2);
+%! gauss = exp (- (c ./ (2 * (0.5 .^ 2))));
+%! f = gauss / sum (gauss(:));
+%! assert (fspecial ("gaussian"), f)
+%!
+%! expected = [
+%!   0.01134373655849507   0.08381950580221061   0.01134373655849507
+%!   0.08381950580221061   0.61934703055717721   0.08381950580221061
+%!   0.01134373655849507   0.08381950580221061   0.01134373655849507];
+%! assert (f, expected, eps)
+
+## An implementation of the function for 2d, we must also check it
+## against some of the values.  Note that hsize is (radius -1) and
+## only works for odd lengths.
+%!function f = f_gaussian_2d (hsize, sigma)
+%!  c = ([(-hsize(1)):(hsize(1))]'.^2) .+ ([(-hsize(2)):(hsize(2))].^2);
+%!  gauss = exp (- (c ./ (2 * (sigma .^ 2))));
+%!  f = gauss ./ sum (gauss(:));
+%!endfunction
+
+%!test
+%! f = fspecial ("gaussian");
+%! assert (f, f_gaussian_2d ([1 1], .5))
+%! expected = [
+%!   0.01134373655849507   0.08381950580221061   0.01134373655849507
+%!   0.08381950580221061   0.61934703055717721   0.08381950580221061
+%!   0.01134373655849507   0.08381950580221061   0.01134373655849507];
+%! assert (f, expected, eps)
+
+%!test
+%! f = fspecial ("gaussian", 7, 2);
+%! assert (f, f_gaussian_2d ([3 3], 2))
+%! expected = [
+%!    0.00492233115934352
+%!    0.00919612528958620
+%!    0.01338028334410124
+%!    0.01516184737296414
+%!    0.01338028334410124
+%!    0.00919612528958620
+%!    0.00492233115934352
+%!    0.00919612528958620
+%!    0.01718062389630964
+%!    0.02499766026691484
+%!    0.02832606006174462
+%!    0.02499766026691484
+%!    0.01718062389630964
+%!    0.00919612528958620
+%!    0.01338028334410124
+%!    0.02499766026691484
+%!    0.03637138107390363
+%!    0.04121417419979795
+%!    0.03637138107390363
+%!    0.02499766026691484
+%!    0.01338028334410124
+%!    0.01516184737296414
+%!    0.02832606006174462
+%!    0.04121417419979795
+%!    0.04670177773892775];
+%! expected = reshape ([expected; expected((end-1):-1:1)], [7 7]);
+%! assert (f, expected, eps)
+
+%!test
+%! f = fspecial ("gaussian", [7 5], 2);
+%! assert (f, f_gaussian_2d ([3 2], 2))
+%! expected = [
+%!    0.01069713252648568
+%!    0.01998487459872362
+%!    0.02907782096336423
+%!    0.03294948784319031
+%!    0.02907782096336423
+%!    0.01998487459872362
+%!    0.01069713252648568
+%!    0.01556423598706978
+%!    0.02907782096336423
+%!    0.04230797985750011
+%!    0.04794122192790870
+%!    0.04230797985750011
+%!    0.02907782096336423
+%!    0.01556423598706978
+%!    0.01763658993191515
+%!    0.03294948784319031
+%!    0.04794122192790870
+%!    0.05432452146574315];
+%! expected = reshape ([expected; expected((end-1):-1:1)], [7 5]);
+%! assert (f, expected, eps)
+
+%!test
+%! f = fspecial ("gaussian", [4 2], 2);
+%! expected = [0.10945587477855045 0.14054412522144952];
+%! expected = expected([1 1; 2 2; 2 2; 1 1]);
+%! assert (f, expected, eps)
+
+%!test
+%! expected =[0.04792235409415088 0.06153352068439959 0.07901060453704994];
+%! expected = expected([1 2 2 1; 2 3 3 2; 2 3 3 2; 1 2 2 1]);
+%! assert (fspecial ("gaussian", 4, 2), expected)
