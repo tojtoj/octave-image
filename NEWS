@@ -35,6 +35,7 @@
  ** Other functions that have been changed for smaller bugfixes, increased
     Matlab compatibility, or performance:
 
+      edge
       grayslice
       im2bw
       imfilter

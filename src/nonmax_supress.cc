@@ -76,9 +76,17 @@ Beware...\n\
           const double strength = Es(r,c);
 
           int best_d = 0;
-          const double dist = fabs( orientation-d[0] );
-          for (int i = 1; i < 4; i++) {
-              if ( fabs( orientation-d[i] ) < dist ) { best_d = i; }
+          double testdist = M_PI;
+          double dist = M_PI;
+          for (int i = 0; i < 4; i++) {
+              testdist = orientation-d[i];
+              if ( testdist > 0.5 * M_PI )
+                  testdist = testdist - M_PI;
+              testdist = fabs( testdist);
+              if ( testdist < dist) {
+                  dist = testdist;
+                  best_d = i;
+              }
           }
           Eo(r,c) = best_d;
 

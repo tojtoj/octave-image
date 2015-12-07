@@ -93,7 +93,7 @@
 ## while the lower threshold is 0.4*@var{arg1}. The optional 4th input argument
 ## @var{arg2} is the spread of the low-pass Gaussian filter that is used to smooth
 ## the input image prior to estimating gradients. By default this scale parameter
-## is 2.
+## is @code{sqrt (2)}.
 ##
 ## @item "Lindeberg"
 ## Finds edges using in @var{im} using the differential geometric single-scale edge
@@ -344,17 +344,22 @@ function [bw, out_threshold, g45_out, g135_out] = edge (im, method, varargin)
       if (nargin == 4 && isscalar(varargin{2}))
         sigma = varargin{2};
       else
-        sigma = 2;
+        sigma = sqrt (2);
       endif
 
-      ## Change scale
-      J = imsmooth(double(im), "Gaussian", sigma);
+      ## Gaussian filtering to change the edge scale (treat dimensions seperatly)
+      len = 8 * ceil (sigma);
+      x = -0.5 * (len-1) : 0.5 * (len-1);
+      gauss = exp (-(x.^2)/(2*sigma^2));
+      gauss = gauss ./ sum (gauss);
+      J = imfilter (im, gauss, "replicate");
+      J = imfilter (J, gauss', "replicate");
 
-      ## Canny enhancer
+      ## edge detection with Prewitt filter (treat dimensions seperatly)
       p = [1 0 -1]/2;
-      Jx = conv2(J, p,  "same");
-      Jy = conv2(J, p', "same");
-      Es = sqrt( Jx.^2 + Jy.^2 );
+      Jx = imfilter (J, p, "replicate");
+      Jy = imfilter (J, p', "replicate");
+      Es = sqrt (Jx.^2 + Jy.^2);
       Eo = pi - mod (atan2 (Jy, Jx) - pi, pi);
 
       ## Get thresholds
@@ -588,3 +593,62 @@ endfunction
 %!    0  0  1  0  0
 %!    0  0  0  0  0]);
 %! assert (edge (A), expected)
+
+## test CANNY edge detector
+%!test
+%! in_8 = fspecial ("gaussian", [8 8], 2);
+%! in_8 /= in_8(4,4);
+%!
+%! ## this is the result from Matlab's old canny method (before 2011a)
+%! out_8_old = logical ([
+%!  0   0   0   0   0   0   0   0
+%!  0   0   0   1   1   0   0   0
+%!  0   0   1   0   0   1   0   0
+%!  0   1   0   0   0   0   1   0
+%!  0   1   0   0   0   0   1   0
+%!  0   0   1   0   0   1   0   0
+%!  0   0   0   1   1   0   0   0
+%!  0   0   0   0   0   0   0   0]);
+%! out_8 = logical ([
+%!  0   0   0   0   0   0   0   0
+%!  0   1   1   1   1   1   0   0
+%!  0   1   0   0   0   1   0   0
+%!  0   1   0   0   0   1   0   0
+%!  0   1   0   0   0   1   0   0
+%!  0   1   1   1   1   1   0   0
+%!  0   0   0   0   0   0   0   0
+%!  0   0   0   0   0   0   0   0]);
+%!
+%! [obs_edge, obs_thresh] = edge (in_8, "Canny");
+%! assert (obs_edge, out_8)
+%! assert (obs_thresh, [0.34375 0.859375])
+
+%!test
+%! in_9 = fspecial ("gaussian", [9 9], 2);
+%! in_9 /= in_9(5,5);
+%!
+%! ## this is the result from Matlab's old canny method (before 2011a)
+%! out_9_old = logical ([
+%!  0   0   0   0   0   0   0   0   0
+%!  0   0   0   0   0   0   0   0   0
+%!  0   0   0   1   1   1   0   0   0
+%!  0   0   1   0   0   0   1   0   0
+%!  0   0   1   0   0   0   1   0   0
+%!  0   0   1   0   0   0   1   0   0
+%!  0   0   0   1   1   1   0   0   0
+%!  0   0   0   0   0   0   0   0   0
+%!  0   0   0   0   0   0   0   0   0]);
+%! out_9 = logical ([
+%!  0   0   0   0   0   0   0   0   0
+%!  0   0   1   1   1   1   0   0   0
+%!  0   1   1   0   0   1   1   0   0
+%!  0   1   0   0   0   0   1   0   0
+%!  0   1   0   0   0   0   1   0   0
+%!  0   1   1   0   0   1   1   0   0
+%!  0   0   1   1   1   1   0   0   0
+%!  0   0   0   0   0   0   0   0   0
+%!  0   0   0   0   0   0   0   0   0]);
+%!
+%! [obs_edge, obs_thresh] = edge (in_9, "Canny");
+%! assert (obs_edge, out_9)
+%! assert (obs_thresh, [0.35 0.875])
