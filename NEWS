@@ -37,6 +37,7 @@
 
       grayslice
       im2bw
+      imfilter
       imresize
       imremap
       montage
