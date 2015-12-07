@@ -15,44 +15,75 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {} fspecial(@var{type}, @var{arg1}, @var{arg2})
+## @deftypefn {Function File} {} fspecial (@var{type}, @dots{})
 ## Create spatial filters for image processing.
 ##
-## @var{type} determines the shape of the filter and can be
-## @table @asis
-## @item @qcode{"average"}
-## Rectangular averaging filter. The optional argument @var{arg1} controls the
-## size of the filter. If @var{arg1} is an integer @var{N}, a @var{N} by @var{N}
+## @var{type} is a string specifying the filter name.  The input arguments
+## that follow are type specific.  The return value is a correlation kernel,
+## often to be used by @code{imfilter}.
+##
+## @seealso{conv2, convn, filter2, imfilter}
+## @end deftypefn
+##
+## @deftypefn  {Function File} {} fspecial ("average")
+## @deftypefnx {Function File} {} fspecial ("average", @var{lengths})
+## Rectangular averaging filter.
+##
+## The optional argument @var{lengths} controls the size of the filter.
+## If @var{lengths} is an integer @var{N}, a @var{N} by @var{N}
 ## filter is created. If it is a two-vector with elements @var{N} and @var{M}, the
 ## resulting filter will be @var{N} by @var{M}. By default a 3 by 3 filter is
 ## created.
 ##
-## @item @qcode{"disk"}
-## Circular averaging filter. The optional argument @var{arg1} controls the
-## radius of the filter. If @var{arg1} is an integer @var{R}, a 2 @var{R} + 1
+## @end deftypefn
+##
+## @deftypefn  {Function File} {} fspecial ("disk")
+## @deftypefnx {Function File} {} fspecial ("disk", @var{radius})
+## Circular averaging filter.
+##
+## The optional argument @var{radius} controls the
+## radius of the filter. If @var{radius} is an integer @var{R}, a 2 @var{R} + 1
 ## filter is created. By default a radius of 5 is used. If the returned matrix
-## corresponds to a cartesian grid, each element of the matrix is weighted by
+## corresponds to a Cartesian grid, each element of the matrix is weighted by
 ## how much of the corresponding grid square is covered by a disk of radius
-## @var{R} and centered at the middle of the element @var{R}+1,@var{R}+1.
+## @var{R} and centred at the middle of the element @var{R}+1,@var{R}+1.
 ##
-## @item @qcode{"gaussian"}
-## Gaussian filter. The optional argument @var{arg1} controls the size of the
-## filter. If @var{arg1} is an integer @var{N}, a @var{N} by @var{N}
-## filter is created. If it is a two-vector with elements @var{N} and @var{M}, the
-## resulting filter will be @var{N} by @var{M}. By default a 3 by 3 filter is
-## created. The optional argument @var{arg2} sets spread of the filter. By default
-## a spread of @math{0.5} is used.
+## @end deftypefn
 ##
-## @item @qcode{"log"}
-## Laplacian of Gaussian. The optional argument @var{arg1} controls the size of the
-## filter. If @var{arg1} is an integer @var{N}, a @var{N} by @var{N}
+## @deftypefn  {Function File} {} fspecial ("gaussian")
+## @deftypefnx {Function File} {} fspecial ("gaussian", @var{lengths})
+## @deftypefnx {Function File} {} fspecial ("gaussian", @var{lengths}, @var{sigma})
+## Create Gaussian filter.
+##
+## Returns a N dimensional Gaussian distribution with standard
+## deviation @var{sigma} and centred in an array of size @var{lengths}.
+##
+## @var{lengths} defaults to @code{[3 3]} and @var{sigma} to 0.5.
+## If @var{lengths} is a scalar, it returns a square matrix of side
+## @var{lengths}, .i.e., its value defines both the number of rows and
+## columns.
+##
+## @end deftypefn
+##
+## @deftypefn  {Function File} {} fspecial ("log")
+## @deftypefnx {Function File} {} fspecial ("log", @var{lengths})
+## @deftypefnx {Function File} {} fspecial ("log", @var{lengths}, @var{std})
+## Laplacian of Gaussian.
+##
+## The optional argument @var{lengths} controls the size of the
+## filter. If @var{lengths} is an integer @var{N}, a @var{N} by @var{N}
 ## filter is created. If it is a two-vector with elements @var{N} and @var{M}, the
 ## resulting filter will be @var{N} by @var{M}. By default a 5 by 5 filter is
-## created. The optional argument @var{arg2} sets spread of the filter. By default
+## created. The optional argument @var{std} sets spread of the filter. By default
 ## a spread of @math{0.5} is used.
 ##
-## @item @qcode{"laplacian"}
-## 3x3 approximation of the laplacian. The filter is approximated as
+## @end deftypefn
+##
+## @deftypefn  {Function File} {} fspecial ("laplacian")
+## @deftypefnx {Function File} {} fspecial ("laplacian", @var{alpha})
+## 3x3 approximation of the laplacian.
+##
+## The filter is approximated as
 ##
 ## @example
 ## (4/(@var{alpha}+1)) * [   @var{alpha}/4   (1-@var{alpha})/4     @var{alpha}/4
@@ -60,27 +91,40 @@
 ##                     @var{alpha}/4   (1-@var{alpha})/4     @var{alpha}/4 ];
 ## @end example
 ##
-## where @var{alpha} is a number between 0 and 1. This number can be controlled
-## via the optional input argument @var{arg1}. By default it is @math{0.2}.
+## where @var{alpha} is a number between 0 and 1.  By default it is @math{0.2}.
 ##
-## @item @qcode{"unsharp"}
-## Sharpening filter. The following filter is returned
+## @end deftypefn
+##
+## @deftypefn  {Function File} {} fspecial ("unsharp")
+## @deftypefnx {Function File} {} fspecial ("unsharp", @var{alpha})
+## Sharpening filter.
+##
+## The following filter is returned
 ## @example
 ## (1/(@var{alpha}+1)) * [-@var{alpha}   @var{alpha}-1 -@var{alpha}
 ##                   @var{alpha}-1 @var{alpha}+5  @var{alpha}-1
 ##                  -@var{alpha}   @var{alpha}-1 -@var{alpha}];
 ## @end example
 ##
-## where @var{alpha} is a number between 0 and 1. This number can be controlled
-## via the optional input argument @var{arg1}. By default it is @math{0.2}.
+## where @var{alpha} is a number between 0 and 1.  By default it is @math{0.2}.
 ##
-## @item @qcode{"motion"}
-## Moion blur filter of width 1 pixel. The optional input argument @var{arg1}
-## controls the length of the filter, which by default is 9. The argument @var{arg2}
+## @end deftypefn
+##
+## @deftypefn  {Function File} {} fspecial ("motion")
+## @deftypefnx {Function File} {} fspecial ("motion", @var{lengths})
+## @deftypefnx {Function File} {} fspecial ("motion", @var{lengths}, @var{angle})
+## Motion blur filter of width 1 pixel.
+##
+## The optional input argument @var{lengths}
+## controls the length of the filter, which by default is 9. The argument @var{angle}
 ## controls the angle of the filter, which by default is 0 degrees.
 ##
-## @item @qcode{"sobel"}
-## Horizontal Sobel edge filter. The following filter is returned
+## @end deftypefn
+##
+## @deftypefn  {Function File} {} fspecial ("sobel")
+## Horizontal Sobel edge filter.
+##
+## The following filter is returned
 ##
 ## @example
 ## [ 1  2  1
@@ -88,8 +132,12 @@
 ##  -1 -2 -1 ]
 ## @end example
 ##
-## @item @qcode{"prewitt"}
-## Horizontal Prewitt edge filter. The following filter is returned
+## @end deftypefn
+##
+## @deftypefn  {Function File} {} fspecial ("prewitt")
+## Horizontal Prewitt edge filter.
+##
+## The following filter is returned
 ##
 ## @example
 ## [ 1  1  1
@@ -97,17 +145,19 @@
 ##  -1 -1 -1 ]
 ## @end example
 ##
-## @item "kirsch"
-## Horizontal Kirsch edge filter. The following filter is returned
+## @end deftypefn
 ##
-## @verbatim
+## @deftypefn  {Function File} {} fspecial ("kirsch")
+## Horizontal Kirsch edge filter.
+##
+## The following filter is returned
+##
+## @example
 ## [ 3  3  3
 ##   3  0  3
 ##  -5 -5 -5 ]
-## @end verbatim
-## @end table
+## @end example
 ##
-## @seealso{conv2, convn, filter2, imfilter}
 ## @end deftypefn
 
 ## Remarks by Søren Hauberg (jan. 2nd 2007)
@@ -229,16 +279,13 @@ function f = fspecial (type, arg1, arg2)
         lengths = [3 3];
       else
         validateattributes (arg1, {"numeric"}, {">", 0, "integer"},
-                            "fspecial (\"gaussian\")", "HSIZE");
-        nd = numel (arg1);
-        if (nd == 1)
+                            "fspecial (\"gaussian\")", "LENGTHS");
+        if (isempty (arg1))
+          error ("fspecial (\"gaussian\"): LENGTHS must not be empty");
+        elseif (numel (arg1) == 1)
           lengths = [arg1 arg1];
-          nd = 2;
-        elseif (nd == 2)
-          ## TODO add support for more dimensions
-          lengths = arg1(:).';
         else
-          error ("fspecial (\"gaussian\"): HSIZE must be a 1 or 2 elements vector");
+          lengths = arg1(:).';
         endif
       endif
 
@@ -251,13 +298,15 @@ function f = fspecial (type, arg1, arg2)
         sigma = arg2;
       endif
 
-      h1 = lengths(1) -1;
-      h2 = lengths(2) -1;
-      [x, y] = meshgrid (0:h2, 0:h1);
-      x = x - (h2/2);
-      y = y - (h1/2);
-      gauss = exp (- (x.^2 + y.^2) / (2 * (sigma.^2)));
-      f = gauss / sum (gauss(:));
+      lengths -= 1;
+      lengths /= 2;
+      pos = arrayfun ("colon", -lengths, lengths, "uniformoutput", false);
+      dist = 0;
+      for d = 1:numel(lengths)
+        dist = dist .+ (vec (pos{d}, d) .^2); # broadcasting with '.+=' does not work
+      endfor
+      f = exp (- (dist) / (2 * (sigma.^2)));
+      f /= sum (f(:));
 
     case "laplacian"
       ## Get alpha
@@ -396,9 +445,9 @@ endfunction
 ## Tests for gaussian shape
 ##
 
-%!error <HSIZE must be greater than 0>
+%!error <LENGTHS must be greater than 0>
 %!  fspecial ("gaussian", 0)
-%!error <HSIZE must be integer>
+%!error <LENGTHS must be integer>
 %!  fspecial ("gaussian", 3.9)
 
 %!assert (fspecial ("gaussian"), fspecial ("gaussian", 3, 0.5))
@@ -501,3 +550,73 @@ endfunction
 %! expected =[0.04792235409415088 0.06153352068439959 0.07901060453704994];
 %! expected = expected([1 2 2 1; 2 3 3 2; 2 3 3 2; 1 2 2 1]);
 %! assert (fspecial ("gaussian", 4, 2), expected)
+
+%!function f = f_gaussian_3d (lengths, sigma)
+%!  [x, y, z] = ndgrid (-lengths(1):lengths(1), -lengths(2):lengths(2),
+%!                      -lengths(3):lengths(3));
+%!  sig_22 = 2 * (sigma.^2);
+%!  f = exp (-((x.^2)/sig_22 + (y.^2)/sig_22 + (z.^2)/sig_22));
+%!  f = f / sum (f(:));
+%!endfunction
+
+%!test
+%! obs = fspecial ("gaussian", [5 5 5]);
+%! assert (obs, f_gaussian_3d ([2 2 2], .5))
+%!
+%! u_values = [
+%!    0.00000000001837155
+%!    0.00000000741161178
+%!    0.00000005476481523
+%!    0.00000299005759843
+%!    0.00002209370333384
+%!    0.00016325161336690
+%!    0.00120627532940896
+%!    0.00891323607975882
+%!    0.06586040141635063
+%!    0.48664620076350640];
+%! expected = zeros (5, 5, 5);
+%! expected([1 5 21 25 101 105 121 125]) = u_values(1);
+%! expected([2 4 6 10 16 20 22 24 26 30 46 50 76 80 96 100 102 104 106 110 116 120 122 124]) = u_values(2);
+%! expected([3 11 15 23 51 55 71 75 103 111 115 123]) = u_values(3);
+%! expected([7 9 17 19 27 29 31 35 41 45 47 49 77 79 81 85 91 95 97 99 107 109 117 119]) = u_values(4);
+%! expected([8 12 14 18 28 36 40 48 52 54 56 60 66 70 72 74 78 86 90 98 108 112 114 118]) = u_values(5);
+%! expected([13 53 61 65 73 113]) = u_values(6);
+%! expected([32 34 42 44 82 84 92 94]) = u_values(7);
+%! expected([33 37 39 43 57 59 67 69 83 87 89 93]) = u_values(8);
+%! expected([38 58 62 64 68 88]) = u_values(9);
+%! expected([63]) = u_values(10);
+%! assert (obs, expected, eps)
+
+%!test
+%! obs = fspecial ("gaussian", [5 5 5], 1);
+%! assert (obs, f_gaussian_3d ([2 2 2], 1))
+%!
+%! u_values = [
+%!    0.00016177781678373
+%!    0.00072503787330278
+%!    0.00119538536377748
+%!    0.00324939431236223
+%!    0.00535734551968363
+%!    0.00883276951279243
+%!    0.01456277497493249
+%!    0.02400995686159072
+%!    0.03958572658629712
+%!    0.06526582943894763];
+%! expected = zeros (5, 5, 5);
+%! expected([1 5 21 25 101 105 121 125]) = u_values(1);
+%! expected([2 4 6 10 16 20 22 24 26 30 46 50 76 80 96 100 102 104 106 110 116 120 122 124]) = u_values(2);
+%! expected([3 11 15 23 51 55 71 75 103 111 115 123]) = u_values(3);
+%! expected([7 9 17 19 27 29 31 35 41 45 47 49 77 79 81 85 91 95 97 99 107 109 117 119]) = u_values(4);
+%! expected([8 12 14 18 28 36 40 48 52 54 56 60 66 70 72 74 78 86 90 98 108 112 114 118]) = u_values(5);
+%! expected([13 53 61 65 73 113]) = u_values(6);
+%! expected([32 34 42 44 82 84 92 94]) = u_values(7);
+%! expected([33 37 39 43 57 59 67 69 83 87 89 93]) = u_values(8);
+%! expected([38 58 62 64 68 88]) = u_values(9);
+%! expected([63]) = u_values(10);
+%! assert (obs, expected, eps)
+
+%!test
+%! obs = fspecial ("gaussian", [3 4 1 5], 3);
+%! assert (find (obs == max (obs(:))), [29; 32])
+%! assert (size (obs), [3 4 1 5])
+%! assert (obs(:)(1:30), obs(:)(end:-1:31))
