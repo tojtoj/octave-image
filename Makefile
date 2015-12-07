@@ -72,7 +72,7 @@ all: $(CC_SOURCES)
 	cd src/ && ./configure
 	$(MAKE) -C src/
 
-check: all doctest
+check: all
 	$(OCTAVE) --path "inst/" --path "src/" \
 	  --eval '${PKG_ADD}' \
 	  --eval 'runtests ("inst"); runtests ("src");'
