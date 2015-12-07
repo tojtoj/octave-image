@@ -27,8 +27,8 @@
     input and output limits be always specified in a [0 1] range, even
     if the image of a floating point class.
 
- ** The function is isgray(), isind(), and isrgb() will return for images
-    of class single in addition to double. 
+ ** The function is isgray(), isind(), and isrgb() will return true for images
+    of class single in addition to double.
 
  ** Other functions that have been changed for smaller bugfixes, increased
     Matlab compatibility, or performance:
