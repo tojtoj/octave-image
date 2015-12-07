@@ -30,6 +30,8 @@
  ** The function is isgray(), isind(), and isrgb() will return true for images
     of class single in addition to double.
 
+ ** fspecial() is now capable to create N dimensional gaussian filters.
+
  ** Other functions that have been changed for smaller bugfixes, increased
     Matlab compatibility, or performance:
 
