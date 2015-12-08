@@ -352,6 +352,7 @@ function [bw, out_threshold, g45_out, g135_out] = edge (im, method, varargin)
       x = -0.5 * (len-1) : 0.5 * (len-1);
       gauss = exp (-(x.^2)/(2*sigma^2));
       gauss = gauss ./ sum (gauss);
+      im = im2double (im);
       J = imfilter (im, gauss, "replicate");
       J = imfilter (J, gauss', "replicate");
 
@@ -360,6 +361,10 @@ function [bw, out_threshold, g45_out, g135_out] = edge (im, method, varargin)
       Jx = imfilter (J, p, "replicate");
       Jy = imfilter (J, p', "replicate");
       Es = sqrt (Jx.^2 + Jy.^2);
+      Es_max = max (Es(:));
+      if (Es_max > 0)
+        Es ./= Es_max;
+      endif
       Eo = pi - mod (atan2 (Jy, Jx) - pi, pi);
 
       ## Get thresholds
@@ -598,6 +603,7 @@ endfunction
 %!test
 %! in_8 = fspecial ("gaussian", [8 8], 2);
 %! in_8 /= in_8(4,4);
+%! in_8_uint8 = im2uint8 (in_8);
 %!
 %! ## this is the result from Matlab's old canny method (before 2011a)
 %! out_8_old = logical ([
@@ -618,10 +624,20 @@ endfunction
 %!  0   1   1   1   1   1   0   0
 %!  0   0   0   0   0   0   0   0
 %!  0   0   0   0   0   0   0   0]);
+%! out_thresh = [0.34375 0.859375];
 %!
 %! [obs_edge, obs_thresh] = edge (in_8, "Canny");
 %! assert (obs_edge, out_8)
-%! assert (obs_thresh, [0.34375 0.859375])
+%! assert (obs_thresh, out_thresh)
+%!
+%! [obs_edge_givethresh, obs_thresh_givethresh] ...
+%!    = edge (in_8, "Canny", out_thresh);
+%! assert (obs_edge_givethresh, out_8)
+%! assert (obs_thresh_givethresh, out_thresh)
+%!
+%! [obs_edge_uint8, obs_thresh_uint8] = edge (in_8_uint8, "Canny");
+%! assert (obs_edge_uint8, out_8)
+%! assert (obs_thresh_uint8, out_thresh)
 
 %!test
 %! in_9 = fspecial ("gaussian", [9 9], 2);
@@ -648,7 +664,13 @@ endfunction
 %!  0   0   1   1   1   1   0   0   0
 %!  0   0   0   0   0   0   0   0   0
 %!  0   0   0   0   0   0   0   0   0]);
+%! out_thresh = [0.35 0.875];
 %!
 %! [obs_edge, obs_thresh] = edge (in_9, "Canny");
 %! assert (obs_edge, out_9)
-%! assert (obs_thresh, [0.35 0.875])
+%! assert (obs_thresh, out_thresh)
+%!
+%! [obs_edge_givethresh, obs_thresh_givethresh] ...
+%!    = edge (in_9, "Canny", out_thresh);
+%! assert (obs_edge_givethresh, out_9)
+%! assert (obs_thresh_givethresh, out_thresh)
