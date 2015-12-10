@@ -347,16 +347,14 @@ function [bw, out_threshold, g45_out, g135_out] = edge (im, method, varargin)
         sigma = sqrt (2);
       endif
 
-      ## Gaussian filtering to change the edge scale (treat dimensions seperatly)
-      len = 8 * ceil (sigma);
-      x = -0.5 * (len-1) : 0.5 * (len-1);
-      gauss = exp (-(x.^2)/(2*sigma^2));
-      gauss = gauss ./ sum (gauss);
+      ## Gaussian filtering to change the edge scale.
+      ## Treat each dimensions separately for performance.
+      gauss = fspecial ("gaussian", [1 (8*ceil(sigma))], sigma);
       im = im2double (im);
       J = imfilter (im, gauss, "replicate");
       J = imfilter (J, gauss', "replicate");
 
-      ## edge detection with Prewitt filter (treat dimensions seperatly)
+      ## edge detection with Prewitt filter (treat dimensions separately)
       p = [1 0 -1]/2;
       Jx = imfilter (J, p, "replicate");
       Jy = imfilter (J, p', "replicate");
