@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="addon">
+  <id>octave-image</id>
+  <extends>www.octave.org-octave.desktop</extends>
+  <name>Image</name>
+  <summary>Image processing, feature extraction, transformations, morphological operations, filters, and more</summary>
+  <url type="homepage">http://octave.sourceforge.net/image</url>
+  <url type="bugtracker">https://savannah.gnu.org/bugs/?func=additem&amp;group=octave</url>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0+</project_license>
+  <update_contact>octave-maintainers_AT_gnu.org</update_contact>
+</component>
