@@ -17,9 +17,9 @@
 ## @deftypefn {Function File} {} normxcorr2 (@var{template}, @var{img})
 ## Compute normalized cross-correlation.
 ##
-## Returns the the cross-correlation coefficient of matrices @var{template}
-## and @var{img}, a matrix of the same size as @var{img} with values ranging
-## between -1 and 1.
+## Returns the cross-correlation coefficient of matrices @var{template}
+## and @var{img}, a matrix of (roughly) the same size as @var{img} with
+## values ranging between -1 and 1.
 ##
 ## Normalized correlation is mostly used for template matching, finding an
 ## object or pattern, @var{template}, withing an image @var{img}.  Higher
@@ -38,6 +38,9 @@
 ##
 ## Despite the function name, this function will accept input with an arbitrary
 ## number of dimensions.
+##
+## Note that the size of the cross-correlation array is slightly bigger
+## than @var{img} because the input image is padded during the calculation.
 ##
 ## @seealso{conv2, convn, corr2, xcorr, xcorr2}
 ## @end deftypefn
@@ -62,6 +65,10 @@ function c = normxcorr2 (a, b)
 
   c = convn (b, conj (ar));
   b = convn (b.^2, a1) .- convn (b, a1).^2 ./ (prod (size (a)));
+
+  ## remove small machine precision errors after substraction
+  b(b < 0) = 0;
+
   a = sumsq (a(:));
   c = reshape (c ./ sqrt (b * a), size (c));
 
@@ -138,3 +145,14 @@ endfunction
 %!error normxcorr2 (rand (5));
 %!error normxcorr2 (rand (5), rand (20), 2);
 
+## test for no small imaginary parts in result (bug #46160)
+%!test
+%! a =  [ 252  168   50    1   59;
+%!        114    0    0    0    0] ./ 255;
+%! b = [    1  171  255  255  255  255  240   71  131  254  255  255  255;
+%!          0  109  254  255  255  233   59    0  131  254  255  255  255;
+%!         76   13  195  253  194   34    0   19  217  255  255  255  255;
+%!        110    0    0    0    0    0    3  181  255  255  255  255  255;
+%!        153    0    0    0    0    2  154  254  255  255  255  255  255]./255;
+%!  c = normxcorr2 (a, b);
+%! assert (max (imag (c(:))), 0);
