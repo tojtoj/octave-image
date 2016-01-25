@@ -43,6 +43,7 @@
       imresize
       imremap
       montage
+      normxcorr2
 
 
  Summary of important user-visible changes for image 2.4.2 (yyyy/mm/dd):
