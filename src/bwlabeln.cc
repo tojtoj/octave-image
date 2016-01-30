@@ -344,8 +344,8 @@ for 3-D images, 4 and 8 for 2-D images, or an arbitrary N-dimensional\n\
 binary connectivity mask where each dimension is of size 3.\n\
 \n\
 The output @var{l} is an Nd-array where 0 indicates a background\n\
-pixel, 1 indicates that the pixel belong to object number 1, 2 that\n\
-the pixel belong to object number 2, etc. The total number of objects\n\
+pixel, 1 indicates that the pixel belongs to object number 1, 2 that\n\
+the pixel belongs to object number 2, etc. The total number of objects\n\
 is @var{num}.\n\
 \n\
 The algorithm used is a disjoint-set data structure, a.k.a. union-find.\n\
@@ -641,13 +641,13 @@ Label binary 2 dimensional image.\n\
 \n\
 Labels foreground objects in the binary image @var{bw}.\n\
 The output @var{l} is a matrix where 0 indicates a background pixel,\n\
-1 indicates that the pixel belong to object number 1, 2 that the pixel\n\
-belong to object number 2, etc.\n\
+1 indicates that the pixel belongs to object number 1, 2 that the pixel\n\
+belongs to object number 2, etc.\n\
 The total number of objects is @var{num}.\n\
 \n\
-To pixels belong to the same object if the are neighbors. By default\n\
+Two pixels belong to the same object if they are neighbors. By default\n\
 the algorithm uses 8-connectivity to define a neighborhood, but this\n\
-can be changed through the argument @var{n} that can be either 4, 6, or 8.\n\
+can be changed through the argument @var{n}, which can be either 4, 6, or 8.\n\
 \n\
 @seealso{bwconncomp, bwlabeln, regionprops}\n\
 @end deftypefn\n\
