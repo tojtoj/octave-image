@@ -146,6 +146,11 @@ function low_high = stretchlim (img, tol = [0.01 0.99])
   ## only).
   low_high(low_high < 0) = 0;
   low_high(low_high > 1) = 1;
+
+  ## If a plane has a single value, then both limits will have the same
+  ## value.  In such case, we must return [0; 1]
+  equal_cols = low_high(1,:) == low_high(2,:);
+  low_high(:, equal_cols) = repmat ([0; 1], 1, nnz (equal_cols));
 endfunction
 
 %!error (stretchlim ());
@@ -323,3 +328,22 @@ endfunction
 %!   endfor
 %! endfor
 %! assert (stretchlim (im, 0), rv)
+
+## Corner case there's a single value in the whole image
+%!assert (stretchlim (zeros (5)), [0; 1])
+%!assert (stretchlim (ones (5)), [0; 1])
+%!assert (stretchlim (.6 * ones (5)), [0; 1])
+%!assert (stretchlim (zeros (3, 3, 3, 3)), repmat ([0; 1], [1 3 3]))
+%!assert (stretchlim ([0 .5 .5 .5 .5 1], .2), [0; 1])
+
+## Cornier case when some of the planes have a single unique value
+%!test
+%! im = repmat ((magic (5) -1) / 24, [1 1 3 3]);
+%! im(:,:,1,1) = 0;
+%! im(:,:,2,2) = .5;
+%! im(:,:,3,3) = 1;
+%! lims = stretchlim (im, 0.2);
+%! assert (size (lims), [2 3 3])
+%! assert (lims(:, [2 3 4 6 7 8]),
+%!         repmat ([(1/24)*round(24*.2); 1-((1/24)*round(24*.2))], [1 6]), eps)
+%! assert (lims(:, [1 5 9]), repmat ([0; 1], [1 3]))
