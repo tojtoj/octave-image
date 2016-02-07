@@ -120,8 +120,6 @@ function B = im2col (A, varargin)
     case "sliding"
       if (numel (block_size) > ndims (A))
         error ("im2col: BLOCK_SIZE can't have more elements than the dimensions of A");
-      elseif (any (size (A) < block_size))
-        error("im2col: no dimension of A can be greater than BLOCK_SIZE in sliding");
       endif
 
       ## Get linear indixes for the first block
@@ -131,7 +129,9 @@ function B = im2col (A, varargin)
       slides  = size (A) - block_size;
       limit   = stride .* slides;
       for dim = 1:ndims (A)
-        ind = ind(:) .+ (0:stride(dim):limit(dim));
+        ## We need to use bsxfun here because of
+        ## https://savannah.gnu.org/bugs/?47085
+        ind = bsxfun (@plus, ind(:), (0:stride(dim):limit(dim)));
       endfor
       n_blocks = prod (slides +1);
 
@@ -173,7 +173,6 @@ endfunction
 
 %!error <BLOCK_TYPE> im2col (rand (20), [2 5], 10)
 %!error <BLOCK_TYPE> im2col (rand (20), [2 5], "wrong_block_type")
-%!error <greater than> im2col (rand (10), [11 5], "sliding")
 %!error im2col (rand (10), [5 5], "sliding", 5)
 %!error im2col (rand (10), "indexed", [5 5], "sliding", 5)
 
@@ -234,3 +233,6 @@ endfunction
 %!        reshape (sum (im2col (A, [3 4 3])), [8 6 3 7]));
 %!assert (convn (A, ones (3, 5, 3, 2), "valid"),
 %!        reshape (sum (im2col (A, [3 5 3 2])), [8 5 3 6]));
+
+## Corner case for Matlab compatibility -- bug #46774
+%!assert (im2col (1:8, [2 1]), zeros (2, 0))

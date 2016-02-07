@@ -38,6 +38,7 @@
       edge
       grayslice
       im2bw
+      im2col
       imfilter
       imresize
       imremap
