@@ -1,6 +1,8 @@
 AC_PREREQ([2.67])
 AC_INIT([Octave-Forge image package], [2.5.0+])
 
+AC_PROG_SED
+
 AC_PROG_CXX
 AC_LANG(C++)
 
@@ -21,22 +23,13 @@ if test "$HAS_IM2DOUBLE" == 0; then
   AC_CONFIG_FILES([im2double.m])
 fi
 
+image_save_CXX="$CXX"
+OCTAVE_IMAGE_PROG_CXX_CXX11(
+  [],
+  [AC_MSG_ERROR([*** A C++ compiler with support for C++11 is required])])
 
-AX_CXX_COMPILE_STDCXX_11([], [optional])
-if test "$HAVE_CXX11" != 1; then
-  AX_CXX_COMPILE_STDCXX_0X()
-  ## Unlike AX_CXX_COMPILE_STDCXX_11, we need to set CXXFLAGS when using
-  ## the AX_CXX_COMPILE_STDCXX_0X macro.
-  if test "$ax_cv_cxx_compile_cxx0x_native" = no; then
-    if test "$ax_cv_cxx_compile_cxx0x_gxx" = yes; then
-      CXXFLAGS="$CXXFLAGS -std=gnu++0x"
-    elif test "$ax_cv_cxx_compile_cxx0x_cxx" = yes; then
-      CXXFLAGS="$CXXFLAGS -std=c++0x"
-    else
-      AC_MSG_ERROR([*** A compiler with support for at least C++0x language features is required])
-    fi
-  fi
-fi
+CXX11_SWITCH=$(echo "$CXX" | $SED "s,^$image_save_CXX ,,")
+MKOCTFILE="$MKOCTFILE $CXX11_SWITCH"
 
 
 ## Test for gcc bug #65843 https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65843
