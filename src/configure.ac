@@ -6,27 +6,24 @@ AC_PROG_SED
 AC_PROG_CXX
 AC_LANG(C++)
 
-AC_ARG_VAR([MKOCTFILE], [Compiler for Octave dynamic-load modules (default=mkoctfile -Wall)])
+XTRA_CXXFLAGS="-Wall"
+
+
+AC_PATH_PROG([MKOCTFILE], [mkoctfile])
 if test -z "$MKOCTFILE"; then
-  MKOCTFILE='mkoctfile -Wall'
+  AC_MSG_ERROR([*** 'mkoctfile' not found.])
 fi
-AC_ARG_VAR([OCTAVE], [Octave executable for the installation (default=octave)])
+
+AC_PATH_PROG([OCTAVE], [octave])
 if test -z "$OCTAVE"; then
-  OCTAVE=octave
+  AC_MSG_ERROR([*** 'octave' not found.])
 fi
 
-
-## Starting with Octave 4.2 (and some 4.1.X versions), the function
-## im2double has been moved to Octave core.
-HAS_IM2DOUBLE=`$OCTAVE -qf --eval "printf ('%i', exist ('im2double'))"`
-if test "$HAS_IM2DOUBLE" == 0; then
-  AC_CONFIG_FILES([im2double.m])
-fi
 
 image_save_CXX="$CXX"
 OCTAVE_IMAGE_PROG_CXX_CXX11(
   [],
-  [AC_MSG_ERROR([*** A C++ compiler with support for C++11 is required])])
+  [AC_MSG_ERROR([*** A compiler with support for C++11 is required])])
 
 CXX11_SWITCH=$(echo "$CXX" | $SED "s,^$image_save_CXX ,,")
 MKOCTFILE="$MKOCTFILE $CXX11_SWITCH"
@@ -57,6 +54,14 @@ if test $_cv_template_lambda_accepts_ref_const_inst = no; then
   ])
 fi
 
+## Starting with Octave 4.2 (and some 4.1.X versions), the function
+## im2double has been moved to Octave core.
+HAS_IM2DOUBLE=`$OCTAVE -qf --eval "printf ('%i', exist ('im2double'))"`
+if test "$HAS_IM2DOUBLE" == 0; then
+  AC_CONFIG_FILES([im2double.m])
+fi
+
+AC_SUBST([XTRA_CXXFLAGS])
 
 AC_CONFIG_FILES([Makefile])
 
