@@ -1,4 +1,4 @@
-FLAGGED_MKOCTFILE = @MKOCTFILE@ @CXXFLAGS@
+FLAGGED_MKOCTFILE = @MKOCTFILE@ @XTRA_CXXFLAGS@ @CXXFLAGS@
 
 ## We can't link oct files, and Octave's package system does not handle
 ## shared libraries. Because of this, we need to create object files for
