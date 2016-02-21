@@ -216,7 +216,8 @@ function h = montage (images, varargin)
   nImg   = size (images, 4);
 
   ## 1) calculate layout of the montage
-  [nRows, nCols] = deal (p.Results.Size(1), p.Results.Size(2));
+  nRows = p.Results.Size(1);
+  nCols = p.Results.Size(2);
   if (isnan (nRows) && isnan (nCols))
     ## We must find the smallest layout that is most square. The most square
     ## are the ones with smallest difference between height and width. And to
@@ -230,7 +231,11 @@ function h = montage (images, varargin)
     small_layout = ((1:nImg)' .* (1:nImg)) >= nImg;
     small_layout = logical (diff (padarray (small_layout, 1, 0, "pre")));
     HxW_diff(! small_layout) = Inf;
-    [nRows, nCols] = find (HxW_diff == min (HxW_diff(:)), 1);
+    ## When there is more than one layout that returns equal "squariness",
+    ## we must pick the one with most columns.  This is because monitors
+    ## have more horizontal space, so a wider image will be better.  Hence
+    ## the "last".
+    [nRows, nCols] = find (HxW_diff == min (HxW_diff(:)), 1, "last");
 
   elseif (isnan (nRows))
     nRows = ceil (nImg/nCols);
@@ -311,3 +316,36 @@ function color = fix_color (color, img_channels)
   endif
   color = reshape (color, [1 1 img_channels]);
 endfunction
+
+%!function cdata = montage_cdata (varargin)
+%!  h = figure ();
+%!  set (h, "visible", "off");
+%!  mh = montage (varargin{:});
+%!  cdata = get (mh, "cdata");
+%!  close (h);
+%!endfunction
+
+## Test automatic distribution of panels
+%!test
+%! im = uint8 (ones (2, 2, 1, 5)) .* reshape ([1 2 3 4 5], [1 1 1 5]);
+%! cdata = montage_cdata (im);
+%! expected = uint8 ([
+%!   1 1 2 2 3 3
+%!   1 1 2 2 3 3
+%!   4 4 5 5 0 0
+%!   4 4 5 5 0 0
+%! ]);
+%! assert (cdata, expected)
+
+%!test
+%! im = uint8 (ones (2, 4, 1, 6)) .* reshape ([1 2 3 4 5 6], [1 1 1 6]);
+%! cdata = montage_cdata (im);
+%! expected = uint8 ([
+%!   1 1 1 1 2 2 2 2
+%!   1 1 1 1 2 2 2 2
+%!   3 3 3 3 4 4 4 4
+%!   3 3 3 3 4 4 4 4
+%!   5 5 5 5 6 6 6 6
+%!   5 5 5 5 6 6 6 6
+%! ]);
+%! assert (cdata, expected)
