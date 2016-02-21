@@ -63,6 +63,13 @@
 ## imadjust (@var{I}, stretchlim (@var{I}, 0.01), [0; 1])
 ## @end example
 ##
+## A common usage is to maximize the display range without saturation:
+##
+## @example
+## imadjust (img, stretchlim (img, 0)) # adjustment performed per plane
+## imadjust (img, stretchlim (img(:), 0)) # equal adjustment to all planes
+## @end example
+##
 ## For sake of @sc{Matab} compatibility, an empty array in any of
 ## the limits is interpreted as @code{[0; 1]}.
 ##
