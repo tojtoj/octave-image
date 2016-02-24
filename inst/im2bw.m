@@ -1,22 +1,25 @@
 ## Copyright (C) 2000 Kai Habel <kai.habel@gmx.de>
-## Copyright (C) 2012, 2013 Carnë Draug <carandraug@octave.org>
+## Copyright (C) 2012-2016 Carnë Draug <carandraug@octave.org>
 ##
-## This program is free software; you can redistribute it and/or modify it under
-## the terms of the GNU General Public License as published by the Free Software
-## Foundation; either version 3 of the License, or (at your option) any later
-## version.
+## This program is free software; you can redistribute it and/or
+## modify it under the terms of the GNU General Public License as
+## published by the Free Software Foundation; either version 3 of the
+## License, or (at your option) any later version.
 ##
-## This program is distributed in the hope that it will be useful, but WITHOUT
-## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-## FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
-## details.
+## This program is distributed in the hope that it will be useful, but
+## WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+## General Public License for more details.
 ##
-## You should have received a copy of the GNU General Public License along with
-## this program; if not, see <http://www.gnu.org/licenses/>.
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, see
+## <http:##www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn  {Function File} {} im2bw (@var{img}, threshold)
-## @deftypefnx {Function File} {} im2bw (@var{X}, @var{cmap}, threshold)
+## @deftypefn  {Function File} {} im2bw (@var{img})
+## @deftypefnx {Function File} {} im2bw (@var{X}, @var{cmap})
+## @deftypefnx {Function File} {} im2bw (@dots{}, @var{threshold})
+## @deftypefnx {Function File} {} im2bw (@dots{}, @var{method})
 ## Convert image to binary, black and white, by threshold.
 ##
 ## The input image @var{img} can either be a grayscale or RGB image.  In the later
@@ -26,19 +29,25 @@
 ##
 ## The value of @var{threshold} should be in the range [0,1] independently of the
 ## class of @var{img}.  Values from other classes can be converted to the correct
-## value with @code{im2double} for example.  For an automatic threshold, consider
-## using @code{graythresh}.
+## value with @code{im2double}:
 ##
 ## @example
-## @group
-## bw = im2bw (img, graythresh (img));
-## @end group
+## bw = im2bw (img_of_class_uint8, im2double (thresh_of_uint8_class));
+## @end example
+##
+## For an automatic threshold value, consider using @code{graythresh}.
+## The argument @var{method} is a string that specifies a valid algorithm
+## available in @code{graythresh}.  The following are equivalent:
+##
+## @example
+## bw = im2bw (img, "moments");
+## bw = im2bw (img, graythresh (img(:), "moments"));
 ## @end example
 ##
 ## @seealso{graythresh, ind2gray, rgb2gray}
 ## @end deftypefn
 
-function BW = im2bw (img, cmap, thres = 0.5)
+function BW = im2bw (img, cmap, thresh = 0.5)
 
   if (nargin < 1 || nargin > 3)
     print_usage ();
@@ -47,14 +56,14 @@ function BW = im2bw (img, cmap, thres = 0.5)
   elseif (nargin == 3 && ! iscolormap (cmap))
     error ("im2bw: CMAP must be a colormap");
   elseif (nargin == 2)
-    thres = cmap;
+    thresh = cmap;
   endif
 
   if (! isimage (img))
     error ("im2bw: IMG must be an image");
-  elseif (! isnumeric (thres) || ! isscalar (thres) || ! isreal (thres) ||
-      thres < 0 || thres > 1)
-    error ("im2bw: THRESHOLD must be a scalar in the interval [0, 1]");
+  elseif (! ischar (thresh) && ! (isnumeric (thresh) && isscalar (thresh)
+                                  && thresh >= 0 && thresh <= 1))
+    error ("im2bw: THRESHOLD must be a string or a scalar in the interval [0 1]");
   endif
 
   if (islogical (img))
@@ -72,6 +81,10 @@ function BW = im2bw (img, cmap, thres = 0.5)
       ## Everything else, we do nothing, no matter how many dimensions
     endif
 
+    if (ischar (thresh))
+      thresh = graythresh (img(:), thresh);
+    endif
+
     ## Convert the threshold value to same class as the image which
     ## is faster and saves more memory than the opposite.
     if (isinteger (img))
@@ -82,15 +95,15 @@ function BW = im2bw (img, cmap, thres = 0.5)
       cls = class(img);
       I_min = double (intmin (cls));
       I_range = double (intmax (cls)) - I_min;
-      thres = cast (floor ((thres * I_range) + I_min), cls);
-    elseif (isfloat (img) || isbool (img))
+      thresh = cast (floor ((thresh * I_range) + I_min), cls);
+    elseif (isfloat (img))
       ## do nothing
     else
       ## we should have never got here in the first place anyway
-      error("im2bw: unsupported image class");
+      error ("im2bw: unsupported image of class '%s'", class (img));
     endif
 
-    tmp = (img > thres); # matlab compatible (not "greater than or equal")
+    tmp = (img > thresh);
   endif
 
   if (nargout > 0)
@@ -146,3 +159,14 @@ endfunction
 %!   s += nnz (im2bw (img, i));
 %! endfor
 %! assert (s, 360445)
+
+%!test
+%! im = [((randn(10)/10)+.3) ((randn(10)/10)+.7)];
+%! assert (im2bw (im, "Otsu"), im2bw (im, graythresh (im(:), "Otsu")))
+%! assert (im2bw (im, "moments"), im2bw (im, graythresh (im(:), "moments")))
+
+%!test
+%! im = [((randn(10)/10)+.3) ((randn(10)/10)+.7)];
+%! im = reshape (im, [10 10 1 2]);
+%! assert (im2bw (im, "Otsu"), im2bw (im, graythresh (im(:), "Otsu")))
+%! assert (im2bw (im, "moments"), im2bw (im, graythresh (im(:), "moments")))

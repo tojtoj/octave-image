@@ -30,6 +30,10 @@
  ** The function is isgray(), isind(), and isrgb() will return true for images
     of class single in addition to double.
 
+ ** im2bw() now accepts a string specifying a graythresh() algorithm
+    as an alternative to a threshold value.  This simplifies the very
+    common usage of `im2bw (im, graythresh (im, method))`.
+
  ** fspecial() is now capable to create N dimensional gaussian filters.
 
  ** Other functions that have been changed for smaller bugfixes, increased
