@@ -570,6 +570,9 @@ endfunction
 function pixel_list = rp_pixel_list (cc, idx)
   nd = numel (cc.ImageSize);
   pixel_list = cell2mat (nthargout (1:nd, @ind2sub, cc.ImageSize, idx));
+  ## If idx is empty, pixel_list will have size (0x0) so we need to expand
+  ## it to (0xnd).  Unfortunately, in2sub() returns (0x0) and not (0x1)
+  pixel_list = postpad (pixel_list, nd, 0, 2);
   pixel_list(:,[1 2]) = pixel_list(:,[2 1]);
 endfunction
 
@@ -611,7 +614,10 @@ function weighted_centroid = rp_weighted_centroid (cc, img, pixel_list,
   nd = numel (cc.ImageSize);
   rep_totals = vec (repelems (totals, [1:no; vec(area, 2)]));
 
-  vals = img(pixel_idx_list);
+  ## Note that we need 1 column, even if pixel_idx_list is [], hence (:)
+  ## so that we get (0x1) instead of (0x0)
+  vals = img(pixel_idx_list)(:);
+
   weighted_pixel_list = pixel_list .* (double (vals) ./ rep_totals);
   weighted_centroid = accumarray (subs_nd, weighted_pixel_list(:), [no nd]);
 endfunction
@@ -633,7 +639,8 @@ endfunction
 function subs_nd = rp_accum_subs_nd (cc, subs)
   nd = numel (cc.ImageSize);
   no = cc.NumObjects;
-  subs_nd = vec (subs .+ [0:no:(no*nd-1)]);
+  ## FIXME workaround bug #47085
+  subs_nd = vec (bsxfun (@plus, subs, [0:no:(no*nd-1)]));
 endfunction
 
 ## Total/Integrated density of each region.
@@ -1096,3 +1103,19 @@ endfunction
 
 %!error <L must be non-negative integers> regionprops ([1 -2   0 3])
 %!error <L must be non-negative integers> regionprops ([1  1.5 0 3])
+
+## Test for images with zero objects
+%!test
+%! im = rand (5);
+%!
+%! ## First do this so we get a list of all supported properties and don't
+%! ## have to update the list each time.
+%! bw = false (5);
+%! bw(13) = true;
+%! props = regionprops (bw, im, "all");
+%! all_props = fieldnames (props);
+%!
+%! bw = false (5);
+%! props = regionprops (bw, im, "all");
+%! assert (size (props), [0 1])
+%! assert (sort (all_props), sort (fieldnames (props)))
