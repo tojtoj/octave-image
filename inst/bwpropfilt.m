@@ -97,14 +97,11 @@ function bwfiltered = bwpropfilt (bw, varargin)
     conn = conndef (ndims (bw), "maximal");
   endif
 
-  ## FIXME: we need to call bwconncomp with our specific connectivity and
-  ##        then pass its struct to regionprops. That may be faster but is
-  ##        not yet implemented so we call labelmatrix
-  labeled = labelmatrix (bwconncomp (bw, conn));
+  cc = bwconncomp (bw, conn);
   if (no_gray)
-    stats = regionprops (labeled, {"PixelIdxList", attrib});
+    stats = regionprops (cc, {"PixelIdxList", attrib});
   else
-    stats = regionprops (labeled, img, {"PixelIdxList", attrib});
+    stats = regionprops (cc, img, {"PixelIdxList", attrib});
   endif
 
   n_objs  = numel (stats);
