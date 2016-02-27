@@ -87,7 +87,7 @@ function varargout = bwperim (bw, conn)
   endif
 endfunction
 
-%!shared in, out
+%!test
 %! in = [ 1   1   1   1   0   1   1   0   1   1
 %!        1   1   0   1   1   1   1   1   1   0
 %!        1   1   1   0   1   1   1   1   1   1
@@ -109,8 +109,8 @@ endfunction
 %!        1   0   0   0   0   0   1   1   0   1
 %!        1   0   0   0   1   1   0   0   1   1
 %!        1   1   1   1   0   1   0   1   1   0];
-%!assert (bwperim (in), logical (out));
-%!assert (bwperim (in, 4), logical (out));
+%! assert (bwperim (in), logical (out))
+%! assert (bwperim (in, 4), logical (out))
 %!
 %! out = [1   1   1   1   0   1   1   0   1   1
 %!        1   1   0   1   1   1   1   1   1   0
@@ -122,7 +122,7 @@ endfunction
 %!        1   0   0   0   0   1   1   1   1   1
 %!        1   0   0   1   1   1   0   0   1   1
 %!        1   1   1   1   0   1   0   1   1   0];
-%!assert (bwperim (in, 8), logical (out));
+%! assert (bwperim (in, 8), logical (out))
 %!
 %! out = [1   1   1   1   0   1   1   0   1   1
 %!        1   0   0   0   0   1   0   0   1   0
@@ -134,10 +134,10 @@ endfunction
 %!        1   0   0   0   0   1   1   0   0   1
 %!        1   0   0   1   0   1   0   0   1   1
 %!        1   1   1   1   0   1   0   1   1   0];
-%!assert (bwperim (in, [1 0 0; 0 1 0; 0 0 1]), logical (out));
+%! assert (bwperim (in, [1 0 0; 0 1 0; 0 0 1]), logical (out))
 
 ## test that any non-zero value is valid (even i and Inf)
-%!shared in, out
+%!test
 %! in = [ 0   0   0   0   0   0   0
 %!        0   0   5   0   0   1   9
 %!        0 Inf   9   7   0   0   0
@@ -152,10 +152,10 @@ endfunction
 %!        0   1   0   0   1   0   0
 %!        0   1   1   1   1   0   0
 %!        0   0   0   0   0   0   0];
-%!assert (bwperim (in), logical (out));
+%! assert (bwperim (in), logical (out))
 
 ## test for 3D
-%!shared in, out
+%!test
 %! in = reshape (magic(16), [8 8 4]) > 50;
 %! out(:,:,1) = [
 %!    1   1   0   1   0   1   1   1
@@ -193,7 +193,7 @@ endfunction
 %!    1   1   1   0   1   0   1   1
 %!    1   1   1   0   1   0   1   1
 %!    1   0   1   1   1   1   1   0];
-%!assert (bwperim (in), logical (out));
+%! assert (bwperim (in), logical (out))
 %!
 %! out(:,:,1) = [
 %!    1   1   0   1   0   1   1   1
@@ -231,7 +231,7 @@ endfunction
 %!    1   1   1   0   1   0   1   1
 %!    1   1   1   0   1   0   1   1
 %!    1   0   1   1   1   1   1   0];
-%!assert (bwperim (in, 18), logical (out));
+%! assert (bwperim (in, 18), logical (out))
 
 %!error bwperim ("text")
 %!error bwperim (rand (10), 5)
@@ -245,3 +245,20 @@ endfunction
 %! p(1:4,[2 4]) = true;
 %! assert (bwperim (a, [0 0 0; 1 1 1; 0 0 0]), p)
 
+## This is not a bug.  Since connectivity defaults to maximum for the
+## number of dimensions, a single slice will be displayed completely
+## (this is obvious but very easy to forget)
+%!test
+%! a = false (8, 8, 5);
+%! a(4:5,4:5,2:4) = true;
+%! a(2:7,2:7,3) = true;
+%! assert (bwperim (a, 26), a)
+%!
+%! ## It is easy to forget that is correct
+%! b = a;
+%! b(4:5, 4:5, 3) = false;
+%! assert (bwperim (a), b)
+%!
+%! c = a;
+%! c(3:6,3:6,3) = false;
+%! assert (bwperim (a, 4), c)
