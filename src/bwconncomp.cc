@@ -307,6 +307,11 @@ or with a binary matrix representing a connectivity array.  Defaults to\n\
 %! cc = bwconncomp (a, 4);
 %! assert (rows (cc.PixelIdxList), 1)
 %! assert (columns (cc.PixelIdxList) > 1)
+
+## PixelIdxList is a row vector, even when there's zero objects
+%!assert (bwconncomp (false (5)), struct ("ImageSize", [5 5], "NumObjects", 0,
+%!                                        "PixelIdxList", {cell(1, 0)},
+%!                                        "Connectivity", 8))
 */
 
 // PKG_ADD: autoload ("bwareaopen", which ("bwconncomp"));
