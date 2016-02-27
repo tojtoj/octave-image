@@ -236,11 +236,17 @@ function props = regionprops (bw, varargin)
         error ("regionprops: L must be non-negative integers only");
       endif
     endif
-    l_idx = find (bw);
     n_obj = max (bw(:));
-    cc = struct ("ImageSize", size (bw), "NumObjects", n_obj,
-                 "PixelIdxList", {accumarray(bw(l_idx)(:), l_idx, [1 n_obj],
-                                             @(x) {x})});
+    if (! n_obj)
+      ## workaround for https://savannah.gnu.org/bugs/index.php?47287
+      cc = struct ("ImageSize", size (bw), "NumObjects", n_obj,
+                   "PixelIdxList", {cell(1, 0)});
+    else
+      l_idx = find (bw);
+      cc = struct ("ImageSize", size (bw), "NumObjects", n_obj,
+                   "PixelIdxList", {accumarray(bw(l_idx)(:), l_idx, [1 n_obj],
+                                               @(x) {x})});
+    endif
   else
     error ("regionprops: no valid BW, CC, or L input");
   endif
@@ -1104,7 +1110,7 @@ endfunction
 %!error <L must be non-negative integers> regionprops ([1 -2   0 3])
 %!error <L must be non-negative integers> regionprops ([1  1.5 0 3])
 
-## Test for images with zero objects
+## Test for BW images with zero objects
 %!test
 %! im = rand (5);
 %!
@@ -1117,5 +1123,37 @@ endfunction
 %!
 %! bw = false (5);
 %! props = regionprops (bw, im, "all");
+%! assert (size (props), [0 1])
+%! assert (sort (all_props), sort (fieldnames (props)))
+
+## Test for labeled images with zeros objects
+%!test
+%! im = rand (5);
+%!
+%! ## First do this so we get a list of all supported properties and don't
+%! ## have to update the list each time.
+%! labeled = zeros (5);
+%! labeled(13) = 1;
+%! props = regionprops (labeled, im, "all");
+%! all_props = fieldnames (props);
+%!
+%! labeled = zeros (5);
+%! props = regionprops (labeled, im, "all");
+%! assert (size (props), [0 1])
+%! assert (sort (all_props), sort (fieldnames (props)))
+
+## Test for bwconncomp struct with zeros objects
+%!test
+%! im = rand (5);
+%!
+%! ## First do this so we get a list of all supported properties and don't
+%! ## have to update the list each time.
+%! bw = false (5);
+%! bw(13) = true;
+%! props = regionprops (bwconncomp (bw), im, "all");
+%! all_props = fieldnames (props);
+%!
+%! bw = false (5);
+%! props = regionprops (bwconncomp (bw), im, "all");
 %! assert (size (props), [0 1])
 %! assert (sort (all_props), sort (fieldnames (props)))
