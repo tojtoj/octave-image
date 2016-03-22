@@ -25,7 +25,7 @@ OCTAVE_IMAGE_PROG_CXX_CXX11(
   [],
   [AC_MSG_ERROR([*** A compiler with support for C++11 is required])])
 
-CXX11_SWITCH=$(echo "$CXX" | $SED "s,^$image_save_CXX ,,")
+CXX11_SWITCH=$(echo "$CXX" | $SED "s,^$image_save_CXX,,")
 MKOCTFILE="$MKOCTFILE $CXX11_SWITCH"
 
 
