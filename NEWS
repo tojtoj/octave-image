@@ -36,6 +36,10 @@
 
  ** fspecial() is now capable to create N dimensional gaussian filters.
 
+ ** The following functions have been changed to support N dimensions:
+
+      checkerboard
+
  ** Other functions that have been changed for smaller bugfixes, increased
     Matlab compatibility, or performance:
 
