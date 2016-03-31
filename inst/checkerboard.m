@@ -50,3 +50,44 @@ function check_checkerboard (in, name)
     error ("checkerboard: %s must be a positive integer.", name)
   endif
 endfunction
+
+%!test
+%! out = zeros (80);
+%! i1 = ((1:20:80) .+ (0:9)')(:);
+%! i2 = ((11:20:80) .+ (0:9)')(:);
+%! out(i1, i2) = 1;
+%! out(i2, i1) = 1;
+%! i1r = ((41:20:80) .+ (0:9)')(:);
+%! i2r = ((51:20:80) .+ (0:9)')(:);
+%! out(i2, i1r) = 0.7;
+%! out(i1, i2r) = 0.7;
+%! assert (checkerboard (), out)
+%! assert (checkerboard (10, 4, 4), out)
+
+%!test
+%! out = zeros (8);
+%! out(2:2:8, 1:2:8) = 1;
+%! out(1:2:8, 2:2:8) = 1;
+%! out(1:2:8, 6:2:8) = 0.7;
+%! out(2:2:8, 5:2:8) = 0.7;
+%! assert (checkerboard (1), out)
+%! assert (checkerboard (1, 4), out)
+%! assert (checkerboard (1, 4, 4), out)
+
+%!test
+%! out = zeros (10);
+%! out(2:2:10, 1:2:10) = 1;
+%! out(1:2:10, 2:2:10) = 1;
+%! out(1:2:10, 6:2:10) = 0.7;
+%! out(2:2:10, 7:2:10) = 0.7;
+%! assert (checkerboard (1, 5), out)
+%! assert (checkerboard (1, 5, 5), out)
+
+%!test
+%! out = zeros (20);
+%! out([1:4:20 2:4:20], [3:4:20 4:4:20]) = 1;
+%! out([3:4:20 4:4:20], [1:4:20 2:4:20]) = 1;
+%! out([1:4:20 2:4:20], [11:4:20 12:4:20]) = 0.7;
+%! out([3:4:20 4:4:20], [13:4:20 14:4:20]) = 0.7;
+%! assert (checkerboard (2, 5), out)
+%! assert (checkerboard (2, 5, 5), out)
