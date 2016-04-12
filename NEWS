@@ -50,6 +50,7 @@
       imfilter
       imresize
       imremap
+      mat2gray
       montage
       normxcorr2
 
