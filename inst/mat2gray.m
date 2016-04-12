@@ -91,8 +91,9 @@ function in = mat2gray (in, scale)
   ## need to get the index before starting editing
   idx = (in > out_min & in < out_max);
 
+  idx_max = (in >= out_max);
   in(in <= out_min) = 0;
-  in(in >= out_max) = 1;
+  in(idx_max) = 1;
   in(idx) = (1/(out_max - out_min)) * (double(in(idx)) - out_min);
 
   ## if the given min and max are in the inverse order...
@@ -110,3 +111,6 @@ endfunction
 %!assert(mat2gray([-1 0 0.5 3], [2 2]), [0 0 0.5 1]);      # equal min and max
 %!assert(mat2gray(ones(3*0.5)), ones(3*0.5));      # equal min and max from the image (not set)
 %!assert(mat2gray([1 2 3], [3 1]), [1 0.5 0]);    # max and min inverted
+
+## bug #47516 (when MIN is greater than input max value)
+%!assert (mat2gray ([-3 -2 -1]), [0 0.5 1])
