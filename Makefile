@@ -6,21 +6,21 @@
 ## notice and this notice are preserved.  This file is offered as-is,
 ## without any warranty.
 
-PACKAGE = $(shell grep "^Name: " DESCRIPTION | cut -f2 -d" ")
-VERSION = $(shell grep "^Version: " DESCRIPTION | cut -f2 -d" ")
+PACKAGE := $(shell grep "^Name: " DESCRIPTION | cut -f2 -d" ")
+VERSION := $(shell grep "^Version: " DESCRIPTION | cut -f2 -d" ")
 
-TARGET_DIR      = target/
-RELEASE_DIR     = $(TARGET_DIR)$(PACKAGE)-$(VERSION)
-RELEASE_TARBALL = $(TARGET_DIR)$(PACKAGE)-$(VERSION).tar.gz
-HTML_DIR        = $(TARGET_DIR)$(PACKAGE)-html
-HTML_TARBALL    = $(TARGET_DIR)$(PACKAGE)-html.tar.gz
+TARGET_DIR      := target
+RELEASE_DIR     := $(TARGET_DIR)/$(PACKAGE)-$(VERSION)
+RELEASE_TARBALL := $(TARGET_DIR)/$(PACKAGE)-$(VERSION).tar.gz
+HTML_DIR        := $(TARGET_DIR)/$(PACKAGE)-html
+HTML_TARBALL    := $(TARGET_DIR)/$(PACKAGE)-html.tar.gz
 
-M_SOURCES   = $(wildcard inst/*.m) $(patsubst %.in,%,$(wildcard src/*.m.in))
-CC_SOURCES  = $(wildcard src/*.cc)
-OCT_FILES   = $(patsubst %.cc,%.oct,$(CC_SOURCES))
+M_SOURCES   := $(wildcard inst/*.m) $(patsubst %.in,%,$(wildcard src/*.m.in))
+CC_SOURCES  := $(wildcard src/*.cc)
+OCT_FILES   := $(patsubst %.cc,%.oct,$(CC_SOURCES))
 ## This has the issue that it won't include PKG_ADD from src/*.m since
 ## they may not exist yet to be grepped.
-PKG_ADD     = $(shell grep -Pho '(?<=// PKG_ADD: ).*' $(CC_SOURCES) $(M_SOURCES))
+PKG_ADD     := $(shell grep -Pho '(?<=// PKG_ADD: ).*' $(CC_SOURCES) $(M_SOURCES))
 
 OCTAVE ?= octave --no-window-system --silent
 
@@ -41,7 +41,7 @@ help:
 	@echo "   clean   - Remove releases, html documentation, and oct files"
 
 %.tar.gz: %
-	tar -c -f - --posix -C "$(TARGET_DIR)" "$(notdir $<)" | gzip -9n > "$@"
+	tar -c -f - --posix -C "$(TARGET_DIR)/" "$(notdir $<)" | gzip -9n > "$@"
 
 $(RELEASE_DIR): .hg/dirstate
 	@echo "Creating package version $(VERSION) release ..."
