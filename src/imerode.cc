@@ -355,7 +355,7 @@ base_action (const std::string& func, const bool& erosion, const octave_value_li
   for (octave_idx_type idx = 0; idx < se.numel (); idx++)
     {
       const strel se_elem = se(idx);
-      if (im.is_bool_matrix ())
+      if (im.is_bool_type ())
         im = erode<boolNDArray> (im.bool_array_value (), se_elem, shape, erosion);
       else if (im.is_int8_type ())
         im = erode<int8NDArray> (im.int8_array_value (), se_elem, shape, erosion);
