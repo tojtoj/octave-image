@@ -228,11 +228,8 @@ erode (const T& im, const strel& se, const std::string& shape, const bool& erosi
 {
   typedef typename T::element_type P;
 
-  const boolNDArray nhood = se.get_nhood ();
-
   // If image is empty, return empty of the same class.
-  // If se is empty, return the same image as input.
-  if (im.is_empty () || nhood.is_empty ())
+  if (im.is_empty ())
     return octave_value (im);
 
   // In the case of floating point, complex and integers numbers, both
@@ -243,12 +240,16 @@ erode (const T& im, const strel& se, const std::string& shape, const bool& erosi
   if (erosion)
     padded = pad_matrix<T> (im, se, octave_Inf, shape);
   else
-    if (typeid (P) == typeid (bool))
-      padded = pad_matrix<T> (im, se, false, shape);
-    else
-      padded = pad_matrix<T> (im, se, -octave_Inf, shape);
+    {
+      if (typeid (P) == typeid (bool))
+        padded = pad_matrix<T> (im, se, false, shape);
+      else
+        padded = pad_matrix<T> (im, se, -octave_Inf, shape);
+    }
   if (error_state)
     return octave_value ();
+
+  const boolNDArray nhood = se.get_nhood ();
 
   const octave_idx_type ndims   = padded.ndims ();
   const dim_vector nhood_size   = nhood.dims ().redim (ndims);

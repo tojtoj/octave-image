@@ -47,6 +47,8 @@
       grayslice
       im2bw
       im2col
+      imdilate
+      imerode
       imfilter
       imresize
       imremap

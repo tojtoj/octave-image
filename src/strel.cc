@@ -53,6 +53,15 @@ octave::image::strel::strel (const octave_value& arg)
 
   nhood   = feval ("getnhood",  se)(0).bool_array_value ();
   height  = feval ("getheight", se)(0).array_value ();
+
+  // Maybe we should handle this better but how?  This makes imerode
+  // and imdilate work with a [] strel
+  if (nhood.is_empty ())
+    {
+      nhood = boolNDArray (dim_vector (1, 1), false);
+      height = NDArray (dim_vector (1, 1), 0);
+    }
+
   ini_ctor ();
   origin  = default_origin ();
 
