@@ -433,9 +433,10 @@ at indices @code{floor ([size(@var{SE})/2] + 1)}.\n\
 }
 
 /*
-## using [1] or nothing as mask returns the same value
+## using [1] as mask returns the same value
 %!assert (imerode (eye (3), [1]), eye (3));
-%!assert (imerode (eye (3), []), eye (3));
+## and an empty SE returns all Inf
+%!assert (imerode (eye (3), []), Inf (3, 3));
 
 ## test normal usage with non-symmetric SE
 %!test
@@ -850,4 +851,77 @@ at indices @code{floor ([size(@var{SE})/2] + 1)}.\n\
 %!  210   210   255   255   255   211   240   254];
 %! assert (imdilate (im, se), out);
 %! assert (imdilate (uint16 (im), se), uint16 (out));
+*/
+
+/*
+## bug #47879 (invalid but mathematically interesting corner-case)
+## This is all about empty sets, either by using a blank/empty/zeros SE
+## or by picking a SE that "picks" elements only from the borders.  These
+## are two completely different issues that may look the same.  See a more
+## detailed explanation at http://stackoverflow.com/a/37117842/1609556
+
+%!test    # scalar blank SE
+%! se = 0;
+%! assert (imerode (5, se), Inf)
+%! assert (imerode (true, se), true)
+%! assert (imerode (false, se), true)
+%! assert (imerode (uint8 (3), se), uint8 (255))
+%!
+%! assert (imdilate (5, se), -Inf)
+%! assert (imdilate (true, se), false)
+%! assert (imdilate (false, se), false)
+%! assert (imdilate (uint8 (3), se), uint8 (0))
+
+%!test    # empty SE
+%! se = [];
+%! assert (imerode (5, se), Inf)
+%! assert (imerode (true, se), true)
+%! assert (imerode (false, se), true)
+%! assert (imerode (uint8 (3), se), uint8 (255))
+%!
+%! assert (imdilate (5, se), -Inf)
+%! assert (imdilate (true, se), false)
+%! assert (imdilate (false, se), false)
+%! assert (imdilate (uint8 (3), se), uint8 (0))
+
+%!test    # non-scalar blank SE
+%! se = zeros (3, 3);
+%! assert (imerode (5, se), Inf)
+%! assert (imerode (true, se), true)
+%! assert (imerode (false, se), true)
+%! assert (imerode (uint8 (3), se), uint8 (255))
+%!
+%! assert (imdilate (5, se), -Inf)
+%! assert (imdilate(true, se), false)
+%! assert (imdilate (false, se), false)
+%! assert (imdilate (uint8 (3), se), uint8 (0))
+
+%!test    # erode only with out-of-border elements
+%! se = [1 1 1; 1 0 1; 1 1 1];
+%! assert (imerode (5, se), Inf)
+%! assert (imerode (true, se), true)
+%!
+%! assert (imdilate (5, se), -Inf)
+%! assert (imdilate (true, se), false)
+
+%!test    # only true elements of SE are out-of-border
+%! se = [0 0 0; 1 0 0; 1 1 0];
+%! assert (imerode (zeros (3), se), [0 0 0; 0 0 0; Inf 0 0])
+%! assert (imerode (false (3), se), logical ([0 0 0; 0 0 0; 1 0 0]))
+%! assert (imdilate (zeros (3), se), [0 0 -Inf; 0 0 0; 0 0 0])
+%! assert (imdilate (false (3), se), false (3, 3))
+%!
+%! se = [0 0 0; 0 0 0; 1 1 1];
+%! assert (imerode (zeros (3, 3), se), [0 0 0; 0 0 0; Inf Inf Inf])
+%! assert (imerode (false (3, 3), se), logical ([0 0 0; 0 0 0; 1 1 1]))
+%! assert (imdilate (zeros (3, 3), se), [-Inf -Inf -Inf; 0 0 0; 0 0 0])
+%! assert (imdilate (false (3, 3), se), false (3, 3))
+
+%!test  # only true elements of even-sized SE are out-of-border
+%! se = logical ([0 1; 1 1]);
+%! assert (imerode (false (3, 3), se), logical ([0 0 0; 0 0 0; 0 0 1]))
+%! assert (imerode (zeros (3, 3), se), [0 0 0; 0 0 0; 0 0 Inf])
+%!
+%! assert (imdilate (false (3, 3), se), false (3, 3))
+%! assert (imdilate (zeros (3, 3), se), [-Inf 0 0; 0 0 0; 0 0 0])
 */
