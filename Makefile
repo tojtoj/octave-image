@@ -86,5 +86,5 @@ run: all
 
 clean:
 	rm -rf $(RELEASE_DIR) $(RELEASE_TARBALL) $(HTML_TARBALL) $(HTML_DIR)
-	test -e src/Makefile && $(MAKE) -C src clean
+	test ! -e src/Makefile || $(MAKE) -C src clean
 
