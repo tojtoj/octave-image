@@ -20,7 +20,7 @@ CC_SOURCES  := $(wildcard src/*.cc)
 OCT_FILES   := $(patsubst %.cc,%.oct,$(CC_SOURCES))
 ## This has the issue that it won't include PKG_ADD from src/*.m since
 ## they may not exist yet to be grepped.
-PKG_ADD     := $(shell grep -Pho '(?<=(//|\#\#) PKG_ADD: ).*' $(CC_SOURCES) $(M_SOURCES))
+PKG_ADD     := $(shell grep -sPho '(?<=(//|\#\#) PKG_ADD: ).*' $(CC_SOURCES) $(M_SOURCES))
 
 OCTAVE ?= octave --no-window-system --silent
 
