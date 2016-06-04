@@ -99,4 +99,4 @@ run: all
 
 clean:
 	rm -rf $(TARGET_DIR)
-	test -e src/Makefile && $(MAKE) -C src clean
+	test ! -e src/Makefile || $(MAKE) -C src clean
