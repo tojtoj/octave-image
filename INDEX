@@ -147,7 +147,11 @@ Types and Type conversions
  isgray
  isind
  isrgb
+ lab2double
  lab2rgb
+ lab2single
+ lab2uint16
+ lab2uint8
  lab2xyz
  label2rgb
  mat2gray

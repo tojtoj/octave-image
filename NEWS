@@ -6,7 +6,11 @@
       imgetfile
       impyramid
       imquantize
+      lab2double
       lab2rgb
+      lab2single
+      lab2uint16
+      lab2uint8
       lab2xyz
       rgb2lab
       rgb2xyz
