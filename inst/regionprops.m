@@ -1103,12 +1103,12 @@ endfunction
 % Test the diameter of a circle of diameter 21.
 %!test
 %! I = zeros (40);
-%! disk = fspecial ('disk',10);
-%! disk = disk./max (disk(:));
+%! disk = fspecial ("disk",10);
+%! disk = disk ./ max (disk(:));
 %! I(10:30, 10:30) = disk;
-%! bw = im2bw (I);
-%! props = regionprops (bw, 'Perimeter');
-%! assert (props.Perimeter, 62.2, 0.1);
+%! bw = im2bw (I, 0.5);
+%! props = regionprops (bw, "Perimeter");
+%! assert (props.Perimeter, 10*4 + (sqrt (2) * 4)*4)
 
 ## Test guessing between labelled and binary image
 %!assert (regionprops ([1 0 1; 1 0 1], "Area"), struct ("Area", 4))
