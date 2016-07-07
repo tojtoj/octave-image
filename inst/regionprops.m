@@ -434,6 +434,7 @@ function props = regionprops (bw, varargin)
       case "minoraxislength"
       case "orientation"
       case "perimeter"
+        values.perimeter = rp_perimeter (cc, bw);
       case "solidity"
       case "maxintensity"
         values.maxintensity = rp_max_intensity (cc, img,
@@ -502,6 +503,7 @@ function props = regionprops (bw, varargin)
       case "minoraxislength"
       case "orientation"
       case "perimeter"
+        [props.Perimeter] = num2cell (values.perimeter){:};
       case "solidity"
       case "maxintensity"
         [props.MaxIntensity] = num2cell (values.maxintensity){:};
@@ -567,6 +569,23 @@ function bb_images = rp_image (cc, bw, idx, subs, subarray_idx)
   bb_images = cellfun (@subsref, {L}, sub_structs, "UniformOutput", false);
   bb_images = cellfun (@eq, bb_images, num2cell (1:no)(:),
                        "UniformOutput", false);
+endfunction
+
+function perim = rp_perimeter (cc, bw)
+  if (! islogical (bw)) # Then input was not really a bw. Create it.
+    bw = false (cc.ImageSize);
+    bw(cell2mat (cc.PixelIdxList(:))) = true;
+  endif
+
+  no = cc.NumObjects;
+  boundaries = bwboundaries (bw, 8, "noholes");
+  npx = cellfun ("size", boundaries, 1);
+  dists = diff (cell2mat (boundaries));
+  dists(cumsum (npx)(1:end-1),:) = [];
+  dists = sqrt (sumsq (dists, 2));
+
+  subs = repelems (1:no, [1:no; (npx-1)(:)']);
+  perim = accumarray (subs(:), dists(:), [no 1]);
 endfunction
 
 function idx = rp_pixel_idx_list (cc)
@@ -683,18 +702,6 @@ function retval = old_regionprops (bw, varargin)
           idx = length (bb)/2 + 1;
           retval (k).Extent = area / prod (bb(idx:end));
         endfor
-
-      case "perimeter"
-        if (N > 2)
-          warning ("regionprops: skipping perimeter for Nd image");
-        else
-          for k = 1:num_labels
-            perim_pixels_sorted = bwboundaries (bw, 8){1, 1};
-            dist_xy = diff (perim_pixels_sorted).^2;
-            dist_abs = sqrt (sum (dist_xy, 2));
-            retval(k).Perimeter = sum (dist_abs);
-          endfor
-        endif
 
       case "filledarea"
         for k = 1:num_labels
@@ -1100,7 +1107,7 @@ endfunction
 %! shouldbe = [0.5  1.5; 4.5  1.5; 4.5 1.5; 4.5 3.5; 4.5 3.5; 1.5 3.5; 0.5 2.5; 0.5  1.5];
 %! assert (t.Extrema, shouldbe,  eps);
 
-% Test the diameter of a circle of diameter 21.
+## Test the diameter of a circle of diameter 21.
 %!test
 %! I = zeros (40);
 %! disk = fspecial ("disk",10);
@@ -1108,7 +1115,19 @@ endfunction
 %! I(10:30, 10:30) = disk;
 %! bw = im2bw (I, 0.5);
 %! props = regionprops (bw, "Perimeter");
-%! assert (props.Perimeter, 10*4 + (sqrt (2) * 4)*4)
+%! assert (props.Perimeter, 10*4 + (sqrt (2) * 4)*4, eps*100)
+%!
+%! props = regionprops (bwconncomp (bw), "Perimeter");
+%! assert (props.Perimeter, 10*4 + (sqrt (2) * 4)*4, eps*100)
+
+%!assert (regionprops (bw2d, "Perimeter"),
+%!        struct ("Perimeter", {(sqrt (2)*6 + 4); (sqrt (2)*3 + 4)}), eps*10)
+
+## Test Perimeter with nested objects
+%!assert (regionprops (bw2d_insides, "Perimeter"),
+%!        struct ("Perimeter", {20; 4}))
+%!assert (regionprops (bwconncomp (bw2d_insides), "Perimeter"),
+%!        struct ("Perimeter", {20; 4}))
 
 ## Test guessing between labelled and binary image
 %!assert (regionprops ([1 0 1; 1 0 1], "Area"), struct ("Area", 4))
