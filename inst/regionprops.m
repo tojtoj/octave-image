@@ -280,50 +280,7 @@ function props = regionprops (bw, varargin)
   else
     properties = {"basic"};
   endif
-
-  if (any (strcmp ("basic", properties)))
-    properties(end+1:end+3) = {"area", "centroid", "boundingbox"};
-  endif
-  if (any (strcmp ("all", properties)))
-    properties(end+1:end+9) = {
-      "area",
-      "boundingbox",
-      "centroid",
-      "filledarea",
-      "filledimage",
-      "image",
-      "pixelidxlist",
-      "pixellist",
-      "subarrayidx",
-    };
-    if (is_2d)
-      properties(end+1:end+13) = {
-        "convexarea",
-        "convexhull",
-        "conveximage",
-        "eccentricity",
-        "equivdiameter",
-        "eulernumber",
-        "extent",
-        "extrema",
-        "majoraxislength",
-        "minoraxislength",
-        "orientation",
-        "perimeter",
-        "solidity",
-      };
-    endif
-    if (has_gray)
-      properties(end+1:end+5) = {
-        "maxintensity",
-        "meanintensity",
-        "minintensity",
-        "pixelvalues",
-        "weightedcentroid",
-      };
-    endif
-  endif
-  properties(strcmp ("basic", properties) | strcmp ("all", properties)) = [];
+  properties = select_properties (properties, is_2d, has_gray);
 
   ## Some properties require the value of others.  In addition, most
   ## properties have common code.  Ideally, to avoid repeating
@@ -521,6 +478,76 @@ function props = regionprops (bw, varargin)
     endswitch
   endfor
 
+endfunction
+
+function props = select_properties (props, is_2d, has_gray)
+  persistent props_basic = {
+    "area",
+    "boundingbox",
+    "centroid",
+  };
+  persistent props_2d = {
+    "convexarea",
+    "convexhull",
+    "conveximage",
+    "eccentricity",
+    "equivdiameter",
+    "extent",
+    "extrema",
+    "majoraxislength",
+    "minoraxislength",
+    "orientation",
+    "perimeter",
+    "solidity",
+  };
+  persistent props_gray = {
+    "maxintensity",
+    "meanintensity",
+    "minintensity",
+    "pixelvalues",
+    "weightedcentroid",
+  };
+  persistent props_others = {
+    "eulernumber",
+    "filledarea",
+    "filledimage",
+    "image",
+    "pixelidxlist",
+    "pixellist",
+    "subarrayidx",
+  };
+  props = props(:);
+  p_basic = strcmp ("basic", props);
+  p_all = strcmp ("all", props);
+  props(p_basic | p_all) = [];
+  if (any (p_all))
+    props = vertcat (props, props_basic, props_others);
+    if (is_2d)
+      props = vertcat (props, props_2d);
+    endif
+    if (has_gray)
+      props = vertcat (props, props_gray);
+    endif
+  elseif (any (p_basic))
+    props = vertcat (props, props_basic);
+  endif
+
+  if (! is_2d)
+    non_2d = ismember (props, props_2d);
+    if (any (non_2d))
+      warning ("regionprops: ignoring %s properties for non 2 dimensional image",
+              strjoin (props(non_2d), ", "));
+      props(non_2d) = [];
+    endif
+  endif
+  if (! has_gray)
+    non_val = ismember (props, props_gray);
+    if (any (non_val))
+      warning ("regionprops: ignoring %s properties due to missing grayscale image",
+              strjoin (props(non_val), ", "));
+      props(non_val) = [];
+    endif
+  endif
 endfunction
 
 function area = rp_area (cc)
@@ -1189,3 +1216,9 @@ endfunction
 %! props = regionprops (bwconncomp (bw), im, "all");
 %! assert (size (props), [0 1])
 %! assert (sort (all_props), sort (fieldnames (props)))
+
+## Test warnings about invalid props for nd images and missing grayscale
+%!warning <ignoring perimeter, extrema properties for non 2 dimensional image>
+%!        regionprops (rand (5, 5, 5) > 0.5, {"perimeter", "extrema"});
+%!warning <ignoring minintensity, weightedcentroid properties due to missing grayscale image>
+%!        regionprops (rand (5, 5) > 0.5, {"minintensity", "weightedcentroid"});
