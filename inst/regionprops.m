@@ -316,7 +316,7 @@ function props = regionprops (bw, varargin)
     "equivdiameter",    {{}},
     "eulernumber",      {{}},
     "extent",           {{}},
-    "extrema",          {{}},
+    "extrema",          {{"area", "accum_subs_nd", "pixellist"}},
     "majoraxislength",  {{}},
     "minoraxislength",  {{}},
     "orientation",      {{}},
@@ -387,6 +387,8 @@ function props = regionprops (bw, varargin)
       case "eulernumber"
       case "extent"
       case "extrema"
+        values.extrema = rp_extrema (cc, values.pixellist, values.area,
+                                     values.accum_subs_nd);
       case "majoraxislength"
       case "minoraxislength"
       case "orientation"
@@ -456,6 +458,8 @@ function props = regionprops (bw, varargin)
       case "eulernumber"
       case "extent"
       case "extrema"
+        [props.Extrema] = mat2cell (values.extrema,
+                                    repmat (8, 1, cc.NumObjects)){:};
       case "majoraxislength"
       case "minoraxislength"
       case "orientation"
@@ -567,6 +571,98 @@ function bounding_box = rp_bounding_box (cc, pixel_list, subs_nd)
   init_corner = accumarray (subs_nd, pixel_list(:), [no nd], @min) - 0.5;
   end_corner  = accumarray (subs_nd, pixel_list(:), [no nd], @max) + 0.5;
   bounding_box = [(init_corner) (end_corner - init_corner)];
+endfunction
+
+function extrema = rp_extrema (cc, pixel_list, area, subs_nd)
+  ## Note that this property is limited to 2d regions
+  no = cc.NumObjects;
+
+  ## Algorithm:
+  ##  1. Find the max and min values for row and column values on
+  ##    each object.  That is, max and min of each column in
+  ##    pixel_list, for each object.
+  ##
+  ##  2. Get a mask for pixel_list, for those rows and columns indices.
+  ##
+  ##  3. Use that mask on the other dimension to find the max and min
+  ##    values for each object.
+  ##
+  ##  4. Assign those values to a (8*no)x2 array.
+  ##
+  ## This gets a bit convoluted because we do the two dimensions and
+  ## all objects at the same time.
+
+  ## In the following, "head" and "base" are the top and bottom index for
+  ## each dimension.  We use the words "head" and "base" to avoid confusion
+  ## with the rest where top and bottom only refer to the row dimension.
+  ## So "head" has the lowest index values (rows for top left/right, and
+  ## columns for left top/bottom), while "base" has the highest index
+  ## values (rows for bottom left/right, and columns for right top/bottom).
+
+  ##  1. Find the max and min values for row and column values on
+  ##    each object.  That is, max and min of each column in
+  ##    pixel_list, for each object.
+  head = accumarray (subs_nd, pixel_list(:), [no 2], @min);
+  base = accumarray (subs_nd, pixel_list(:), [no 2], @max);
+
+  ##  2. Get a mask for pixel_list, for those rows and columns indices.
+  ##
+  ##  3. Use that mask on the other dimension to find the max and min
+  ##    values for each object.
+  ##
+  ## head_head and head_base, have the lowest index (head) and the
+  ## highest index (base) values, for the "head" indices.
+  ## Same logic for base_head and base_base.
+
+  px_l_sz = size (pixel_list);
+  rep_extrema = @(x) reshape (repelems (x, [1:(no*2); area(:)' area(:)']),
+                              px_l_sz);
+
+  head_mask = (pixel_list == rep_extrema (head))(:, [2 1]);
+  head_head = accumarray (subs_nd(head_mask), pixel_list(head_mask), [no 2], @min);
+  head_base = accumarray (subs_nd(head_mask), pixel_list(head_mask), [no 2], @max);
+
+  base_mask = (pixel_list == rep_extrema (base))(:, [2 1]);
+  base_head = accumarray (subs_nd(base_mask), pixel_list(base_mask), [no 2], @min);
+  base_base = accumarray (subs_nd(base_mask), pixel_list(base_mask), [no 2], @max);
+
+
+  ## Adjust from idx integer to pixel border coordinates
+  head -= 0.5;
+  head_head -= 0.5;
+  head_base += 0.5;
+  base += 0.5;
+  base_head -= 0.5;
+  base_base += 0.5;
+
+
+  ##  4. Assign those values to a (8*no)x2 array.
+  nr = 8 * no;
+  extrema = zeros (nr, 2);
+
+  extrema(1:8:nr, 2) = head(:,2); # y values for top left
+  extrema(2:8:nr, 2) = head(:,2); # y values for top right
+
+  extrema(7:8:nr, 1) = head(:,1); # x values for left bottom
+  extrema(8:8:nr, 1) = head(:,1); # x values for left top
+
+  extrema(5:8:nr, 2) = base(:,2); # y values for bottom right
+  extrema(6:8:nr, 2) = base(:,2); # y values for bottom left
+
+  extrema(3:8:nr, 1) = base(:,1); # x values for right top
+  extrema(4:8:nr, 1) = base(:,1); # x values for right bottom
+
+  extrema(1:8:nr, 1) = head_head(:,1); # x value for top left
+  extrema(8:8:nr, 2) = head_head(:,2); # y value for left top
+
+  extrema(2:8:nr, 1) = head_base(:,1); # x value for top right
+  extrema(7:8:nr, 2) = head_base(:,2); # y value for left bottom
+
+  extrema(6:8:nr, 1) = base_head(:,1); # x value for bottom left
+  extrema(3:8:nr, 2) = base_head(:,2); # y value for right top
+
+  extrema(5:8:nr, 1) = base_base(:,1); # x value for bottom right
+  extrema(4:8:nr, 2) = base_base(:,2); # y value for right bottom
 endfunction
 
 function bb_images = rp_image (cc, bw, idx, subs, subarray_idx)
@@ -804,50 +900,6 @@ function retval = old_regionprops (bw, varargin)
             retval(k).Orientation = 0;
           endif
         endfor
-
-      case "extrema"
-        if (N > 2)
-          warning ("regionprops: skipping extrema for Nd image");
-        else
-          for k = 1:num_labels
-            pixelidxlist =  find (L == k);
-            if length(pixelidxlist) == 0
-              retval (k).Extrema = repmat (0.5, [8 2]); # for ML compatibility
-            else
-              [pixel_R, pixel_C] = ind2sub (size (L), pixelidxlist);
-
-              top_r = min (pixel_R); # small "r" and "c" for scalars and capital "R" and "C" for vectors
-              top_R = pixel_C (pixel_R == top_r);
-              top_left_c = min (top_R) - 0.5; # add/substract 0.5 to all values for corner of pixles (as in ML)
-              top_right_c = max (top_R) + 0.5;
-              top_r = top_r - 0.5;
-
-              right_c = max (pixel_C);
-              right_C = pixel_R (pixel_C == right_c);
-              right_top_r = min (right_C) - 0.5;
-              right_bottom_r = max (right_C) + 0.5;
-              right_c = right_c + 0.5;
-
-              bottom_r = max (pixel_R);
-              bottom_R = pixel_C (pixel_R == bottom_r);
-              bottom_right_c = max (bottom_R) + 0.5;
-              bottom_left_c = min (bottom_R) - 0.5;
-              bottom_r = bottom_r + 0.5;
-
-              left_c = min (pixel_C);
-              left_C = pixel_R (pixel_C == left_c);
-              left_bottom_r = max (left_C) + 0.5;
-              left_top_r = min (left_C) - 0.5;
-              left_c = left_c - 0.5;
-
-              # return 8x2 matrix with x-values in first column and y-values in second column
-              retval(k).Extrema = [top_left_c top_r; top_right_c top_r; ...
-                right_c right_top_r; right_c right_bottom_r; ...
-                bottom_right_c bottom_r; bottom_left_c bottom_r; ...
-                left_c left_bottom_r; left_c left_top_r];                
-            endif
-          endfor
-        endif
 
       otherwise
         error ("regionprops: unsupported property '%s'", property);
@@ -1114,6 +1166,17 @@ endfunction
 %! t = regionprops (f, "Extrema");
 %! shouldbe = [0.5  1.5; 4.5  1.5; 4.5 1.5; 4.5 3.5; 4.5 3.5; 1.5 3.5; 0.5 2.5; 0.5  1.5];
 %! assert (t.Extrema, shouldbe,  eps);
+
+%!test
+%! bw = false (5);
+%! bw([8 12 13 14 18]) = true;
+%! extrema = [2 1; 3 1; 4 2; 4 3; 3 4; 2 4; 1 3; 1 2] + 0.5;
+%! assert (regionprops (bw, "extrema"), struct ("Extrema", extrema))
+
+%!test
+%! ext1 = [1 0; 5 0; 6 1; 6 2; 2 3; 1 3; 1 3; 1 0] + 0.5;
+%! ext2 = [3 3; 6 3; 6 3; 6 5; 6 5; 2 5; 2 5; 2 4] + 0.5;
+%! assert (regionprops (bw2d, "extrema"), struct ("Extrema", {ext1; ext2}))
 
 ## Test the diameter of a circle of diameter 21.
 %!test
