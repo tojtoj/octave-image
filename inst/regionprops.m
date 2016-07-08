@@ -857,25 +857,6 @@ function retval = old_regionprops (bw, varargin)
   retval = retval(:);
 endfunction
 
-function C = all_coords (bw, flip = true, singleton = false)
-  N = ndims (bw);
-  idx = find (bw);
-  C = cell2mat (nthargout (1:N, @ind2sub, size(bw), idx(:)));
-
-  ## Coordinate convention for 2d images is to flip the X and Y axes
-  ## relative to matrix indexing. Nd images inherit this for the first
-  ## two dimensions.
-  if (flip)
-    [C(:, 2), C(:, 1)] = deal (C(:, 1), C(:, 2));
-  endif
-
-  ## Some functions above expect to work columnwise, so don't return a
-  ## vector
-  if (rows (C) == 1 && !singleton)
-    C = [C; C];
-  endif
-endfunction
-
 function [major, minor, major_vec] = local_ellipsefit (X, Y)
   ## calculate (centralised) second moment of region with pixels [X, Y]
   C = cov ([X(:), Y(:)], 1);    # option 1 for normalisation with n instead of n-1
