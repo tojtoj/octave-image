@@ -228,11 +228,11 @@ function props = regionprops (bw, varargin)
     cc = bwconncomp (bw);
   elseif (isnumeric (bw))
     if (isinteger (bw))
-      if (intmin (class (bw)) < 0 && any (bw < 0))
+      if (intmin (class (bw)) < 0 && any (bw(:) < 0))
         error ("regionprops: L must be non-negative integers only");
       endif
     else
-      if (any (bw < 0) || any (fix (bw) != bw))
+      if (any (bw(:) < 0) || any (fix (bw(:)) != bw(:)))
         error ("regionprops: L must be non-negative integers only");
       endif
     endif
@@ -1222,3 +1222,11 @@ endfunction
 %!        regionprops (rand (5, 5, 5) > 0.5, {"perimeter", "extrema"});
 %!warning <ignoring minintensity, weightedcentroid properties due to missing grayscale image>
 %!        regionprops (rand (5, 5) > 0.5, {"minintensity", "weightedcentroid"});
+
+## Input check for labeled images
+%!error <L must be non-negative integers only>
+%!      regionprops ([0 -1 3 4; 0 -1 3 4])
+%!error <L must be non-negative integers only>
+%!      regionprops ([0 1.5 3 4; 0 1.5 3 4])
+%!error <L must be non-negative integers only>
+%!      regionprops (int8 ([0 -1 3 4; 0 -1 3 4]))
