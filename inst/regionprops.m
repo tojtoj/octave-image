@@ -313,7 +313,7 @@ function props = regionprops (bw, varargin)
     "convexhull",       {{}},
     "conveximage",      {{}},
     "eccentricity",     {{}},
-    "equivdiameter",    {{}},
+    "equivdiameter",    {{"area"}},
     "eulernumber",      {{}},
     "extent",           {{}},
     "extrema",          {{"area", "accum_subs_nd", "pixellist"}},
@@ -384,6 +384,7 @@ function props = regionprops (bw, varargin)
       case "conveximage"
       case "eccentricity"
       case "equivdiameter"
+        values.equivdiameter = rp_equivdiameter (values.area);
       case "eulernumber"
       case "extent"
       case "extrema"
@@ -455,6 +456,7 @@ function props = regionprops (bw, varargin)
       case "conveximage"
       case "eccentricity"
       case "equivdiameter"
+        [props.EquivDiameter] = num2cell (values.equivdiameter){:};
       case "eulernumber"
       case "extent"
       case "extrema"
@@ -571,6 +573,10 @@ function bounding_box = rp_bounding_box (cc, pixel_list, subs_nd)
   init_corner = accumarray (subs_nd, pixel_list(:), [no nd], @min) - 0.5;
   end_corner  = accumarray (subs_nd, pixel_list(:), [no nd], @max) + 0.5;
   bounding_box = [(init_corner) (end_corner - init_corner)];
+endfunction
+
+function equivdiameter = rp_equivdiameter (area)
+  equivdiameter =  sqrt (4 * area / pi);
 endfunction
 
 function extrema = rp_extrema (cc, pixel_list, area, subs_nd)
@@ -803,16 +809,6 @@ function retval = old_regionprops (bw, varargin)
   for property = lower(properties)
     property = property{:};
     switch (property)
-      case "equivdiameter"
-        if (N > 2)
-          warning ("regionprops: skipping equivdiameter for Nd image");
-        else
-          for k = 1:num_labels
-            area = local_area (L == k);
-            retval (k).EquivDiameter = sqrt (4*area/pi);
-          endfor
-        endif
-
       case "eulernumber"
         for k = 1:num_labels
           retval (k).EulerNumber = bweuler (L == k);
@@ -1177,6 +1173,13 @@ endfunction
 %! ext1 = [1 0; 5 0; 6 1; 6 2; 2 3; 1 3; 1 3; 1 0] + 0.5;
 %! ext2 = [3 3; 6 3; 6 3; 6 5; 6 5; 2 5; 2 5; 2 4] + 0.5;
 %! assert (regionprops (bw2d, "extrema"), struct ("Extrema", {ext1; ext2}))
+
+%!assert (regionprops (bw2d, "equivDiameter"),
+%!        struct ("EquivDiameter", {sqrt(4*8/pi); sqrt(4*6/pi)}))
+%!assert (regionprops (bw2d_over_bb, "equivDiameter"),
+%!        struct ("EquivDiameter", {sqrt(4*7/pi); sqrt(4*8/pi); sqrt(4*4/pi)}))
+%!assert (regionprops (bw2d_insides, "equivDiameter"),
+%!        struct ("EquivDiameter", {sqrt(4*20/pi); sqrt(4*4/pi)}))
 
 ## Test the diameter of a circle of diameter 21.
 %!test
