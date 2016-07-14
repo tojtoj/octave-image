@@ -238,27 +238,36 @@ function [bw, thresh] = edge_kirsch_prewitt_sobel (im, method, varargin)
     thresh = [];
   endif
 
-  h1 = fspecial (method);
+  ## Note that the edge strengths are squared to emphasise the
+  ## borders.  The threshold value is then also squared.
+
+  h1 = fspecial (method) ./ 8;
+  im = im2double (im);
   switch (direction)
     case "horizontal"
-      strength = abs (conv2 (im, h1, "same"));
+      strength = imfilter (im, h1, "replicate").^2;
     case "vertical"
-      strength = abs (conv2 (im, h1', "same"));
+      strength = imfilter (im, h1', "replicate").^2;
     case "both"
-      strength = sqrt (conv2 (im, h1, "same").^2 + conv2 (im, h1', "same").^2);
+      strength = (imfilter (im, h1, "replicate").^2
+                  + imfilter (im, h1', "replicate").^2);
     otherwise
       error ("edge: unknown DIRECTION `%s' for %s method", direction, method);
   endswitch
 
   if (isempty (thresh))
     switch (method)
-      case "sobel",   thresh = 2 * mean (strength(:));
-      case "prewitt", thresh = 4 * mean (strength(:));
-      case "kirsch",  thresh = mean (strength(:));
+      case "sobel",   thresh2 = 2 * mean (strength(:));
+      case "prewitt", thresh2 = 4 * mean (strength(:));
+      case "kirsch",  thresh2 = mean (strength(:));
     endswitch
+    thresh2 *= 2;
+    thresh = sqrt (thresh2);
+  else
+    thresh2 = thresh .^ 2;
   endif
 
-  bw = strength > thresh;
+  bw = strength > (thresh2);
   if (thinning)
     bw = simple_thinning (bw);
   endif
@@ -644,9 +653,13 @@ endfunction
 %!    0 0 1 0 0
 %!    0 0 0 0 0]);
 %! assert (edge (in), E)
+%! assert (edge (uint8 (in.*100)), E)
 %! assert (edge (in, "sobel"), E)
 %! assert (edge (in, "sobel", 0), E)
 %! assert (edge (in, "sobel", 1), false (5))
+%!
+%! [E, auto_thresh] = edge (in);
+%! assert (auto_thresh, 0.2449, 1e-4)
 %!
 %! V = logical([
 %!    0 0 0 0 0
