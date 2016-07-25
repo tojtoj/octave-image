@@ -28,7 +28,7 @@
 #include <queue>
 
 #include <octave/oct.h>
-#include <lo-mappers.h>  // xmin()
+#include <octave/lo-mappers.h>  // xmin()
 
 #include "connectivity.h"
 using namespace octave::image;
