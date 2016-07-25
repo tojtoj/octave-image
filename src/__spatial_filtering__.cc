@@ -19,6 +19,7 @@
 //      -- Søren Hauberg, March 21st, 2008
 
 #include <octave/oct.h>
+#include <octave/lo-mappers.h>
 
 /**
  * Filter functions for ordered filtering.

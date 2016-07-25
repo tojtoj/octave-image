@@ -14,6 +14,7 @@
 // this program; if not, see <http://www.gnu.org/licenses/>.
 
 #include <octave/oct.h>
+#include <octave/lo-mappers.h>
 
 inline
 double gauss (const double *x, const double *mu, const double sigma, const octave_idx_type ndims)
