@@ -54,10 +54,10 @@
 ## Find edges using the Kirsch approximation to the derivatives.
 ##
 ## Edge points are defined as points where the length of the gradient exceeds
-## a threshold @var{thresh} and is larger than it's neighbours.
+## a threshold @var{thresh}.
 ##
-## @var{thresh} is the threshold used and defaults to the mean of the
-## gradient of @var{im}.
+## @var{thresh} is the threshold used and defaults to twice the square root of the
+## mean of the gradient squared of @var{im}.
 ##
 ## @var{direction} is the direction of which the gradient is
 ## approximated and can be @qcode{"vertical"}, @qcode{"horizontal"},
@@ -65,8 +65,9 @@
 ##
 ## @var{thinning} can be the string @qcode{"thinning"} (default) or
 ## @qcode{"nothinning"}.  This controls if a simple thinning procedure
-## is applied to the edge image such that the edges are only one pixel
-## wide.
+## is applied to the edge image such that edge points also need to have
+## a larger gradient than their neighbours. The resulting "thinned"
+## edges are only one pixel wide.
 ##
 ## @end deftypefn
 ## @deftypefn  {Function File} {} edge (@var{im}, @qcode{"Lindeberg"})
@@ -97,7 +98,7 @@
 ## Find edges using the Prewitt approximation to the derivatives.
 ##
 ## This method is the same as Kirsch except a different approximation
-## gradient is used, and the default @var{thresh} is multiplied by 4.
+## gradient is used.
 ##
 ## @end deftypefn
 ## @deftypefn  {Function File} {} edge (@var{im}, @qcode{"Roberts"})
@@ -106,7 +107,7 @@
 ## Find edges using the Roberts approximation to the derivatives.
 ##
 ## This method is similar to Kirsch except a different approximation
-## gradient is used, and the default @var{thresh} is multiplied by 6.
+## gradient is used, and the default @var{thresh} is multiplied by sqrt(1.5).
 ## In addition, there it does not accept the @var{direction} argument.
 ##
 ## @end deftypefn
@@ -114,7 +115,7 @@
 ## Find edges using the Sobel approximation to the derivatives.
 ##
 ## This method is the same as Kirsch except a different approximation
-## gradient is used, and the default @var{thresh} is multiplied by 2.
+## gradient is used.
 ##
 ## @end deftypefn
 ## @deftypefn {Function File} {} edge (@var{im}, @qcode{"zerocross"}, @var{thresh}, @var{filter})
