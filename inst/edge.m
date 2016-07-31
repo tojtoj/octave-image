@@ -238,38 +238,39 @@ function [bw, thresh] = edge_kirsch_prewitt_sobel (im, method, varargin)
     thresh = [];
   endif
 
-  ## Note that the edge strengths are squared to emphasise the
-  ## borders.  The threshold value is then also squared.
+  ## For better speed, the calculation is done with
+  ## squared edge strenght values (strength2) and
+  ## squared threshold values (thresh2).
 
-  h1 = fspecial (method) ./ 8;
+  h1 = fspecial (method);
+  h1 ./= sum (abs (h1(:)));  # normalize h1
   im = im2double (im);
   switch (direction)
     case "horizontal"
-      strength = imfilter (im, h1, "replicate").^2;
+      strength2 = imfilter (im, h1, "replicate").^2;
     case "vertical"
-      strength = imfilter (im, h1', "replicate").^2;
+      strength2 = imfilter (im, h1', "replicate").^2;
     case "both"
-      strength = (imfilter (im, h1, "replicate").^2
+      strength2 = (imfilter (im, h1, "replicate").^2
                   + imfilter (im, h1', "replicate").^2);
     otherwise
       error ("edge: unknown DIRECTION `%s' for %s method", direction, method);
   endswitch
 
   if (isempty (thresh))
-    switch (method)
-      case "sobel",   thresh2 = 2 * mean (strength(:));
-      case "prewitt", thresh2 = 4 * mean (strength(:));
-      case "kirsch",  thresh2 = mean (strength(:));
-    endswitch
-    thresh2 *= 2;
+    thresh2 = 4 * mean (strength2(:));
     thresh = sqrt (thresh2);
   else
     thresh2 = thresh .^ 2;
   endif
 
-  bw = strength > (thresh2);
   if (thinning)
-    bw = simple_thinning (bw);
+    ## Keep edge strengths for use in non-maximum
+    ## suppresion in the simple_thinning step.
+    strength2(strength2<=thresh2) = 0;
+    bw = simple_thinning (strength2);
+  else
+    bw = strength2 > thresh2;
   endif
 endfunction
 
@@ -307,19 +308,26 @@ function [bw, thresh, g45, g135] = edge_roberts (im, varargin)
     thresh = [];
   endif
 
-  h1 = [1 0; 0 -1];
-  h2 = [0 1; -1 0];
-  g45  = conv2 (im, h1, "same");
-  g135 = conv2 (im, h2, "same");
-  strength = abs (g45) + abs (g135);
+  h1 = [1 0; 0 -1] ./ 2;
+  h2 = [0 1; -1 0] ./ 2;
+  g45 = imfilter (im, h1, "replicate");
+  g135 = imfilter (im, h2, "replicate");
+  strength2 = g45.^2 + g135.^2;
 
   if (isempty (thresh))
-    thresh = 6 * mean (strength(:));
+    thresh2 = 6 * mean (strength2(:));
+    thresh = sqrt (thresh2);
+  else
+    thresh2 = thresh .^ 2;
   endif
 
-  bw = strength > thresh;
   if (thinning)
-    bw = simple_thinning (bw);
+    ## Keep edge strengths for use in non-maximum
+    ## suppresion in the simple_thinning step.
+    strength2(strength2<=thresh2) = 0;
+    bw = simple_thinning (strength2);
+  else
+    bw = strength2 > thresh2;
   endif
 endfunction
 
@@ -642,6 +650,7 @@ endfunction
 %! [~, thresh] = edge (im, "canny", [.2; .6]);
 %! assert (thresh, [.2 .6])
 
+## test SOBEL edge detector
 %!test
 %! in = zeros (5);
 %! in(3,3) = 1;
@@ -697,6 +706,72 @@ endfunction
 %!    0  0  1  0  0
 %!    0  0  0  0  0]);
 %! assert (edge (A), expected)
+
+## test PREWITT edge detector
+%!test
+%! in = zeros (5);
+%! in(3, 3) = 1;
+%!
+%! E = logical ([
+%!    0 0 0 0 0
+%!    0 1 0 1 0
+%!    0 0 0 0 0
+%!    0 1 0 1 0
+%!    0 0 0 0 0]);
+%!
+%! assert (edge (in, "prewitt"), E)
+%!
+%! [~, auto_thresh] = edge (in, "prewitt");
+%! assert (auto_thresh, 0.2309, 1e-4)
+%!
+%! V = logical([
+%!    0 0 0 0 0
+%!    0 1 0 1 0
+%!    0 1 0 1 0
+%!    0 1 0 1 0
+%!    0 0 0 0 0]);
+%! assert (edge (in, "prewitt", 0, "vertical"), V)
+%!
+%! H = logical ([
+%!    0 0 0 0 0
+%!    0 1 1 1 0
+%!    0 0 0 0 0
+%!    0 1 1 1 0
+%!    0 0 0 0 0]);
+%! assert (edge (in, "prewitt", 0, "horizontal"), H)
+
+## test ROBERTS edge detector
+%!test
+%! in = zeros (5);
+%! in(3,3) = 1;
+%! in(3,4) = 0.9;
+%!
+%! E = logical ([
+%!    0 0 0 0 0
+%!    0 0 1 0 0
+%!    0 0 1 0 0
+%!    0 0 0 0 0
+%!    0 0 0 0 0]);
+%!
+%! assert (edge (in, "roberts"), E)
+%!
+%! [~, auto_thresh] = edge (in, "roberts");
+%! assert (auto_thresh, 0.6591, 1e-4)
+%!
+%! E45 = [0     0      0     0  0
+%!        0  -0.5  -0.45     0  0
+%!        0     0   0.50  0.45  0
+%!        0     0      0     0  0
+%!        0     0      0     0  0];
+%! E135 = [0    0      0      0  0
+%!         0    0  -0.50  -0.45  0
+%!         0  0.5   0.45      0  0
+%!         0    0      0      0  0
+%!         0    0      0      0  0];
+%!
+%! [~, ~, erg45, erg135] = edge (in, "roberts");
+%! assert (erg45, E45)
+%! assert (erg135, E135)
 
 ## test CANNY edge detector
 %!test
