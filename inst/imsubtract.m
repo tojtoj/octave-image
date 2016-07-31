@@ -79,6 +79,14 @@ endfunction
 %!assert (imsubtract (uint8   ([23 250]), uint8   ([24  50]), "uint16"),  uint16  ([ 0 200])); # defining output class works (not in matlab)
 %!assert (imsubtract (logical ([ 1   0]), logical ([ 1   1])),            double  ([ 0  -1])); # return double for two logical images
 %!assert (imsubtract (logical ([ 1   0]), logical ([ 1   1]), "logical"), logical ([ 0   0])); # this is matlab incompatible on purpose
-%!fail  ("imsubtract (uint8   ([23 250]), uint16  ([23 250]))");                               # input need to have same class
-%!assert (imsubtract (uint8   ([23 250]), uint8   ([24 255]), "int8"),    int8    ([-1   0])); # signed integers kinda work (not in matlab)
+
+## input need to have same class
+%!error <same class> imsubtract (uint8 ([23 250]), uint16 ([23 250]));
+
+## signed integers kinda work (not in matlab)
 %!warning <signed integer> imsubtract (uint8 ([23 250]), uint8 ([24 255]), "int8");
+
+%!test
+%! warning ("off", "all");
+%! assert (imsubtract (uint8 ([23 250]), uint8 ([24 255]), "int8"),
+%!         int8 ([-1 0]))
