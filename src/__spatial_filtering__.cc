@@ -19,7 +19,6 @@
 //      -- Søren Hauberg, March 21st, 2008
 
 #include <octave/oct.h>
-#include <octave/lo-mappers.h>
 
 /**
  * Filter functions for ordered filtering.
@@ -199,7 +198,7 @@ ET_OUT entropy_filt (MT &vals, octave_idx_type len, int nbins)
     {
       const double p = hist (i);
       if (p > 0)
-        entropy -= p * xlog2 (p);
+        entropy -= p * std::log2 (p);
     }
 
   return entropy;
