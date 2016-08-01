@@ -1,0 +1,2 @@
+/* Define if octave::math::min exists as replacement to xmin. */
+#undef HAVE_MIN_IN_OCTAVE_MATH_NAMESPACE
