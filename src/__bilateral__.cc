@@ -14,7 +14,6 @@
 // this program; if not, see <http://www.gnu.org/licenses/>.
 
 #include <octave/oct.h>
-#include <octave/lo-mappers.h>
 
 inline
 double gauss (const double *x, const double *mu, const double sigma, const octave_idx_type ndims)
@@ -38,7 +37,7 @@ bilateral (const MatrixType &im, const double sigma_d, const double sigma_r)
   const octave_idx_type num_planes = (ndims == 2) ? 1 : size (2);
   
   // Build spatial kernel
-  const int s = std::max ((int)xround (3*sigma_d), 1);
+  const int s = std::max ((int)std::round (3*sigma_d), 1);
   Matrix kernel (2*s+1, 2*s+1);
   for (octave_idx_type r = 0; r < 2*s+1; r++)
     {
