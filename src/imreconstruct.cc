@@ -24,14 +24,31 @@
 // This should still be more efficient than using subscript indices to find
 // when we are on the border.
 
+#include "config.h"
+
 #include <functional>
 #include <queue>
 
 #include <octave/oct.h>
-#include <octave/lo-mappers.h>  // xmin()
+#include <octave/lo-mappers.h>
 
 #include "connectivity.h"
 using namespace octave::image;
+
+namespace octave_image
+{
+  // Temporary wrapper until we no longer support Octave 4.0 (bug #48618)
+  template <typename T>
+  inline T
+  min (T x, T y)
+  {
+#if defined HAVE_MIN_IN_OCTAVE_MATH_NAMESPACE
+    return octave::math::min (x, y);
+#else
+    return xmin (x, y);
+#endif
+  }
+}
 
 /*
 ## A dirty implementation of the fast hybrid reconstruction as m file
@@ -221,7 +238,7 @@ propagation_step (T& padded_marker, const T& padded_mask,
           octave_idx_type q = p + neighbours[k];
           if (J[q] < J[p] && I[q] != J[q])
             {
-              J[q] = xmin (J[p], I[q]);
+              J[q] = octave_image::min (J[p], I[q]);
               unfinished.push (q);
             }
         }

@@ -1,6 +1,8 @@
 AC_PREREQ([2.67])
 AC_INIT([Octave-Forge image package], [2.5.1+])
 
+AC_CONFIG_HEADERS([config.h])
+
 AC_PROG_SED
 
 AC_PROG_CXX
@@ -19,7 +21,6 @@ if test -z "$OCTAVE"; then
   AC_MSG_ERROR([*** 'octave' not found.])
 fi
 
-
 image_save_CXX="$CXX"
 OCTAVE_IMAGE_PROG_CXX_CXX11(
   [],
@@ -27,6 +28,30 @@ OCTAVE_IMAGE_PROG_CXX_CXX11(
 
 CXX11_SWITCH=$(echo "$CXX" | $SED "s,^$image_save_CXX,,")
 MKOCTFILE="$MKOCTFILE $CXX11_SWITCH"
+
+
+## Octave 4.2 moved functions that clashed with C functions into its own
+## namespace while deprecated the old ones prefixed with "x".  We want to
+## be compatible with Octave 4.0 but we also want to avoid scaring the
+## users with deprecated warnings.  Remove this once we no longer support
+## Octave 4.0.X
+
+image_save_CXX="$CXX"
+CXX="$MKOCTFILE"
+AC_CACHE_CHECK(
+  [whether xmin is in the octave::math namespace],
+  [octave_image_cv_xmin_in_octave_math_namespace],
+  [AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM([#include <lo-mappers.h>],
+                     [octave::math::min (2.0, 3.0)])],
+    [octave_image_cv_xmin_in_octave_math_namespace=yes],
+    [octave_image_cv_xmin_in_octave_math_namespace=no])])
+
+if test "$octave_image_cv_xmin_in_octave_math_namespace" = yes; then
+  AC_DEFINE([HAVE_MIN_IN_OCTAVE_MATH_NAMESPACE], [1],
+            [Define if octave::math::min exists as replacement to xmin.])
+fi
+CXX="$image_save_CXX"
 
 
 ## Test for gcc bug #65843 https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65843
