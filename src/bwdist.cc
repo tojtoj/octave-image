@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License along with
 // this program; if not, see <http://www.gnu.org/licenses/>.
 
+#include <vector>
+
 #include <octave/oct.h>
 
 /*
@@ -510,13 +512,13 @@ Currently, only 2D images are supported.\n\
 
   // Allocate two arrays for temporary output values
   const int numel = bw.numel ();
-  OCTAVE_LOCAL_BUFFER (short, xdist, numel);
-  OCTAVE_LOCAL_BUFFER (short, ydist, numel);
+  std::vector<short> xdist (numel);
+  std::vector<short> ydist (numel);
 
   FloatMatrix dist;
   if (method == "euclidean")
     {
-      dist = calc_distances (euclidean, bw, xdist, ydist);
+      dist = calc_distances (euclidean, bw, xdist.data (), ydist.data ());
       const Array<octave_idx_type> positions = (!bw).find ();
       const int zpos = positions.numel();
       const octave_idx_type* pos_vec = positions.fortran_vec ();
@@ -525,11 +527,11 @@ Currently, only 2D images are supported.\n\
         dist_vec[pos_vec[i]] = sqrt (dist_vec[pos_vec[i]]);
     }
   else if (method == "chessboard")
-    dist = calc_distances (chessboard,      bw, xdist, ydist);
+    dist = calc_distances (chessboard,      bw, xdist.data (), ydist.data ());
   else if (method == "cityblock")
-    dist = calc_distances (cityblock,       bw, xdist, ydist);
+    dist = calc_distances (cityblock,       bw, xdist.data (), ydist.data ());
   else if (method == "quasi-euclidean")
-    dist = calc_distances (quasi_euclidean, bw, xdist, ydist);
+    dist = calc_distances (quasi_euclidean, bw, xdist.data (), ydist.data ());
   else
     error ("bwdist: unknown METHOD '%s'", method.c_str ());
 
@@ -539,9 +541,9 @@ Currently, only 2D images are supported.\n\
   if (nargout > 1)
     {
       if (numel >= pow (2, 32))
-        retval(1) = calc_index<uint64NDArray> (bw, xdist, ydist);
+        retval(1) = calc_index<uint64NDArray> (bw, xdist.data (), ydist.data ());
       else
-        retval(1) = calc_index<uint32NDArray> (bw, xdist, ydist);
+        retval(1) = calc_index<uint32NDArray> (bw, xdist.data (), ydist.data ());
     }
 
   return retval;

@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU General Public License along with
 // this program; if not, see <http://www.gnu.org/licenses/>.
 
+#include <vector>
+
 #include <octave/oct.h>
 
 #define   ptUP     (-1)
@@ -144,21 +146,21 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
  *  so that we can be more efficient in the main loop
  */
   int ioM = imM + 2;
-  OCTAVE_LOCAL_BUFFER (unsigned char, imo, (imM+2) * (imN+2));
+  std::vector<unsigned char> imo ((imM+2) * (imN+2));
 
   for (int i = 0; i < imM; i++)
     for (int j = 0; j < imN; j++)
-      imo [(i+1) + ioM*(j+1)] = (im (i, j) > 0);
+      imo[(i+1) + ioM*(j+1)] = (im (i, j) > 0);
 
   for (int i = 0; i < ioM; i++)
-    imo [i]= imo [i + ioM*(imN+1)] = 3;
+    imo[i]= imo[i + ioM*(imN+1)] = 3;
 
   for (int j = 1; j < imN+1; j++)
-    imo [ioM*j]= imo[imM+1 + ioM*j] = 3;
+    imo[ioM*j]= imo[imM+1 + ioM*j] = 3;
 
   // This is obviously big enough for the point stack, but I'm
   // sure it can be smaller.
-  OCTAVE_LOCAL_BUFFER (int, ptstack, ioM*imN);
+  std::vector<int> ptstack (ioM*imN);
 
   int seedidx = npoints;
   npoints= 0;
@@ -173,25 +175,25 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
           continue;
         }
       const int pt = x * ioM + y;
-      checkpoint (pt , imo, ptstack, &npoints);
+      checkpoint (pt , imo.data (), ptstack.data (), &npoints);
     }
 
   while (npoints > 0)
     {
       npoints--;
-      int pt = ptstack [npoints];
+      int pt = ptstack[npoints];
       
-      checkpoint (pt + ptLF, imo, ptstack, &npoints);
-      checkpoint (pt + ptRT, imo, ptstack, &npoints);
-      checkpoint (pt + ptUP, imo, ptstack, &npoints);
-      checkpoint (pt + ptDN, imo, ptstack, &npoints);
+      checkpoint (pt + ptLF, imo.data (), ptstack.data (), &npoints);
+      checkpoint (pt + ptRT, imo.data (), ptstack.data (), &npoints);
+      checkpoint (pt + ptUP, imo.data (), ptstack.data (), &npoints);
+      checkpoint (pt + ptDN, imo.data (), ptstack.data (), &npoints);
       
       if (nb==8)
         {
-          checkpoint (pt + ptLF + ptUP, imo, ptstack, &npoints);
-          checkpoint (pt + ptRT + ptUP, imo, ptstack, &npoints);
-          checkpoint (pt + ptLF + ptDN, imo, ptstack, &npoints);
-          checkpoint (pt + ptRT + ptDN, imo, ptstack, &npoints);
+          checkpoint (pt + ptLF + ptUP, imo.data (), ptstack.data (), &npoints);
+          checkpoint (pt + ptRT + ptUP, imo.data (), ptstack.data (), &npoints);
+          checkpoint (pt + ptLF + ptDN, imo.data (), ptstack.data (), &npoints);
+          checkpoint (pt + ptRT + ptDN, imo.data (), ptstack.data (), &npoints);
         }
     } // while ( npoints > 0)
 
@@ -210,8 +212,8 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
   for (int i = 0; i < imM; i++)
     for (int j = 0; j < imN; j++)
       {
-        imout (i, j) = imo [(i+1) + ioM*(j+1)] != notvalidpt;
-        if (imo [(i+1) + ioM*(j+1)] == idxpoint)
+        imout (i, j) = imo[(i+1) + ioM*(j+1)] != notvalidpt;
+        if (imo[(i+1) + ioM*(j+1)] == idxpoint)
           idxout (idx++) = (double) (i + j*imM + 1);
       }
 

@@ -13,13 +13,14 @@
 // You should have received a copy of the GNU General Public License along with
 // this program; if not, see <http://www.gnu.org/licenses/>.
 
+#include <vector>
+
 /**
  *  Oct-file to trace the boundary of an object in a binary image.
  *
  *      b = boundary(region, conn=8)
  */
 #include <octave/oct.h>
-#include <octave/oct-locbuf.h>
 
 using namespace std;
 
@@ -117,7 +118,7 @@ point is the same as the first.\n\
       const int* mBack = (conn == 4) ? back4 : back8;
 
       // relative indexes into the region for the Moore neighbourhood pixels
-      OCTAVE_LOCAL_BUFFER (int, mi, conn);
+      std::vector<int> mi (conn);
       for (int i = 0; i < conn; ++i)
         mi[i] = mr[i] + (rows * mc [i]);
 
@@ -129,8 +130,8 @@ point is the same as the first.\n\
       // the final boundary point to be visited
       int finish = 0;
       for (int i = 0; i < conn; ++i)
-        if (region.elem(start + mi [i]))
-          finish = start + mi [i];
+        if (region.elem(start + mi[i]))
+          finish = start + mi[i];
 
       // look for the next boundary point, starting at the next neighbour
       int bp = start;
@@ -139,7 +140,7 @@ point is the same as the first.\n\
       while (!done)
         {
           // next neighbour
-          int cp = bp + mi [mCurrent];
+          int cp = bp + mi[mCurrent];
 
           // if this pixel is false, try the next one
           if (!region.elem (cp))
