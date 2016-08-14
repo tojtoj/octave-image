@@ -13,13 +13,16 @@
 // You should have received a copy of the GNU General Public License along with
 // this program; if not, see <http://www.gnu.org/licenses/>.
 
+#include <vector>
+
 #include <octave/oct.h>
 
 inline
-double gauss (const double *x, const double *mu, const double sigma, const octave_idx_type ndims)
+double gauss (const std::vector<double> x, const std::vector<double> mu,
+              const double sigma)
 {
   double s = 0;
-  for (octave_idx_type i = 0; i < ndims; i++)
+  for (size_t i = 0; i < x.size (); i++)
     {
       const double d = x[i] - mu[i];
       s += d*d;
@@ -63,8 +66,8 @@ bilateral (const MatrixType &im, const double sigma_d, const double sigma_r)
           OCTAVE_QUIT;
 
           // For each neighbour
-          OCTAVE_LOCAL_BUFFER (double, val, num_planes);
-          OCTAVE_LOCAL_BUFFER (double, sum, num_planes);
+          std::vector<double> val (num_planes);
+          std::vector<double> sum (num_planes);
           double k = 0;
           for (octave_idx_type i = 0; i < num_planes; i++)
             {
@@ -75,10 +78,10 @@ bilateral (const MatrixType &im, const double sigma_d, const double sigma_r)
             {
               for (octave_idx_type kc = 0; kc < 2*s+1; kc++)
                 {
-                  OCTAVE_LOCAL_BUFFER (double, lval, num_planes);
+                  std::vector<double> lval (num_planes);
                   for (octave_idx_type i = 0; i < num_planes; i++)
                     lval[i] = im (r+kr, c+kc, i);
-                  const double w = kernel (kr, kc) * gauss (val, lval, sigma_r, num_planes);
+                  const double w = kernel (kr, kc) * gauss (val, lval, sigma_r);
                   for (octave_idx_type i = 0; i < num_planes; i++)
                     sum[i] += w * lval[i];
                   k += w;
