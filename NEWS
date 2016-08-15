@@ -25,6 +25,7 @@
       bwperim
       graythresh
       normxcorr2
+      imreconstruct
 
 
  Summary of important user-visible changes for image 2.6.1 (2016/10/21):
