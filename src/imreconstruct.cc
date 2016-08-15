@@ -243,15 +243,6 @@ fast_hybrid_reconstruction (const T& marker, const T& mask,
 {
   typedef typename T::element_type P;
 
-  const P* Ju = marker.fortran_vec ();
-  const P* Iu = mask.fortran_vec ();
-  for (octave_idx_type i = 0; i < marker.numel (); i++)
-    if (*Ju++ > *Iu++)
-      {
-        error ("imreconstruct: MARKER must be less or equal than MASK");
-        return T ();
-      }
-
   const dim_vector original_size = marker.dims ();
 
   T padded_marker = conn.create_padded (marker, connectivity::min_value<P> ());
@@ -525,5 +516,29 @@ else \
 %! c2(:,:,:,2) = c1;
 %! assert (imreconstruct (a, b, c1), imreconstruct (a, b, c2))
 
-%!error <MARKER must be less or equal than MASK> imreconstruct (randi([5 10], [10 10]), randi([1 5], [10 10]))
+## Values in MARKER above MASK should be clipped (bug #48794)
+## (well, treated internally as if they were clipped)
+%!test
+%! mask = logical ([1 1 1; 1 0 1; 1 1 1]);
+%! assert (imreconstruct (true (3, 3), mask), mask)
+%!
+%! mask = ones (5, 5);
+%! mask(2:4,2:4) = 0;
+%! assert (imreconstruct (ones (5, 5), mask), mask)
+%!
+%! mask = ones (5, 5);
+%! mask(2:4,2:4) = 0;
+%! assert (imreconstruct (repmat (2, [5, 5]), mask), mask)
+%!
+%! mask = ones (5, 5);
+%! mask(2:4,2:4) = 0;
+%! assert (imreconstruct (repmat (2, [5, 5]), mask), mask)
+%!
+%! marker = ones (3, 3, 3, 3);
+%! mask = marker;
+%! mask(2, 2, 2, 2) = 0;
+%! assert (imreconstruct (marker, mask), mask)
+%!
+%! marker = randi (210, 100, 100);
+%! assert (imreconstruct (marker, marker), imreconstruct (marker, marker +1))
 */
