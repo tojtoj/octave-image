@@ -5,25 +5,27 @@ AC_CONFIG_HEADERS([config.h])
 
 AC_PROG_SED
 
-dnl CXX is the compiler including options such as -std=c++11.
-dnl CXXFLAGS are flags for CXX coming from the environment.
-dnl XTRA_CXXFLAGS are extra flags that we want to set ourselves.
-
-AC_PROG_CXX
-AC_LANG(C++)
-
-XTRA_CXXFLAGS="-Wall"
+AC_PATH_PROG([OCTAVE], [octave])
+if test -z "$OCTAVE"; then
+  AC_MSG_ERROR([*** 'octave' not found.])
+fi
 
 AC_PATH_PROG([MKOCTFILE], [mkoctfile])
 if test -z "$MKOCTFILE"; then
   AC_MSG_ERROR([*** 'mkoctfile' not found.])
 fi
 
-AC_PATH_PROG([OCTAVE], [octave])
-if test -z "$OCTAVE"; then
-  AC_MSG_ERROR([*** 'octave' not found.])
-fi
+dnl CXX is the compiler including options such as -std=c++11.
+dnl CXXFLAGS are flags for CXX coming from the environment.
+dnl XTRA_CXXFLAGS are extra flags that we want to set ourselves.
+dnl
+dnl Most likely, CXX will already come set by pkg itself.  If not,
+dnl it should be set in the Makefile at the root of the package.
 
+AC_PROG_CXX
+AC_LANG(C++)
+
+XTRA_CXXFLAGS="-Wall"
 
 image_save_CXX="$CXX"
 
