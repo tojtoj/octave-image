@@ -23,6 +23,7 @@ OCT_FILES   := $(patsubst %.cc,%.oct,$(CC_SOURCES))
 PKG_ADD     := $(shell grep -sPho '(?<=(//|\#\#) PKG_ADD: ).*' $(CC_SOURCES) $(M_SOURCES))
 
 OCTAVE ?= octave --no-window-system --silent
+MKOCTFILE ?= mkoctfile
 
 .PHONY: help dist html release install all check run clean
 
@@ -74,10 +75,13 @@ release: dist html
 ## dependencies on DESCRIPTION.
 install: $(RELEASE_TARBALL)
 	@echo "Installing package locally ..."
-	$(OCTAVE) --eval 'pkg ("install", "${RELEASE_TARBALL}")'
+	$(OCTAVE) --eval 'pkg ("install", "-verbose", "${RELEASE_TARBALL}")'
 
+## Set CXX when calling configure as it will be set by pkg.  Note that
+## mkoctfile will respect environment variables so this still uses whatever
+## the user has set.
 all: $(CC_SOURCES)
-	cd src/ && ./configure
+	cd src/ && ./configure CXX="$$($(MKOCTFILE) -p CXX)"
 	$(MAKE) -C src/
 
 check: all
