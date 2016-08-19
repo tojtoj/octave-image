@@ -25,8 +25,8 @@
 #include <unordered_map>
 
 #include <octave/oct.h>
-#include "union-find.h"
 
+#include "union-find.h"
 #include "connectivity.h"
 using namespace octave::image;
 

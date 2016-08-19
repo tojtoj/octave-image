@@ -19,9 +19,15 @@
 
 #include <string>
 #include <stdexcept>
+#include <functional>
 
-#include <octave/oct.h>
-#include <lo-ieee.h>  // octave_Inf
+#include <octave/Array.h>
+#include <octave/idx-vector.h>
+#include <octave/dim-vector.h>
+#include <octave/boolNDArray.h>
+#include <octave/lo-ieee.h>  // octave_Inf
+
+#include <octave/ov.h>
 
 namespace octave
 {

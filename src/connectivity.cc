@@ -14,12 +14,13 @@
 // along with this program; if not, see
 // <http://www.gnu.org/licenses/>.
 
+#include "connectivity.h"
+
 #include <string>
 #include <vector>
 #include <typeinfo>
 
 #include <octave/oct.h>
-#include "connectivity.h"
 
 using namespace octave::image;
 

@@ -19,10 +19,12 @@
 // matlab compatibility. In here we try to make a bit more sense.
 
 #include "strel.h"
-#include <octave/oct.h>
-#include <parse.h>        // gives us feval so we can use @strel
-#include <oct-map.h>
+
 #include <vector>
+
+#include <octave/oct.h>
+#include <octave/parse.h>  // gives us feval so we can use @strel
+#include <octave/oct-map.h>
 
 // Constructors
 

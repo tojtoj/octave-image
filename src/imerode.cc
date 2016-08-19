@@ -13,11 +13,19 @@
 // You should have received a copy of the GNU General Public License along with
 // this program; if not, see <http://www.gnu.org/licenses/>.
 
+#include <string>
+#include <typeinfo> // for an optimization using logical matrices
+
+#include <octave/Array.h>
+#include <octave/Array-util.h>  // to get ind2sub
+#include <octave/boolNDArray.h>
+#include <octave/dim-vector.h>
+#include <octave/lo-ieee.h>  // octave_Inf
+
 #include <octave/oct.h>
-#include <Array-util.h>  // to get ind2sub
-#include <typeinfo>   // for an optimization using logical matrices
-#include <lo-ieee.h>  // gives us octave_Inf
+
 #include "strel.h"
+
 using namespace octave::image;
 
 // How this works:
