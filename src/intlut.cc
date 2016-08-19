@@ -20,8 +20,10 @@
 
 #include <string>
 
-#include <octave/oct.h>
+#include <octave/dim-vector.h>
+#include <octave/oct-inttypes.h>
 
+#include <octave/oct.h>
 
 template<class P>
 static inline P

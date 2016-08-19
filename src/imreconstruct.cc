@@ -29,10 +29,12 @@
 #include <functional>
 #include <queue>
 
-#include <octave/oct.h>
 #include <octave/lo-mappers.h>
 
+#include <octave/oct.h>
+
 #include "connectivity.h"
+
 using namespace octave::image;
 
 namespace octave_image

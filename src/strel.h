@@ -35,8 +35,15 @@
 #ifndef OCTAVE_IMAGE_STREL
 #define OCTAVE_IMAGE_STREL
 
-#include <octave/oct.h>
 #include <vector>
+#include <string>
+
+#include <octave/Array.h>
+#include <octave/dNDArray.h>
+#include <octave/dim-vector.h>
+#include <octave/boolNDArray.h>
+
+#include <octave/ov.h>
 
 namespace octave
 {

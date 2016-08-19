@@ -27,7 +27,7 @@
 #include <vector>
 
 #include <octave/oct.h>
-#include <oct-map.h>
+#include <octave/oct-map.h>
 
 #include "connectivity.h"
 using namespace octave::image;

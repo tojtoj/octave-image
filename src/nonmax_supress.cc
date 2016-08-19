@@ -13,10 +13,11 @@
 // You should have received a copy of the GNU General Public License along with
 // this program; if not, see <http://www.gnu.org/licenses/>.
 
-#include <octave/oct.h>
 #include <math.h>
 #include <stack>
 #include <utility>
+
+#include <octave/oct.h>
 
 DEFUN_DLD(nonmax_supress,args,nargout,"\
 -*- texinfo -*-\n\
