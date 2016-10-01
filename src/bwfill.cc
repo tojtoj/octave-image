@@ -54,6 +54,7 @@ pixels @var{idx}\n\
 @deftypefn {Loadable Function} {[@var{bw2}, @var{idx}] =} bwfill(@var{bw1}, \"holes\", @var{n})\n\
 If the string \"holes\" is given instead of starting points for the flood-fill\n\
 operation, the function finds interior holes in @var{bw1} and fills them.\n\
+@seealso{imfill}\n\
 @end deftypefn\n\
 ")
 {
