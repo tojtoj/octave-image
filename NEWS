@@ -3,6 +3,7 @@
 
  ** The following functions are new:
 
+      imfill
       imgetfile
       impyramid
       imquantize
