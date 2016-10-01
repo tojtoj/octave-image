@@ -19,31 +19,42 @@
 ## @deftypefnx {Function File} {@var{bw2} =} imfill (@var{bw}, @var{locations})
 ## @deftypefnx {Function File} {@var{bw2} =} imfill (@var{bw}, @var{locations}, @var{conn})
 ## @deftypefnx {Function File} {@var{I2} =} imfill (@var{I})
+## @deftypefnx {Function File} {@var{I2} =} imfill (@var{I}, "holes")
 ## @deftypefnx {Function File} {@var{I2} =} imfill (@var{I}, @var{conn})
-## Fill holes in binary images @var{bw} and grayscale images @var{I}.
+## Fill image holes or regions.
 ##
-## @var{bw} is a 2d binary input image. With the option "holes" all its
-## holes will be filled. (I.e. all 0-value pixel regions fully enclosed
-## by 1-value pixels will be filled with 1s). Alternativly all
-## @var{locations}  where holes shall be filled, can be given as a n-by-1
-## vector of linear pixel indices, or as a n-by-2 matrix of pixel indices.
-## The used @var{connectivity} (of the background pixel regions)
-## for this filling operation can be specified as 4 (default)
-## or 8 (or any other valid connectivity specification).
+## The image to be filled can be binary @var{bw} or grayscale @var{I}.
+## Regions are a series of connected elements whose values are lower than
+## at least one of its neighborh elemnts.
 ##
-## @var{I} is a 2d grayscale input image. Without any options all its holes
-## will be filled. (I.e. all darker pixel regions fully enclosed by lighter
-## pixels will be filled with lighter pixel values).  The used
-## @var{connectivity} (of the background pixel regions)  for this filling
-## operation  can be specified as 4 (default) or 8 (or any other valid
-## connectivity specification).
+## The option @qcode{"holes"}, default for grayscale images, can be used
+## to fill all holes, i.e., regions without border elements.
 ##
-## The imfill function uses an algorithm based on morphological reconstruction.
+## Alternatively, the argument @var{locations} are coordinates for elements
+## in the regions to be filled.  It can be a a @var{n}-by-1 vector of linear
+## indices or a @var{n}-by-@var{d} matrix of subscript indices where @var{n}
+## is the number of points and @var{d} is the number of dimensions in the
+## image.
 ##
-## (The following Matlab functionality of imfill is not yet supported:
-## Nd images, interactive usage.)
+## The argument @var{conn} specifies the connectivity used for filling
+## the region and defaults to
+## @code{conndef (ndims (@var{img}, @qcode{"minimal"})} which is 4 for
+## the case of 2 dimensional images.
 ##
-## @seealso{bwfill, imreconstruct, iptcheckconn}
+## @example
+## im = [0  1  0
+##       1  0  1
+##       0  1  0];
+##
+## imfill (im, "holes")
+## ans =
+##
+##  0  1  0
+##  1  1  1
+##  0  1  0
+## @end example
+##
+## @seealso{bwfill, bwselect, imreconstruct}
 ## @end deftypefn
 
 function filled = imfill (img, varargin)
@@ -52,12 +63,12 @@ function filled = imfill (img, varargin)
     print_usage ();
   endif
 
-  if (! isimage (img) || ndims (img) > 2)
-    error ("imfill: first argument must be a 2D logical or gray-scale image");
+  if (! isimage (img))
+    error ("imfill: IMG and BW must be a binary or grayscale image");
   endif
 
   ## Default parameter values
-  conn = 4;
+  conn = conndef (ndims (img), "minimal");
   fill_holes = false;
 
   if (nargin () == 1)
@@ -80,10 +91,9 @@ function filled = imfill (img, varargin)
       fill_holes = true;
       iptcheckconn (opt2, "imfill", "CONN");
       conn = opt2;
-    elseif (islogical (img) && isnumeric (opt2) && isindex (opt2)
-            && ndims (opt2) <= 2)
+    elseif (islogical (img) && isnumeric (opt2) && isindex (opt2))
       ## syntax: imfill (BW, LOCATIONS)
-      locations = check_loc (opt2, size (img));
+      locations = check_loc (opt2, img);
     else
       error ("imfill: second argument must be 'holes', a connectivity specification, or an index array");
     endif
@@ -97,13 +107,12 @@ function filled = imfill (img, varargin)
       iptcheckconn (opt2, "imfill", "CONN");
       conn = opt2;
       fill_holes = true;
-    elseif (islogical (img) && isnumeric (opt2) && isindex (opt2)
-            && ndims (opt2) <= 2)
+    elseif (islogical (img) && isnumeric (opt2) && isindex (opt2))
       ## syntax: imfill (BW, LOCATIONS, CONN)
       iptcheckconn(opt3, "imfill", "CONN");
       conn = opt3;
-      locations = check_loc (opt2, size (img));
-    elseif (islogical (img) && (opt2 == 0))
+      locations = check_loc (opt2, img);
+    elseif (islogical (img) && isscalar (opt2) && opt2 == 0)
         ## syntax: imfill (BW, 0, CONN)
         error ("imfill: interactive usage is not yet supported");
     else
@@ -113,49 +122,48 @@ function filled = imfill (img, varargin)
 
 
   if (fill_holes)
-    ##  "Hole filling" algorithm taken from the book
-    ##   Gonzalez & Woods "Digital Image Processing" (3rd Edition)
-    ##   in chapter 9.5.9 "Morphological Reconstruction", section
-    ##   "Filling holes"
-    ##   formula 9.5-28 and 9.5.29, explained with image IMG
-    ##   and generalized to grayscale images:
-    ##      * (1-IMG) -> complement(IMG),
-    ##      * 0-value -> -Inf value
-    ##   and change of border treatment to make unusual connectivity
-    ##   specs work:
-    ##      * define marker as complement(IMG) on border of IMG and
-    ##        as -Inf otherwise
-    ##          -> define marker as -Inf on all of IMG and then pad it
-    ##             with +Inf all around (and remove this padding after
-    ##             the following operations)
-    ##      * define the mask as complement of IMG
-    ##          -> define the mask as complement of IMG, and then pad it
-    ##             with +Inf all around
+    ##  Hole filling algorithm adapted from the book Gonzalez & Woods
+    ## "Digital Image Processing" (3rd Edition), section 9.5.9
+    ## "Morphological Reconstruction", subsection "Filling holes" (page 682):
     ##
-    ##   step 1: define the mask as complement of IMG, then pad it with
-    ##           +Inf all around
-    ##   step 2: define marker as -Inf an all of IMG, then pad it with
-    ##           +Inf all around
-    ##   step 3: do morphological reconstruction of marker by mask
-    ##   step 4: complement the result and remove border padding
+    ##      "Let I(x,y) denote a binary image and suppose that we form a
+    ##      marker image F that is 0 everywhere, except at the image border
+    ##      where it is set to 1-I; that is,
+    ##
+    ##                   / 1 - I(x,y) if (x,y) is on the border of I
+    ##          F(x,y) = |
+    ##                   \ 0          otherwise
+    ##
+    ##      Then
+    ##
+    ##          H = complement (reconstruct (F, complement (I)))
+    ##
+    ##      is a binary image equal to I with all holes filled."
+    ##
+    ## This is generalized to grayscale images with:
+    ##
+    ##      * (1-I) -> complement(I)
+    ##      * 0 value -> -Inf value if non logical
+    ##
+    ##   step 1: define the mask and marker as complement of input
+    ##   step 2: set border elements of marker as false/-Inf
+    ##   step 3: do morphological reconstruction
+    ##   step 4: complement of reconstruction has the holes filled.
+    ##
+    ## Beware of unusual connectivity definition which changes what is
+    ## defined as border pixels.  For example, [0 0 0; 1 1 1; 0 0 0],
+    ## means that top and bottom row of an image are not border pixels.
 
     mask = imcomplement (img);
-    if (islogical (img))
-      mask = padarray (mask, [1 1], true, "both");
-    else
-      mask = padarray (mask, [1 1], +Inf, "both");
-    endif
 
-    marker = mask;
     if (islogical (img))
-      marker(2:end-1, 2:end-1) = false;
+      marker = set_nonborder_pixels (mask, conn, false);
     else
-      marker(2:end-1, 2:end-1) = -Inf;
+      marker = set_nonborder_pixels (mask, conn, -Inf);
     endif
 
     filled = imreconstruct (marker, mask, conn);
-
-    filled = imcomplement (filled(2:end-1, 2:end-1));
+    filled = imcomplement (filled);
 
   else
     ## Using explicitly given marker pixels instead of "holes" option
@@ -178,25 +186,53 @@ endfunction
 ## Helper function for LOCATIONS input checking.
 ## Drops locations outside of the image and proceeds with a warning.
 ## Additionally transforms matrix indices to linear indices.
-function loc_lin_idx = check_loc (loc, im_size)
-  if (size (loc, 2) == 1)  # linear indices given
-    idx_outside = loc > prod (im_size);
+function loc_lin_idx = check_loc (loc, img)
+  sz = size (img);
+  if (ndims (loc) != 2)
+    error ("imfill: LOCATIONS must be a n-by-1 or n-by-d sized index array");
+  elseif (columns (loc) == 1)  # linear indices given
+    idx_outside = loc > numel (img);
     loc(idx_outside) = [];
     loc_lin_idx = loc;
-  elseif (size (loc, 2) == 2)  # subscript indices given
-    idx_outside_x = loc(:, 1) > im_size(1);
-    idx_outside_y = loc(:, 2) > im_size(2);
-    idx_outside = idx_outside_x | idx_outside_y;
+  elseif (columns (loc) == ndims (img)) # subscript indices given
+    idx_outside = any (loc > sz, 2);
     loc(idx_outside,:) = [];
-    loc_lin_idx = sub2ind (im_size, loc(:,1), loc(:,2));
+    loc_lin_idx = sub2ind (sz, num2cell (loc, 1){:});
   else
-    error ("imfill: LOCATION must be a n-by-1 vector or n-by-2 sized index array");
+    error ("imfill: LOCATIONS must be a n-by-1 or n-by-d sized index array");
   endif
 
   if (any (idx_outside))
-    warning ("imfill: dropped LOCATIONs outside of given image");
+    warning ("imfill: ignored LOCATIONS outside of image borders");
   endif
 endfunction
+
+## Set non border of pixels of IMG according to connectivity CONN to VAL.
+## The only tricky part is handling unusual connectivity such as
+## [0 0 0; 1 1 1; 0 0 0] which define top and bottom row as non border.
+## Another case is 8 connectivity in 3d images.  In such case, the first
+## row and column of each page is border elements, but the first and last
+## page itself are not.
+function marker = set_nonborder_pixels (img, conn, val)
+  sz = size (img);
+
+  nonborder_idx = repmat ({":"}, ndims (img), 1);
+
+  conn_idx_tmp = repmat ({":"}, ndims (conn), 1);
+  for dim = 1:ndims (conn)
+    conn_idx = conn_idx_tmp;
+    ## Because connectivity is symmetric by definition, we only need
+    ## to check the first slice of that dimension.
+    conn_idx{dim} = [1];
+    if (any (conn(conn_idx{:})(:)))
+      nonborder_idx{dim} = 2:(sz(dim) -1);
+    endif
+  endfor
+
+  marker = img;
+  marker(nonborder_idx{:}) = val;
+endfunction
+
 
 ## test the possible INPUT IMAGE TYPES
 %!test
@@ -218,14 +254,10 @@ endfunction
 %! assert (imfill (bw, "holes"), bw2)
 %! assert (imfill (uint8 (bw)), uint8 (bw2))
 
-## test the INPUT CHECKS
-%!error <must be a 2D logical or gray-scale>
-%!  imfill (ones (3, 3, 3));                 # Nd-image input
-
-%!error <must be a 2D logical or gray-scale>
+%!error <must be a binary or grayscale image>
 %!  imfill (i + ones (3, 3));                 # complex input
 
-%!error <must be a 2D logical or gray-scale>
+%!error <must be a binary or grayscale image>
 %!  imfill (sparse (double (I)));   # sparse input
 
 %!error
@@ -234,13 +266,10 @@ endfunction
 %!error
 %! imfill (true (3), 4, "holes", 5)
 
-%!error <LOCATION must be a n-by-1 vector or n-by-2 sized index array>
+%!error <LOCATIONS must be a n-by-1 or n-by-d sized index array>
 %! imfill (false (3), ones (2, 3))
 
-%!error <second argument must be 'holes', a connectivity specification, or an index array>
-%! imfill (false (3), ones (2, 2, 2))
-
-%!error <LOCATION must be a n-by-1 vector or n-by-2 sized index array>
+%!error <LOCATIONS must be a n-by-1 or n-by-d sized index array>
 %! imfill (false (3), ones (2, 3), 4)
 
 %!error <interactive usage is not yet supported>
@@ -249,15 +278,14 @@ endfunction
 %!error <interactive usage is not yet supported>
 %! imfill (false (3), 0, 4)
 
-## test dealing with locations out of image
-%!warning <dropped LOCATIONs outside>
-%! imfill (logical (ones (3)), 10);
-
-%!warning
-%! ## use "!warning" here instead of "!test" to silence expected warnings
+%!warning <ignored LOCATIONS outside of image borders>
 %! bw = logical ([1 1 1; 1 0 1; 1 1 1]);
 %! assert (imfill (bw, [5 5]), bw)
 %! assert (imfill (bw, 15), bw)
+%!
+%! bw = repmat (bw, [1 1 3]);
+%! assert (imfill (bw, 30), bw)
+%! assert (imfill (bw, [2 2 5]), bw)
 
 ## test BINARY hole filling and binary filling from starting point
 %!test
@@ -298,8 +326,7 @@ endfunction
 %! assert (imfill (bw, [19; 20], 4), bw3)
 %! assert (imfill (bw, [19; 20], 8), bw2)
 
-%!warning
-%! ## use "!warning" here instead of "!test" to silence expected warnings
+%!warning <ignored LOCATIONS outside of image borders>
 %! bw = logical ([1 1 1 1 1 1 1
 %!                1 0 0 0 0 0 1
 %!                1 0 1 1 1 0 1
@@ -387,3 +414,67 @@ endfunction
 %! assert (imfill (I, 4, "holes"), I2)
 %! assert (imfill (I, 8), I3)
 %! assert (imfill (I, "holes"), I2)
+
+## Test dimensions of length 1 whose extremes may or may not be on the
+## border due to less typical connectivity.
+%!test
+%! v_line = [0 1 0; 0 1 0; 0 1 0];
+%! h_line = [0 0 0; 1 1 1; 0 0 0];
+%! im = [0 1 0 0 1 0];
+%!
+%! assert (imfill (im, h_line, "holes"), [0 1 1 1 1 0])
+%! assert (imfill (im, v_line, "holes"), [0 1 0 0 1 0])
+%! assert (imfill (im', h_line, "holes"), [0 1 0 0 1 0]')
+%! assert (imfill (im', v_line, "holes"), [0 1 1 1 1 0]')
+%!
+%! im = repmat (im, [1 1 5]);
+%! assert (imfill (im, h_line, "holes"), repmat ([0 1 1 1 1 0], [1 1 5]))
+%! assert (imfill (im, v_line, "holes"), im)
+%!
+%! im = permute (im, [2 1 3]);
+%! assert (imfill (im, h_line, "holes"), im)
+%! assert (imfill (im, v_line, "holes"), repmat ([0 1 1 1 1 0]', [1 1 5]))
+
+%!test
+%! im = logical ([0 0 0 0 0 0
+%!                0 1 1 1 1 0
+%!                0 1 0 0 1 0
+%!                0 1 1 1 1 0
+%!                0 0 0 0 0 0]);
+%! fi = logical ([0 0 0 0 0 0
+%!                0 1 1 1 1 0
+%!                0 1 1 1 1 0
+%!                0 1 1 1 1 0
+%!                0 0 0 0 0 0]);
+%!
+%! assert (imfill (cat (3, im, im, im), 8, 'holes'), cat (3, fi, fi, fi))
+%! assert (imfill (cat (3, im, im, im), 'holes'), cat (3, im, im, im))
+%! assert (imfill (cat (3, fi, im, fi), 'holes'), cat (3, fi, fi, fi))
+
+%!test
+%! emp = false (5, 6);
+%!  im = logical ([0 0 0 0 0 0
+%!                 0 1 1 1 1 0
+%!                 0 1 0 1 0 1
+%!                 0 1 1 1 1 0
+%!                 0 0 0 0 0 0]);
+%!  fi = logical ([0 0 0 0 0 0
+%!                 0 1 1 1 1 0
+%!                 0 1 1 1 1 1
+%!                 0 1 1 1 1 0
+%!                 0 0 0 0 0 0]);
+%!  fi1 = logical ([0 0 0 0 0 0
+%!                  0 1 1 1 1 0
+%!                  0 1 1 1 0 1
+%!                  0 1 1 1 1 0
+%!                  0 0 0 0 0 0]);
+%!  fi2 = logical ([0 0 0 0 0 0
+%!                  0 1 1 1 1 0
+%!                  0 1 0 1 1 1
+%!                  0 1 1 1 1 0
+%!                  0 0 0 0 0 0]);
+%!
+%! assert (imfill (cat (3, im, im, im), [3 3 2]), cat (3, fi1, fi1, fi1))
+%! assert (imfill (cat (3, im, im, im), [3 5 2]), cat (3, fi2, fi2, fi2))
+%! assert (imfill (cat (3, im, im, im), [3 3 2; 3 5 2]), cat (3, fi, fi, fi))
+%! assert (imfill (cat (3, emp, im, emp), [3 3 2]), true (5, 6, 3))
