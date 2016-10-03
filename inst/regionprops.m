@@ -304,8 +304,8 @@ function props = regionprops (bw, varargin)
     "accum_subs_nd",    {{"accum_subs"}},
     "boundingbox",      {{"pixellist", "accum_subs_nd"}},
     "centroid",         {{"accum_subs_nd", "pixellist", "area"}},
-    "filledarea",       {{}},
-    "filledimage",      {{}},
+    "filledarea",       {{"filledimage"}},
+    "filledimage",      {{"image"}},
     "image",            {{"subarrayidx", "accum_subs", "pixelidxlist"}},
     "pixelidxlist",     {{}},
     "pixellist",        {{"pixelidxlist"}},
@@ -370,7 +370,9 @@ function props = regionprops (bw, varargin)
         values.centroid = rp_centroid (cc, values.pixellist, values.area,
                                        values.accum_subs_nd);
       case "filledarea"
+        values.filledarea = rp_filled_area (values.filledimage);
       case "filledimage"
+        values.filledimage = rp_filled_image (values.image);
       case "image"
         values.image = rp_image (cc, bw, values.pixelidxlist,
                                  values.accum_subs, values.subarrayidx);
@@ -444,7 +446,9 @@ function props = regionprops (bw, varargin)
         [props.Centroid] = mat2cell (values.centroid,
                                      ones (cc.NumObjects, 1)){:};
       case "filledarea"
+        [props.FilledArea] = num2cell (values.filledarea){:};
       case "filledimage"
+        [props.FilledImage] = values.filledimage{:};
       case "image"
         [props.Image] = values.image{:};
       case "pixelidxlist"
@@ -679,6 +683,19 @@ function extrema = rp_extrema (cc, pixel_list, area, subs_nd)
   extrema(4:8:nr, 2) = base_base(:,2); # y value for right bottom
 endfunction
 
+function filled_area = rp_filled_area (bb_filled_images)
+  filled_area = cellfun ('nnz', bb_filled_images);
+endfunction
+
+function bb_filled_images = rp_filled_image (bb_images)
+  ## Beware if attempting to vectorize this.  The bounding boxes of
+  ## different regions may overlap, and a "hole" may be a hole for
+  ## several regions (e.g., concentric circles).  There should be tests
+  ## this weird cases.
+  bb_filled_images = cellfun (@(x) imfill (x, "holes"), bb_images,
+                              "UniformOutput", false);
+endfunction
+
 function bb_images = rp_image (cc, bw, idx, subs, subarray_idx)
   ## For this property, we must remember to remove elements from other
   ## regions (remember that bounding boxes may overlap).  We do that by
@@ -824,16 +841,6 @@ function retval = old_regionprops (bw, varargin)
           area = local_area (L == k);
           idx = length (bb)/2 + 1;
           retval (k).Extent = area / prod (bb(idx:end));
-        endfor
-
-      case "filledarea"
-        for k = 1:num_labels
-          retval (k).FilledArea = sum (bwfill (L == k, "holes") (:));
-        endfor
-
-      case "filledimage"
-        for k = 1:num_labels
-          retval (k).FilledImage = bwfill (L == k, "holes");
         endfor
 
       case "majoraxislength"
@@ -1185,6 +1192,124 @@ endfunction
 %! ]);
 %! assert (regionprops (l, "EulerNumber"),
 %!         struct ("EulerNumber", {-9; 1; 1; 1; 1}))
+
+
+## Test connectivity for hole filling.
+%!test
+%! l = uint8 ([
+%!   1  1  1  1  1  1  1
+%!   0  1  2  1  2  2  1
+%!   1  2  1  2  1  2  1
+%!   1  1  2  1  2  1  1
+%!   1  2  1  2  1  2  1
+%!   1  2  2  1  2  1  1
+%!   1  1  1  1  1  1  1
+%! ]);
+%! filled = {
+%!   logical([
+%!     1  1  1  1  1  1  1
+%!     0  1  1  1  1  1  1
+%!     1  1  1  1  1  1  1
+%!     1  1  1  1  1  1  1
+%!     1  1  1  1  1  1  1
+%!     1  1  1  1  1  1  1
+%!     1  1  1  1  1  1  1
+%!   ]);
+%!   logical([
+%!     0  1  0  1  1
+%!     1  1  1  1  1
+%!     0  1  1  1  0
+%!     1  1  1  1  1
+%!     1  1  0  1  0
+%!   ]);
+%!  };
+%! assert (regionprops (l, {"FilledImage", "FilledArea"}),
+%!         struct ("FilledImage", filled, "FilledArea", {48; 19}))
+
+## Disconnected regions without holes.
+%!test
+%! l = uint8 ([
+%!   0  0  0  0  0  0  0
+%!   0  1  0  1  0  1  0
+%!   0  1  0  1  0  1  0
+%!   0  0  0  0  0  0  0
+%! ]);
+%! filled = logical ([
+%!   1  0  1  0  1
+%!   1  0  1  0  1
+%! ]);
+%! assert (regionprops (l, {"FilledImage", "FilledArea"}),
+%!         struct ("FilledImage", filled, "FilledArea", 6))
+%!
+%! l = uint8 ([
+%!   2  2  2  2  2  2  2
+%!   2  1  2  1  2  1  2
+%!   2  1  2  1  2  1  2
+%!   2  2  2  2  2  2  2
+%! ]);
+%! filled = {
+%!   logical([
+%!     1  0  1  0  1
+%!     1  0  1  0  1
+%!   ]);
+%!   true(4, 7)
+%! };
+%! assert (regionprops (l, {"FilledImage", "FilledArea"}),
+%!         struct ("FilledImage", filled, "FilledArea", {6; 28}))
+
+## Concentric regions to fill holes.
+%!test
+%! l = uint8 ([
+%!   0  0  0  0  0  0  0
+%!   0  1  1  1  1  1  0
+%!   0  1  2  2  2  1  0
+%!   0  1  2  3  2  1  0
+%!   0  1  2  2  2  1  0
+%!   0  1  1  1  1  1  0
+%!   0  0  0  0  0  0  0
+%! ]);
+%! filled = {true(5, 5); true(3, 3); true};
+%! assert (regionprops (l, {"FilledImage", "FilledArea"}),
+%!         struct ("FilledImage", filled, "FilledArea", {25; 9; 1}))
+
+## Regions with overlapping holes.
+%!test
+%! l = uint8 ([
+%!   1  1  1  2  0  0
+%!   1  0  2  1  2  0
+%!   1  2  0  1  0  2
+%!   1  2  1  1  0  2
+%!   0  1  2  2  2  2
+%! ]);
+%! filled = {
+%!   logical([
+%!     1  1  1  0
+%!     1  1  1  1
+%!     1  1  1  1
+%!     1  1  1  1
+%!     0  1  0  0
+%!   ]);
+%!   logical([
+%!     0  0  1  0  0
+%!     0  1  1  1  0
+%!     1  1  1  1  1
+%!     1  1  1  1  1
+%!     0  1  1  1  1
+%!   ])
+%! };
+%! assert (regionprops (l, {"FilledImage", "FilledArea"}),
+%!         struct ("FilledImage", filled, "FilledArea", {16; 18}))
+
+## 3D region to fill which requires connectivity 6 (fails with 18 or 26).
+%!test
+%! bw = false (5, 5, 5);
+%! bw(2:4, 2:4, [1 5]) = true;
+%! bw(2:4, [1 5], 2:4) = true;
+%! bw([1 5], 2:4, 2:4) = true;
+%! filled = bw;
+%! filled(2:4, 2:4, 2:4) = true;
+%! assert (regionprops (bw, {"FilledImage", "FilledArea"}),
+%!         struct ("FilledImage", filled, "FilledArea", 81))
 
 
 %!test
