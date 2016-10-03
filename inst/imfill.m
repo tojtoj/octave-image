@@ -21,11 +21,12 @@
 ## @deftypefnx {Function File} {@var{I2} =} imfill (@var{I})
 ## @deftypefnx {Function File} {@var{I2} =} imfill (@var{I}, "holes")
 ## @deftypefnx {Function File} {@var{I2} =} imfill (@var{I}, @var{conn})
+## @deftypefnx {Function File} {@var{I2} =} imfill (@var{I}, @var{conn}, "holes")
 ## Fill image holes or regions.
 ##
 ## The image to be filled can be binary @var{bw} or grayscale @var{I}.
 ## Regions are a series of connected elements whose values are lower than
-## at least one of its neighborh elemnts.
+## at least one of its neighbor elements.
 ##
 ## The option @qcode{"holes"}, default for grayscale images, can be used
 ## to fill all holes, i.e., regions without border elements.
@@ -87,7 +88,7 @@ function filled = imfill (img, varargin)
       validatestring (opt2, {"holes"}, "imfill", "OPTION");
       fill_holes = true;
     elseif (! islogical (img))
-      ## syntax: imfill (BW, CONN) or imfill (IMG, CONN)
+      ## syntax: imfill (IMG, CONN)
       fill_holes = true;
       iptcheckconn (opt2, "imfill", "CONN");
       conn = opt2;
