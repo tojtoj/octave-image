@@ -22,9 +22,16 @@
  ** For better compatibility with Matlab, the imtransform function now
     uses 0 instead of NA for the default extrapolation value.
 
- ** The regionprops function now computes the new properties:
+ ** The regionprops function has been rewritten and should perform several
+    orders of magnitude faster, dependending on the number of properties
+    being measured and the number of objects.  The new implementation will
+    be specially faster for a large number of objects and multiple properties.
+    In addition to the increased performance, regions can be defined with
+    a bwconncomp structure.  The following properties have changed:
 
-      SubarrayIdx
+      * FilledArea - new support for ND images
+      * FilledImage - new support for ND images
+      * SubarrayIdx - new property implemented
 
  ** stretchlim() now properly supports integer input and will return
     values in the [0 1] range.  It also no longer performs rounding
