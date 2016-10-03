@@ -39,6 +39,8 @@ function eul = bweuler (BW, n = 8)
     print_usage;
   elseif (!isbw (BW, "non-logical"))
     error("first argument must be a Black and White image");
+  elseif (ndims (BW) != 2)
+    error ("bweuler: BW must have 2 dimensions");
   endif
 
   ## lut_4=(q1lut-q3lut+2*qdlut)/4;  # everything in one lut will be quicker
@@ -60,13 +62,8 @@ function eul = bweuler (BW, n = 8)
   ## borders. Therefore, there are three one-pixel and one diagonal pixels. So, we get 3 * 1 - 2 = 1
   ## (error) instead of 6 * 1 - 2 = 4 (correct).
 
-  BWaux  = zeros (rows (BW) + 1, columns (BW) + 1);
-
-  for r = 1 : rows(BW)
-     for c = 1 : columns (BW)
-        BWaux (r + 1, c + 1) = BW (r, c);
-     endfor
-  endfor
+  BWaux = false (size (BW) +1);
+  BWaux(2:end,2:end) = BW;
 
   eul = sum (applylut (BWaux, lut) (:)) / 4;
 
@@ -87,7 +84,7 @@ endfunction
 %! A(6,6)=0;
 %! assert(bweuler(A),-1);
 
-%!# This will test if n=4 and n=8 behave differently
+## This will test if n=4 and n=8 behave differently
 %!test
 %! A=zeros(10,10);
 %! A(2:4,2:4)=1;
@@ -95,3 +92,5 @@ endfunction
 %! assert(bweuler(A,4),2);
 %! assert(bweuler(A,8),1);
 %! assert(bweuler(A),1);
+
+%!error <2 dimensions> bweuler (true (5, 5, 1, 5))
