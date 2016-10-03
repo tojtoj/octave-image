@@ -120,7 +120,8 @@
 ## The diameter of a circle with the same area as the object.
 ##
 ## @item @qcode{"EulerNumber"}
-## The Euler number of the region (see @code{bweuler} for details).
+## The Euler number of the region using connectivity 8.  Only supported
+## for 2D images.  See @code{bweuler} for details.
 ##
 ## @item @qcode{"Extent"}
 ## The area of the object divided by the area of the bounding box.
@@ -314,7 +315,7 @@ function props = regionprops (bw, varargin)
     "conveximage",      {{}},
     "eccentricity",     {{}},
     "equivdiameter",    {{"area"}},
-    "eulernumber",      {{}},
+    "eulernumber",      {{"image"}},
     "extent",           {{}},
     "extrema",          {{"area", "accum_subs_nd", "pixellist"}},
     "majoraxislength",  {{}},
@@ -386,6 +387,7 @@ function props = regionprops (bw, varargin)
       case "equivdiameter"
         values.equivdiameter = rp_equivdiameter (values.area);
       case "eulernumber"
+        values.eulernumber = rp_euler_number (values.image);
       case "extent"
       case "extrema"
         values.extrema = rp_extrema (cc, values.pixellist, values.area,
@@ -458,6 +460,7 @@ function props = regionprops (bw, varargin)
       case "equivdiameter"
         [props.EquivDiameter] = num2cell (values.equivdiameter){:};
       case "eulernumber"
+        [props.EulerNumber] = num2cell (values.eulernumber){:};
       case "extent"
       case "extrema"
         [props.Extrema] = mat2cell (values.extrema,
@@ -577,6 +580,11 @@ endfunction
 
 function equivdiameter = rp_equivdiameter (area)
   equivdiameter =  sqrt (4 * area / pi);
+endfunction
+
+function euler = rp_euler_number (bb_images)
+  ## TODO there should be a way to vectorize this, right?
+  euler = cellfun (@bweuler, bb_images);
 endfunction
 
 function extrema = rp_extrema (cc, pixel_list, area, subs_nd)
@@ -809,10 +817,6 @@ function retval = old_regionprops (bw, varargin)
   for property = lower(properties)
     property = property{:};
     switch (property)
-      case "eulernumber"
-        for k = 1:num_labels
-          retval (k).EulerNumber = bweuler (L == k);
-        endfor
 
       case "extent"
         for k = 1:num_labels
@@ -1117,6 +1121,71 @@ endfunction
 %!                         logical([1 1; 1 1])});
 %! assert (regionprops (bw2d_insides, "Image"), out)
 %! assert (regionprops (bwlabel (bw2d_insides), "Image"), out)
+
+
+%!test
+%! l = uint8 ([
+%!   0  0  0  0  0  0
+%!   0  1  1  1  1  0
+%!   0  1  2  2  1  0
+%!   0  1  2  2  1  0
+%!   0  1  1  1  1  0
+%!   0  0  0  0  0  0
+%! ]);
+%! assert (regionprops (l, "EulerNumber"),
+%!         struct ("EulerNumber", {0; 1}))
+%!
+%! l = uint8 ([
+%!   0  0  0  0  0  0  0
+%!   0  1  1  1  1  1  0
+%!   0  1  2  2  2  1  0
+%!   0  1  2  3  2  1  0
+%!   0  1  2  2  2  1  0
+%!   0  1  1  1  1  1  0
+%!   0  0  0  0  0  0  0
+%! ]);
+%! assert (regionprops (l, "EulerNumber"),
+%!         struct ("EulerNumber", {0; 0; 1}))
+
+%!test
+%! l = uint8 ([
+%!   0  0  0  0  0  0  0
+%!   0  1  1  1  1  1  0
+%!   0  1  0  0  0  1  0
+%!   0  1  0  1  0  1  0
+%!   0  1  0  0  0  1  0
+%!   0  1  1  1  1  1  0
+%!   0  0  0  0  0  0  0
+%! ]);
+%! assert (regionprops (l, "EulerNumber"),
+%!         struct ("EulerNumber", 1))
+
+%!test
+%! l = uint8 ([
+%!   1  1  1  1  1  1  1
+%!   1  1  2  1  2  2  1
+%!   1  2  1  2  1  2  1
+%!   1  1  2  1  2  1  1
+%!   1  2  1  2  1  2  1
+%!   1  2  2  1  2  1  1
+%!   1  1  1  1  1  1  1
+%! ]);
+%! assert (regionprops (l, "EulerNumber"),
+%!         struct ("EulerNumber", {-9; -4}))
+
+%!test
+%! l = uint8 ([
+%!   1  1  1  1  1  1  1
+%!   1  1  4  1  5  5  1
+%!   1  3  1  4  1  5  1
+%!   1  1  3  1  4  1  1
+%!   1  2  1  3  1  4  1
+%!   1  2  2  1  3  1  1
+%!   1  1  1  1  1  1  1
+%! ]);
+%! assert (regionprops (l, "EulerNumber"),
+%!         struct ("EulerNumber", {-9; 1; 1; 1; 1}))
+
 
 %!test
 %! a = eye (4);
