@@ -300,8 +300,8 @@ function props = regionprops (bw, varargin)
 
   dependencies = struct (
     "area",             {{}},
-    "accum_subs",       {{"area"}},
-    "accum_subs_nd",    {{"accum_subs"}},
+    "accum_subs",       {{"area"}}, # private
+    "accum_subs_nd",    {{"accum_subs"}}, # private
     "boundingbox",      {{"pixellist", "accum_subs_nd"}},
     "centroid",         {{"accum_subs_nd", "pixellist", "area"}},
     "filledarea",       {{"filledimage"}},
@@ -313,14 +313,15 @@ function props = regionprops (bw, varargin)
     "convexarea",       {{}},
     "convexhull",       {{}},
     "conveximage",      {{}},
-    "eccentricity",     {{}},
+    "eccentricity",     {{"minoraxislength", "majoraxislength"}},
     "equivdiameter",    {{"area"}},
     "eulernumber",      {{"image"}},
     "extent",           {{"area", "boundingbox"}},
     "extrema",          {{"area", "accum_subs_nd", "pixellist"}},
-    "majoraxislength",  {{}},
-    "minoraxislength",  {{}},
-    "orientation",      {{}},
+    "local_ellipse",    {{"area", "pixellist"}}, # private
+    "majoraxislength",  {{"local_ellipse"}},
+    "minoraxislength",  {{"local_ellipse"}},
+    "orientation",      {{"local_ellipse"}},
     "perimeter",        {{}},
     "solidity",         {{}},
     "maxintensity",     {{"accum_subs", "pixelidxlist"}},
@@ -386,6 +387,8 @@ function props = regionprops (bw, varargin)
       case "convexhull"
       case "conveximage"
       case "eccentricity"
+        values.eccentricity = rep_eccentricity (values.minoraxislength,
+                                                values.majoraxislength);
       case "equivdiameter"
         values.equivdiameter = rp_equivdiameter (values.area);
       case "eulernumber"
@@ -395,9 +398,13 @@ function props = regionprops (bw, varargin)
       case "extrema"
         values.extrema = rp_extrema (cc, values.pixellist, values.area,
                                      values.accum_subs_nd);
-      case "majoraxislength"
-      case "minoraxislength"
-      case "orientation"
+      case "local_ellipse"
+        values.local_ellipse = true;
+        [values.minoraxislength, values.majoraxislength, ...
+         values.orientation] = rp_local_ellipse (values.area, values.pixellist);
+      case {"majoraxislength", "minoraxislength", "orientation"}
+        ## Do nothing.  These are "virtual" targets which are computed
+        ## in local_ellipse.
       case "perimeter"
         values.perimeter = rp_perimeter (cc, bw);
       case "solidity"
@@ -462,6 +469,7 @@ function props = regionprops (bw, varargin)
       case "convexhull"
       case "conveximage"
       case "eccentricity"
+        [props.Eccentricity] = num2cell (values.eccentricity){:};
       case "equivdiameter"
         [props.EquivDiameter] = num2cell (values.equivdiameter){:};
       case "eulernumber"
@@ -472,8 +480,11 @@ function props = regionprops (bw, varargin)
         [props.Extrema] = mat2cell (values.extrema,
                                     repmat (8, 1, cc.NumObjects)){:};
       case "majoraxislength"
+        [props.MajorAxisLength] = num2cell (values.majoraxislength){:};
       case "minoraxislength"
+        [props.MinorAxisLength] = num2cell (values.minoraxislength){:};
       case "orientation"
+        [props.Orientation] = num2cell (values.orientation){:};
       case "perimeter"
         [props.Perimeter] = num2cell (values.perimeter){:};
       case "solidity"
@@ -582,6 +593,10 @@ function bounding_box = rp_bounding_box (cc, pixel_list, subs_nd)
   init_corner = accumarray (subs_nd, pixel_list(:), [no nd], @min) - 0.5;
   end_corner  = accumarray (subs_nd, pixel_list(:), [no nd], @max) + 0.5;
   bounding_box = [(init_corner) (end_corner - init_corner)];
+endfunction
+
+function eccentricity = rep_eccentricity (minoraxislength, majoraxislength)
+  eccentricity = sqrt (1 - (minoraxislength ./ majoraxislength).^2);
 endfunction
 
 function equivdiameter = rp_equivdiameter (area)
@@ -834,97 +849,39 @@ function totals = rp_total_intensity (cc, img, idx, subs)
   totals = accumarray (subs, img(idx), [cc.NumObjects 1]);
 endfunction
 
-function retval = old_regionprops (bw, varargin)
+function [minor, major, orientation] = rp_local_ellipse (area, pixellist)
+  ## FIXME: this should be vectorized.  See R.M. Haralick and Linda G.
+  ##        Shapiro, "Computer and Robot Vision: Volume 1", Appendix A
 
-  ## Compute the properties
-  retval = struct ();
-  for property = lower(properties)
-    property = property{:};
-    switch (property)
+  no = numel (area);
 
-      case "majoraxislength"
-        if (N > 2)
-          warning ("regionprops: skipping majoraxislength for ND image");
-          break
-        endif
+  minor = zeros (no, 1);
+  major = minor;
+  orientation = minor;
 
-        for k = 1:num_labels
-          [Y, X] = find (L == k);
+  c_idx = 1;
+  for idx = 1:no
+    sel = c_idx:(c_idx + area(idx) -1);
+    X = pixellist(sel, 2);
+    Y = pixellist(sel, 1);
 
-          if (numel (Y) > 1)
-            [major, ~, ~] = local_ellipsefit (X, Y);
-            retval(k).MajorAxisLength = major;
-          else
-            retval(k).MajorAxisLength = 1;
-          endif
-        endfor
+    ## calculate (centralised) second moment of region with pixels [X, Y]
 
-      case "minoraxislength"
-        if (N > 2)
-          warning ("regionprops: skipping minoraxislength for ND image");
-          break
-        endif
+    ## This is equivalent to "cov ([X(:) Y(:)], 1)" but will work as
+    ## expected even if X and Y have only one row each.
+    C = center ([X(:) Y(:)], 1);
+    C = C' * C / (rows (C));
 
-        for k = 1:num_labels
-          [Y, X] = find (L == k);
-          if (numel (Y) > 1)
-            [~, minor, ~] = local_ellipsefit (X, Y);
-            retval(k).MinorAxisLength = minor;
-          else
-            retval(k).MinorAxisLength = 1;
-          endif
-        endfor
-
-      case "eccentricity"
-        if (N > 2)
-          warning ("regionprops: skipping eccentricity for ND image");
-          break
-        endif
-
-        for k = 1:num_labels
-          [Y, X] = find (L == k);
-          if (numel (Y) > 1)
-            [major, minor, ~] = local_ellipsefit (X, Y);
-            retval(k).Eccentricity = sqrt (1- (minor/major)^2);
-          else
-            retval(k).Eccentricity = 0; # a circle has 0 eccentricity
-          endif
-        endfor
-
-      case "orientation"
-        if (N > 2)
-          warning ("regionprops: skipping orientation for ND image");
-          break
-        endif
-
-        for k = 1:num_labels
-          [Y, X] = find (L == k);
-          if (numel (Y) > 1)
-            [~, ~, major_vec] = local_ellipsefit (X, Y);
-            retval(k).Orientation = -(180/pi) * atan (major_vec(2) / major_vec(1));
-          else
-            retval(k).Orientation = 0;
-          endif
-        endfor
-
-      otherwise
-        error ("regionprops: unsupported property '%s'", property);
-    endswitch
+    C = C + 1/12 .* eye (rows (C)); # centralised second moment of 1 pixel is 1/12
+    [V, lambda] = eig (C);
+    lambda_d = 4 .* sqrt (diag (lambda));
+    minor(idx) = min (lambda_d);
+    [major(idx), major_idx] = max (lambda_d);
+    major_vec = V(:, major_idx);
+    orientation(idx) = -(180/pi) .* atan (major_vec(2) ./ major_vec(1));
   endfor
-  ## Matlab returns a column vector struct array.
-  retval = retval(:);
 endfunction
 
-function [major, minor, major_vec] = local_ellipsefit (X, Y)
-  ## calculate (centralised) second moment of region with pixels [X, Y]
-  C = cov ([X(:), Y(:)], 1);    # option 1 for normalisation with n instead of n-1
-  C = C + 1/12 .* eye (rows (C)); # centralised second moment of 1 pixel is 1/12
-  [V, lambda] = eig (C);
-  lambda_d = 4 .* sqrt (diag (lambda));
-  [major, major_idx] = max (lambda_d);
-  major_vec = V(:, major_idx);
-  minor = min(lambda_d);
-endfunction
 
 %!shared bw2d, gray2d, bw2d_over_bb, bw2d_insides
 %! bw2d = logical ([
@@ -1323,6 +1280,14 @@ endfunction
 
 
 %!test
+%! bw = logical ([0 0 0; 0 1 0; 0 0 0]);
+%! assert (regionprops (bw, {"MinorAxisLength", "MajorAxisLength", ...
+%!                           "Eccentricity"}),
+%!         struct ("MajorAxisLength", 4 .* sqrt (1/12),
+%!                 "MinorAxisLength", 4 .* sqrt (1/12),
+%!                 "Eccentricity", 0))
+
+%!test
 %! a = eye (4);
 %! t = regionprops (a, "majoraxislength");
 %! assert (t.MajorAxisLength, 6.4291, 1e-3);
@@ -1358,8 +1323,9 @@ endfunction
 %! assert (t.Eccentricity, 0.90128 , 1e-3);
 %! t = regionprops (c, "orientation");
 %! assert (t.Orientation, 45);
-% t = regionprops (c, "equivdiameter");
-% assert (t.EquivDiameter, 2.5231,  1e-3);
+%! t = regionprops (c, "equivdiameter");
+%! assert (t.EquivDiameter, 2.5231,  1e-3);
+
 
 %!test
 %! f = [0 0 0 0; 1 1 1 1; 0 1 1 1; 0 0 0 0];
