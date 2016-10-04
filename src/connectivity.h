@@ -21,6 +21,9 @@
 #include <stdexcept>
 #include <functional>
 
+// XXX We need to include this first so it works with Octave 4.0.0.
+#include <octave/oct.h>
+
 #include <octave/Array.h>
 #include <octave/idx-vector.h>
 #include <octave/dim-vector.h>
