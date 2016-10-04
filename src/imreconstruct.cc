@@ -29,9 +29,10 @@
 #include <functional>
 #include <queue>
 
-#include <octave/lo-mappers.h>
-
+// XXX We need to include this first so it works with Octave 4.0.0.
 #include <octave/oct.h>
+
+#include <octave/lo-mappers.h>
 
 #include "connectivity.h"
 
