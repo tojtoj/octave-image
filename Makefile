@@ -46,15 +46,16 @@ help:
 
 $(RELEASE_DIR): .hg/dirstate
 	@echo "Creating package version $(VERSION) release ..."
-	-rm -rf "$@"
+	$(RM) -r "$@"
 	hg archive --exclude ".hg*" --exclude "Makefile" --exclude "HACKING" \
 	  --exclude "devel" --type files "$@"
 	cd "$@" && ./bootstrap && rm -rf "src/autom4te.cache"
+	$(RM) "$@/bootstrap"
 	chmod -R a+rX,u+w,go-w "$@"
 
 $(HTML_DIR): install
 	@echo "Generating HTML documentation. This may take a while ..."
-	-rm -rf "$@"
+	$(RM) -r "$@"
 	$(OCTAVE) --no-window-system --silent \
 	  --eval "pkg load generate_html; " \
 	  --eval "pkg load $(PACKAGE);" \
@@ -102,5 +103,5 @@ run: all
 	  --eval '${PKG_ADD}'
 
 clean:
-	rm -rf $(TARGET_DIR)
+	$(RM) -r $(TARGET_DIR)
 	test ! -e src/Makefile || $(MAKE) -C src clean
