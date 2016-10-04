@@ -316,7 +316,7 @@ function props = regionprops (bw, varargin)
     "eccentricity",     {{}},
     "equivdiameter",    {{"area"}},
     "eulernumber",      {{"image"}},
-    "extent",           {{}},
+    "extent",           {{"area", "boundingbox"}},
     "extrema",          {{"area", "accum_subs_nd", "pixellist"}},
     "majoraxislength",  {{}},
     "minoraxislength",  {{}},
@@ -391,6 +391,7 @@ function props = regionprops (bw, varargin)
       case "eulernumber"
         values.eulernumber = rp_euler_number (values.image);
       case "extent"
+        values.extent = rp_extent (values.area, values.boundingbox);
       case "extrema"
         values.extrema = rp_extrema (cc, values.pixellist, values.area,
                                      values.accum_subs_nd);
@@ -466,6 +467,7 @@ function props = regionprops (bw, varargin)
       case "eulernumber"
         [props.EulerNumber] = num2cell (values.eulernumber){:};
       case "extent"
+        [props.Extent] = num2cell (values.extent){:};
       case "extrema"
         [props.Extrema] = mat2cell (values.extrema,
                                     repmat (8, 1, cc.NumObjects)){:};
@@ -505,7 +507,6 @@ function props = select_properties (props, is_2d, has_gray)
     "conveximage",
     "eccentricity",
     "equivdiameter",
-    "extent",
     "extrema",
     "majoraxislength",
     "minoraxislength",
@@ -522,6 +523,7 @@ function props = select_properties (props, is_2d, has_gray)
   };
   persistent props_others = {
     "eulernumber",
+    "extent", # Matlab limits Extent to 2D.  Octave does not.
     "filledarea",
     "filledimage",
     "image",
@@ -589,6 +591,11 @@ endfunction
 function euler = rp_euler_number (bb_images)
   ## TODO there should be a way to vectorize this, right?
   euler = cellfun (@bweuler, bb_images);
+endfunction
+
+function extent = rp_extent (area, bounding_box)
+  bb_area = prod (bounding_box(:,(end/2)+1:end), 2);
+  extent = area ./ bb_area;
 endfunction
 
 function extrema = rp_extrema (cc, pixel_list, area, subs_nd)
@@ -834,14 +841,6 @@ function retval = old_regionprops (bw, varargin)
   for property = lower(properties)
     property = property{:};
     switch (property)
-
-      case "extent"
-        for k = 1:num_labels
-          bb = local_boundingbox (L == k);
-          area = local_area (L == k);
-          idx = length (bb)/2 + 1;
-          retval (k).Extent = area / prod (bb(idx:end));
-        endfor
 
       case "majoraxislength"
         if (N > 2)
@@ -1310,6 +1309,17 @@ endfunction
 %! filled(2:4, 2:4, 2:4) = true;
 %! assert (regionprops (bw, {"FilledImage", "FilledArea"}),
 %!         struct ("FilledImage", filled, "FilledArea", 81))
+
+
+%!test
+%! l = uint8 ([
+%!   1  1  1  2  0  0
+%!   1  0  2  1  2  0
+%!   1  2  0  1  0  2
+%!   1  2  1  1  0  2
+%!   0  1  2  2  2  2
+%! ]);
+%! assert (regionprops (l, {"Extent"}), struct ("Extent", {0.55; 0.44}))
 
 
 %!test
