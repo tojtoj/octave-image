@@ -384,8 +384,11 @@ function props = regionprops (bw, varargin)
       case "subarrayidx"
         values.subarrayidx = rp_subarray_idx (cc, values.boundingbox);
       case "convexarea"
+        error ("regionprops: property \"ConvexArea\" not yet implemented");
       case "convexhull"
+        error ("regionprops: property \"ConvexHull\" not yet implemented");
       case "conveximage"
+        error ("regionprops: property \"ConvexImage\" not yet implemented");
       case "eccentricity"
         values.eccentricity = rep_eccentricity (values.minoraxislength,
                                                 values.majoraxislength);
@@ -408,6 +411,7 @@ function props = regionprops (bw, varargin)
       case "perimeter"
         values.perimeter = rp_perimeter (cc, bw);
       case "solidity"
+        error ("regionprops: property \"Solidity\" not yet implemented");
       case "maxintensity"
         values.maxintensity = rp_max_intensity (cc, img,
                                                 values.pixelidxlist,
@@ -465,9 +469,9 @@ function props = regionprops (bw, varargin)
         [props.PixelList] = mat2cell (values.pixellist, Area){:};
       case "subarrayidx"
         [props.SubarrayIdx] = values.subarrayidx{:};
-      case "convexarea"
-      case "convexhull"
-      case "conveximage"
+#      case "convexarea"
+#      case "convexhull"
+#      case "conveximage"
       case "eccentricity"
         [props.Eccentricity] = num2cell (values.eccentricity){:};
       case "equivdiameter"
@@ -487,7 +491,7 @@ function props = regionprops (bw, varargin)
         [props.Orientation] = num2cell (values.orientation){:};
       case "perimeter"
         [props.Perimeter] = num2cell (values.perimeter){:};
-      case "solidity"
+#      case "solidity"
       case "maxintensity"
         [props.MaxIntensity] = num2cell (values.maxintensity){:};
       case "meanintensity"
@@ -513,9 +517,9 @@ function props = select_properties (props, is_2d, has_gray)
     "centroid",
   };
   persistent props_2d = {
-    "convexarea",
-    "convexhull",
-    "conveximage",
+#    "convexarea",
+#    "convexhull",
+#    "conveximage",
     "eccentricity",
     "equivdiameter",
     "extrema",
@@ -523,7 +527,7 @@ function props = select_properties (props, is_2d, has_gray)
     "minoraxislength",
     "orientation",
     "perimeter",
-    "solidity",
+#    "solidity",
   };
   persistent props_gray = {
     "maxintensity",
@@ -1447,3 +1451,8 @@ endfunction
 %!      regionprops ([0 1.5 3 4; 0 1.5 3 4])
 %!error <L must be non-negative integers only>
 %!      regionprops (int8 ([0 -1 3 4; 0 -1 3 4]))
+
+%!error <not yet implemented> regionprops (rand (5, 5) > 0.5, "ConvexArea")
+%!error <not yet implemented> regionprops (rand (5, 5) > 0.5, "ConvexHull")
+%!error <not yet implemented> regionprops (rand (5, 5) > 0.5, "ConvexImage")
+%!error <not yet implemented> regionprops (rand (5, 5) > 0.5, "Solidity")
