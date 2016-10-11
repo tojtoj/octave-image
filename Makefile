@@ -78,11 +78,8 @@ install: $(RELEASE_TARBALL)
 	@echo "Installing package locally ..."
 	$(OCTAVE) --eval 'pkg ("install", "-verbose", "${RELEASE_TARBALL}")'
 
-## Set CXX when calling configure as it will be set by pkg.  Note that
-## mkoctfile will respect environment variables so this still uses whatever
-## the user has set.
 all: $(CC_SOURCES)
-	cd src/ && ./configure CXX="$$($(MKOCTFILE) -p CXX)"
+	cd src/ && ./configure
 	$(MAKE) -C src/
 
 check: all
