@@ -25,20 +25,30 @@
 ##
 ## @end deftypefn
 
-function Y = imtranslate (X, a, b, bbox = "wrap")
+function Y = imtranslate (X, nc, nr, bbox = "wrap")
 
-  if ( strcmp(bbox, "crop")==1 )
-    pre = post = ceil ([a b]);
-    pre(pre   > 0) = 0;
-    post(post < 0) = 0;
+  if (strcmp (bbox, "crop"))
+    pre = post = [0 0];
+    if (nc > 0)
+      post(2) = ceil (nc);
+    else
+      pre(2) = ceil (nc);
+    endif
+    if (nr > 0)
+      pre(1) = ceil (nr);
+    else
+      post(1) = ceil (nr);
+    endif
+    pre = abs (pre);
+    post = abs (post);
     X = padarray (X, abs (pre), "pre");
-    X = padarray (X, post, "post");
+    X = padarray (X, abs (post), "post");
   endif
 
   [dimy, dimx] = size(X);
   x = fft2(X);
-  px = exp(-2*pi*i*a*(0:dimx-1)/dimx);
-  py = exp(-2*pi*i*b*(0:dimy-1)/dimy)';   % actually to correspond to index notation 'b' should be
+  px = exp(-2*pi*i*nc*(0:dimx-1)/dimx);
+  py = exp(-2*pi*i*nr*(0:dimy-1)/dimy)';   % actually to correspond to index notation 'b' should be
                                           % replaced with '-b'
                                           % but I do not want to brake previous version compatibility
                                           % note: it also must be done in the cropping iand padding code
@@ -48,7 +58,18 @@ function Y = imtranslate (X, a, b, bbox = "wrap")
                         % for integer shifts imaginary part  is 0 
                         % so real takes care of transfer from complex number to real
 
-  if ( strcmp(bbox, "crop")==1 )
-    Y = Y(ypad(1)+1:dimy-ypad(2) , xpad(1)+1:dimx-xpad(2));
+  if (strcmp (bbox, "crop"))
+    Y = Y(pre(1)+1:dimy-post(1) , pre(2)+1:dimx-post(2));
   endif
 endfunction
+
+%!test
+%! obs = imtranslate (ones (5, 5), 2, 1, "crop");
+%! exp = zeros (5, 5);
+%! exp(1:4, 3:5) = 1;
+%! assert (obs, exp, eps * 10)
+%!
+%! obs = imtranslate (ones (5, 5), -2, -1, "crop");
+%! exp = zeros (5, 5);
+%! exp(2:5, 1:3) = 1;
+%! assert (obs, exp, eps * 10)
