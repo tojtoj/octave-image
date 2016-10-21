@@ -5,6 +5,7 @@
 
  ** Fix imtranslate regression when used with the "crop" option.
 
+ ** Fix compilation issues for clang++ users on Mac OSX.
 
  Summary of important user-visible changes for image 2.6.0 (2016/10/05):
 -------------------------------------------------------------------------
