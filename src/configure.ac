@@ -1,5 +1,5 @@
 AC_PREREQ([2.67])
-AC_INIT([Octave-Forge image package], [2.6.0])
+AC_INIT([Octave-Forge image package], [2.6.1])
 
 AC_CONFIG_HEADERS([config.h])
 
