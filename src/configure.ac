@@ -18,25 +18,33 @@ fi
 dnl CXX is the compiler including options such as -std=c++11.
 dnl CXXFLAGS are flags for CXX coming from the environment.
 dnl XTRA_CXXFLAGS are extra flags that we want to set ourselves.
-dnl
-dnl Most likely, CXX will already come set by pkg itself.  If not,
-dnl it should be set in the Makefile at the root of the package.
 
-AC_PROG_CXX
-AC_LANG(C++)
 
-XTRA_CXXFLAGS="-Wall"
+dnl We will not actually use CXX in the build, we only use mkoctfile
+dnl which picks up the dnl CXX environment variable and defaults to what
+dnl was used to build Octave.  However, that may not be enough for our
+dnl C++11 dependency (Octave 4.0 did not require C++11) so we set CXX
+dnl ourselves, check if any extra flag was needed, and then use that
+dnl on MKOCTFILE.
 
+CXX=`${MKOCTFILE} -p CXX`
 image_save_CXX="$CXX"
 
-OCTAVE_IMAGE_PROG_CXX_CXX11(
-  [],
-  [AC_MSG_ERROR([*** A compiler with support for C++11 is required])])
+AC_PROG_CXX
+if test "x$ac_prog_cxx_stdcxx" != "xcxx11"; then
+  AC_MSG_ERROR([** could not find a C++11 compiler])
+fi
 
 CXX11_SWITCH=$(echo "$CXX" | $SED "s,^$image_save_CXX,,")
 MKOCTFILE="$MKOCTFILE $CXX11_SWITCH"
-
 CXX="$image_save_CXX"
+
+
+dnl Pick up any warnings as soon as possible.
+XTRA_CXXFLAGS="-Wall"
+
+
+AC_LANG(C++)
 
 
 ## Octave 4.2 moved functions that clashed with C functions into its own

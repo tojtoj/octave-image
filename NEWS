@@ -1,3 +1,13 @@
+ Summary of important user-visible changes for image 2.6.1 (2016/10/21):
+-------------------------------------------------------------------------
+
+ ** image 2.6.1 is a patch release.
+
+ ** Fix imtranslate regression when used with the "crop" option.
+
+ ** Fix compilation issues for clang++ users on Mac OSX.
+
+
  Summary of important user-visible changes for image 2.6.0 (2016/10/05):
 -------------------------------------------------------------------------
 
