@@ -25,43 +25,6 @@
 using namespace octave::image;
 
 template<class T>
-static T
-ov2T (const octave_value& ov);
-
-#define OV_2_T_SPECIALIZATION(TYPE, METHOD) \
-template<> \
-TYPE \
-ov2T<TYPE> (const octave_value& ov) \
-{ return ov.METHOD ## array_value (); } \
-
-OV_2_T_SPECIALIZATION(boolNDArray, bool_)
-OV_2_T_SPECIALIZATION(uint8NDArray, uint8_)
-OV_2_T_SPECIALIZATION(uint16NDArray, uint16_)
-OV_2_T_SPECIALIZATION(uint32NDArray, uint32_)
-OV_2_T_SPECIALIZATION(uint64NDArray, uint64_)
-OV_2_T_SPECIALIZATION(int8NDArray, int8_)
-OV_2_T_SPECIALIZATION(int16NDArray, int16_)
-OV_2_T_SPECIALIZATION(int32NDArray, int32_)
-OV_2_T_SPECIALIZATION(int64NDArray, int64_)
-OV_2_T_SPECIALIZATION(FloatNDArray, float_)
-OV_2_T_SPECIALIZATION(NDArray, )
-OV_2_T_SPECIALIZATION(FloatComplexNDArray, float_complex_)
-OV_2_T_SPECIALIZATION(ComplexNDArray, complex_)
-#undef OV_2_T_SPECIALIZATION
-
-template<class T>
-static T
-morph_gradient (const T& im, const connectivity& conn)
-{
-  octave_value_list args (3);
-  args(0) = im;
-  args(1) = conn.mask;
-  args(2) = conn.mask;
-  const octave_value gradient = feval ("mmgradm", args)(0);
-  return ov2T<T> (gradient);
-}
-
-template<class T>
 static boolNDArray
 imregionalmin (const T& im, const connectivity& conn)
 {
