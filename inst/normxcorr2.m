@@ -72,7 +72,7 @@ function c = normxcorr2 (a, b)
   a = sumsq (a(:));
   c = reshape (c ./ sqrt (b * a), size (c));
 
-  c(isnan (c)) = 0;
+  c(isinf (c) | isnan (c)) = 0;
 endfunction
 
 %!function offsets = get_max_offsets (c)
@@ -156,3 +156,10 @@ endfunction
 %!        153    0    0    0    0    2  154  254  255  255  255  255  255]./255;
 %!  c = normxcorr2 (a, b);
 %! assert (max (imag (c(:))), 0);
+
+## test for inf results on image regions with constant value (bug #50122)
+%!test
+%! img = [1 1 1 0];
+%! t = [1 1 0];
+%! c = normxcorr2 (t, img);
+%! assert (c(3), 0)
