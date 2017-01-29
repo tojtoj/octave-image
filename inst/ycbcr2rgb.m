@@ -33,7 +33,7 @@
 ## @item "601" (default)
 ## According to the ITU-R BT.601 (formerly CCIR 601) standard.  Its values
 ## of @var{Kb} and @var{Kr} are 0.114 and 0.299 respectively.
-## @item "709" (default)
+## @item "709"
 ## According to the ITU-R BT.709 standard.  Its values of @var{Kb} and
 ## @var{Kr} are 0.0722 and 0.2116 respectively.
 ## @end table
