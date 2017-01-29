@@ -67,3 +67,5 @@ endfunction
 %! assert (rgb2ycbcr (gray (10)), out, 0.00001);
 
 %!assert (rgb2ycbcr ([1 1 1]), [0.92157 cbcr cbcr], 0.0001);
+
+%!assert (class (rgb2ycbcr (single (rand (5, 5, 3)))), "single")

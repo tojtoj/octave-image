@@ -4,6 +4,10 @@
  ** imcrop will now adjust the region to crop to the image boundaries
     when the region to crop goes beyond the image boundaries.
 
+ ** ycbcr2rgb and rgb2ycbcr will return an image of class single if
+    the input was class single (it was previously returning a double
+    for such cases).
+
 
  Summary of important user-visible changes for image 2.6.1 (2016/10/21):
 -------------------------------------------------------------------------
