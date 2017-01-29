@@ -59,7 +59,9 @@ function out = ycbcrfunc (func, in, standard)
             0.5          -(1-Kr-Kb)/(2-2*Kr) -(Kb/(2-2*Kr)) ];
 
   cls = class (in);
-  in  = im2double (in);
+  if (! isfloat (in))
+    in  = im2double (in);
+  endif
 
   ## note that these blocks are the inverse of one another. Changes
   ## in one will most likely require a change on the other
