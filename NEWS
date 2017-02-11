@@ -1,6 +1,10 @@
  Summary of important user-visible changes for image 2.8.0 (yyyy/mm/dd):
 -------------------------------------------------------------------------
 
+ ** The following functions are new:
+
+      hough
+
  ** imcrop will now adjust the region to crop to the image boundaries
     when the region to crop goes beyond the image boundaries.
 

@@ -34,6 +34,8 @@ The angles are given in radians and default to -pi/2:pi/2.\n\
 \n\
 The algorithm is described in\n\
 Digital Image Processing by Gonzales & Woods (2nd ed., p. 587)\n\
+\n\
+For a Matlab compatible Hough transform see hough.m\n\
 @end deftypefn\n\
 ")
 {
