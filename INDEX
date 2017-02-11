@@ -12,6 +12,7 @@ Analysis and Statistics
  qtgetblk
  qtsetblk
  graycomatrix
+ hough
  houghtf
  hough_line
  hough_circle
