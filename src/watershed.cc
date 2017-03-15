@@ -21,6 +21,9 @@
 #include <octave/Cell.h>
 #include <octave/oct-map.h>
 
+#define WANTS_FEVAL 1
+#include "octave-wrappers.h"
+
 #include "connectivity.h"
 using namespace octave::image;
 
@@ -31,7 +34,8 @@ imregionalmin (const T& im, const connectivity& conn)
   octave_value_list args (2);
   args(0) = im;
   args(1) = conn.mask;
-  const octave_value regional_min = feval ("imregionalmin", args)(0);
+  const octave_value regional_min = octave_image::feval ("imregionalmin",
+                                                         args)(0);
   return regional_min.bool_array_value ();
 }
 
@@ -41,7 +45,7 @@ bwlabeln (const boolNDArray& bw, const connectivity& conn)
   octave_value_list args (2);
   args(0) = bw;
   args(1) = conn.mask;
-  const octave_value label = feval ("bwlabeln", args)(0);
+  const octave_value label = octave_image::feval ("bwlabeln", args)(0);
   return label.array_value ();
 }
 

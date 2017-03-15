@@ -24,8 +24,6 @@
 // This should still be more efficient than using subscript indices to find
 // when we are on the border.
 
-#include "config.h"
-
 #include <functional>
 #include <queue>
 
@@ -38,20 +36,8 @@
 
 using namespace octave::image;
 
-namespace octave_image
-{
-  // Temporary wrapper until we no longer support Octave 4.0 (bug #48618)
-  template <typename T>
-  inline T
-  min (T x, T y)
-  {
-#if defined HAVE_MIN_IN_OCTAVE_MATH_NAMESPACE
-    return octave::math::min (x, y);
-#else
-    return xmin (x, y);
-#endif
-  }
-}
+#define WANTS_MIN 1
+#include "octave-wrappers.h"
 
 /*
 ## A dirty implementation of the fast hybrid reconstruction as m file
