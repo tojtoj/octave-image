@@ -70,6 +70,20 @@ if test "$octave_image_cv_xmin_in_octave_math_namespace" = yes; then
             [Define if octave::math::min exists as replacement to xmin.])
 fi
 
+AC_CACHE_CHECK(
+  [whether feval is in the octave namespace],
+  [octave_image_cv_feval_in_octave_namespace],
+  [AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM([#include <parse.h>],
+                     [octave::feval ("eye")])],
+    [octave_image_cv_feval_in_octave_namespace=yes],
+    [octave_image_cv_feval_in_octave_namespace=no])])
+
+if test "$octave_image_cv_feval_in_octave_namespace" = yes; then
+  AC_DEFINE([HAVE_FEVAL_IN_OCTAVE_NAMESPACE], [1],
+            [Define if octave::feval exists as replacement to feval.])
+fi
+
 CXXFLAGS="$image_save_CXXFLAGS"
 
 
