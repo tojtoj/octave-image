@@ -27,6 +27,9 @@
 #include <octave/parse.h>  // gives us feval so we can use @strel
 #include <octave/oct-map.h>
 
+#define WANTS_FEVAL 1
+#include "octave-wrappers.h"
+
 // Constructors
 
 // Expects a @strel object, or a boolean matrix (or something
@@ -49,13 +52,13 @@ octave::image::strel::strel (const octave_value& arg)
       strel_args(0) = "arbitrary";
       strel_args(1) = se;
       // We are leaving the input check up to @strel
-      se = feval ("strel", strel_args)(0);
+      se = octave_image::feval ("strel", strel_args)(0);
       if (error_state)
         return;
     }
 
-  nhood   = feval ("getnhood",  se)(0).bool_array_value ();
-  height  = feval ("getheight", se)(0).array_value ();
+  nhood   = octave_image::feval ("getnhood",  se)(0).bool_array_value ();
+  height  = octave_image::feval ("getheight", se)(0).array_value ();
 
   // Maybe we should handle this better but how?  This makes imerode
   // and imdilate work with a [] strel
@@ -68,8 +71,9 @@ octave::image::strel::strel (const octave_value& arg)
   ini_ctor ();
   origin  = default_origin ();
 
-  const octave_value se_seq       = feval ("getsequence", se)(0);
-  const octave_idx_type seq_numel = feval ("numel", se_seq)(0).idx_type_value ();
+  const octave_value se_seq = octave_image::feval ("getsequence", se)(0);
+  const octave_idx_type seq_numel
+    = octave_image::feval ("numel", se_seq)(0).idx_type_value ();
 
   // This is to emulate the strel_obj(idx) syntax in function form
   static const char *fields[] = {"type", "subs", 0};
@@ -86,10 +90,13 @@ octave::image::strel::strel (const octave_value& arg)
           ref.setfield ("subs", Cell (octave_value (subs+1)));
           subsref_args(1) = ref;
           // Equivalent to "selem = strel_obj(subs)"
-          const octave_value_list elem = feval ("subsref", subsref_args)(0);
+          const octave_value_list elem
+            = octave_image::feval ("subsref", subsref_args)(0);
 
-          const boolNDArray elem_nhood  = feval ("getnhood",  elem)(0).bool_array_value ();
-          const NDArray elem_height     = feval ("getheight", elem)(0).array_value ();
+          const boolNDArray elem_nhood
+            = octave_image::feval ("getnhood",  elem)(0).bool_array_value ();
+          const NDArray elem_height
+            = octave_image::feval ("getheight", elem)(0).array_value ();
 
           decomposition.push_back (strel (elem_nhood, elem_height));
         }
