@@ -20,7 +20,7 @@
 ##
 ## Values from the matrix @var{bw} are considered part of an object perimeter
 ## if their value is non-zero and is connected to at least one zero-valued
-## element.
+## element, or to the outside of @var{bw}.
 ##
 ## Element connectivity @var{conn}, to define the size of objects, can be
 ## specified with a numeric scalar (number of elements in the neighborhood):
@@ -71,7 +71,7 @@ function varargout = bwperim (bw, conn)
   for dim = 1:min (ndims (perim), ndims (conn))
     conn_idx = tmp_conn_idx;
     conn_idx{dim} = [1 3];
-    if (p_size(dim) == 1 || ! any (conn(conn_idx{:})(:)))
+    if (! any (conn(conn_idx{:})(:)))
       continue
     endif
 
@@ -262,3 +262,23 @@ endfunction
 %! c = a;
 %! c(3:6,3:6,3) = false;
 %! assert (bwperim (a, 4), c)
+
+## test dimensions of length 1 (1x1, Nx1, etc) (bug #50153)
+%!test
+%! conn_self = logical ([0 0 0; 0 1 0; 0 0 0]);
+%! assert (bwperim (true), true)
+%! assert (bwperim (true, conn_self), false)
+%! assert (bwperim (true (1, 6)), true (1, 6))
+%! assert (bwperim (true (1, 6), conn_self), false (1, 6))
+%! assert (bwperim (true (6, 1)), true (6, 1))
+%!
+%! bw_3d = true (1, 1, 6);
+%! assert (bwperim (bw_3d), bw_3d)
+%! assert (bwperim (bw_3d, conn_self), false (1, 1, 6))
+%! assert (bwperim (bw_3d, true (3)), bw_3d)
+%!
+%! perim_3d = bw_3d;
+%! perim_3d(1, 1, 2:end-1) = false;
+%! conn_3d = false (3, 3, 3);
+%! conn_3d(2, 2, :) = true;
+%! assert (bwperim (true (1, 1, 6), conn_3d), perim_3d)
