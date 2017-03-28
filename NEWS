@@ -3,6 +3,7 @@
 
  ** The following functions are new:
 
+      imsharpen
       hough
 
  ** imcrop will now adjust the region to crop to the image boundaries
