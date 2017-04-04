@@ -1,4 +1,5 @@
 ## Copyright (C) 2017 Avinoam Kalma <a.kalma@gmail.com>
+## Copyright (C) 2017 Carnë Draug <carandraug@octave.org>
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -14,26 +15,44 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {} imsharpen (@var{im}, @var{options})
-## Using Unsharp Masking to sharpen images:
+## @deftypefn  {Function File} {} imsharpen (@var{im})
+## @deftypefnx {Function File} {} imsharpen (@var{im}, @var{option}, @var{value}, @dots{})
+## Sharpen image using unsharp masking.
 ##
-## OUT_image = im + k*(im - smooth(im))
+## @var{im} must be a grayscale or RGB image.  The unsharp masking can
+## be controlled with @var{option}-@var{value} pairs.
 ##
-## @var{im} is a gray level image or color image.
-## @var{smooth(im)} is the image after a gaussian smoothing.
-## For color images, the image is transformed to Lab colorspace,
-## L channel is sharpen to L', and L'ab is transformed back to RGB.
+## The unsharp masking technique is equivalent to:
 ##
-## Parameters:
-## @itemize @bullet
-## @item @var{"radius"} - sigma of Gaussian Filter for the smoothing stage.
-## positive number (default = 1)
-## @item  @var{"Amount"} - magnitude of the overshoot k. Non-negative number (default = 0.8)
-## @item @var{"Threshold"} - minimum brightness change that will be sharpened.
-## Threshold value should be in the range [0:1] (default = 0)
-## @end itemize
+## @example
+## @var{im} + @var{k} * (@var{im} - smooth (@var{im}))
+## @end example
+##
+## where @var{im} is a grayscale image and @command{smooth} performs
+## gaussian smoothing.  RGB images are transformed to Lab colorspace,
+## the L channel is sharpen to L', and L'ab is transformed back to RGB.
+## See @url{https://en.wikipedia.org/wiki/Unsharp_masking,
+## "Unsharp masking" in Wikipedia}
+##
+## The following options control the unsharp masking:
+##
+## @table @asis
+## @item @qcode{"Radius"}
+## Sigma of Gaussian Filter for the smoothing stage.  Must be a
+## positive number.  Defaults to 1.
+##
+## @item @qcode{"Amount"}
+## Magnitude of the overshoot @var{k}.   Must be a non-negative
+## number.  Defaults to 0.8.
+##
+## @item @qcode{"Threshold"}
+## Minimum brightness change that will be sharpened.  Must be in the
+## range [0 1].  Defaults to 0.
+##
+## @end table
 ##
 ## Examples:
+##
 ## @example
 ## @group
 ## out = imsharpen (im);              # Using imsharpen with default values
@@ -44,218 +63,185 @@
 ## @end group
 ## @end example
 ##
-## See "Unsharp masking" in Wikipedia: https://en.wikipedia.org/wiki/Unsharp_masking
-##
 ## @seealso{imfilter, fspecial}
 ## @end deftypefn
 
-function [OUT] = imsharpen (im, varargin)
+function [sharp] = imsharpen (im, varargin)
 
   if (nargin == 0)
     print_usage ();
   elseif (! isnumeric (im) && ! isbool (im))
-    error ("imsharpen: IM must be numeric or logical")
+    error ("imsharpen: IM must be numeric or logical");
+  elseif (ndims (im) > 4 || all (size (im, 3) != [1 3]))
+    error ("imsharpen: IM must be a grayscale or RGB image");
   endif
 
-  imsharpen_param = check_imsharpen_args (varargin);
+  p = inputParser ();
+  p.addParamValue ("Radius", 1, @(x) isnumeric (x) && isscalar (x));
+  p.addParamValue ("Amount", 0.8, @(x) isnumeric (x) && isscalar (x));
+  p.addParamValue ("Threshold", 0, @(x) isnumeric (x) && isscalar (x));
+  p.parse (varargin{:});
 
-  imsharpen_size = ceil(max(4*imsharpen_param.Radius+1,3));
-  if (mod(imsharpen_size,2) == 0)
+  if (p.Results.Radius <= 0)
+    error ("imsharpen: RADIUS should be positive");
+  elseif (p.Results.Amount < 0)
+    error ("imsharpen: AMOUNT should be non-negative");
+  elseif (p.Results.Threshold < 0 || p.Results.Threshold > 1)
+    error ("imsharpen: THRESHOLD should be in the range [0:1]");
+  endif
+
+  imsharpen_size = ceil (max (4 * p.Results.Radius +1, 3));
+  if (mod (imsharpen_size, 2) == 0)
     imsharpen_size += 1;
   endif
 
-  if (size(im,3) == 1)
-     OUT = USMGray(im, imsharpen_size, imsharpen_param.Radius, ...
-                      imsharpen_param.Amount, imsharpen_param.Threshold);
+  if (size (im, 3) == 1)
+    sharp = USMGray (im, imsharpen_size, p.Results.Radius,
+                     p.Results.Amount, p.Results.Threshold);
   else
-     OUT = USMColor(im, imsharpen_size, imsharpen_param.Radius, ...
-                       imsharpen_param.Amount, imsharpen_param.Threshold);
-  end
-  OUT = imcast (OUT, class(im));
-  return
+    sharp = USMColor (im, imsharpen_size, p.Results.Radius,
+                      p.Results.Amount, p.Results.Threshold);
+  endif
+  sharp = imcast (sharp, class (im));
 endfunction
 
-function [OUT] = USMGray(I, hsize, sigma, amount, thresh)
-
-  ## UnSharp Masking of gray images
-
-  f = fspecial('gaussian', hsize, sigma);
-  ID = im2double(I);
-  filtered = imfilter (ID, f, 'replicate');
+## UnSharp Masking of gray images
+function [sharp] = USMGray (im, hsize, sigma, amount, thresh)
+  f = fspecial ("gaussian", hsize, sigma);
+  ID = im2double (im);
+  filtered = imfilter (ID, f, "replicate");
   g = ID - filtered;
   if (thresh > 0)
-     absg = abs(g);
-     thr = thresh*max(absg(:));
+     absg = abs (g);
+     thr = thresh * max (absg(:));
      bw = im2bw (absg, thr);
-     g = g.*bw;
-  end
-  OUT = ID + amount*g;
-
-return
+     g .*= bw;
+  endif
+  sharp = ID + amount*g;
 endfunction
 
-function [OUT] = USMColor(I, hsize, sigma, amount, thresh)
-
-  ## UnSharp Masking of color images
-  ## Transform image to CIELab color space, perform UnSharp Masking on L channel,
-  ## and transform back to RGB.
-
+## UnSharp Masking of color images
+## Transform image to CIELab color space, perform UnSharp Masking on L channel,
+## and transform back to RGB.
+function [sharp] = USMColor(im, hsize, sigma, amount, thresh)
   ## Convert input RGB image to CIELab color space.
-  Lab = rgb2lab (I);
-  U = USMGray(Lab(:,:,1), hsize, sigma, amount, thresh);
-  Lab(:,:,1) = U;
+  lab = rgb2lab (im);
+  U = USMGray (lab(:,:,1), hsize, sigma, amount, thresh);
+  lab(:,:,1) = U;
+
   ## Convert filtered image back to RGB color space.
-  OUT = lab2rgb (Lab);
-
-return
-endfunction
-
-function [param_out] = check_imsharpen_args(optional_param)
-
-  param_out.Radius = 1;
-  param_out.Amount = 0.8;
-  param_out.Threshold = 0;
-
-  p = inputParser;
-
-  ## Parameter values
-
-  p.addParamValue ('Radius', param_out.Radius, @isnumeric);
-  p.addParamValue ('Amount', param_out.Amount, @isnumeric);
-  p.addParamValue ('Threshold', param_out.Threshold, @isnumeric);
-
-  ## parsing
-  p.parse (optional_param{:});
-
-  if (p.Results.Radius <= 0)
-    error ('imsharpen: Radius should be positive');
-  end
-
-  if (p.Results.Amount < 0)
-    error ('imsharpen: Amount should be non-negative');
-  end
-
-  if (p.Results.Threshold < 0 || p.Results.Threshold > 1)
-    error ('imsharpen: Threshold should be in the range [0:1]');
-  end
-
-  ## param_out
-
-  param_out.Radius    = p.Results.Radius;
-  param_out.Amount    = p.Results.Amount;
-  param_out.Threshold = p.Results.Threshold;
-
+  sharp = lab2rgb (lab);
 endfunction
 
 %!test
-%! A = zeros(7,7);
+%! A = zeros (7, 7);
 %! A(4,4) = 1;
-%! B = ...
-%! [0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000,
-%!  0.00000  -0.00238  -0.01064  -0.01755  -0.01064  -0.00238   0.00000,
-%!  0.00000  -0.01064  -0.04771  -0.07866  -0.04771  -0.01064   0.00000,
-%!  0.00000  -0.01755  -0.07866   1.67032  -0.07866  -0.01755   0.00000,
-%!  0.00000  -0.01064  -0.04771  -0.07866  -0.04771  -0.01064   0.00000,
-%!  0.00000  -0.00238  -0.01064  -0.01755  -0.01064  -0.00238   0.00000,
+%! B = [
+%!  0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+%!  0.00000  -0.00238  -0.01064  -0.01755  -0.01064  -0.00238   0.00000
+%!  0.00000  -0.01064  -0.04771  -0.07866  -0.04771  -0.01064   0.00000
+%!  0.00000  -0.01755  -0.07866   1.67032  -0.07866  -0.01755   0.00000
+%!  0.00000  -0.01064  -0.04771  -0.07866  -0.04771  -0.01064   0.00000
+%!  0.00000  -0.00238  -0.01064  -0.01755  -0.01064  -0.00238   0.00000
 %!  0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000];
-%! assert (imsharpen(A), B, 5e-6);
+%! assert (imsharpen (A), B, 5e-6)
 
 %!test
-%! A = zeros(7,7);
+%! A = zeros (7, 7);
 %! A(4,4) = 1;
-%! B = ...
-%! [-0.0035147  -0.0065663  -0.0095539  -0.0108259  -0.0095539  -0.0065663  -0.0035147,
-%!  -0.0065663  -0.0122674  -0.0178490  -0.0202255  -0.0178490  -0.0122674  -0.0065663,
-%!  -0.0095539  -0.0178490  -0.0259701  -0.0294280  -0.0259701  -0.0178490  -0.0095539,
-%!  -0.0108259  -0.0202255  -0.0294280   1.7666538  -0.0294280  -0.0202255  -0.0108259,
-%!  -0.0095539  -0.0178490  -0.0259701  -0.0294280  -0.0259701  -0.0178490  -0.0095539,
-%!  -0.0065663  -0.0122674  -0.0178490  -0.0202255  -0.0178490  -0.0122674  -0.0065663,
+%! B = [
+%!  -0.0035147  -0.0065663  -0.0095539  -0.0108259  -0.0095539  -0.0065663  -0.0035147
+%!  -0.0065663  -0.0122674  -0.0178490  -0.0202255  -0.0178490  -0.0122674  -0.0065663
+%!  -0.0095539  -0.0178490  -0.0259701  -0.0294280  -0.0259701  -0.0178490  -0.0095539
+%!  -0.0108259  -0.0202255  -0.0294280   1.7666538  -0.0294280  -0.0202255  -0.0108259
+%!  -0.0095539  -0.0178490  -0.0259701  -0.0294280  -0.0259701  -0.0178490  -0.0095539
+%!  -0.0065663  -0.0122674  -0.0178490  -0.0202255  -0.0178490  -0.0122674  -0.0065663
 %!  -0.0035147  -0.0065663  -0.0095539  -0.0108259  -0.0095539  -0.0065663  -0.0035147];
-%! assert (imsharpen(A, 'radius', 2), B, 5e-8);
+%! assert (imsharpen (A, "radius", 2), B, 5e-8)
 
 %!test
-%! A = zeros(7,7);
+%! A = zeros (7, 7);
 %! A(4,4) = 1;
-%! assert (imsharpen(A, 'radius', 0.01), A, 0);
+%! assert (imsharpen (A, "radius", 0.01), A)
 
 %!test
-%! A = zeros(7,7);
+%! A = zeros (7, 7);
 %! A(4,4) = 1;
 %! B = A;
 %! B(3:5,3:5) = -0.000000000011110;
 %! B(3:5,4)   = -0.000002981278097;
 %! B(4,3:5)   = -0.000002981278097;
 %! B(4,4)     =  1.000011925156828;
-%! assert (imsharpen(A, 'radius', 0.2), B, 5e-16);
+%! assert (imsharpen (A, "radius", 0.2), B, eps*10)
 
 %!test
-%! A = zeros(7,7);
+%! A = zeros (7, 7);
 %! A(4,4) = 1;
-%! B = ...
-%!  [0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000,
-%!   0.00000  -0.00297  -0.01331  -0.02194  -0.01331  -0.00297   0.00000,
-%!   0.00000  -0.01331  -0.05963  -0.09832  -0.05963  -0.01331   0.00000,
-%!   0.00000  -0.02194  -0.09832   1.83790  -0.09832  -0.02194   0.00000,
-%!   0.00000  -0.01331  -0.05963  -0.09832  -0.05963  -0.01331   0.00000,
-%!   0.00000  -0.00297  -0.01331  -0.02194  -0.01331  -0.00297   0.00000,
+%! B = [
+%!   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+%!   0.00000  -0.00297  -0.01331  -0.02194  -0.01331  -0.00297   0.00000
+%!   0.00000  -0.01331  -0.05963  -0.09832  -0.05963  -0.01331   0.00000
+%!   0.00000  -0.02194  -0.09832   1.83790  -0.09832  -0.02194   0.00000
+%!   0.00000  -0.01331  -0.05963  -0.09832  -0.05963  -0.01331   0.00000
+%!   0.00000  -0.00297  -0.01331  -0.02194  -0.01331  -0.00297   0.00000
 %!   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000];
-%! assert (imsharpen(A, 'amount', 1), B, 5e-6);
+%! assert (imsharpen (A, "amount", 1), B, 5e-6)
 
 %!test
-%! A = zeros(7,7);
+%! A = zeros (7, 7);
 %! A(4,4) = 1;
-%! B = zeros(7,7);
+%! B = zeros (7, 7);
 %! B(4,4) =  1.670317742690299;
 %! B(4,3) = -0.078656265079077;
 %! B(3,4) = -0.078656265079077;
 %! B(4,5) = -0.078656265079077;
 %! B(5,4) = -0.078656265079077;
-%! assert (imsharpen(A, 'Threshold', 0.117341762), B, 5e-16)
+%! assert (imsharpen (A, "Threshold", 0.117341762), B, eps*10)
 
 %!test
-%! A = zeros(7,7);
+%! A = zeros (7, 7);
 %! A(4,4) = 1;
-%! B = zeros(7,7);
+%! B = zeros (7, 7);
 %! B(4,4) = 1.670317742690299;
-%! assert (imsharpen(A, 'Threshold', 0.117341763), B, 5e-16)
+%! assert (imsharpen (A, "Threshold", 0.117341763), B, eps*10)
 
 ## uint8 test
 %!test
-%! A=zeros(7,7,'uint8');
-%! A(3:5,3:5)=150;
-%! B=zeros(7,7,'uint8');
-%! B(3:5,3:5)=211;
-%! B(4,3:5)=195;
-%! B(3:5,4)=195;
-%! B(4,4)=175;
-%! assert (imsharpen(A), B, 0);
+%! A = zeros (7, 7, "uint8");
+%! A(3:5,3:5) = 150;
+%! B = zeros (7, 7, "uint8");
+%! B(3:5,3:5) = 211;
+%! B(4,3:5) = 195;
+%! B(3:5,4) = 195;
+%! B(4,4) = 175;
+%! assert (imsharpen (A), B)
 
 ## uint8 test
 %!test
-%! A=zeros(7,7,'uint8');
-%! A(3:5,3:5)=100;
-%! B=zeros(7,7,'uint8');
-%! B(3:5,3:5)=173;
-%! assert (imsharpen(A, 'radius', 4), B, 0);
+%! A = zeros (7, 7, "uint8");
+%! A(3:5,3:5) = 100;
+%! B = zeros (7, 7, "uint8");
+%! B(3:5,3:5) = 173;
+%! assert (imsharpen (A, "radius", 4), B)
 
 ## color image test #1
 %!test
-%! A = zeros(7,7,3,'uint8');
+%! A = zeros (7, 7, 3, "uint8");
 %! A(4,4,:) = 255;
-%! assert (imsharpen(A), A, 0);
+%! assert (imsharpen (A), A)
 
 ## Matlab result is different by 1 grayscale
-%!test
-%! A = zeros(7,7,3,'uint8');
+%!xtest
+%! A = zeros(7,7,3, "uint8");
 %! A(4,4,1) = 255;
 %! B = A;
 %! B(4,4,2) = 146;   # Octave result is 145;
 %! B(4,4,3) = 100;   # Octave result is 99;
-%! assert (imsharpen(A), B, 1);
+%! assert (imsharpen (A), B)
 
 ## Matlab result is different by 1 grayscale
-%!test
-%! A = zeros(7,7,3,'uint8');
+%!xtest
+%! A = zeros (7, 7, 3, "uint8");
 %! A(3:5,3:5,1) = 100;
 %! A(3:5,3:5,2) = 150;
 %! B = A;
@@ -271,14 +257,14 @@ endfunction
 %! B(3:5,4,3)   = 62;
 %! B(4,3:5,3)   = 62;
 %! B(4,4,3)     = 40;      # Octave result is 39
-%! assert (imsharpen(A), B, 1);
+%! assert (imsharpen (A), B)
 
 ## Test input validation
 %!error imsharpen ()
-%!error imsharpen (ones(3,3), 'Radius')
-%!error imsharpen (ones(3,3), 'Radius', 0)
-%!error imsharpen (ones(3,3), 'Amount', -1)
-%!error imsharpen (ones(3,3), 'Threshold', 1.5)
-%!error imsharpen (ones(3,3), 'Threshold', -1)
-%!error imsharpen (ones(3,3), 'foo')
-%!error imsharpen ('foo')
+%!error imsharpen (ones (3, 3), "Radius")
+%!error imsharpen (ones (3, 3), "Radius", 0)
+%!error imsharpen (ones (3, 3), "Amount", -1)
+%!error imsharpen (ones (3, 3), "Threshold", 1.5)
+%!error imsharpen (ones (3, 3), "Threshold", -1)
+%!error imsharpen (ones (3, 3), "foo")
+%!error imsharpen ("foo")
