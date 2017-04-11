@@ -108,28 +108,23 @@ endfunction
 ## UnSharp Masking of gray images
 function [sharp] = USMGray (im, hsize, sigma, amount, thresh)
   f = fspecial ("gaussian", hsize, sigma);
-  ID = im2double (im);
-  filtered = imfilter (ID, f, "replicate");
-  g = ID - filtered;
+  sharp = im2double (im);
+  filtered = imfilter (sharp, f, "replicate");
+  g = sharp - filtered;
   if (thresh > 0)
-     absg = abs (g);
-     thr = thresh * max (absg(:));
-     bw = im2bw (absg, thr);
-     g .*= bw;
+    absg = abs (g);
+    thresh *= max (absg(:));
+    g(absg <= thresh) = 0;
   endif
-  sharp = ID + amount*g;
+  sharp += amount*g;
 endfunction
 
 ## UnSharp Masking of color images
 ## Transform image to CIELab color space, perform UnSharp Masking on L channel,
 ## and transform back to RGB.
-function [sharp] = USMColor(im, hsize, sigma, amount, thresh)
-  ## Convert input RGB image to CIELab color space.
+function [sharp] = USMColor (im, hsize, sigma, amount, thresh)
   lab = rgb2lab (im);
-  U = USMGray (lab(:,:,1), hsize, sigma, amount, thresh);
-  lab(:,:,1) = U;
-
-  ## Convert filtered image back to RGB color space.
+  lab(:,:,1) = USMGray (lab(:,:,1), hsize, sigma, amount, thresh);
   sharp = lab2rgb (lab);
 endfunction
 
