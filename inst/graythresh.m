@@ -213,30 +213,41 @@ function [thresh] = otsu (ihist, compute_good)
   total = sum (ihist);
   ## b = black, w = white
   b_totals  = cumsum ([0 ihist(1:end-1)]);
-  b_weights = b_totals / total;
-  b_means   = [0 cumsum(bins(1:end-1) .* ihist(1:end-1))] ./ b_totals;
+  b_weights = b_totals / total
+  b_means   = [0 cumsum(bins(1:end-1) .* ihist(1:end-1))] ./ b_totals
 
   w_totals  = total - b_totals;
-  w_weights = w_totals / total;
-  w_means   = (cumsum (bins(end:-1:1) .* ihist(end:-1:1)) ./ w_totals(end:-1:1))(end:-1:1);
+  w_weights = w_totals / total
+  w_means   = (cumsum (bins(end:-1:1) .* ihist(end:-1:1)) ./ w_totals(end:-1:1))(end:-1:1)
 
   ## between class variance (its maximum is the best threshold)
   bcv       = b_weights .* w_weights .* (b_means - w_means).^2;
-  ## in case there's more than one place with best maximum (for example, a group
-  ## of empty bins, we select the one in the center (this is compatible with ImageJ)
-  thresh{1} = ceil (mean (find (bcv == max (bcv)))) - 2;
-  ## we subtract 2, once for the 1 based indexes and another for the greater
-  ## than or equal problem
 
-  if (compute_good)
-    ## basically we need to divide the between class variance by the total
-    ## variance which is a single value, independent of the threshold. From the
-    ## paper, last of the equation 12, eta = sigma²b / sigma²t
-    ##(where b = between and t = total)
-    norm_hist      = ihist / total;
-    total_mean     = sum (bins .* norm_hist);
-    total_variance = sum (((bins - total_mean).^2) .* norm_hist);
-    thresh{2}      = max (bcv) / total_variance;
+  max_bcv = max (bcv);
+  if (isnan (max_bcv))
+    ## Couldn't measure variance.  This will happen if for example all
+    ## values are the same.  See bug #45333.
+    thresh{1} = 0;
+    thresh{2} = 0;
+  else
+    ## In case there's more than one place with best maximum (for
+    ## example, a group of empty bins), we select the one in the
+    ## center (this is compatible with ImageJ).
+    thresh{1} = ceil (mean (find (bcv == max_bcv))) - 2;
+    ## We subtract 2, once for the 1 based indexes and another for the
+    ## greater than or equal problem.
+
+    if (compute_good)
+      ## Basically we need to divide the between class variance by the
+      ## total variance which is a single value, independent of the
+      ## threshold.  From the paper, last of the equation 12:
+      ##     eta = sigma²b / sigma²t
+      ## where b = between and t = total
+      norm_hist      = ihist / total;
+      total_mean     = sum (bins .* norm_hist);
+      total_variance = sum (((bins - total_mean).^2) .* norm_hist);
+      thresh{2}      = max (bcv) / total_variance;
+    endif
   endif
 endfunction
 
@@ -691,3 +702,10 @@ endfunction
 ## for the mean our results differ from matlab because we do not calculate it
 ## from the histogram. Our results should be more accurate.
 %!assert (graythresh (img, "mean"), 0.51445615982, 0.000000001);  # here our results differ from ImageJ
+
+## Test for bug #45333
+%!test
+%! im = repmat (0.5, 100, 100);
+%! [t, g] = graythresh (im);
+%! assert (t, 0)
+%! assert (g, 0)
