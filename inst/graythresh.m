@@ -213,12 +213,12 @@ function [thresh] = otsu (ihist, compute_good)
   total = sum (ihist);
   ## b = black, w = white
   b_totals  = cumsum ([0 ihist(1:end-1)]);
-  b_weights = b_totals / total
-  b_means   = [0 cumsum(bins(1:end-1) .* ihist(1:end-1))] ./ b_totals
+  b_weights = b_totals / total;
+  b_means   = [0 cumsum(bins(1:end-1) .* ihist(1:end-1))] ./ b_totals;
 
   w_totals  = total - b_totals;
-  w_weights = w_totals / total
-  w_means   = (cumsum (bins(end:-1:1) .* ihist(end:-1:1)) ./ w_totals(end:-1:1))(end:-1:1)
+  w_weights = w_totals / total;
+  w_means   = (cumsum (bins(end:-1:1) .* ihist(end:-1:1)) ./ w_totals(end:-1:1))(end:-1:1);
 
   ## between class variance (its maximum is the best threshold)
   bcv       = b_weights .* w_weights .* (b_means - w_means).^2;
