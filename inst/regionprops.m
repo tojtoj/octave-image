@@ -866,6 +866,7 @@ function [minor, major, orientation] = rp_local_ellipse (area, pixellist)
   c_idx = 1;
   for idx = 1:no
     sel = c_idx:(c_idx + area(idx) -1);
+    c_idx += area(idx);
     X = pixellist(sel, 2);
     Y = pixellist(sel, 1);
 
@@ -1437,6 +1438,19 @@ endfunction
 %! props = regionprops (bwconncomp (bw), im, "all");
 %! assert (size (props), [0 1])
 %! assert (sort (all_props), sort (fieldnames (props)))
+
+## Test MajorAxisLength and MinorAxisLength with
+## multiple regions (bug #49613)
+%!test
+%! bw = logical ([
+%!   0  1  1  1  1
+%!   0  1  1  0  0
+%!   0  0  0  0  0
+%!   0  0  0  1  0
+%!   0  1  1  1  0]);
+%! props = regionprops (bw, "MajorAxisLength", "MinorAxisLength");
+%! assert ([props.MajorAxisLength] ,[4.51354115 3.65148372], 1.e-8)
+%! assert ([props.MinorAxisLength], [2.01801654 1.82574186], 1.e-8)
 
 ## Test warnings about invalid props for nd images and missing grayscale
 %!warning <ignoring perimeter, extrema properties for non 2 dimensional image>
