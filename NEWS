@@ -4,7 +4,8 @@
  ** image 2.6.2 is a patch release.
 
  ** Fix regionprops MajorAxisLength, MinorAxisLength, and Orientation
-    when there's multiple regions in an image.
+    when there's multiple regions in an image; and Orientation for
+    thin regions.
 
 
  Summary of important user-visible changes for image 2.6.1 (2016/10/21):

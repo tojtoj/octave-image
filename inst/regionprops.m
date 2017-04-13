@@ -883,7 +883,13 @@ function [minor, major, orientation] = rp_local_ellipse (area, pixellist)
     minor(idx) = min (lambda_d);
     [major(idx), major_idx] = max (lambda_d);
     major_vec = V(:, major_idx);
-    orientation(idx) = -(180/pi) .* atan (major_vec(2) ./ major_vec(1));
+    if (major(idx) == minor(idx))
+      orientation(idx) = 0;
+    elseif (major_vec(2) == 0)
+      orientation(idx) = 90;
+    else
+      orientation(idx) = -(180/pi) .* atan (major_vec(1) ./ major_vec(2));
+    endif
   endfor
 endfunction
 
@@ -1287,10 +1293,11 @@ endfunction
 %!test
 %! bw = logical ([0 0 0; 0 1 0; 0 0 0]);
 %! assert (regionprops (bw, {"MinorAxisLength", "MajorAxisLength", ...
-%!                           "Eccentricity"}),
+%!                           "Eccentricity", "Orientation"}),
 %!         struct ("MajorAxisLength", 4 .* sqrt (1/12),
 %!                 "MinorAxisLength", 4 .* sqrt (1/12),
-%!                 "Eccentricity", 0))
+%!                 "Eccentricity", 0,
+%!                 "Orientation", 0))
 
 %!test
 %! a = eye (4);
@@ -1331,6 +1338,34 @@ endfunction
 %! t = regionprops (c, "equivdiameter");
 %! assert (t.EquivDiameter, 2.5231,  1e-3);
 
+## Tests for multiple 'Orientation' thin cases (bug #49613)
+%!test
+%! bw = logical ([0 0 0 0; 0 1 1 0; 0 0 0 0]);
+%! props = regionprops (bw, "Orientation");
+%! assert ([props.Orientation], 0, 0)
+%!
+%! props = regionprops (bw', "Orientation");
+%! assert ([props.Orientation], 90, 0)
+%!
+%! bw = logical ([0 0 0 0; 0 1 1 0; 0 1 1 0; 0 0 0 0]);
+%! props = regionprops (bw, "Orientation");
+%! assert ([props.Orientation], 0, 0)
+%!
+%! bw = logical ([1 1 0 0 0 ; 0 0 1 1 0 ; 0 0 0 0 0; 0 0 0 0 0]);
+%! props = regionprops (bw, "Orientation");
+%! assert ([props.Orientation], -22.5, eps (22.5))
+%!
+%! bw = logical ([
+%!   1  1  0  0  1
+%!   0  0  0  0  1
+%!   0  0  0  0  0
+%!   0  0  1  1  0
+%!   1  0  1  1  0
+%!   1  0  0  0  0
+%!   0  1  0  0  0
+%!   0  1  0  0  0]);
+%! props = regionprops (bw, "Orientation");
+%! assert ([props.Orientation], [0 -67.5 0 90])
 
 %!test
 %! f = [0 0 0 0; 1 1 1 1; 0 1 1 1; 0 0 0 0];
@@ -1439,7 +1474,7 @@ endfunction
 %! assert (size (props), [0 1])
 %! assert (sort (all_props), sort (fieldnames (props)))
 
-## Test MajorAxisLength and MinorAxisLength with
+## Test MajorAxisLength, MinorAxisLength, and Orientation with
 ## multiple regions (bug #49613)
 %!test
 %! bw = logical ([
@@ -1448,9 +1483,11 @@ endfunction
 %!   0  0  0  0  0
 %!   0  0  0  1  0
 %!   0  1  1  1  0]);
-%! props = regionprops (bw, "MajorAxisLength", "MinorAxisLength");
+%! props = regionprops (bw, "MajorAxisLength", "MinorAxisLength",
+%!                      "Orientation");
 %! assert ([props.MajorAxisLength] ,[4.51354115 3.65148372], 1.e-8)
 %! assert ([props.MinorAxisLength], [2.01801654 1.82574186], 1.e-8)
+%! assert ([props.Orientation], [12.93317840 18.43494882], 1.e-8)
 
 ## Test warnings about invalid props for nd images and missing grayscale
 %!warning <ignoring perimeter, extrema properties for non 2 dimensional image>
