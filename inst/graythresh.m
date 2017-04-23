@@ -168,7 +168,6 @@ function [varargout] = graythresh (img, algo = "otsu", varargin)
       ## do nothing
     elseif (isa (img, "int16"))
       img     = im2uint16 (img);
-      img_max = 65535;
     else
       img = im2uint8 (img);
     endif
