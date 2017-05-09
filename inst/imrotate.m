@@ -24,11 +24,12 @@
 ##
 ##   @var{theta}    the rotation angle in degrees counterclockwise
 ##
-## The optional argument @var{method} defines the interpolation method to be
-## used.  All methods supported by @code{interp2} can be used.  In addition,
-## Fourier interpolation by decomposing the rotation matrix into 3 shears can
-## be used with the @code{fourier} method. By default, the @code{nearest} method
-## is used.
+## The optional argument @var{method} defines the interpolation method
+## to be used.  All methods supported by @code{interp2} can be used
+## although as of Octave 4.2 the @qcode{"spline"} still does not work.
+## In addition, Fourier interpolation by decomposing the rotation
+## matrix into 3 shears can be used with the @code{fourier} method.
+## By default, the @code{nearest} method is used.
 ##
 ## For @sc{matlab} compatibility, the methods @code{bicubic} (same as
 ## @code{cubic}), @code{bilinear} and @code{triangle} (both the same as
