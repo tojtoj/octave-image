@@ -185,13 +185,15 @@ function f = fspecial (type, arg1, arg2)
       f = f / sum (f (:));
 
     case "disk"
-      ## Get the radius
-      if (nargin > 1 && isreal (arg1) && isscalar (arg1))
+      ## fspecial ("disk", radius = [5])
+      if (nargin == 1)
+        r = 5;
+      elseif (isreal (arg1) && isscalar (arg1))
         r = arg1;
       else
-        r = 5;
+        error ("fspecial: RADIUS for disk must be a real scalar");
       endif
-      ## Create the filter
+
       if (r == 0)
         f = 1;
       else
