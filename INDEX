@@ -80,6 +80,7 @@ Filtering and Transforms
  nonmax_supress
  radon
  rho_filter
+ wiener2
 Morhophological Operations
  bwareaopen
  conndef
