@@ -5,6 +5,7 @@
 
       imsharpen
       hough
+      wiener2
 
  ** imcrop will now adjust the region to crop to the image boundaries
     when the region to crop goes beyond the image boundaries.
