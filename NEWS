@@ -10,6 +10,7 @@
       deconvwnr
       houghlines
       houghpeaks
+      otsuthresh
 
  ** The functions entropyfilt, rangefilt, and stdfilt were completely
     incorrect and have now been fixed.
