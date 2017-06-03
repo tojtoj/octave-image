@@ -40,6 +40,8 @@
     compatible.  The previous implementation, based on the book by
     W. K. Pratt, is available under the name "thin-pratt".
 
+ ** imcast now also converts images to logical type.
+
  ** Other functions that have been changed for smaller bugfixes,
     increased Matlab compatibility, or performance:
 
