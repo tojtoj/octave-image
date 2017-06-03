@@ -116,7 +116,7 @@
 ## recognition", Journal of the Association for Computing Machinery 9: 259-267}
 ## @end table
 ##
-## @seealso{im2bw}
+## @seealso{im2bw, otsuthresh}
 ## @end deftypefn
 
 ## Notes:
