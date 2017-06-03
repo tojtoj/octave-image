@@ -1,4 +1,5 @@
 ## Copyright (C) 2017 Hartmut Gimpel <hg_code@gmx.de>
+## Copyright (C) 2017 David Miguel Susano Pinto <carandraug@octave.org>
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -14,17 +15,16 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn  {Function File} {@var{J} =} @ wiener2 (@var{I})
-## @deftypefnx {Function File} {@var{J} =} @ wiener2 (@var{I}, [@var{m}, @var{n}])
-## @deftypefnx {Function File} {@var{J} =} @ wiener2 (@var{I}, @var{noise})
-## @deftypefnx {Function File} {@var{J} =} @ wiener2 (@var{I}, [@var{m}, @var{n}], @var{noise})
-## @deftypefnx {Function File} {[@var{J}, @var{noise}] =} @
-##    wiener2 (@var{I}, [@var{m}, @var{n}])
-## Apply an adaptive noise reduction filter on a 2D grayscale image.
+## @deftypefn  {Function File} {@var{J} =} wiener2 (@var{I})
+## @deftypefnx {Function File} {@var{J} =} wiener2 (@var{I}, @var{nhood})
+## @deftypefnx {Function File} {@var{J} =} wiener2 (@var{I}, @var{noise})
+## @deftypefnx {Function File} {@var{J} =} wiener2 (@var{I}, @var{nhood}, @var{noise})
+## @deftypefnx {Function File} {[@var{J}, @var{noise}] =} wiener2 (@dots{})
+## Apply an adaptive noise reduction filter.
 ##
 ## The wiener2 function locally applies a linear averaging filter to the input
-## image @var{I}. The averaging operation will be performed using the
-## given [@var{m}, @var{n}] neighborhood of each pixel.
+## image @var{I}.  The averaging operation will be performed using a
+## neighbourhood of each pixel of size @var{nhood}.
 ## The strength of the averaging depends on the local variance in this
 ## neighborhood and on the given variance of the @var{noise} (of mean zero).
 ## As a result, pixels in a region with higher contrast will be smoothed less,
@@ -33,63 +33,64 @@
 ## This operation is useful to remove noise from the image, while blurring edges
 ## much less compared to a global linear averaging filter.
 ##
-## The @var{m}-by-@var{n} neighborhood defaults to 3-by-3 if not given.
+## @var{nhood} defaults to @code{repmat (3, [1 ndims(I)])} which in
+## the most common case of 2D images would be @code{[3 3]}.
 ## The @var{noise} variance will be estimated by the mean variance
 ## in the neighborhoods, if not given.
+##
+## Despite the function name, @var{I} may have any number of
+## dimensions. However, beware of singleton dimensions and border
+## effects because @var{nhood} defaults to a vector of 3's for all
+## dimensions.  It may be adequate to manually set @var{nhood} to
+## length 1 for singleton dimensions.  Also, in the specific case of
+## RGB images where @var{I} is an array of size MxNx3, @var{nhood}
+## will default to @code{[3 3 3]} while @code{[3 3]} may be more
+## useful.
 ##
 ## @seealso{imfilter, medfilt2}
 ## @end deftypefn
 
-## The algorithm is taken from the book
-## "Two-Dimensional Signal and Image Processing"
-## by Jae S. Lim, Prentice Hall Ptr, 1st edition 1989.
-## Equations (9.26), (9.27) and (9.29) on page 538 - 539.
-
-function [mean_im, noise] = wiener2 (im, varargin)
-
-  ## Default parameters:
-  noise = [];
-  nhood = [3 3];
+function [denoised, noise] = wiener2 (im, nhood, noise = [])
 
   if (nargin < 1 || nargin > 3)
     print_usage ();
+  elseif (! isnumeric (im) && ! islogical (im))
+    error ("wiener2: I must be a numeric array");
+  endif
+  nd = ndims (im);
 
-  elseif (nargin == 1)
-    ## wiener2 (I), do nothing.
-
-  elseif (nargin == 2)
-    if (numel (varargin{1}) == 1)
-      ## wiener2 (I, noise)
-      noise = varargin{1};
-    elseif (numel (varargin{1}) == 2)
-      ## wiener2 (I, [m, n])
-      nhood = varargin{1};
-    else
-      print_usage ();
-    endif
-
-  elseif (nargin == 3)
-    ## wiener2 (I, [m, n], noise)
-    nhood = varargin{1};
-    noise = varargin{2};
+  if (nargin == 1)
+    ## wiener2 (I)
+    nhood = repmat (3, [nd 1]);
+  elseif (isempty (nhood) || isscalar (nhood))
+    ## wiener2 (I, noise)
+    noise = nhood;
+    nhood = repmat (3, [nd 1]);
   endif
 
-  if (! isimage (im) || islogical (im) || ndims (im) != 2)
-    error ("wiener2: I must be a 2D image");
-  elseif (! isreal (noise) || (numel (noise) != 0 && numel (noise) != 1))
+  if (! isreal (noise) || (! isempty (noise) && ! isscalar (noise)))
     error ("wiener2: NOISE must be a real number");
-  elseif (! isreal (nhood) || numel (nhood) != 2)
-    error ("wiener2: NHOOD must be a 1x2 vector of the form [N, M]");
+  elseif (! isreal (nhood) || ! isvector (nhood) || any (nhood < 0)
+          || any (nhood != fix (nhood)))
+    error ("wiener2: NHOOD must be a vector of non-negative integers");
   endif
 
-  ## transform input image to class double (leave class single alone):
-  class_before = class (im);
+  cls = class (im);
   if (! isfloat (im))
     im = im2double (im);
   endif
 
+  [denoised, noise] = wiener_filter (im, nhood, noise);
+  denoised = imcast (denoised, cls);
+endfunction
+
+function [mean_im, noise] = wiener_filter (im, nhood, noise)
   ## do the Wiener filtering:
-  ## This is the algorithm from the book cited above:
+  ## The algorithm is taken from the book
+  ## "Two-Dimensional Signal and Image Processing"
+  ## by Jae S. Lim, Prentice Hall Ptr, 1st edition 1989.
+  ## Equations (9.26), (9.27) and (9.29) on page 538 - 539.
+  ##
   ## im_out = mean_im + variance_orig / (variance_orig + variance_noise) * (im - mean_im)
   ## with
   ## variance_orig = variance_im - variance_noise if variance_im > variance_noise
@@ -98,26 +99,24 @@ function [mean_im, noise] = wiener2 (im, varargin)
   ## mean_im = "mean value of pixel neighborhood" in im
   ## variance_im = "variance of pixel neighbohood" in im
   ## variance_noise = "variance of noise" to be removed (mean_noise assumed to be zero)
-  box_filter = ones (nhood) ./ prod (nhood);
-  mean_im = imfilter (im, box_filter);
 
-  variance_im = imfilter (im.^ 2, box_filter) - mean_im.^ 2;
+  box_filter = fspecial ("average", nhood);
+  mean_im = convn (im, box_filter, "same");
+
+  variance_im = convn (im.^2, box_filter, "same") - mean_im.^ 2;
 
   if (isempty (noise))
     noise = mean (variance_im(:));
   endif
 
-  variance_im = max (0, variance_im - noise); # = variance_orig
-  mean_im +=  variance_im ./ (variance_im + noise) .* (im - mean_im); # = im_out
-
-  ## restore original class of input image:
-  mean_im = imcast (mean_im, class_before);
+  variance_im = max (0, variance_im - noise);
+  mean_im += variance_im ./ (variance_im + noise) .* (im - mean_im);
 
 endfunction
 
 %!shared im0, im0_out, im0_n
-%! im0 = ones(5,5);
-%! im0_out = ones(5,5);
+%! im0 = ones (5, 5);
+%! im0_out = ones (5, 5);
 %! im0_out(1:4:5, 1:4:5) = 0.67111;
 %! im0_out(1:4:5, 2:4) = 0.78074;
 %! im0_out(2:4, 1:4:5) = 0.78074;
@@ -147,7 +146,6 @@ endfunction
 %!assert (class (wiener2 (im2uint16 (im0))), "uint16")
 %!assert (wiener2 (im2int16 (im0)), im2int16 (im0_out), 1)
 %!assert (class (wiener2 (im2int16 (im0))), "int16")
-%!error wiener2 (true (5))
 
 ## test calculation results:
 %!test
@@ -326,6 +324,47 @@ endfunction
 %! out_center = out(27:33, 27:33);
 %! assert (out_center, im5_out_center, 1e-4)
 %! assert (n, im5_n, 1e-4)
+
+%!test
+%! im = zeros (100, 10, 10);
+%! im(5, 5, 5) = 1;
+%!
+%! [out, n] = wiener2 (im, [3 3]);
+%! expected_out = im;
+%! expected_out(4:6,4:6,5) = [
+%!    0.0001    0.0001    0.0001
+%!    0.0001    0.9992    0.0001
+%!    0.0001    0.0001    0.0001];
+%! assert (out, expected_out, eps)
+%!
+%! [out, n] = wiener2 (im, [3 3 3]);
+%! expected_out = im;
+%! expected_out(4:6,4:6,4:6) = 0.0001;
+%! expected_out(5,5,5) = 0.9974;
+%! assert (out, expected_out, eps)
+%!
+%! ## Default in ND, use nhood 3 even for singleton dimensions.
+%! assert (wiener2 (im), wiener2 (im, [3 3 3]))
+%!
+%! im = reshape (im, [100 10 1 10]);
+%! expected_out = im;
+%! expected_out(4:6,4:6,1,4:6) = 0.0001/3;
+%! expected_out(5,5,1,5) = 1-(80*(0.0001/3));
+%! assert (wiener2 (im), wiener2 (im, [3 3 3 3]))
+%! assert (wiener2 (im), expected_out, eps)
+%!
+%! expected_out = im;
+%! expected_out(4:6,4:6,1,4:6) = 0.0001;
+%! expected_out(5,5,1,5) = 0.9974;
+%! assert (wiener2 (im, [3 3 1 3]), expected_out, eps)
+
+%!test
+%! expected = [0.2222  0.3926  0.3926  0.3926  0.2222];
+%! assert (wiener2 (ones (1, 5)), expected, .0001)
+
+%!assert (wiener2 ([]), [])
+%!assert (wiener2 (logical ([0 0; 1 1])), true (2, 2))
+
 
 %!demo
 %! I = phantom ();
