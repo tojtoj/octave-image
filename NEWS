@@ -35,6 +35,7 @@
       graythresh
       normxcorr2
       imreconstruct
+      imregionalmax
 
 
  Summary of important user-visible changes for image 2.6.2 (2017/11/09):
