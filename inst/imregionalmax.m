@@ -52,7 +52,11 @@ function bw = imregionalmax (img, conn)
     bw = img;
   else
     ## we could probably still make this more efficient
-    recon = imreconstruct (img, img + 1, conn);
+    if (isfloat (img))
+      recon = imreconstruct (img, img + eps (img), conn);
+    else
+      recon = imreconstruct (img, img + 1, conn);
+    endif
     bw = (recon == img);
   endif
 endfunction
@@ -84,3 +88,13 @@ endfunction
 %! assert (imregionalmax (a, 8), logical (a8))
 %! assert (imregionalmax (a), logical (a8))
 
+%!test
+%! ## test float input images <bug #51724>
+%! im0 = peaks ();
+%! im1 = im0 ./ 100;
+%! max_pos_expected = [1000; 1214; 1691; 2353];
+%! max0 = imregionalmax (im0);
+%! max0_pos = find (max0);
+%! max1 = imregionalmax (im1);
+%! assert (max1, max0)
+%! assert (max0_pos, max_pos_expected)
