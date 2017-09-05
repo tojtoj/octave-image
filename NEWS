@@ -39,6 +39,7 @@
     increased Matlab compatibility, or performance:
 
       bwdist
+      bwmorph
       graythresh
       hough_line
 

@@ -179,7 +179,7 @@
 ## It refers to all pixels which are connected to X: X0, X1, X2, X3, X4,
 ## X5, X6 and X7.
 ## @end table
-## 
+##
 ## @strong{Compatibility notes:}
 ## @table @code
 ## @item 'skel'
@@ -489,12 +489,20 @@ function bw2 = bwmorph (bw, operation, n = 1)
       morph = @(x) applylut (x, lut);
 
     case "thicken"
-      ## This implementation also "thickens" the border. To avoid this,
-      ## a simple solution could be to add a border of 1 to the reversed
-      ## image.
-      bw = bwmorph (! bw, "thin", n);
-      loop_once = true;
-      morph = @(x) bwmorph (x, "diag");
+      if (n > 0)
+        pads = repmat (2 * min ([max(size (bw)) n]),
+                       [1 ndims(bw)]);
+        bw = padarray (bw, pads, false);
+        bw = bwmorph (! bw, "thin", n);
+
+        loop_once = true;
+        morph = @(x) bwmorph (x, "diag");
+
+        ## Remove ND padding
+        idx = arrayfun (@colon, pads +1, size (bw) -pads,
+                        "UniformOutput", false);
+        post_morph = @(x) ! x(idx{:});
+      endif
 
     case "thin"
       ## lut1 = makelut ("__conditional_mark_patterns_lut_fun__", 3, "T");
@@ -572,6 +580,7 @@ function bw2 = bwmorph (bw, operation, n = 1)
   endif
 
 endfunction
+
 
 %!demo
 %! bwmorph (true (11), "shrink", Inf)
@@ -732,6 +741,82 @@ endfunction
 %!                 1  1  1  1  1
 %!                 1  1  1  1  1]);
 %! assert (bwmorph (in, "spur", Inf), out);
+
+## several tests for "thicken":
+%!test
+%! bw = false (3, 3);
+%! bw(3, 1) = true;
+%! out = bwmorph (bw, "thicken", 0);
+%! assert (out, bw)
+
+%!test
+%! bw = false (8, 7);
+%! bw(8, 1) = true;
+%! expected = logical ([
+%!  0  0  0  0  0  0  0
+%!  1  0  0  0  0  0  0
+%!  1  1  0  0  0  0  0
+%!  1  1  1  0  0  0  0
+%!  1  1  1  1  0  0  0
+%!  1  1  1  1  1  0  0
+%!  1  1  1  1  1  1  0
+%!  1  1  1  1  1  1  1]);
+%! out = bwmorph (bw, "thicken", 6);
+%! assert (out, expected)
+
+%!test
+%! bw = false (8, 7);
+%! bw(2, 4) = true;
+%! expected = logical ([
+%!  0  0  1  1  1  0  0
+%!  0  1  1  1  1  1  0
+%!  0  0  1  1  1  0  0
+%!  0  0  0  1  0  0  0
+%!  0  0  0  0  0  0  0
+%!  0  0  0  0  0  0  0
+%!  0  0  0  0  0  0  0
+%!  0  0  0  0  0  0  0]);
+%! out = bwmorph (bw, "thicken", 2);
+%! assert (out, expected)
+
+%!test
+%! bw = false (8, 7);
+%! bw (6, 3) = true ;
+%! expected1 = logical ([
+%!  0  0  0  0  0  0  0
+%!  0  0  0  0  0  0  0
+%!  0  0  0  0  0  0  0
+%!  0  0  0  0  0  0  0
+%!  0  0  1  0  0  0  0
+%!  0  1  1  1  0  0  0
+%!  0  0  1  0  0  0  0
+%!  0  0  0  0  0  0  0]);
+%! expected3 = logical ([
+%!  0  0  0  0  0  0  0
+%!  0  0  0  0  0  0  0
+%!  0  0  1  0  0  0  0
+%!  0  1  1  1  0  0  0
+%!  1  1  1  1  1  0  0
+%!  1  1  1  1  1  1  0
+%!  1  1  1  1  1  0  0
+%!  0  1  1  1  0  0  0]);
+%! out1 = bwmorph (bw, "thicken", 1);
+%! out3 = bwmorph (bw, "thicken", 3);
+%! assert (out1, expected1)
+%! assert (out3, expected3)
+
+%!test
+%! bw = false (10, 10);
+%! bw(2, 3) = true;
+%! bw(7, 7) = true;
+%! out_inf = bwmorph (bw, "thicken", Inf);
+%! assert (out_inf(1, 9), false)
+
+%!test
+%! bw = false (3, 3);
+%! bw(3, 1) = true;
+%! out = bwmorph (bw, "thicken", 4);
+%! assert (out, true (3, 3))
 
 %!xtest
 %! ## bug #44396
