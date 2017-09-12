@@ -20,6 +20,14 @@
     been implemented yet.  Instead of rewriting imdither, the missing
     dither function should be written.  See bug #41768.
 
+ ** graythresh will now clip values outside the [0 1] range in images
+    of floating point class.  A side effect of this is that it will no
+    longer distinguish between an image of floating point class that
+    has only one one row or column, and an histogram.  Breaks
+    backwards compatibility if you were previously relying on
+    something like 'graythresh (img(:), ...)' and img is of class
+    single or double.
+
  ** Other functions that have been changed for smaller bugfixes, increased
     Matlab compatibility, or performance:
 
