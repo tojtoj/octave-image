@@ -139,17 +139,33 @@ function [varargout] = graythresh (img, algo = "otsu", varargin)
     error ("graythresh: algorithm `%s' does not accept any options.", algo);
   else
     hist_in = false;
-    ## If the image is RGB convert it to grayscale
-    if (isrgb (img))
+    if (! isnumeric (img))
+      error ("graythresh: IMG must be numeric");
+    elseif (size (img, 3) == 3)
+      ## If the image is RGB convert it to grayscale
       img = rgb2gray (img);
-    elseif (isgray (img))
-      ## do nothing
-    elseif (isvector (img) && !issparse (img) && isreal (img) && all (img >= 0))
+    elseif (isfloat(img) && isvector (img) && !issparse (img) &&
+            isreal (img) && all (img >= 0))
+      ## FIXME: we need to rething this approach.  This means that
+      ##        "images" with a single row or vector will be handled
+      ##        as histograms.  Also, previously we relied on having
+      ##        values outside [0 1] range to distinguish between an
+      ##        image and a histogram but for Matlab compatibility we
+      ##        need to clip the values so there's backwards
+      ##        incompatibility issues when addressing this.  Because
+      ##        previously any histogram of integer class would be
+      ##        identified as an image, we added the 'isfloat' logic
+      ##        to limit the issue to images of floating point
+      ##        images.  Best fix is to implement histthresh to handle
+      ##        histograms and this function simply prepares an
+      ##        histogram from a user image and then calls histthresh.
       hist_in = true;
       ihist   = img;
-    else
-      error ("graythresh: input must be an image or an histogram.");
     endif
+    ## ... else it should a gray image so do nothing.  The only thing
+    ## we need to worry is on clipping values outside the [0 1] range
+    ## for floating point images.  But that is done later when it
+    ## converts to uint8.
   endif
 
   ## the "mean" is the simplest of all, we can get rid of it right here
@@ -708,3 +724,12 @@ endfunction
 %! [t, g] = graythresh (im);
 %! assert (t, 0)
 %! assert (g, 0)
+
+## test for bug #51976
+## Values outside the range [0 1] in floating images, should be clipped
+%!test
+%! im = [-2  1  0; 43  .5 .2];
+%! clip_im = [ 0  1  0;  1  .5 .2];
+%! t =graythresh (clip_im);
+%! assert (graythresh (im), t)
+%! assert (graythresh (single (im)), t)
