@@ -615,7 +615,7 @@ or with a binary matrix representing a connectivity array.  Defaults to\n\
 %!   0   0   0   0   0   4   4
 %!   2   2   2   0   4   4   4];
 %!
-%! assert (watershed (im_crop), matlab_result_crop);
+%! assert (watershed (im_full), matlab_result_full);
 %!
 %! im_crop = [
 %!       2  10   3   8   7   5
