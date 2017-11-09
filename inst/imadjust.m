@@ -262,7 +262,7 @@ endfunction
 %! assert (imadjust (im, [], [.25 .75]), imadjust (im, [0; 1], [.25; .75], 1))
 %! assert (imadjust (im, [.25; .75], []), imadjust (im, [.25; .75], [0; 1], 1))
 
-%!assert (imadjust (linspace (0, 1), [], [.25 .75]), linspace (.25, .75, 100))
+%!assert (imadjust (linspace (0, 1), [], [.25 .75]), linspace (.25, .75, 100), eps)
 
 ## test with only input arg
 %!assert (imadjust (linspace (0, 1, 100),[1/99; 98/99]),

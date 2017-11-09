@@ -976,16 +976,17 @@ endfunction
 
 %!assert (regionprops (bw2d, "Centroid"),
 %!        struct ("Centroid", {get_2d_centroid_for([6 7 8 12 16 21 22 27])
-%!                             get_2d_centroid_for([15 19 20 24 29 30])}))
+%!                             get_2d_centroid_for([15 19 20 24 29 30])}),
+%!        5 * eps)
 
 %!test
 %! props = struct ("Area", {8; 6},
 %!                 "Centroid", {get_2d_centroid_for([6 7 8 12 16 21 22 27])
 %!                              get_2d_centroid_for([15 19 20 24 29 30])},
 %!                 "BoundingBox", {[1.5 0.5 5 3]; [2.5 3.5 4 2]});
-%! assert (regionprops (bw2d, "basic"), props)
-%! assert (regionprops (bwconncomp (bw2d, 8), "basic"), props)
-%! assert (regionprops (bwlabeln (bw2d, 8), "basic"), props)
+%! assert (regionprops (bw2d, "basic"), props, 5 * eps)
+%! assert (regionprops (bwconncomp (bw2d, 8), "basic"), props, 5 * eps)
+%! assert (regionprops (bwlabeln (bw2d, 8), "basic"), props, 5 * eps)
 
 %!test
 %! props = struct ("Area", {4; 6; 4},
@@ -993,8 +994,8 @@ endfunction
 %!                              get_2d_centroid_for([15 19 20 24 29 30])
 %!                              get_2d_centroid_for([16 21 22 27])},
 %!                 "BoundingBox", {[1.5 0.5 2 3]; [2.5 3.5 4 2]; [3.5 0.5 3 2]});
-%! assert (regionprops (bwconncomp (bw2d, 4), "basic"), props)
-%! assert (regionprops (bwlabeln (bw2d, 4), "basic"), props)
+%! assert (regionprops (bwconncomp (bw2d, 4), "basic"), props, 5 * eps)
+%! assert (regionprops (bwlabeln (bw2d, 4), "basic"), props, 5 * eps)
 
 ## This it is treated as labeled image with a single discontiguous region.
 %!assert (regionprops (double (bw2d), "basic"),
@@ -1035,7 +1036,7 @@ endfunction
 %!                             {sum([2 1; 2 2; 3 2; 2 3; 4 1; 5 1; 5 2; 6 2]
 %!                              .* ([4; 0; 4; 5; 7; 5; 3; 7] / 35))
 %!                              sum([3 5; 4 4; 4 5; 5 4; 6 4; 6 5]
-%!                                  .* ([7; 5; 2; 8; 6; 5] / 33))}))
+%!                                  .* ([7; 5; 2; 8; 6; 5] / 33))}), 5 * eps)
 
 %!test
 %! img = zeros (3, 9);
