@@ -682,7 +682,7 @@ endfunction
 %! assert (isscalar (se),  true)
 %! assert (isscalar (seq), false)
 %!error <index out of bounds> se(2);
-%!error <index out of bounds> seq(3);
+%!error <out of bound> seq(3);
 
 ## test reflection
 %!test
