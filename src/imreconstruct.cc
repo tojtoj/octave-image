@@ -37,6 +37,7 @@
 using namespace octave::image;
 
 #define WANTS_MIN 1
+#define WANTS_OCTAVE_IMAGE_VALUE 1
 #include "octave-wrappers.h"
 
 /*
@@ -339,41 +340,46 @@ DEFUN_DLD(imreconstruct, args, , "\
           return octave_value_list ();
         }
     }
+  octave_image::value marker (args(0));
+
+#define RECONSTRUCT(TYPE) \
+  ret = reconstruct (marker.TYPE ## _array_value (), \
+                     args(1).TYPE ## _array_value (), conn);
 
 #define IF_TYPE(TYPE) \
-if (args (0).is_ ## TYPE ## _type ()) \
-  ret = reconstruct (args(0).TYPE ## _array_value (), \
-                     args(1).TYPE ## _array_value (), conn);
+if (marker.is_ ## TYPE ## _type ()) \
+  RECONSTRUCT (TYPE)
 
 #define INT_BRANCH(TYPE) \
 IF_TYPE(u ## TYPE) \
 else IF_TYPE(TYPE)
 
 #define FLOAT_BRANCH(CR) \
-if (args(0).is_single_type ()) \
-  ret = reconstruct (args(0).float_ ## CR ## array_value (), \
+if (marker.is_single_type ()) \
+  ret = reconstruct (marker.float_ ## CR ## array_value (), \
                     args(1).float_ ## CR ## array_value (), conn); \
 else \
-  ret = reconstruct (args(0).CR ## array_value (), \
+  ret = reconstruct (marker.CR ## array_value (), \
                      args(1).CR ## array_value (), conn);
 
   octave_value ret;
-  IF_TYPE (bool)
+  if (marker.islogical ())
+    RECONSTRUCT(bool)
   else INT_BRANCH (int8)
   else INT_BRANCH (int16)
   else INT_BRANCH (int32)
   else INT_BRANCH (int64)
-  else if (args(0).is_real_type ())
+  else if (marker.isreal ())
     {
       FLOAT_BRANCH()
     }
-  else if (args(0).is_complex_type ())
+  else if (marker.iscomplex ())
     {
       FLOAT_BRANCH(complex_)
     }
   else
     error ("imreconstruct: unsupported class %s for MARKER",
-           args(0).class_name ().c_str ());
+           marker.class_name ().c_str ());
 
 #undef IF_TYPE
 #undef INT_BRANCH

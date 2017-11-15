@@ -84,6 +84,37 @@ if test "$octave_image_cv_feval_in_octave_namespace" = yes; then
             [Define if octave::feval exists as replacement to feval.])
 fi
 
+## Sometime during 4.3 development, the is_* style methods were
+## deprecated in favour of others whose names match the functions
+## in the Octave language:
+##   is_bool_type    -> islogical
+##   is_complex_type -> iscomplex
+##   is_empty        -> isempty
+##   is_float_type   -> isfloat
+##   is_numeric_type -> isnumeric
+##   is_real_type    -> isreal
+## Warnings are scary to users, so use the new style if it's available.
+AC_CACHE_CHECK([whether octave value has Octave style is* methods],
+   [octave_image_cv_octave_style_is_functions],
+   [AC_COMPILE_IFELSE(
+     [AC_LANG_PROGRAM([#include <ov.h>],
+                      [octave_value foo = octave_value ();
+                       bool is_result;
+                       is_result = foo.iscomplex ();
+                       is_result = foo.isempty ();
+                       is_result = foo.isfloat ();
+                       is_result = foo.islogical ();
+                       is_result = foo.isnumeric ();
+                       is_result = foo.isreal ();])],
+     [octave_image_cv_octave_style_is_functions=yes],
+     [octave_image_cv_octave_style_is_functions=no])]
+)
+
+if test "$octave_image_cv_octave_style_is_functions" = yes; then
+  AC_DEFINE([HAVE_OCTAVE_STYLE_IS_FUNCTIONS], [1],
+            [Define if octave_value has is* style like the Octave language.])
+fi
+
 CXXFLAGS="$image_save_CXXFLAGS"
 
 
