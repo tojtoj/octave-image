@@ -173,25 +173,31 @@ function f = fspecial (type, arg1, arg2)
 
   switch lower (type)
     case "average"
-      ## Get filtersize
-      if (nargin > 1 && isreal (arg1) && length (arg1 (:)) <= 2)
-        fsize = arg1 (:);
+      if (nargin > 2)
+        print_usage ();
+      elseif (nargin == 1)
+        fsize = [3 3];
+      elseif (! isreal (arg1) || isempty (arg1) || ! isvector (arg1)
+              || any (arg1 < 0) || any (arg1 != fix (arg1)))
+        error ("fspecial: LENGTHS must be a vector of non-negative integers");
+      elseif (isscalar (arg1))
+        fsize = [arg1 arg1];
       else
-        fsize = 3;
+        fsize = arg1;
       endif
-      ## Create the filter
-      f = ones (fsize);
-      ## Normalize the filter to integral 1
-      f = f / sum (f (:));
+      val = 1 ./ prod (fsize);
+      f = repmat (val, fsize);
 
     case "disk"
-      ## Get the radius
-      if (nargin > 1 && isreal (arg1) && isscalar (arg1))
+      ## fspecial ("disk", radius = [5])
+      if (nargin == 1)
+        r = 5;
+      elseif (isreal (arg1) && isscalar (arg1))
         r = arg1;
       else
-        r = 5;
+        error ("fspecial: RADIUS for disk must be a real scalar");
       endif
-      ## Create the filter
+
       if (r == 0)
         f = 1;
       else
@@ -620,3 +626,19 @@ endfunction
 %! assert (find (obs == max (obs(:))), [29; 32])
 %! assert (size (obs), [3 4 1 5])
 %! assert (obs(:)(1:30), obs(:)(end:-1:31))
+
+%!test
+%! f = repmat (1/9, [3 3]);
+%! assert (fspecial ("average", [3 3]), f)
+%!
+%! ## Test default
+%! assert (fspecial ("average"), fspecial ("average", [3 3]))
+%! assert (fspecial ("average"), fspecial ("average", [3]))
+%!
+%! f = repmat (1/21, [3 7]);
+%! assert (fspecial ("average", [3 7]), f)
+%!
+%! f = repmat (1/40, [4 5 1 2]);
+%! assert (fspecial ("average", [4 5 1 2]), f)
+%! ## Behave even if it's a column vector
+%! assert (fspecial ("average", [4 5 1 2]'), f)

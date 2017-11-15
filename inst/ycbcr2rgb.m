@@ -49,3 +49,5 @@ function rgb = ycbcr2rgb (ycbcr, standard = "601")
 endfunction
 
 %!assert (ycbcr2rgb (rgb2ycbcr (jet (10))), jet (10), 0.00001);
+
+%!assert (class (ycbcr2rgb (single (rand (5, 5, 3)))), "single")

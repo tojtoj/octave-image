@@ -22,6 +22,7 @@
 #include <octave/oct-map.h>
 
 #define WANTS_FEVAL 1
+#define WANTS_OCTAVE_IMAGE_VALUE 1
 #include "octave-wrappers.h"
 
 #include "connectivity.h"
@@ -309,38 +310,39 @@ or with a binary matrix representing a connectivity array.  Defaults to\n\
       return octave_value_list ();
     }
 
+  const octave_image::value im (args(0));
 #define IF_TYPE(IS_TYPE, VALUE_TYPE) \
-  if (args(0).is_ ## IS_TYPE ## _type ()) \
-    return octave_value (watershed (args(0). VALUE_TYPE ## array_value (), \
+  if (im.is ## IS_TYPE ()) \
+    return octave_value (watershed (im. VALUE_TYPE ## array_value (), \
                                     conn)); \
 
   // My guess is that uint8, uint16, and double will be the most common types.
-  IF_TYPE(uint8, uint8_)
-  else IF_TYPE(uint16, uint16_)
-  else if (args(0).is_float_type ())
+  IF_TYPE(_uint8_type, uint8_)
+  else IF_TYPE(_uint16_type, uint16_)
+  else if (im.isfloat ())
     {
-      if (args(0).is_complex_type ())
+      if (im.iscomplex ())
         {
-          IF_TYPE(double, complex_)
-          else IF_TYPE(single, float_complex_)
+          IF_TYPE(_double_type, complex_)
+          else IF_TYPE(_single_type, float_complex_)
         }
       else
         {
-          IF_TYPE(double, )
-          else IF_TYPE(single, float_)
+          IF_TYPE(_double_type, )
+          else IF_TYPE(_single_type, float_)
         }
     }
-  else IF_TYPE(uint32, uint32_)
-  else IF_TYPE(uint64, uint64_)
-  else IF_TYPE(int8, int8_)
-  else IF_TYPE(int16, int16_)
-  else IF_TYPE(int32, int32_)
-  else IF_TYPE(int64, int64_)
-  else IF_TYPE(uint8, uint8_)
-  else IF_TYPE(bool, bool_)
+  else IF_TYPE(_uint32_type, uint32_)
+  else IF_TYPE(_uint64_type, uint64_)
+  else IF_TYPE(_int8_type, int8_)
+  else IF_TYPE(_int16_type, int16_)
+  else IF_TYPE(_int32_type, int32_)
+  else IF_TYPE(_int64_type, int64_)
+  else IF_TYPE(_uint8_type, uint8_)
+  else IF_TYPE(logical, bool_)
 
   error ("watershed: IM of unsupported class `%s'",
-         args(0).class_name ().c_str ());
+         im.class_name ().c_str ());
   return octave_value_list ();
 #undef IF_TYPE
 }
@@ -578,7 +580,7 @@ or with a binary matrix representing a connectivity array.  Defaults to\n\
 %!   0   0   0   0   0   4   4
 %!   2   2   2   0   4   4   4];
 %!
-%! assert (watershed (im_crop), matlab_result_crop);
+%! assert (watershed (im_full), matlab_result_full);
 %!
 %! im_crop = [
 %!       2  10   3   8   7   5

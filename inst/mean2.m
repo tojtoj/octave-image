@@ -14,21 +14,37 @@
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {@var{m}=} mean2 (@var{I})
-## Compute the mean value of the 2D image @var{I}.
+## @deftypefn {Function File} {} mean2 (@var{I})
+## Compute mean value of array.
 ##
-## Note that @var{m} will be of class double, independently of the input class.
-## This is equivalent to @code{mean (I(:))}.
+## While the function name suggests that it computes the mean value of
+## a 2D array, it will actually computes the mean value of an entire
+## array.  It is equivalent to @code{mean (I(:))}.
+##
+## The return value will be of class double independently of the input
+## class.
 ##
 ## @seealso{mean, std2}
 ## @end deftypefn
 
 function m = mean2 (I)
-
   if (nargin != 1)
     print_usage();
-  elseif (!isimage (I) || ndims (I) != 2)
-    error("mean2: argument must be a 2D image");
   endif
   m = mean (I(:));
 endfunction
+
+## Corner cases for Matlab compatibility (bug #51144)
+
+%!test
+%! ## This throws a division by zero warning which Matlab does not, but
+%! ## that's because Matlab does not throw such warnings in the first
+%! ## place.  Octave does, so we do not turn the warning off.
+%! warning ("off", "Octave:divide-by-zero", "local");
+%! assert (mean2 ([]), NaN)
+
+%!assert (mean2 (logical ([1 1; 0 0])), 0.5)
+%!assert (mean2 (ones (3, 3, 3)), 1)
+%!assert (mean2 (i), i)
+%!assert (mean2 ([1 i]), [0.5+0.5i])
+%!assert (mean2 (speye (3)), sparse (1/3))

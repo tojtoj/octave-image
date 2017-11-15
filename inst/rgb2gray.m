@@ -38,9 +38,13 @@ function gray = rgb2gray (rgb)
     gray = rgb2ntsc (rgb) (:, 1) * ones (1, 3);
 
   elseif (isimage (rgb) && ndims (rgb) == 3)
+    if (! isfloat (rgb))
+      rgb = im2doule (rgb);
+    endif
+
     ## multiply each color by the luminance factor (this is also matlab compatible)
     ##      0.29894 * red + 0.58704 * green + 0.11402 * blue
-    gray = im2double (rgb) .* permute ([0.29894, 0.58704, 0.11402], [1, 3, 2]);
+    gray = rgb .* permute ([0.29894, 0.58704, 0.11402], [1, 3, 2]);
     gray = sum (gray, 3);
 
     switch (class (rgb))
@@ -67,3 +71,5 @@ endfunction
 %! img(:,:,3) = [0 0; 1 1];
 %! img = rgb2gray (img);
 %!assert ([img(1,1) img(1,2) img(2,1) img(2,2)], [0.29894 0.58704 0.11402 1]);
+
+%!assert (class (rgb2gray (single (ones (5, 5, 3)))), "single")

@@ -67,4 +67,36 @@ namespace octave_image
 #endif
   }
 #endif
+
+#if defined WANTS_OCTAVE_IMAGE_VALUE && ! defined HAS_OCTAVE_IMAGE_VALUE
+#define HAS_OCTAVE_IMAGE_VALUE 1
+  class
+  value : public octave_value
+  {
+  public:
+    value (const octave_value& a) : octave_value (a) {}
+
+#if ! defined HAVE_OCTAVE_STYLE_IS_FUNCTIONS
+
+    bool islogical (void) const
+    { return is_bool_type (); }
+
+    bool iscomplex (void) const
+    { return is_complex_type (); }
+
+    bool isempty (void) const
+    { return is_empty (); }
+
+    bool isfloat (void) const
+    { return is_float_type (); }
+
+    bool isnumeric (void) const
+    { return is_numeric_type (); }
+
+    bool isreal (void) const
+    { return is_real_type (); }
+
+#endif
+  };
+#endif
 }

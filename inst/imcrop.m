@@ -176,8 +176,8 @@ function varargout = imcrop (varargin)
     endif
     rect = [x(1) y(1) x(2)-x(1) y(2)-y(1)];
   endif
-  i_ini = round ([rect(1) rect(2)]);
-  i_end = round ([rect(1)+rect(3) rect(2)+rect(4)]);
+  i_ini = max (round ([rect(1) rect(2)]), [1 1]);
+  i_end = min (round ([rect(1)+rect(3) rect(2)+rect(4)]), size (cdata)(1:2));
   img = cdata(i_ini(2):i_end(2), i_ini(1):i_end(1),:,:); # don't forget RGB and ND images
 
   ## Even the API for the output is complicated
@@ -242,3 +242,18 @@ endfunction
 ## scalar 0 as image data, not as figure handle.
 %!assert (imcrop (0, [0.5 0.5 0.9 0.9]), 0);
 %!assert (imcrop (zeros (5), [1 1 1 1]), zeros (2));
+
+## test out of bounds region of interest to crop (bug #49456)
+%!test
+%! im = magic (5);
+%! assert (imcrop (im, [1 1 5 5]), im)
+%! assert (imcrop (im, [0 0 5 5]), im)
+%! assert (imcrop (im, [1 1 2 5]), im(:,1:3))
+%! assert (imcrop (im, [1 -3 2 5]), im(1:2,1:3))
+%! assert (imcrop (im, [5 -3 2 5]), im(1:2,5))
+
+%!test
+%! ## Matlab returns [] (size 0x0) for this cases, while we return
+%! ## [] (size 2x0).  We are not compatible by design.  If it ever
+%! ## becomes an issue to anyone we can review this decision.
+%! assert (imcrop (magic (5), [6 -3 2 5]), zeros (2, 0))

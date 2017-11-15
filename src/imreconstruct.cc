@@ -37,6 +37,7 @@
 using namespace octave::image;
 
 #define WANTS_MIN 1
+#define WANTS_OCTAVE_IMAGE_VALUE 1
 #include "octave-wrappers.h"
 
 /*
@@ -243,15 +244,6 @@ fast_hybrid_reconstruction (const T& marker, const T& mask,
 {
   typedef typename T::element_type P;
 
-  const P* Ju = marker.fortran_vec ();
-  const P* Iu = mask.fortran_vec ();
-  for (octave_idx_type i = 0; i < marker.numel (); i++)
-    if (*Ju++ > *Iu++)
-      {
-        error ("imreconstruct: MARKER must be less or equal than MASK");
-        return T ();
-      }
-
   const dim_vector original_size = marker.dims ();
 
   T padded_marker = conn.create_padded (marker, connectivity::min_value<P> ());
@@ -348,41 +340,46 @@ DEFUN_DLD(imreconstruct, args, , "\
           return octave_value_list ();
         }
     }
+  octave_image::value marker (args(0));
+
+#define RECONSTRUCT(TYPE) \
+  ret = reconstruct (marker.TYPE ## _array_value (), \
+                     args(1).TYPE ## _array_value (), conn);
 
 #define IF_TYPE(TYPE) \
-if (args (0).is_ ## TYPE ## _type ()) \
-  ret = reconstruct (args(0).TYPE ## _array_value (), \
-                     args(1).TYPE ## _array_value (), conn);
+if (marker.is_ ## TYPE ## _type ()) \
+  RECONSTRUCT (TYPE)
 
 #define INT_BRANCH(TYPE) \
 IF_TYPE(u ## TYPE) \
 else IF_TYPE(TYPE)
 
 #define FLOAT_BRANCH(CR) \
-if (args(0).is_single_type ()) \
-  ret = reconstruct (args(0).float_ ## CR ## array_value (), \
+if (marker.is_single_type ()) \
+  ret = reconstruct (marker.float_ ## CR ## array_value (), \
                     args(1).float_ ## CR ## array_value (), conn); \
 else \
-  ret = reconstruct (args(0).CR ## array_value (), \
+  ret = reconstruct (marker.CR ## array_value (), \
                      args(1).CR ## array_value (), conn);
 
   octave_value ret;
-  IF_TYPE (bool)
+  if (marker.islogical ())
+    RECONSTRUCT(bool)
   else INT_BRANCH (int8)
   else INT_BRANCH (int16)
   else INT_BRANCH (int32)
   else INT_BRANCH (int64)
-  else if (args(0).is_real_type ())
+  else if (marker.isreal ())
     {
       FLOAT_BRANCH()
     }
-  else if (args(0).is_complex_type ())
+  else if (marker.iscomplex ())
     {
       FLOAT_BRANCH(complex_)
     }
   else
     error ("imreconstruct: unsupported class %s for MARKER",
-           args(0).class_name ().c_str ());
+           marker.class_name ().c_str ());
 
 #undef IF_TYPE
 #undef INT_BRANCH
@@ -525,5 +522,29 @@ else \
 %! c2(:,:,:,2) = c1;
 %! assert (imreconstruct (a, b, c1), imreconstruct (a, b, c2))
 
-%!error <MARKER must be less or equal than MASK> imreconstruct (randi([5 10], [10 10]), randi([1 5], [10 10]))
+## Values in MARKER above MASK should be clipped (bug #48794)
+## (well, treated internally as if they were clipped)
+%!test
+%! mask = logical ([1 1 1; 1 0 1; 1 1 1]);
+%! assert (imreconstruct (true (3, 3), mask), mask)
+%!
+%! mask = ones (5, 5);
+%! mask(2:4,2:4) = 0;
+%! assert (imreconstruct (ones (5, 5), mask), mask)
+%!
+%! mask = ones (5, 5);
+%! mask(2:4,2:4) = 0;
+%! assert (imreconstruct (repmat (2, [5, 5]), mask), mask)
+%!
+%! mask = ones (5, 5);
+%! mask(2:4,2:4) = 0;
+%! assert (imreconstruct (repmat (2, [5, 5]), mask), mask)
+%!
+%! marker = ones (3, 3, 3, 3);
+%! mask = marker;
+%! mask(2, 2, 2, 2) = 0;
+%! assert (imreconstruct (marker, mask), mask)
+%!
+%! marker = randi (210, 100, 100);
+%! assert (imreconstruct (marker, marker), imreconstruct (marker, marker +1))
 */

@@ -28,6 +28,10 @@
 
 #include "union-find.h"
 #include "connectivity.h"
+
+#define WANTS_OCTAVE_IMAGE_VALUE 1
+#include "octave-wrappers.h"
+
 using namespace octave::image;
 
 static union_find
@@ -364,12 +368,13 @@ See, for example, http://en.wikipedia.org/wiki/Union-find\n\
       return rval;
     }
 
-  if (!args(0).is_numeric_type () && !args(0).is_bool_type ())
+  octave_image::value bw_value (args(0));
+  if (! bw_value.isnumeric () && ! bw_value.islogical ())
     {
       error ("bwlabeln: BW must be a numeric or logical matrix");
       return rval;
     }
-  boolNDArray BW = args(0).bool_array_value ();
+  boolNDArray BW = bw_value.bool_array_value ();
   dim_vector size_vec = BW.dims ();
 
   connectivity conn;
@@ -665,8 +670,9 @@ can be changed through the argument @var{n}, which can be either 4, 6, or 8.\n\
   // We do not check error state after conversion to boolMatrix
   // because what we want is to actually get a boolean matrix
   // with all non-zero elements as true (Matlab compatibility).
-  if ((! args(0).is_numeric_type () && ! args(0).is_bool_type ()) ||
-      args(0).ndims () != 2)
+  octave_image::value bw_value (args(0));
+  if ((! bw_value.isnumeric () && ! bw_value.islogical ()) ||
+      bw_value.ndims () != 2)
     {
       error ("bwlabel: BW must be a 2D matrix");
       return rval;
@@ -675,7 +681,7 @@ can be changed through the argument @var{n}, which can be either 4, 6, or 8.\n\
   // a boolMatrix since it will error if there's values other
   // than 0 and 1 (whatever bool_array_value() does, bool_matrix_value()
   // does not).
-  const boolMatrix BW = args(0).bool_array_value ();
+  const boolMatrix BW = bw_value.bool_array_value ();
 
   // N-hood connectivity
   const octave_idx_type n = nargin < 2 ? 8 : args(1).idx_type_value ();

@@ -41,7 +41,7 @@
 ##
 ## @example
 ## bw = im2bw (img, "moments");
-## bw = im2bw (img, graythresh (img(:), "moments"));
+## bw = im2bw (img, graythresh (img, "moments"));
 ## @end example
 ##
 ## @seealso{graythresh, ind2gray, rgb2gray}
@@ -82,7 +82,7 @@ function BW = im2bw (img, cmap, thresh = 0.5)
     endif
 
     if (ischar (thresh))
-      thresh = graythresh (img(:), thresh);
+      thresh = graythresh (img, thresh);
     endif
 
     ## Convert the threshold value to same class as the image which
@@ -162,11 +162,11 @@ endfunction
 
 %!test
 %! im = [((randn(10)/10)+.3) ((randn(10)/10)+.7)];
-%! assert (im2bw (im, "Otsu"), im2bw (im, graythresh (im(:), "Otsu")))
-%! assert (im2bw (im, "moments"), im2bw (im, graythresh (im(:), "moments")))
+%! assert (im2bw (im, "Otsu"), im2bw (im, graythresh (im, "Otsu")))
+%! assert (im2bw (im, "moments"), im2bw (im, graythresh (im, "moments")))
 
 %!test
 %! im = [((randn(10)/10)+.3) ((randn(10)/10)+.7)];
 %! im = reshape (im, [10 10 1 2]);
-%! assert (im2bw (im, "Otsu"), im2bw (im, graythresh (im(:), "Otsu")))
-%! assert (im2bw (im, "moments"), im2bw (im, graythresh (im(:), "moments")))
+%! assert (im2bw (im, "Otsu"), im2bw (im, graythresh (im, "Otsu")))
+%! assert (im2bw (im, "moments"), im2bw (im, graythresh (im, "moments")))

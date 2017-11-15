@@ -28,6 +28,7 @@
 #include <octave/oct-map.h>
 
 #define WANTS_FEVAL 1
+#define WANTS_OCTAVE_IMAGE_VALUE 1
 #include "octave-wrappers.h"
 
 // Constructors
@@ -62,7 +63,7 @@ octave::image::strel::strel (const octave_value& arg)
 
   // Maybe we should handle this better but how?  This makes imerode
   // and imdilate work with a [] strel
-  if (nhood.is_empty ())
+  if (octave_image::value (nhood).isempty ())
     {
       nhood = boolNDArray (dim_vector (1, 1), false);
       height = NDArray (dim_vector (1, 1), 0);

@@ -139,17 +139,33 @@ function [varargout] = graythresh (img, algo = "otsu", varargin)
     error ("graythresh: algorithm `%s' does not accept any options.", algo);
   else
     hist_in = false;
-    ## If the image is RGB convert it to grayscale
-    if (isrgb (img))
+    if (! isnumeric (img))
+      error ("graythresh: IMG must be numeric");
+    elseif (size (img, 3) == 3)
+      ## If the image is RGB convert it to grayscale
       img = rgb2gray (img);
-    elseif (isgray (img))
-      ## do nothing
-    elseif (isvector (img) && !issparse (img) && isreal (img) && all (img >= 0))
+    elseif (isfloat(img) && isvector (img) && !issparse (img) &&
+            isreal (img) && all (img >= 0))
+      ## FIXME: we need to rething this approach.  This means that
+      ##        "images" with a single row or vector will be handled
+      ##        as histograms.  Also, previously we relied on having
+      ##        values outside [0 1] range to distinguish between an
+      ##        image and a histogram but for Matlab compatibility we
+      ##        need to clip the values so there's backwards
+      ##        incompatibility issues when addressing this.  Because
+      ##        previously any histogram of integer class would be
+      ##        identified as an image, we added the 'isfloat' logic
+      ##        to limit the issue to images of floating point
+      ##        images.  Best fix is to implement histthresh to handle
+      ##        histograms and this function simply prepares an
+      ##        histogram from a user image and then calls histthresh.
       hist_in = true;
       ihist   = img;
-    else
-      error ("graythresh: input must be an image or an histogram.");
     endif
+    ## ... else it should a gray image so do nothing.  The only thing
+    ## we need to worry is on clipping values outside the [0 1] range
+    ## for floating point images.  But that is done later when it
+    ## converts to uint8.
   endif
 
   ## the "mean" is the simplest of all, we can get rid of it right here
@@ -168,7 +184,6 @@ function [varargout] = graythresh (img, algo = "otsu", varargin)
       ## do nothing
     elseif (isa (img, "int16"))
       img     = im2uint16 (img);
-      img_max = 65535;
     else
       img = im2uint8 (img);
     endif
@@ -222,21 +237,32 @@ function [thresh] = otsu (ihist, compute_good)
 
   ## between class variance (its maximum is the best threshold)
   bcv       = b_weights .* w_weights .* (b_means - w_means).^2;
-  ## in case there's more than one place with best maximum (for example, a group
-  ## of empty bins, we select the one in the center (this is compatible with ImageJ)
-  thresh{1} = ceil (mean (find (bcv == max (bcv)))) - 2;
-  ## we subtract 2, once for the 1 based indexes and another for the greater
-  ## than or equal problem
 
-  if (compute_good)
-    ## basically we need to divide the between class variance by the total
-    ## variance which is a single value, independent of the threshold. From the
-    ## paper, last of the equation 12, eta = sigma²b / sigma²t
-    ##(where b = between and t = total)
-    norm_hist      = ihist / total;
-    total_mean     = sum (bins .* norm_hist);
-    total_variance = sum (((bins - total_mean).^2) .* norm_hist);
-    thresh{2}      = max (bcv) / total_variance;
+  max_bcv = max (bcv);
+  if (isnan (max_bcv))
+    ## Couldn't measure variance.  This will happen if for example all
+    ## values are the same.  See bug #45333.
+    thresh{1} = 0;
+    thresh{2} = 0;
+  else
+    ## In case there's more than one place with best maximum (for
+    ## example, a group of empty bins), we select the one in the
+    ## center (this is compatible with ImageJ).
+    thresh{1} = ceil (mean (find (bcv == max_bcv))) - 2;
+    ## We subtract 2, once for the 1 based indexes and another for the
+    ## greater than or equal problem.
+
+    if (compute_good)
+      ## Basically we need to divide the between class variance by the
+      ## total variance which is a single value, independent of the
+      ## threshold.  From the paper, last of the equation 12:
+      ##     eta = sigma²b / sigma²t
+      ## where b = between and t = total
+      norm_hist      = ihist / total;
+      total_mean     = sum (bins .* norm_hist);
+      total_variance = sum (((bins - total_mean).^2) .* norm_hist);
+      thresh{2}      = max (bcv) / total_variance;
+    endif
   endif
 endfunction
 
@@ -691,3 +717,19 @@ endfunction
 ## for the mean our results differ from matlab because we do not calculate it
 ## from the histogram. Our results should be more accurate.
 %!assert (graythresh (img, "mean"), 0.51445615982, 0.000000001);  # here our results differ from ImageJ
+
+## Test for bug #45333
+%!test
+%! im = repmat (0.5, 100, 100);
+%! [t, g] = graythresh (im);
+%! assert (t, 0)
+%! assert (g, 0)
+
+## test for bug #51976
+## Values outside the range [0 1] in floating images, should be clipped
+%!test
+%! im = [-2  1  0; 43  .5 .2];
+%! clip_im = [ 0  1  0;  1  .5 .2];
+%! t =graythresh (clip_im);
+%! assert (graythresh (im), t)
+%! assert (graythresh (single (im)), t)

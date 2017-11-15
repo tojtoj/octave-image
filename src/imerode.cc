@@ -27,6 +27,9 @@
 
 #include "strel.h"
 
+#define WANTS_OCTAVE_IMAGE_VALUE 1
+#include "octave-wrappers.h"
+
 using namespace octave::image;
 
 // How this works:
@@ -238,7 +241,7 @@ erode (const T& im, const strel& se, const std::string& shape, const bool& erosi
   typedef typename T::element_type P;
 
   // If image is empty, return empty of the same class.
-  if (im.is_empty ())
+  if (octave_image::value (im).isempty ())
     return octave_value (im);
 
   // In the case of floating point, complex and integers numbers, both
@@ -361,11 +364,11 @@ base_action (const std::string& func, const bool& erosion, const octave_value_li
   if (! erosion) // must be dilation, then get the se reflection
     se = se.reflect ();
 
-  octave_value im = args(0);
+  octave_image::value im (args(0));
   for (octave_idx_type idx = 0; idx < se.numel (); idx++)
     {
       const strel se_elem = se(idx);
-      if (im.is_bool_type ())
+      if (im.islogical ())
         im = erode<boolNDArray> (im.bool_array_value (), se_elem, shape, erosion);
       else if (im.is_int8_type ())
         im = erode<int8NDArray> (im.int8_array_value (), se_elem, shape, erosion);
@@ -383,12 +386,12 @@ base_action (const std::string& func, const bool& erosion, const octave_value_li
         im = erode<uint32NDArray> (im.uint32_array_value (), se_elem, shape, erosion);
       else if (im.is_uint64_type ())
         im = erode<uint64NDArray> (im.uint64_array_value (), se_elem, shape, erosion);
-      else if (im.is_real_type ())
+      else if (im.isreal ())
         if (im.is_single_type ())
           im = erode<FloatNDArray> (im.float_array_value (), se_elem, shape, erosion);
         else // must be double
           im = erode<NDArray> (im.array_value (), se_elem, shape, erosion);
-      else if (im.is_complex_type ())
+      else if (im.iscomplex ())
         if (im.is_single_type ())
           im = erode<FloatComplexNDArray> (im.float_complex_array_value (), se_elem, shape, erosion);
         else // must be double

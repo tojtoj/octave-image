@@ -28,12 +28,14 @@ DEFUN_DLD(hough_line, args, , "\
 @deftypefn {Loadable Function} {[@var{H}, @var{R}] =} hough_line(@var{I}, @var{angles})\n\
 Calculate the straight line Hough transform of a binary image @var{I}.\n\
 \n\
-The angles are given in degrees and defaults to -90:90.\n\
+The angles are given in radians and default to -pi/2:pi/2.\n\
 \n\
 @var{H} is the resulting Hough transform, and @var{R} is the radial distances.\n\
 \n\
 The algorithm is described in\n\
 Digital Image Processing by Gonzales & Woods (2nd ed., p. 587)\n\
+\n\
+For a Matlab compatible Hough transform see hough.m\n\
 @end deftypefn\n\
 ")
 {

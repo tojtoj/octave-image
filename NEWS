@@ -1,3 +1,42 @@
+ Summary of important user-visible changes for image 2.8.0 (yyyy/mm/dd):
+-------------------------------------------------------------------------
+
+ ** The following functions are new:
+
+      imsharpen
+      hough
+      wiener2
+
+ ** imcrop will now adjust the region to crop to the image boundaries
+    when the region to crop goes beyond the image boundaries.
+
+ ** ycbcr2rgb, rgb2ycbcr, and rgb2gray will return an image of class
+    single if the input was class single (they were previously
+    returning a double for such cases).
+
+ ** The function imdither has been removed.  This function hadn't work
+    since Octave version 3.8.0 and would need to be rewritten.  The
+    function dither from Octave core should be used instead but hasn't
+    been implemented yet.  Instead of rewriting imdither, the missing
+    dither function should be written.  See bug #41768.
+
+ ** graythresh will now clip values outside the [0 1] range in images
+    of floating point class.  A side effect of this is that it will no
+    longer distinguish between an image of floating point class that
+    has only one one row or column, and an histogram.  Breaks
+    backwards compatibility if you were previously relying on
+    something like 'graythresh (img(:), ...)' and img is of class
+    single or double.
+
+ ** Other functions that have been changed for smaller bugfixes, increased
+    Matlab compatibility, or performance:
+
+      bwperim
+      graythresh
+      normxcorr2
+      imreconstruct
+
+
  Summary of important user-visible changes for image 2.6.2 (2017/11/09):
 -------------------------------------------------------------------------
 

@@ -37,8 +37,8 @@
 ## inspect the details of the different ellipses) are:
 ##
 ## @table @asis
-## @item @qcode{"Sheep-Logan"}
-## This is the original Sheep-Logan model with 10 ellipses as described in
+## @item @qcode{"Shepp-Logan"}
+## This is the original Shepp-Logan model with 10 ellipses as described in
 ## Table 1 of @cite{Shepp, Lawrence A., and Benjamin F. Logan. "The Fourier
 ## reconstruction of a head section." Nuclear Science, IEEE Transactions on
 ## 21, no. 3 (1974): 21-43.}
