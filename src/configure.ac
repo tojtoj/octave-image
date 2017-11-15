@@ -70,6 +70,7 @@ if test "$octave_image_cv_xmin_in_octave_math_namespace" = yes; then
             [Define if octave::math::min exists as replacement to xmin.])
 fi
 
+
 AC_CACHE_CHECK(
   [whether feval is in the octave namespace],
   [octave_image_cv_feval_in_octave_namespace],
@@ -114,6 +115,7 @@ if test "$octave_image_cv_octave_style_is_functions" = yes; then
   AC_DEFINE([HAVE_OCTAVE_STYLE_IS_FUNCTIONS], [1],
             [Define if octave_value has is* style like the Octave language.])
 fi
+
 
 CXXFLAGS="$image_save_CXXFLAGS"
 

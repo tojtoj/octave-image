@@ -37,6 +37,21 @@
       imreconstruct
 
 
+ Summary of important user-visible changes for image 2.6.2 (2017/11/09):
+-------------------------------------------------------------------------
+
+ ** image 2.6.2 is a patch release.
+
+ ** Fix regionprops MajorAxisLength, MinorAxisLength, and Orientation
+    when there's multiple regions in an image; and Orientation for
+    thin regions.
+
+ ** Fix montage usage with a cell array of image filepaths.
+
+ ** Fixed installation for upcoming versions of Octave.  Enables
+    installation in current development version 4.3.0+.
+
+
  Summary of important user-visible changes for image 2.6.1 (2016/10/21):
 -------------------------------------------------------------------------
 

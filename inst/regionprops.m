@@ -866,6 +866,7 @@ function [minor, major, orientation] = rp_local_ellipse (area, pixellist)
   c_idx = 1;
   for idx = 1:no
     sel = c_idx:(c_idx + area(idx) -1);
+    c_idx += area(idx);
     X = pixellist(sel, 2);
     Y = pixellist(sel, 1);
 
@@ -882,7 +883,13 @@ function [minor, major, orientation] = rp_local_ellipse (area, pixellist)
     minor(idx) = min (lambda_d);
     [major(idx), major_idx] = max (lambda_d);
     major_vec = V(:, major_idx);
-    orientation(idx) = -(180/pi) .* atan (major_vec(2) ./ major_vec(1));
+    if (major(idx) == minor(idx))
+      orientation(idx) = 0;
+    elseif (major_vec(2) == 0)
+      orientation(idx) = 90;
+    else
+      orientation(idx) = -(180/pi) .* atan (major_vec(1) ./ major_vec(2));
+    endif
   endfor
 endfunction
 
@@ -969,16 +976,17 @@ endfunction
 
 %!assert (regionprops (bw2d, "Centroid"),
 %!        struct ("Centroid", {get_2d_centroid_for([6 7 8 12 16 21 22 27])
-%!                             get_2d_centroid_for([15 19 20 24 29 30])}))
+%!                             get_2d_centroid_for([15 19 20 24 29 30])}),
+%!        5 * eps)
 
 %!test
 %! props = struct ("Area", {8; 6},
 %!                 "Centroid", {get_2d_centroid_for([6 7 8 12 16 21 22 27])
 %!                              get_2d_centroid_for([15 19 20 24 29 30])},
 %!                 "BoundingBox", {[1.5 0.5 5 3]; [2.5 3.5 4 2]});
-%! assert (regionprops (bw2d, "basic"), props)
-%! assert (regionprops (bwconncomp (bw2d, 8), "basic"), props)
-%! assert (regionprops (bwlabeln (bw2d, 8), "basic"), props)
+%! assert (regionprops (bw2d, "basic"), props, 5 * eps)
+%! assert (regionprops (bwconncomp (bw2d, 8), "basic"), props, 5 * eps)
+%! assert (regionprops (bwlabeln (bw2d, 8), "basic"), props, 5 * eps)
 
 %!test
 %! props = struct ("Area", {4; 6; 4},
@@ -986,8 +994,8 @@ endfunction
 %!                              get_2d_centroid_for([15 19 20 24 29 30])
 %!                              get_2d_centroid_for([16 21 22 27])},
 %!                 "BoundingBox", {[1.5 0.5 2 3]; [2.5 3.5 4 2]; [3.5 0.5 3 2]});
-%! assert (regionprops (bwconncomp (bw2d, 4), "basic"), props)
-%! assert (regionprops (bwlabeln (bw2d, 4), "basic"), props)
+%! assert (regionprops (bwconncomp (bw2d, 4), "basic"), props, 5 * eps)
+%! assert (regionprops (bwlabeln (bw2d, 4), "basic"), props, 5 * eps)
 
 ## This it is treated as labeled image with a single discontiguous region.
 %!assert (regionprops (double (bw2d), "basic"),
@@ -1028,7 +1036,7 @@ endfunction
 %!                             {sum([2 1; 2 2; 3 2; 2 3; 4 1; 5 1; 5 2; 6 2]
 %!                              .* ([4; 0; 4; 5; 7; 5; 3; 7] / 35))
 %!                              sum([3 5; 4 4; 4 5; 5 4; 6 4; 6 5]
-%!                                  .* ([7; 5; 2; 8; 6; 5] / 33))}))
+%!                                  .* ([7; 5; 2; 8; 6; 5] / 33))}), 5 * eps)
 
 %!test
 %! img = zeros (3, 9);
@@ -1286,10 +1294,11 @@ endfunction
 %!test
 %! bw = logical ([0 0 0; 0 1 0; 0 0 0]);
 %! assert (regionprops (bw, {"MinorAxisLength", "MajorAxisLength", ...
-%!                           "Eccentricity"}),
+%!                           "Eccentricity", "Orientation"}),
 %!         struct ("MajorAxisLength", 4 .* sqrt (1/12),
 %!                 "MinorAxisLength", 4 .* sqrt (1/12),
-%!                 "Eccentricity", 0))
+%!                 "Eccentricity", 0,
+%!                 "Orientation", 0))
 
 %!test
 %! a = eye (4);
@@ -1330,6 +1339,34 @@ endfunction
 %! t = regionprops (c, "equivdiameter");
 %! assert (t.EquivDiameter, 2.5231,  1e-3);
 
+## Tests for multiple 'Orientation' thin cases (bug #49613)
+%!test
+%! bw = logical ([0 0 0 0; 0 1 1 0; 0 0 0 0]);
+%! props = regionprops (bw, "Orientation");
+%! assert ([props.Orientation], 0, 0)
+%!
+%! props = regionprops (bw', "Orientation");
+%! assert ([props.Orientation], 90, 0)
+%!
+%! bw = logical ([0 0 0 0; 0 1 1 0; 0 1 1 0; 0 0 0 0]);
+%! props = regionprops (bw, "Orientation");
+%! assert ([props.Orientation], 0, 0)
+%!
+%! bw = logical ([1 1 0 0 0 ; 0 0 1 1 0 ; 0 0 0 0 0; 0 0 0 0 0]);
+%! props = regionprops (bw, "Orientation");
+%! assert ([props.Orientation], -22.5, eps (22.5))
+%!
+%! bw = logical ([
+%!   1  1  0  0  1
+%!   0  0  0  0  1
+%!   0  0  0  0  0
+%!   0  0  1  1  0
+%!   1  0  1  1  0
+%!   1  0  0  0  0
+%!   0  1  0  0  0
+%!   0  1  0  0  0]);
+%! props = regionprops (bw, "Orientation");
+%! assert ([props.Orientation], [0 -67.5 0 90])
 
 %!test
 %! f = [0 0 0 0; 1 1 1 1; 0 1 1 1; 0 0 0 0];
@@ -1437,6 +1474,21 @@ endfunction
 %! props = regionprops (bwconncomp (bw), im, "all");
 %! assert (size (props), [0 1])
 %! assert (sort (all_props), sort (fieldnames (props)))
+
+## Test MajorAxisLength, MinorAxisLength, and Orientation with
+## multiple regions (bug #49613)
+%!test
+%! bw = logical ([
+%!   0  1  1  1  1
+%!   0  1  1  0  0
+%!   0  0  0  0  0
+%!   0  0  0  1  0
+%!   0  1  1  1  0]);
+%! props = regionprops (bw, "MajorAxisLength", "MinorAxisLength",
+%!                      "Orientation");
+%! assert ([props.MajorAxisLength] ,[4.51354115 3.65148372], 1.e-8)
+%! assert ([props.MinorAxisLength], [2.01801654 1.82574186], 1.e-8)
+%! assert ([props.Orientation], [12.93317840 18.43494882], 1.e-8)
 
 ## Test warnings about invalid props for nd images and missing grayscale
 %!warning <ignoring perimeter, extrema properties for non 2 dimensional image>

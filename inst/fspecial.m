@@ -591,7 +591,7 @@ endfunction
 %! expected([33 37 39 43 57 59 67 69 83 87 89 93]) = u_values(8);
 %! expected([38 58 62 64 68 88]) = u_values(9);
 %! expected([63]) = u_values(10);
-%! assert (obs, expected, eps)
+%! assert (obs, expected, 4 * eps)
 
 %!test
 %! obs = fspecial ("gaussian", [5 5 5], 1);

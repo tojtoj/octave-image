@@ -141,13 +141,14 @@ function h = montage (images, varargin)
       nPages     = numel (img_info);
       nRead     += nPages;
       page_range = nRead+1-nPages:nRead;
+      filepath = img_info(1).Filename;
 
       ## we won't be handling the alpha channel, but matlab doesn't either
       if (size (images, 3) == 1 || all (strcmp ({img_info(:).ColorType}, "truecolor")))
         ## sweet, no problems for sure
-        [images(:,:,:,page_range), map] = imread (img_info(idx).Filename, 1:nPages);
+        [images(:,:,:,page_range), map] = imread (filepath, 1:nPages);
       else
-        [tmp_img, map] = imread (fullpaths(:), 1:nPages);
+        [tmp_img, map] = imread (filepath, 1:nPages);
         if (! isempty (map))
           ## an indexed image. According to TIFF 6 specs, an indexed
           ## multipage image can have different colormaps for each page.
