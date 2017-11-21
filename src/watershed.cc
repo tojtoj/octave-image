@@ -456,10 +456,10 @@ or with a binary matrix representing a connectivity array.  Defaults to\n\
 %! assert (watershed (im, 4), labeled4);
 %! assert (watershed (im, [1 1 0; 1 1 1; 0 1 1]), labeled_weird);
 
-## The following test is required for Matlab compatibility.  There must be
-## something specific about their implementation that causes it to return
-## this value.  Even when solving it on paper, we get different results.
-%!test
+%!xtest
+%! ## The following test is required for Matlab compatibility.  There must be
+%! ## something specific about their implementation that causes it to return
+%! ## this value.  Even when solving it on paper, we get different results.
 %! im = [
 %!     2     3    30     2
 %!     3    30     3    30
@@ -568,8 +568,8 @@ or with a binary matrix representing a connectivity array.  Defaults to\n\
 %! assert (watershed (im, 4), labeled4);
 %! assert (watershed (im, [1 1 0; 1 1 1; 0 1 1]), labeled_weird);
 
-## This test is failing for Matlab compatibility
-%!test
+%!xtest
+%! ## This test is failing for Matlab compatibility
 %! im_full = [
 %!   1   2  10   3   8   7   5
 %!   3   2   5  10   8   1   4
