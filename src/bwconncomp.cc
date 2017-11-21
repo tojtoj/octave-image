@@ -301,12 +301,12 @@ or with a binary matrix representing a connectivity array.  Defaults to\n\
 %! assert (bwconncomp (a, ones (3)).Connectivity, 8)
 %! assert (bwconncomp (a, [0 1 0; 1 1 1; 0 1 0]).Connectivity, 4)
 
-## test that PixelIdxList is a row vector
 %!test
+%! ## test that PixelIdxList is a row vector
 %! a = rand (40, 40) > 0.2;
 %! cc = bwconncomp (a, 4);
 %! assert (rows (cc.PixelIdxList), 1)
-%! assert (columns (cc.PixelIdxList) > 1)
+%! assert (columns (cc.PixelIdxList), cc.NumObjects)
 
 ## PixelIdxList is a row vector, even when there's zero objects
 %!assert (bwconncomp (false (5)), struct ("ImageSize", [5 5], "NumObjects", 0,
