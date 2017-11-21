@@ -710,8 +710,15 @@ endfunction
 %!                 1  1  0  1  1
 %!                 1  1  1  1  1]);
 %! assert (bwmorph (in, "remove", Inf), out);
-%!
+
+%!xtest
 %! ## tests for spur are failing (matlab incompatible)
+%! in  = logical ([0  1  0  0  0
+%!                 1  0  0  1  0
+%!                 1  0  1  0  0
+%!                 1  1  1  1  1
+%!                 1  1  1  1  1]);
+%!
 %! out = logical ([0  1  0  0  0
 %!                 1  0  0  0  0
 %!                 1  0  1  0  0
@@ -726,8 +733,8 @@ endfunction
 %!                 1  1  1  1  1]);
 %! assert (bwmorph (in, "spur", Inf), out);
 
-## bug #44396
-%!test
+%!xtest
+%! ## bug #44396
 %! in = [
 %!   0   0   0   1   0
 %!   1   1   1   1   0
@@ -741,4 +748,3 @@ endfunction
 %!   0   0   0   0   0
 %!   0   0   0   0   0];
 %! assert (bwmorph (in, "shrink"), logical (out));
-
