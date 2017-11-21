@@ -267,14 +267,15 @@ function out = inv_polynomial (x, pst)
   endfor
 endfunction
 
-%!function [crw, cap] = coords (npt = 1000, scale = 2, dtheta = pi/3, dx = 2, dy = -6, sig2noise = 1e32)
+%!function [crw, cap] = coords (npt = 1000, scale = 2, dtheta = pi/3,
+%!                              dx = 2, dy = -6, sig2noise = 1e32)
 %!  theta = (rand(npt, 1)*2-1)*2*pi;
 %!  R = rand(npt,1);
 %!  y = R.*sin(theta);
 %!  x = R.*cos(theta);
 %!  crw = [y x];
 %!
-%!  thetap = theta + dtheta; 
+%!  thetap = theta + dtheta;
 %!  Rap = R * scale;
 %!
 %!  yap = Rap.*sin(thetap);
@@ -295,7 +296,7 @@ endfunction
 %! T = cp2tform (crw, cap, ttype);
 %! crw2 = tforminv (T, cap);
 %! finalerr = norm (crw - crw2)/npt;
-%! assert (finalerr < eps, "norm = %3.2e ( > eps)", finalerr)
+%! assert (finalerr < 2*eps, "norm = %3.2e ( > 2*eps)", finalerr)
 
 %!test
 %! npt = 100000;
@@ -318,7 +319,7 @@ endfunction
 %!test
 %! npt = 100000;
 %! [crw, cap] = coords (npt);
-%! cap(:,2) *= -1; 	% reflection around y axis
+%! cap(:,2) *= -1; % reflection around y axis
 %! ttype = 'similarity';
 %! T = cp2tform (crw, cap, ttype);
 %! crw2 = tforminv (T, cap);
@@ -353,4 +354,4 @@ endfunction
 %! T = cp2tform (crw, cap, ttype, ord);
 %! crw2 = tforminv (T, cap);
 %! finalerr = norm (crw - crw2)/npt;
-%! assert (finalerr < eps, "norm = %3.2e ( > eps)", finalerr)
+%! assert (finalerr < 6*eps, "norm = %3.2e ( > 6*eps)", finalerr)
