@@ -522,9 +522,9 @@ else \
 %! c2(:,:,:,2) = c1;
 %! assert (imreconstruct (a, b, c1), imreconstruct (a, b, c2))
 
-## Values in MARKER above MASK should be clipped (bug #48794)
-## (well, treated internally as if they were clipped)
 %!test
+%! ## Values in MARKER above MASK should be clipped (bug #48794)
+%! ## (well, treated internally as if they were clipped)
 %! mask = logical ([1 1 1; 1 0 1; 1 1 1]);
 %! assert (imreconstruct (true (3, 3), mask), mask)
 %!
@@ -546,5 +546,6 @@ else \
 %! assert (imreconstruct (marker, mask), mask)
 %!
 %! marker = randi (210, 100, 100);
-%! assert (imreconstruct (marker, marker), imreconstruct (marker, marker +1))
+%! assert (imreconstruct (marker +1, marker), marker)
+%! assert (imreconstruct (marker +1, marker), imreconstruct (marker, marker))
 */
