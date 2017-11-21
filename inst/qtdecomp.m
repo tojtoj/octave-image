@@ -233,7 +233,7 @@ endfunction
 %! b=[2,0;0,0];
 %! assert(full(qtdecomp(eye(4))), [a,b;b,a]);
 
-%!shared A, B2, B4, f
+%!shared A, B2, B4
 %! A=[ 1, 4, 2, 5,54,55,61,62;
 %!     3, 6, 3, 1,58,53,67,65;
 %!     3, 6, 3, 1,58,53,67,65;
@@ -266,7 +266,7 @@ endfunction
 %! assert(full(qtdecomp(A,100,[2, 4])), [B4,B4;B4,B4]);
 
 %!test
-%! f = @(A, c1 = 54, c2 = 0, c3 = 0) y = (A (1, 1, :) != ((c1+c2+c3) * ones (1, 1, size (A, 3))))(:);
+%! f = @(A, c1 = 54, c2 = 0, c3 = 0) (A (1, 1, :) != ((c1+c2+c3) * ones (1, 1, size (A, 3))))(:);
 %!
 %! assert(full(qtdecomp(A,f)),[ones(4),B4;ones(4,8)]); 
 %! assert(full(qtdecomp(A,f,54)),[ones(4),B4;ones(4,8)]);
