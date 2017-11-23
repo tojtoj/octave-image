@@ -85,14 +85,6 @@ function [board] = checkerboard (side = 10, varargin)
   endif
   nd = numel (lengths);
 
-  ## Before Octave 4.2, linspace() with N 0 would return the end value.
-  ## We need it to return empty (for the case of side == 0).
-  ## FIXME remove this special case once we are dependent on 4.2 or later
-  if (side == 0)
-    board = reshape ([], zeros (1, nd));
-    return
-  endif
-
   grids = nthargout (1:nd, @ndgrid, linspace (-1, 1, 2*side));
   tile = grids{1};
   for d = 2:nd

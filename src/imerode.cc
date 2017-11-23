@@ -16,14 +16,16 @@
 #include <string>
 #include <typeinfo> // for an optimization using logical matrices
 
-// XXX We need to include this first so it works with Octave 4.0.0.
-#include <octave/oct.h>
-
 #include <octave/Array.h>
 #include <octave/Array-util.h>  // to get ind2sub
 #include <octave/boolNDArray.h>
 #include <octave/dim-vector.h>
 #include <octave/lo-ieee.h>  // octave_Inf
+
+#include <octave/defun-dld.h>
+#include <octave/defun-int.h>
+#include <octave/error.h>
+#include <octave/ovl.h>
 
 #include "strel.h"
 

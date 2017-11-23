@@ -27,16 +27,17 @@
 #include <functional>
 #include <queue>
 
-// XXX We need to include this first so it works with Octave 4.0.0.
-#include <octave/oct.h>
-
 #include <octave/lo-mappers.h>
+
+#include <octave/defun-dld.h>
+#include <octave/defun-int.h>
+#include <octave/error.h>
+#include <octave/ovl.h>
 
 #include "connectivity.h"
 
 using namespace octave::image;
 
-#define WANTS_MIN 1
 #define WANTS_OCTAVE_IMAGE_VALUE 1
 #include "octave-wrappers.h"
 
@@ -228,7 +229,7 @@ propagation_step (T& padded_marker, const T& padded_mask,
           octave_idx_type q = p + neighbours[k];
           if (J[q] < J[p] && I[q] != J[q])
             {
-              J[q] = octave_image::min (J[p], I[q]);
+              J[q] = octave::math::min (J[p], I[q]);
               unfinished.push (q);
             }
         }
