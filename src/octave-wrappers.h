@@ -37,21 +37,6 @@
 
 namespace octave_image
 {
-  // Temporary wrapper until we no longer support Octave 4.0 (bug #48618)
-#if defined WANTS_MIN && ! defined HAS_MIN
-#define HAS_MIN 1
-  template <typename T>
-  inline T
-  min (T x, T y)
-  {
-#if defined HAVE_MIN_IN_OCTAVE_MATH_NAMESPACE
-    return octave::math::min (x, y);
-#else
-    return xmin (x, y);
-#endif
-  }
-#endif
-
   // Temporary wrapper until we no longer support Octave 4.2 (bug #50180)
 #if defined WANTS_FEVAL && ! defined HAS_FEVAL
 #define HAS_FEVAL 1
@@ -68,6 +53,7 @@ namespace octave_image
   }
 #endif
 
+  // Temporary wrapper until we no longer support Octave 4.2
 #if defined WANTS_OCTAVE_IMAGE_VALUE && ! defined HAS_OCTAVE_IMAGE_VALUE
 #define HAS_OCTAVE_IMAGE_VALUE 1
   class

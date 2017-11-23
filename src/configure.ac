@@ -47,30 +47,15 @@ XTRA_CXXFLAGS="-Wall"
 AC_LANG(C++)
 
 
-## Octave 4.2 moved functions that clashed with C functions into its own
-## namespace while deprecated the old ones prefixed with "x".  We want to
-## be compatible with Octave 4.0 but we also want to avoid scaring the
-## users with deprecated warnings.  Remove this once we no longer support
-## Octave 4.0.X
-
 image_save_CXXFLAGS="$CXXFLAGS"
 CXXFLAGS="$CXXFLAGS -I`$MKOCTFILE -p OCTINCLUDEDIR`"
 
-AC_CACHE_CHECK(
-  [whether xmin is in the octave::math namespace],
-  [octave_image_cv_xmin_in_octave_math_namespace],
-  [AC_COMPILE_IFELSE(
-    [AC_LANG_PROGRAM([#include <lo-mappers.h>],
-                     [octave::math::min (2.0, 3.0)])],
-    [octave_image_cv_xmin_in_octave_math_namespace=yes],
-    [octave_image_cv_xmin_in_octave_math_namespace=no])])
+## Starting with Octave 4.2, functions have been moved into the octave
+## namespace.  While the old ones still exist and are deprecated,
+## warnings scare users.  So check for their correct location and wrap
+## them if needed.
 
-if test "$octave_image_cv_xmin_in_octave_math_namespace" = yes; then
-  AC_DEFINE([HAVE_MIN_IN_OCTAVE_MATH_NAMESPACE], [1],
-            [Define if octave::math::min exists as replacement to xmin.])
-fi
-
-
+## feval was moved into octave:: during 4.3 development series.
 AC_CACHE_CHECK(
   [whether feval is in the octave namespace],
   [octave_image_cv_feval_in_octave_namespace],
