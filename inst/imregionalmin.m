@@ -53,14 +53,7 @@ function bw = imregionalmin (img, conn)
   else
     img = imcomplement (img);
   endif
-
-  if (islogical (img))
-    bw = img;
-  else
-    ## we could probably still make this more efficient
-    recon = imreconstruct (img, img + 1, conn);
-    bw = (recon == img);
-  endif
+  bw = imregionalmax (img, conn);
 endfunction
 
 %!test
@@ -125,3 +118,13 @@ endfunction
 %! assert (imregionalmin (a, 8), a8)
 %! assert (imregionalmin (int8 (a), 8), a8)
 
+%!test
+%! ## test float input images <bug #51724>
+%! im0 = peaks ();
+%! im1 = im0 ./ 100;
+%! max_pos_expected = [1; 49; 664; 1286; 1302; 2401];
+%! max0 = imregionalmin (im0);
+%! max0_pos = find (max0);
+%! max1 = imregionalmin (im1);
+%! assert (max1, max0)
+%! assert (max0_pos, max_pos_expected)
