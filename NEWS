@@ -7,6 +7,9 @@
       hough
       wiener2
 
+ ** Octave version 4.0 is no longer supported.  This makes Octave
+    version 4.2.0 the minimum requirement.
+
  ** imcrop will now adjust the region to crop to the image boundaries
     when the region to crop goes beyond the image boundaries.
 
