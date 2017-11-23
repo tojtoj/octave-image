@@ -53,7 +53,7 @@ function bw = imregionalmax (img, conn)
   else
     ## we could probably still make this more efficient
     if (isfloat (img))
-      recon = imreconstruct (img, img + eps (img), conn);
+      recon = imreconstruct (img, img + __eps__ (img), conn);
     else
       recon = imreconstruct (img, img + 1, conn);
     endif
