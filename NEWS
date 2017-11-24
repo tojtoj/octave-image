@@ -3,8 +3,13 @@
 
  ** The following functions are new:
 
-      imsharpen
       hough
+      imextendedmax
+      imextendedmin
+      imhmax
+      imhmin
+      imimposemin
+      imsharpen
       wiener2
 
  ** Octave version 4.0 is no longer supported.  This makes Octave

@@ -89,7 +89,12 @@ Morhophological Operations
  imclose
  imdilate
  imerode
+ imextendedmax
+ imextendedmin
  imfill
+ imhmax
+ imhmin
+ imimposemin
  imopen
  imreconstruct
  imregionalmax
