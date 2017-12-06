@@ -16,6 +16,7 @@ Analysis and Statistics
  houghtf
  hough_line
  hough_circle
+ imfindcircles
  imgradient
  imgradientxy
  imhist

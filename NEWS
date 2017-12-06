@@ -6,6 +6,7 @@
       hough
       imextendedmax
       imextendedmin
+      imfindcircles
       imhmax
       imhmin
       imimposemin
