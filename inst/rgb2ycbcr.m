@@ -35,6 +35,9 @@
 ## @item "709"
 ## According to the ITU-R BT.709 standard.  Its values of @var{Kb} and
 ## @var{Kr} are 0.0722 and 0.2116 respectively.
+## @item "2020"
+## According to the ITU-R BT.2020 standard.  Its values of @var{Kb} and
+## @var{Kr} are 0.0593 and 0.2627 respectively.
 ## @end table
 ##
 ## @seealso{hsv2rgb, ntsc2rgb, rgb2hsv, rgb2ntsc}

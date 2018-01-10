@@ -31,6 +31,9 @@
     something like 'graythresh (img(:), ...)' and img is of class
     single or double.
 
+ ** The functions ycbcr2rgb and rgb2ycbcr now support conversion
+    according to the BT.2020 standard.
+
  ** Other functions that have been changed for smaller bugfixes, increased
     Matlab compatibility, or performance:
 

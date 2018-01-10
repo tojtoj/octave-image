@@ -38,6 +38,9 @@ function out = ycbcrfunc (func, in, standard)
     elseif (strcmpi (standard, "709")) # for ITU-R BT.709
       Kb = 0.0722;
       Kr = 0.2126;
+    elseif (strcmpi (standard, "2020")) # for ITU-R BT.2020
+      Kb = 0.0593;
+      Kr = 0.2627;
     else
       error ("%s: unknown standard `%s'", func, standard);
     endif
