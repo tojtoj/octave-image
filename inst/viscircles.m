@@ -153,10 +153,17 @@ function h = viscircles (varargin)
 endfunction
 
 %!demo
-%! image ();
-%! centers = [11 32; 52 15; 58 53];
-%! radii = [7 3 4];
-%! viscircles (centers, radii, "Color", "black");
+%! centers = randi ([0 100], 5, 2);
+%! radii = randi ([10 100], 5, 1);
+%! axis equal
+%! viscircles (centers, radii,
+%!             "Color", "magenta",
+%!             "LineStyle", ":",
+%!             "LineWidth", 5);
+%! title ("5 random circles");
+%! #----------------------------------------------
+%! # the figure window shows 5 circles with random
+%! # radii and positions
 
 %!test # old undocumented property
 %! h = viscircles ([0 0], 1, "EdgeColor", "black");
@@ -168,3 +175,31 @@ endfunction
 
 %!error <both 'EdgeColor' \(deprecated\) and 'Color'> ...
 %!      viscircles ([0 0], 1, "Color", "magenta", "EdgeColor", "black")
+
+%!test
+%! centers = randi ([0 100], 5, 2);
+%! radii = randi ([0 100], 5, 1);
+%! h = viscircles (centers, radii);
+%! close;
+
+%!test
+%! centers = randi ([0 100], 5, 2);
+%! radii = randi ([0 100], 5, 1);
+%! figure ();
+%! h = viscircles (gca (), centers, radii);
+%! close;
+
+%!test
+%! centers = randi ([0 100], 5, 2);
+%! radii = randi ([0 100], 5, 1);
+%! h = viscircles (centers, radii, "Color", "magenta",
+%!                 "LineStyle", ":", "LineWidth", 5);
+%! close;
+
+%!test
+%! centers = randi ([0 100],5,2);
+%! radii = randi ([0 100],5,1);
+%! figure ();
+%! h = viscircles (centers, radii, "Color", "magenta",
+%!                 "LineStyle", ":", "LineWidth", 5);
+%! close;
