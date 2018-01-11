@@ -61,6 +61,7 @@ Colour maps and Colour controls
 Display
  montage
  subimage
+ viscircles
 Enhancement and Restoration
  histeq
  imadjust
