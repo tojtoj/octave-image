@@ -14,9 +14,11 @@ OCT_FILES = __spatial_filtering__.oct __bilateral__.oct __eps__.oct \
             rotate_scale.oct hough_line.oct graycomatrix.oct bwdist.oct \
             intlut.oct nonmax_supress.oct $(strel_dependent) $(conn_dependent)
 
+M_FILES = @M_FILES@
+
 CC_FILES = $(patsubst %.oct, %.cc, ${OCT_FILES})
 
-all: ${OCT_FILES}
+all: ${OCT_FILES} ${M_FILES}
 
 %.o: %.cc %.h
 	$(FLAGGED_MKOCTFILE) -c $<
@@ -30,5 +32,8 @@ $(strel_dependent): %.oct: %.cc strel.o
 %.oct: %.cc
 	$(FLAGGED_MKOCTFILE) $<
 
+%.m: %.m.in
+	cp $< $@
+
 clean:
-	rm -f *.o *.oct *.m octave-core octave-workspace *~
+	$(RM) *.o octave-core octave-workspace *~ ${M_FILES} ${OCT_FILES}

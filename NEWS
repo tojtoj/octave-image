@@ -11,6 +11,8 @@
       imhmin
       imimposemin
       imsharpen
+      ntsc2rgb
+      rgb2ntsc
       viscircles
       wiener2
 
