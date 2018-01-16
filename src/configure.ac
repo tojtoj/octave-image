@@ -130,14 +130,28 @@ if test $_cv_template_lambda_accepts_ref_const_inst = no; then
   ])
 fi
 
-## Starting with Octave 4.2 (and some 4.1.X versions), the function
-## im2double has been moved to Octave core.
-HAS_IM2DOUBLE=`$OCTAVE -qf --eval "printf ('%i', exist ('im2double'))"`
-if test "$HAS_IM2DOUBLE" == 0; then
-  AC_CONFIG_FILES([im2double.m])
-fi
+## Some functions have been moving between Octave core and the Image
+## package so make sure we are not shadowing anything on this
+## installation.
+##
+##  im2double - moved into core for core version 4.2
+##  ntsc2rgb - moved into the image package for core version 4.4
+##  rgb2ntsc - moved into the image package for core version 4.4
+
+M_FILES=""
+m4_foreach([FNAME], [im2double, ntsc2rgb, rgb2ntsc], [
+  AC_MSG_CHECKING([Octave core for function FNAME])
+  HAS_FUNCTION=`$OCTAVE -qf --eval "printf ('%i', exist ('FNAME'))"`
+  if test "$HAS_FUNCTION" == 0; then
+    AC_MSG_RESULT([no])
+    M_FILES="${M_FILES} FNAME.m"
+  else
+    AC_MSG_RESULT([yes])
+  fi
+])
 
 AC_SUBST([XTRA_CXXFLAGS])
+AC_SUBST([M_FILES])
 
 AC_CONFIG_FILES([Makefile])
 

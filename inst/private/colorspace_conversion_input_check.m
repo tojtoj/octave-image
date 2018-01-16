@@ -33,7 +33,7 @@ function [in_arg, cls, sz, is_im, is_nd, is_int] ...
 
   ## If we have an image convert it into a color map.
   if (! iscolormap (in_arg))
-    if (! any (strcmp (cls, {"uint8", "uint16", "single", "double"})))
+    if (! any (strcmp (cls, {"uint8", "int8", "uint16", "single", "double"})))
       error ("%s: %s of invalid data type '%s'", func, arg_name, cls);
     elseif (only_floats && ! any (strcmp (cls, {"single", "double"})))
       error ("%s: %s of invalid data type '%s'", func, arg_name, cls);
