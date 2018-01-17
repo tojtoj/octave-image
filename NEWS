@@ -46,10 +46,11 @@
 
       bwperim
       graythresh
-      normxcorr2
       imreconstruct
       imregionalmax
       imregionalmin
+      normxcorr2
+      rgb2gray
 
 
  Summary of important user-visible changes for image 2.6.2 (2017/11/09):
