@@ -38,26 +38,16 @@ function gray = rgb2gray (rgb)
     gray = rgb2ntsc (rgb) (:, 1) * ones (1, 3);
 
   elseif (isimage (rgb) && ndims (rgb) == 3)
+    cls = class (rgb);
     if (! isfloat (rgb))
-      rgb = im2doule (rgb);
+      rgb = im2double (rgb);
     endif
 
     ## multiply each color by the luminance factor (this is also matlab compatible)
     ##      0.29894 * red + 0.58704 * green + 0.11402 * blue
     gray = rgb .* permute ([0.29894, 0.58704, 0.11402], [1, 3, 2]);
     gray = sum (gray, 3);
-
-    switch (class (rgb))
-    case {"single", "double"}
-      ## do nothing. All is good
-    case "uint8"
-      gray = im2uint8 (gray);
-    case "uint16"
-      gray = im2uint16 (gray);
-    otherwise
-      error ("rgb2gray: unsupported class %s", class(rgb));
-    endswitch
-
+    gray = imcast (gray, cls);
   else
     error ("rgb2gray: the input must either be an RGB image or a colormap");
   endif
@@ -73,3 +63,4 @@ endfunction
 %!assert ([img(1,1) img(1,2) img(2,1) img(2,2)], [0.29894 0.58704 0.11402 1]);
 
 %!assert (class (rgb2gray (single (ones (5, 5, 3)))), "single")
+%!assert (class (rgb2gray (uint8 (ones (5, 5, 3)))), "uint8")
