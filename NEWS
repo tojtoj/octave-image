@@ -19,6 +19,14 @@
  ** Octave version 4.0 is no longer supported.  This makes Octave
     version 4.2.0 the minimum requirement.
 
+ ** The functions ntsc2rgb and rgb2ntsc have been removed in Octave
+    core version 4.4 and are now part of the image package.  In a
+    similar manner, rgb2gray, which has always been part of the image
+    package, is part of Octave core version 4.4.
+
+    The versions in the image package will only be installed if they
+    are missing from Octave to avoid shadowing the core functions.
+
  ** imcrop will now adjust the region to crop to the image boundaries
     when the region to crop goes beyond the image boundaries.
 
@@ -691,4 +699,3 @@
 --------------------------------------------------------------------------------
 
  ** First release.
-
