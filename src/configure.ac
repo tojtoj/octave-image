@@ -139,7 +139,7 @@ fi
 ##  rgb2ntsc - moved into the image package for core version 4.4
 
 M_FILES=""
-m4_foreach([FNAME], [im2double, ntsc2rgb, rgb2ntsc], [
+m4_foreach([FNAME], [im2double, ntsc2rgb, rgb2gray, rgb2ntsc], [
   AC_MSG_CHECKING([Octave core for function FNAME])
   HAS_FUNCTION=`$OCTAVE -qf --eval "printf ('%i', exist ('FNAME'))"`
   if test "$HAS_FUNCTION" == 0; then
