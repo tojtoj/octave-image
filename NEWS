@@ -1,4 +1,13 @@
- Summary of important user-visible changes for image 2.6.2 (2017/11/09):
+ Summary of important user-visible changes for image 2.6.3 (yyyy/mm/dd):
+-------------------------------------------------------------------------
+
+ ** image 2.6.3 is a patch release.
+
+ ** Fix regionprops Perimeter when using a labelled image or a
+    bwconncomp structure, from connectivity different from 8.
+
+
+Summary of important user-visible changes for image 2.6.2 (2017/11/09):
 -------------------------------------------------------------------------
 
  ** image 2.6.2 is a patch release.
