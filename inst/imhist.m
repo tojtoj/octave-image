@@ -162,7 +162,7 @@ function [varargout] = imhist (img, b)
     else
       colormap (gray (b));
     endif
-    colorbar ("SouthOutside", "xticklabel", []);
+    colorbar ("xticklabel", [], "SouthOutside");
   endif
 endfunction
 
