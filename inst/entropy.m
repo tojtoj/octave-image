@@ -35,19 +35,18 @@
 ## @end deftypefn
 
 function retval = entropy (I, nbins = 0)
-  ## Check input
-  if (nargin == 0)
-    error ("entropy: not enough input arguments");
+  if (nargin < 1 || nargin > 2)
+    print_usage ();
   endif
-  
+
   if (! isnumeric (I))
     error ("entropy: I must be numeric");
   endif
-  
-  if (!isscalar (nbins))
-    error ("entropy: second input argument must be a scalar");
+
+  if (! isscalar (nbins))
+    error ("entropy: NBINS must be a scalar");
   endif
-  
+
   ## Get number of histogram bins
   if (nbins <= 0)
     if (islogical (I))
@@ -56,11 +55,22 @@ function retval = entropy (I, nbins = 0)
       nbins = 256;
     endif
   endif
-  
+
   ## Compute histogram
-  P = hist (I (:), nbins, 1);
-  
+  P = hist (I(:), nbins, 1);
+
   ## Compute entropy (ignoring zero-entries of the histogram)
   P += (P == 0);
   retval = -sum (P .* log2 (P));
 endfunction
+
+%!assert (entropy ([0 1]), 1)
+%!assert (entropy (uint8 ([0 1])), 1)
+%!assert (entropy ([0 0]), 0)
+%!assert (entropy ([0]), 0)
+%!assert (entropy ([1]), 0)
+%!assert (entropy ([0 .5; 2 0]), 1.5)
+
+## rgb images are treated like nd grayscale images
+%!assert (entropy (repmat ([0 .5; 2 0], 1, 1, 3)),
+%!        entropy ([0 .5; 2 0]))
