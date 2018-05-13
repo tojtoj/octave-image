@@ -58,7 +58,7 @@ function retval = entropy (I, nbins = 0)
   endif
   
   ## Compute histogram
-  P = hist (I (:), nbins, true);
+  P = hist (I (:), nbins, 1);
   
   ## Compute entropy (ignoring zero-entries of the histogram)
   P += (P == 0);
