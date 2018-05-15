@@ -61,6 +61,7 @@
       imreconstruct
       imregionalmax
       imregionalmin
+      imrotate
       normxcorr2
       rgb2gray
 

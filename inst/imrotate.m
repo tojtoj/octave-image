@@ -124,12 +124,12 @@ function [imgPost, H, valid] = imrotate (imgPre, thetaDeg, interp = "nearest", b
       ## Here, bbox is "crop" and the rotation angle is +/- 90 degrees.
       ## This works only if the image dimensions are of equal parity.
       imgRot = rotdim (imgPre, nRot90, [1 2]);
-      imgPost = zeros(sizePre);
-      hw = min(sizePre) / 2 - 0.5;
+      imgPost = zeros (sizePre, class (imgPre));
+      hw = min (sizePre(1:2)) / 2 - 0.5;
       imgPost   (round(oPost(2) - hw) : round(oPost(2) + hw),
-                 round(oPost(1) - hw) : round(oPost(1) + hw) ) = ...
+                 round(oPost(1) - hw) : round(oPost(1) + hw),:) = ...
           imgRot(round(oPost(1) - hw) : round(oPost(1) + hw),
-                 round(oPost(2) - hw) : round(oPost(2) + hw) );
+                 round(oPost(2) - hw) : round(oPost(2) + hw),:);
       return;
     else
       ## Here, bbox is "crop", the rotation angle is +/- 90 degrees, and
@@ -368,3 +368,37 @@ endfunction
 %! assert (imrotate (a,  270), am90);
 %! assert (imrotate (a, -270), a90);
 %! assert (imrotate (a,  360), a);
+
+## Test special case of 90 degrees rotation, when image is not square
+## but sides are of even length.  Test both grayscale and RGB.
+%!test
+%! # bug #53309
+%! in = ones (2, 4);
+%! out = [0 1 1 0; 0 1 1 0];
+%! assert (imrotate (in, 90, "nearest", "crop"), out)
+%! assert (imrotate (repmat (in, [1 1 3]), 90, "nearest", "crop"),
+%!         repmat (out, [1 1 3]))
+
+## When rotating RGB images, rotate all 3 channels.  Also test all the
+## special cases we have internally.
+%!test
+%! ## bug #53309
+%! rgbs = {
+%!   rand(5, 4, 3), # normal path, does interpolation
+%!   rand(4, 4, 3), # rows and columns, same number, simple rotdim
+%!   rand(4, 6, 3), # rows and columns differents, but of length even
+%! };
+%! for rgb_i = 1:numel(rgbs)
+%!   rgb = rgbs{rgb_i};
+%!   rot = imrotate (rgb, 90, "nearest", "crop");
+%!   for i = 1:3
+%!     assert (rot(:,:,i), imrotate (rgb(:,:,i), 90, "nearest", "crop"))
+%!   endfor
+%!   ## same check but with an integer class
+%!   rgb = im2uint8 (rgb);
+%!   rot = imrotate (rgb, 90, "nearest", "crop");
+%!   assert (class (rgb), class (rot))
+%!   for i = 1:3
+%!     assert (rot(:,:,i), imrotate (rgb(:,:,i), 90, "nearest", "crop"))
+%!   endfor
+%! endfor
