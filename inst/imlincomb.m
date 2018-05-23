@@ -16,6 +16,7 @@
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {@var{out} =} imlincomb (@var{fac}, @var{img})
 ## @deftypefnx {Function File} {@var{out} =} imlincomb (@var{fac1}, @var{img1}, @var{fac2}, @var{img2}, @dots{})
+## @deftypefnx {Function File} {@var{out} =} imlincomb (@var{fac1}, @var{img1}, @var{fac2}, @var{img2}, @dots{}, @var{K})
 ## @deftypefnx {Function File} {@var{out} =} imlincomb (@dots{}, @var{class})
 ## Combine images linearly.
 ##
@@ -23,8 +24,12 @@
 ##
 ## @var{out} = @var{fac}1*@var{img}1 + @var{fac}2*@var{img}2 + @dots{} + @var{fac}n*@var{img}n
 ##
+## or
+##
+## @var{out} = @var{fac}1*@var{img}1 + @var{fac}2*@var{img}2 + @dots{} + @var{fac}n*@var{img}n + @var{K}
+##
 ## The images @var{img}1..n must all be of same size and class. The factors @var{fac}1..n
-## must all be floating-point scalars.
+## must all be floating-point scalars, and @var{K} (if given) is a real constant.
 ##
 ## The class of @var{out} will be the same as @var{img}s unless @var{img}s are logical
 ## in which case @var{out} will be double. Alternatively, it can be specified
@@ -43,20 +48,30 @@ function out = imlincomb (varargin)
 
   if (nargin < 2)
     print_usage;
-  else
-    if (rem (nargin, 2) == 0)
-      ## use default for output class; the class of first image (second argument)
-      out_class = class (varargin{2});
-      def_class = true;
-    else
-      ## last argument is requested output class
-      out_class = varargin{end};
-      def_class = false;
-    endif
   endif
 
-  facI = 1:2:nargin-1;        # index for factors
-  imgI = 2:2:nargin;          # index for images
+  if (isnumeric (varargin{end}))
+    ## last argument is not a class
+    ## use default for output class; the class of first image (second argument)
+    out_class = class (varargin{2});
+    def_class = true;
+    last = nargin;
+  else
+    ## last argument is requested output class
+    out_class = varargin{end};
+    def_class = false;
+    last = nargin-1;
+  endif
+
+  if (rem (last, 2) == 1) # There's a constant at the end to add
+    add = varargin{last};
+    last --;
+  else
+    add = 0;
+  endif
+
+  facI = 1:2:last-1;        # index for factors
+  imgI = 2:2:last;          # index for images
   imgC = class (varargin{2}); # class of the first image
 
   out = zeros (size (varargin{2}));
@@ -74,6 +89,11 @@ function out = imlincomb (varargin)
     out += img;
   endfor
 
+  ## Adding the constant
+  if (add != 0)
+    out += add;
+  endif
+
   ## this is probably matlab imcompatible since by their documentation, they don't even
   ## support logical matrix. If specified by user, respect and return a logical
   ## matrix. Otherwise, return a double, even if images were all logical
@@ -86,5 +106,19 @@ function out = imlincomb (varargin)
 
 endfunction
 
-%!assert (imlincomb (0.5, uint8 ([255 10]), 0.5, uint8 ([50 20])),           uint8  ([153 15])); # default to first class and truncate
-%!assert (imlincomb (0.5, uint8 ([255 10]), 0.5, uint8 ([50 20]), "uint16"), uint16 ([153 15])); # defining output class works
+%!assert (imlincomb (0.5, uint8 ([255 10]), 0.5, uint8 ([50 20])),
+%!        uint8  ([153 15])); # default to first class and truncate
+
+%!assert (imlincomb (0.5, uint8 ([255 10]), 0.5, uint8 ([50 20]), "uint16"),
+%!        uint16 ([153 15])); # defining output class works
+
+## Now with a constant value applied to the whole image
+
+%!assert (imlincomb (0.5, uint8 ([255 10]), 0.5, uint8 ([50 20]), 10),
+%!        uint8  ([163 25])); # default to first class and truncate
+
+%!assert (imlincomb (0.5, uint8 ([255 10]), 0.5, uint8 ([50 20]), 1000, "uint16"),
+%!        uint16 ([1153 1015])); # defining output class works
+
+%!assert (imlincomb (0.5, uint8 ([255 10]), 0.5, uint8 ([50 20]), 1000),
+%!        uint8 ([255 255])); # defining output class works
