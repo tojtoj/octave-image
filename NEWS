@@ -58,6 +58,7 @@
       entropy
       graythresh
       imhist
+      imlincomb
       imreconstruct
       imregionalmax
       imregionalmin
