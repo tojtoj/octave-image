@@ -409,7 +409,7 @@ function props = regionprops (bw, varargin)
         ## Do nothing.  These are "virtual" targets which are computed
         ## in local_ellipse.
       case "perimeter"
-        values.perimeter = rp_perimeter (cc, bw);
+        values.perimeter = rp_perimeter (cc);
       case "solidity"
         error ("regionprops: property \"Solidity\" not yet implemented");
       case "maxintensity"
@@ -751,14 +751,22 @@ function bb_images = rp_image (cc, bw, idx, subs, subarray_idx)
                        "UniformOutput", false);
 endfunction
 
-function perim = rp_perimeter (cc, bw)
-  if (! islogical (bw)) # Then input was not really a bw. Create it.
-    bw = false (cc.ImageSize);
-    bw(cell2mat (cc.PixelIdxList(:))) = true;
-  endif
-
+function perim = rp_perimeter (cc)
+  ## FIXME: this should be vectorized.  We were previously using
+  ##        bwboundaries (incorrectly, see bug #52926) but
+  ##        bwboundaries is doing a similar loop internally.
   no = cc.NumObjects;
-  boundaries = bwboundaries (bw, 8, "noholes");
+  boundaries = cell (no, 1);
+  bw = false (cc.ImageSize);
+  for k = 1:no
+    idx = cc.PixelIdxList{k};
+    bw(idx) = true;
+    boundaries{k} = __boundary__ (bw, 8);
+    if (k != no)
+      bw(idx) = false;
+    endif
+  endfor
+
   npx = cellfun ("size", boundaries, 1);
   dists = diff (cell2mat (boundaries));
   dists(cumsum (npx)(1:end-1),:) = [];
@@ -1508,3 +1516,19 @@ endfunction
 %!error <not yet implemented> regionprops (rand (5, 5) > 0.5, "ConvexHull")
 %!error <not yet implemented> regionprops (rand (5, 5) > 0.5, "ConvexImage")
 %!error <not yet implemented> regionprops (rand (5, 5) > 0.5, "Solidity")
+
+%!test # bug #52926
+%! ## Perimeter of objects that would be connected with connectivity 8
+%! ## but have been labeled with connectivity 4.
+%! BW = logical ([1 1 1 0 0 0 0 0
+%!                1 1 1 0 1 1 0 0
+%!                1 1 1 0 1 1 0 0
+%!                1 1 1 0 0 0 1 0
+%!                1 1 1 0 0 0 1 0
+%!                1 1 1 0 0 0 1 0
+%!                1 1 1 0 0 1 1 0
+%!                1 1 1 0 0 0 0 0]);
+%!
+%! L = bwlabel (BW, 4);
+%! props = regionprops(L, "Perimeter");
+%! assert ([props.Perimeter], [18 4 6+sqrt(2)])
