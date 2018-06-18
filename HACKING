@@ -147,7 +147,7 @@ to the tip of the default branch.
 Periodic merge of stable to default
 -----------------------------------
 
-    hg update default
+    hg update @
     hg merge stable
     ## fix possible merge conflicts
     hg commit -m "maint: periodic merge of stable to default."
@@ -166,13 +166,13 @@ Preparing a minor or major release
 ----------------------------------
 
     ## If required, first merge stable to default
-    hg update default
+    hg update @
     hg merge stable
     hg commit -m "maint: periodic merge of stable to default."
 
     ## Merge default into stable
     hg update stable
-    hg merge default
+    hg merge @
     ## fix possible merge conflicts
     hg commit -m "maint: merge default into stable for release X.Y.Z."
 
