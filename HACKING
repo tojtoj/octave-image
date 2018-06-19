@@ -1,0 +1,192 @@
+Hacking the Octave Forge image package
+======================================
+
+This file gives tips when hacking the Octave Forge image package and
+describes the guidelines to contribute them upstream.
+
+
+Quick start
+===========
+
+The Makefile at the root of the package allows for quickly testing
+and installing development versions of the package.
+
+  1. Generate the configure script:
+
+      ./bootstrap
+
+  2. Run the test suite:
+
+      make check
+
+  3. Start an Octave session with the image package on the path:
+
+      make run
+
+If octave is not on the path, or if wanting to use a different version,
+set the OCTAVE environment variable, e.g.:
+
+      OCTAVE='/usr/local/bin/octave-4.1.0+ --no-gui' make run
+
+
+Development
+===========
+
+Requirements
+------------
+
+The image package has the following targets for a full working installation:
+
+  * latest stable versions of Debian and CentOS.
+  * latest stable release Octave version.
+
+Contribution guidelines
+-----------------------
+
+Please submit bugs and patches to the
+[Octave bug tracker](https://savannah.gnu.org/bugs/?group=octave).
+
+To get patches included, these are the minimum requirements:
+
+  * Include your name and email when submitting patches.
+
+    If your patch gets accepted, your name and email be used as the
+    commiter.  In addition, you will be added to the copyright owners.
+
+  * Add tests.
+
+    If you are writing a new function, include tests for it.  If you
+    are fixing a bug, add a test for the bug.  If you submit a patch
+    to a function without tests, add tests to it first.
+
+    Your fix may solve your use case but may break something else.  You
+    may understand the issue very well and been looking at the code
+    for several hours and therefore be confident it is not breaking
+    anything else.  But the package covers several very wide fields of
+    science; the code has been contributed by dozens of people; and the
+    current package maintainers may not be so familiar with the issue
+    as you are.
+
+  * Follow the coding style.
+
+Coding style
+------------
+
+The image package uses the same coding guidelines as Octave core,
+which inherits coding guideline style from the GNU project.
+When applied to m file coding, it boils down to the following:
+
+  * Always uses parentheses for a function, even when there's no input
+    arguments.  Use a space between a function name and the parentheses.
+    Do not use a space between a variable name and the brackets to index
+    them.  The reason is () are used both for calling a function and
+    indexing variables.  This spacing allows to quickly recognize something
+    as a variable or function.
+
+  * Use the Octave specific end to finish blocks, e.g., endif, endfor, etc.
+
+  * End a function block with endfunction and indent the whole block, even
+    there's a single function in the file.
+
+  * 2 space indentation levels.
+
+  * use snake_case, not camelCase, for naming variables and functions.
+
+  * use # for comments, ! as 'not' operator, and double quotes for strings.
+
+Tips to use Savannah
+--------------------
+
+  * Do not make a comment without a message.  For example, do not make a
+    comment where you only attach a file.  Savannah will not send
+    notifications about them and they will get lost.
+
+  * If you plan on submitting a changeset, do not include it on the
+    original submission.  Submit a bug report with the issue description
+    only.  Then, attach the changeset on your first comment.  This will
+    allow you to include the bug number on the commit message (the bug
+    number is only attributed after the original submission).
+
+Finding itches to scratch
+-------------------------
+
+You will probably want to scratch the things that itch you, so you
+won't be looking for others.  Still, the bug tracker can be searched
+
+    https://savannah.gnu.org/bugs/?func=search&group=octave
+
+and Carnë keeps a list of bugs and patches of interest to him, which
+includes everything related to the image package:
+
+    http://wiki.octave.org/User:Carandraug#Octave_to_do_list
+
+Finally, the tags TODO, FIXME, and XXX are used on the code to mark
+several things.  You can grep the repository with:
+
+    grep -Pr --exclude-dir=".hg" 'TODO|FIXME|XXX'
+
+
+Maintenance
+===========
+
+Versioning
+----------
+
+The package uses the Major.Minor.Patch versioning style.  Patch
+releases only include documentation and regression fixes.
+Even and odd Minor numbers, refer to stable and development versions.
+
+The package is developed in two branches, stable and default.
+The stable branch only includes regression and documentation fixes
+since the last minor release.  Patch releases are made from here.
+No stability is promised on the default branch.
+
+There are individual tags for each release.  The "@" bookmark points
+to the tip of the default branch.
+
+Periodic merge of stable to default
+-----------------------------------
+
+    hg update @
+    hg merge stable
+    ## fix possible merge conflicts
+    hg commit -m "maint: periodic merge of stable to default."
+
+Preparing a patch release
+-------------------------
+
+    hg update stable
+    ## update version number and release date on DESCRIPTION,
+    ## src/configure.ac, and NEWS files.
+    hg commit DESCRIPTION NEWS src/configure.ac -m "maint: release X.Y.Z"
+    hg tag 'release-X.Y.Z'
+    make release
+
+Preparing a minor or major release
+----------------------------------
+
+    ## If required, first merge stable to default
+    hg update @
+    hg merge stable
+    hg commit -m "maint: periodic merge of stable to default."
+
+    ## Merge default into stable
+    hg update stable
+    hg merge @
+    ## fix possible merge conflicts
+    hg commit -m "maint: merge default into stable for release X.Y.Z."
+
+    ## Make release
+    ## update version number and release date on DESCRIPTION,
+    ## src/configure.ac, and NEWS files.
+    hg commit DESCRIPTION NEWS src/configure.ac -m "maint: release X.Y.Z"
+    hg tag 'release-X.Y.Z'
+    make release
+
+    ## Merge stable back into default
+    hg update default
+    hg merge stable
+    hg commit -m "maint: merge of stable to default after X.Y.Z release."
+    ## update minor version number to odd number
+    hg commit DESCRIPTION src/configure.ac -m \
+        "maint: setup default branch as version 2.5.0+"

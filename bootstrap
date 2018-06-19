@@ -1,0 +1,9 @@
+#!/bin/bash
+## Octave-Forge: image package bootstrap script
+## Run this to generate the configure script
+
+set -e        # halt if unhandled error
+
+cd src/
+aclocal -Im4  # get macros into aclocal.m4
+autoconf      # generate configure script
