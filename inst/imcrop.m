@@ -177,7 +177,7 @@ function varargout = imcrop (varargin)
     rect = [x(1) y(1) x(2)-x(1) y(2)-y(1)];
   endif
   i_ini = max (round ([rect(1) rect(2)]), [1 1]);
-  i_end = min (round ([rect(1)+rect(3) rect(2)+rect(4)]), size (cdata)(1:2));
+  i_end = min (round ([rect(1)+rect(3) rect(2)+rect(4)]), size (cdata)([2 1]));
   img = cdata(i_ini(2):i_end(2), i_ini(1):i_end(1),:,:); # don't forget RGB and ND images
 
   ## Even the API for the output is complicated
@@ -251,6 +251,15 @@ endfunction
 %! assert (imcrop (im, [1 1 2 5]), im(:,1:3))
 %! assert (imcrop (im, [1 -3 2 5]), im(1:2,1:3))
 %! assert (imcrop (im, [5 -3 2 5]), im(1:2,5))
+
+## out of bounds ROIs with non-square images (bug #54370)
+%!test
+%! im = [1:7] .* [1; 2; 3; 4; 5];
+%! assert (imcrop (im, [1 1 5 5]), im(:,1:6))
+%! assert (imcrop (im, [0 0 5 5]), im(:,1:5))
+%! assert (imcrop (im, [1 1 2 5]), im(:,1:3))
+%! assert (imcrop (im, [1 -3 2 7]), im(1:4,1:3))
+%! assert (imcrop (im, [7 -3 2 7]), im(1:4,7))
 
 %!test
 %! ## Matlab returns [] (size 0x0) for this cases, while we return
