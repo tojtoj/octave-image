@@ -1,4 +1,13 @@
- Summary of important user-visible changes for image 2.8.0 (2018/06/19):
+ Summary of important user-visible changes for image 2.8.1 (yyyy/mm/dd):
+-------------------------------------------------------------------------
+
+ ** image 2.8.1 is a patch release.
+
+ ** Fix imcrop for non-square images.  This a regression introduced in
+    version 2.8.0.
+
+
+Summary of important user-visible changes for image 2.8.0 (2018/06/19):
 -------------------------------------------------------------------------
 
  ** The following functions are new:
