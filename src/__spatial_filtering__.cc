@@ -20,6 +20,9 @@
 
 #include <octave/oct.h>
 
+#define WANTS_OCTAVE_IMAGE_VALUE 1
+#include "octave-wrappers.h"
+
 /**
  * Filter functions for ordered filtering.
  */
@@ -37,7 +40,7 @@ template <> inline bool compare<Complex> (const Complex a, const Complex b)
 {
     const double anorm2 = a.real () * a.real () + a.imag () * a.imag ();
     const double bnorm2 = b.real () * b.real () + b.imag () * b.imag ();
-        
+
     if (anorm2 > bnorm2)
       return 1;
     else
@@ -73,13 +76,13 @@ ET_OUT selnth (MT &vals, octave_idx_type len, int nth)
           // and set up sentinels in the borders (order l, l+1 and r)
           if (compare<ET> (vals (l), vals (r)))
             std::swap (vals (l), vals (r));
-            
+
           if (compare<ET> (vals (l+1), vals (r)))
             std::swap (vals (l+1), vals (r));
-            
+
           if (compare<ET> (vals (l), vals (l+1)))
             std::swap (vals (l), vals (l+1));
-            
+
           i = l + 1;
           j = r;
           hinge = vals (l+1);
@@ -87,7 +90,7 @@ ET_OUT selnth (MT &vals, octave_idx_type len, int nth)
             {
               do i++; while (compare<ET> (hinge, vals (i)));
               do j--; while (compare<ET> (vals (j), hinge));
-              if (i > j) 
+              if (i > j)
                 break;
               std::swap (vals (i), vals (j));
             }
@@ -107,7 +110,7 @@ ET_OUT min_filt (MT &vals, octave_idx_type len, int not_used)
   ET_OUT min_val = vals (0);
   for (octave_idx_type i = 1; i < len; i++)
     min_val = compare (min_val, vals (i)) ? vals (i) : min_val;
-    
+
   return min_val;
 }
 
@@ -117,7 +120,7 @@ ET_OUT max_filt (MT &vals, octave_idx_type len, int not_used)
   ET_OUT max_val = vals (0);
   for (octave_idx_type i = 1; i < len; i++)
     max_val = compare (max_val, vals (i)) ? max_val : vals (i);
-    
+
   return max_val;
 }
 
@@ -139,15 +142,15 @@ ET_OUT std_filt (MT &vals, octave_idx_type len, int norm)
   for (octave_idx_type i = 0; i < len; i++)
     mean += (ET_OUT)vals (i);
   mean /= (ET_OUT)len;
-  
+
   // Compute sum of square differences from the mean
   ET_OUT var = 0;
   for (octave_idx_type i = 0; i < len; i++)
     var += square ((ET_OUT)vals (i) - mean);
-    
+
   // Normalise to produce variance
   var /= (ET_OUT)norm;
-    
+
   // Compute std. deviation
   return sqrt (var);
 }
@@ -170,7 +173,7 @@ void get_entropy_info (ET &add, int &nbins)
     if (nbins <= 0) \
       nbins = NBINS; \
   }
-  
+
 ENTROPY_INFO (bool, 0, 2)
 ENTROPY_INFO (octave_int8, 128, 256)
 //ENTROPY_INFO (octave_int16, 32768, 65536)
@@ -184,14 +187,14 @@ ET_OUT entropy_filt (MT &vals, octave_idx_type len, int nbins)
 {
   ET add;
   get_entropy_info<ET> (add, nbins);
-  
+
   // Compute histogram from values
   ColumnVector hist (nbins, 0);
   for (octave_idx_type i = 0; i < len; i++)
     hist (vals (i) + add) ++;
   for (octave_idx_type i = 0; i < len; i++)
     hist (vals (i) + add) /= (double)len;
-    
+
   // Compute entropy
   double entropy = 0;
   for (octave_idx_type i = 0; i < nbins; i++)
@@ -373,7 +376,10 @@ NOT IMPLEMENTED (local binary patterns style)\n\
       return retval;
     }
 
-  const boolNDArray dom = args (1).bool_array_value ();
+  const octave_image::value A (args(0));
+  const octave_image::value S (args(3));
+
+  const boolNDArray domain = args(1).bool_array_value ();
   if (error_state)
     {
       error ("__spatial_filtering__: A must be a logical matrix");
@@ -381,20 +387,19 @@ NOT IMPLEMENTED (local binary patterns style)\n\
     }
 
   octave_idx_type len = 0;
-  for (octave_idx_type i = 0; i < dom.numel (); i++)
-    len += dom (i);
+  for (octave_idx_type i = 0; i < domain.numel (); i++)
+    len += domain (i);
 
-  const int ndims = dom.ndims ();
-  const int args0_ndims = args (0).ndims ();
-  if (args0_ndims != ndims || args (3).ndims () != ndims)
+  const int ndims = domain.ndims ();
+  if (A.ndims () != ndims || S.ndims () != ndims)
     {
       error ("__spatial_filtering__: A and S must have the same dimensions");
       return retval;
     }
 
-  int arg4 = (nargin == 4) ? 0 : args (4).int_value ();
+  int arg4 = (nargin == 4) ? 0 : args(4).int_value ();
 
-  const std::string method = args (2).string_value ();
+  const std::string method = args(2).string_value ();
   if (error_state)
     {
       error ("__spatial_filtering__: method must be a string");
@@ -402,14 +407,9 @@ NOT IMPLEMENTED (local binary patterns style)\n\
     }
 
   #define GENERAL_ACTION(MT, FUN, ET, MT_OUT, ET_OUT, FILTER_FUN) \
-    { \
-      const MT A = args (0).FUN (); \
-      const MT S = args (3).FUN (); \
-      if (error_state) \
-        error ("__spatial_filtering__: invalid input"); \
-      else \
-        retval = do_filtering<MT, ET, MT_OUT, ET_OUT> (A, dom, FILTER_FUN<ET, MT, ET_OUT>, S, arg4); \
-    }
+    retval = do_filtering<MT, ET, MT_OUT, ET_OUT> (A.FUN (), domain, \
+                                                   FILTER_FUN<ET, MT, ET_OUT>, \
+                                                   S.FUN (), arg4) \
 
   if (method == "ordered")
     {
@@ -427,130 +427,172 @@ NOT IMPLEMENTED (local binary patterns style)\n\
           arg4 = 0;
         }
 
-      // Do the real work
       #define ACTION(MT, FUN, ET) \
-              GENERAL_ACTION(MT, FUN, ET, MT, ET, selnth)
-      if (args (0).is_real_matrix ())
-        ACTION (NDArray, array_value, double)
-      else if (args (0).is_complex_matrix ())
-        ACTION (ComplexNDArray, complex_array_value, Complex)
-      else if (args (0).is_bool_matrix ())
-        ACTION (boolNDArray, bool_array_value, bool)
-      else if (args (0).is_int8_type ())
-        ACTION (int8NDArray, int8_array_value, octave_int8)
-      else if (args (0).is_int16_type ())
-        ACTION (int16NDArray, int16_array_value, octave_int16)
-      else if (args (0).is_int32_type ())
-        ACTION (int32NDArray, int32_array_value, octave_int32)
-      else if (args (0).is_int64_type ())
-        ACTION (int64NDArray, int64_array_value, octave_int64)
-      else if (args (0).is_uint8_type ())
-        ACTION (uint8NDArray, uint8_array_value, octave_uint8)
-      else if (args (0).is_uint16_type ())
-        ACTION (uint16NDArray, uint16_array_value, octave_uint16)
-      else if (args (0).is_uint32_type ())
-        ACTION (uint32NDArray, uint32_array_value, octave_uint32)
-      else if (args (0).is_uint64_type ())
-        ACTION (uint64NDArray, uint64_array_value, octave_uint64)
+        GENERAL_ACTION(MT, FUN, ET, MT, ET, selnth)
+
+      if (A.is_int8_type ())
+        ACTION (int8NDArray, int8_array_value, octave_int8);
+      else if (A.is_int16_type ())
+        ACTION (int16NDArray, int16_array_value, octave_int16);
+      else if (A.is_int32_type ())
+        ACTION (int32NDArray, int32_array_value, octave_int32);
+      else if (A.is_int64_type ())
+        ACTION (int64NDArray, int64_array_value, octave_int64);
+      else if (A.is_uint8_type ())
+        ACTION (uint8NDArray, uint8_array_value, octave_uint8);
+      else if (A.is_uint16_type ())
+        ACTION (uint16NDArray, uint16_array_value, octave_uint16);
+      else if (A.is_uint32_type ())
+        ACTION (uint32NDArray, uint32_array_value, octave_uint32);
+      else if (A.is_uint64_type ())
+        ACTION (uint64NDArray, uint64_array_value, octave_uint64);
+      else if (A.islogical ())
+        ACTION (boolNDArray, bool_array_value, bool);
+      else if (A.isreal ())
+        {
+          if (A.is_single_type ())
+            ACTION (FloatNDArray, float_array_value, float);
+          else
+            ACTION (NDArray, array_value, double);
+        }
+      else if (A.iscomplex ())
+        {
+          if (A.is_single_type ())
+            ACTION (FloatComplexNDArray, float_complex_array_value, FloatComplex);
+          else
+            ACTION (ComplexNDArray, complex_array_value, Complex);
+        }
       else
-        error ("__spatial_filtering__: first input should be a real, complex, or integer array");
+        error ("__spatial_filtering__: A should be real, complex, or integer");
 
       #undef ACTION
     }
   else if (method == "min")
     {
-      // Do the real work
       #define ACTION(MT, FUN, ET) \
-              GENERAL_ACTION(MT, FUN, ET, MT, ET, min_filt)
-      if (args (0).is_real_matrix ())
-        ACTION (NDArray, array_value, double)
-      else if (args (0).is_complex_matrix ())
-        ACTION (ComplexNDArray, complex_array_value, Complex)
-      else if (args (0).is_bool_matrix ())
-        ACTION (boolNDArray, bool_array_value, bool)
-      else if (args (0).is_int8_type ())
-        ACTION (int8NDArray, int8_array_value, octave_int8)
-      else if (args (0).is_int16_type ())
-        ACTION (int16NDArray, int16_array_value, octave_int16)
-      else if (args (0).is_int32_type ())
-        ACTION (int32NDArray, int32_array_value, octave_int32)
-      else if (args (0).is_int64_type ())
-        ACTION (int64NDArray, int64_array_value, octave_int64)
-      else if (args (0).is_uint8_type ())
-        ACTION (uint8NDArray, uint8_array_value, octave_uint8)
-      else if (args (0).is_uint16_type ())
-        ACTION (uint16NDArray, uint16_array_value, octave_uint16)
-      else if (args (0).is_uint32_type ())
-        ACTION (uint32NDArray, uint32_array_value, octave_uint32)
-      else if (args (0).is_uint64_type ())
-        ACTION (uint64NDArray, uint64_array_value, octave_uint64)
+        GENERAL_ACTION(MT, FUN, ET, MT, ET, min_filt)
+
+      if (A.is_int8_type ())
+        ACTION (int8NDArray, int8_array_value, octave_int8);
+      else if (A.is_int16_type ())
+        ACTION (int16NDArray, int16_array_value, octave_int16);
+      else if (A.is_int32_type ())
+        ACTION (int32NDArray, int32_array_value, octave_int32);
+      else if (A.is_int64_type ())
+        ACTION (int64NDArray, int64_array_value, octave_int64);
+      else if (A.is_uint8_type ())
+        ACTION (uint8NDArray, uint8_array_value, octave_uint8);
+      else if (A.is_uint16_type ())
+        ACTION (uint16NDArray, uint16_array_value, octave_uint16);
+      else if (A.is_uint32_type ())
+        ACTION (uint32NDArray, uint32_array_value, octave_uint32);
+      else if (A.is_uint64_type ())
+        ACTION (uint64NDArray, uint64_array_value, octave_uint64);
+      else if (A.islogical ())
+        ACTION (boolNDArray, bool_array_value, bool);
+      else if (A.isreal ())
+        {
+          if (A.is_single_type ())
+            ACTION (FloatNDArray, float_array_value, float);
+          else
+            ACTION (NDArray, array_value, double);
+        }
+      else if (A.iscomplex ())
+        {
+          if (A.is_single_type ())
+            ACTION (FloatComplexNDArray, float_complex_array_value, FloatComplex);
+          else
+            ACTION (ComplexNDArray, complex_array_value, Complex);
+        }
       else
-        error ("__spatial_filtering__: first input should be a real, complex, or integer array");
-        
+        error ("__spatial_filtering__: A should be real, complex, or integer");
+
       #undef ACTION
     }
   else if (method == "max")
     {
-      // Do the real work
+
       #define ACTION(MT, FUN, ET) \
-              GENERAL_ACTION(MT, FUN, ET, MT, ET, max_filt)
-      if (args (0).is_real_matrix ())
-        ACTION (NDArray, array_value, double)
-      else if (args (0).is_complex_matrix ())
-        ACTION (ComplexNDArray, complex_array_value, Complex)
-      else if (args (0).is_bool_matrix ())
-        ACTION (boolNDArray, bool_array_value, bool)
-      else if (args (0).is_int8_type ())
-        ACTION (int8NDArray, int8_array_value, octave_int8)
-      else if (args (0).is_int16_type ())
-        ACTION (int16NDArray, int16_array_value, octave_int16)
-      else if (args (0).is_int32_type ())
-        ACTION (int32NDArray, int32_array_value, octave_int32)
-      else if (args (0).is_int64_type ())
-        ACTION (int64NDArray, int64_array_value, octave_int64)
-      else if (args (0).is_uint8_type ())
-        ACTION (uint8NDArray, uint8_array_value, octave_uint8)
-      else if (args (0).is_uint16_type ())
-        ACTION (uint16NDArray, uint16_array_value, octave_uint16)
-      else if (args (0).is_uint32_type ())
-        ACTION (uint32NDArray, uint32_array_value, octave_uint32)
-      else if (args (0).is_uint64_type ())
-        ACTION (uint64NDArray, uint64_array_value, octave_uint64)
+        GENERAL_ACTION(MT, FUN, ET, MT, ET, max_filt)
+
+      if (A.is_int8_type ())
+        ACTION (int8NDArray, int8_array_value, octave_int8);
+      else if (A.is_int16_type ())
+        ACTION (int16NDArray, int16_array_value, octave_int16);
+      else if (A.is_int32_type ())
+        ACTION (int32NDArray, int32_array_value, octave_int32);
+      else if (A.is_int64_type ())
+        ACTION (int64NDArray, int64_array_value, octave_int64);
+      else if (A.is_uint8_type ())
+        ACTION (uint8NDArray, uint8_array_value, octave_uint8);
+      else if (A.is_uint16_type ())
+        ACTION (uint16NDArray, uint16_array_value, octave_uint16);
+      else if (A.is_uint32_type ())
+        ACTION (uint32NDArray, uint32_array_value, octave_uint32);
+      else if (A.is_uint64_type ())
+        ACTION (uint64NDArray, uint64_array_value, octave_uint64);
+      else if (A.islogical ())
+        ACTION (boolNDArray, bool_array_value, bool);
+      else if (A.isreal ())
+        {
+          if (A.is_single_type ())
+            ACTION (FloatNDArray, float_array_value, float);
+          else
+            ACTION (NDArray, array_value, double);
+        }
+      else if (A.iscomplex ())
+        {
+          if (A.is_single_type ())
+            ACTION (FloatComplexNDArray, float_complex_array_value, FloatComplex);
+          else
+            ACTION (ComplexNDArray, complex_array_value, Complex);
+        }
       else
-        error ("__spatial_filtering__: first input should be a real, complex, or integer array");
-        
+        error ("__spatial_filtering__: A should be real, complex, or integer");
+
       #undef ACTION
     }
   else if (method == "range")
     {
-      // Do the real work
+
       #define ACTION(MT, FUN, ET) \
-              GENERAL_ACTION(MT, FUN, ET, MT, ET, range_filt)
-      if (args (0).is_real_matrix ())
-        ACTION (NDArray, array_value, double)
-      else if (args (0).is_complex_matrix ())
-        ACTION (ComplexNDArray, complex_array_value, Complex)
-      else if (args (0).is_bool_matrix ())
-        ACTION (boolNDArray, bool_array_value, bool)
-      else if (args (0).is_int8_type ())
-        ACTION (int8NDArray, int8_array_value, octave_int8)
-      else if (args (0).is_int16_type ())
-        ACTION (int16NDArray, int16_array_value, octave_int16)
-      else if (args (0).is_int32_type ())
-        ACTION (int32NDArray, int32_array_value, octave_int32)
-      else if (args (0).is_int64_type ())
-        ACTION (int64NDArray, int64_array_value, octave_int64)
-      else if (args (0).is_uint8_type ())
-        ACTION (uint8NDArray, uint8_array_value, octave_uint8)
-      else if (args (0).is_uint16_type ())
-        ACTION (uint16NDArray, uint16_array_value, octave_uint16)
-      else if (args (0).is_uint32_type ())
-        ACTION (uint32NDArray, uint32_array_value, octave_uint32)
-      else if (args (0).is_uint64_type ())
-        ACTION (uint64NDArray, uint64_array_value, octave_uint64)
+        GENERAL_ACTION(MT, FUN, ET, MT, ET, range_filt)
+
+      if (A.is_int8_type ())
+        ACTION (int8NDArray, int8_array_value, octave_int8);
+      else if (A.is_int16_type ())
+        ACTION (int16NDArray, int16_array_value, octave_int16);
+      else if (A.is_int32_type ())
+        ACTION (int32NDArray, int32_array_value, octave_int32);
+      else if (A.is_int64_type ())
+        ACTION (int64NDArray, int64_array_value, octave_int64);
+      else if (A.is_uint8_type ())
+        ACTION (uint8NDArray, uint8_array_value, octave_uint8);
+      else if (A.is_uint16_type ())
+        ACTION (uint16NDArray, uint16_array_value, octave_uint16);
+      else if (A.is_uint32_type ())
+        ACTION (uint32NDArray, uint32_array_value, octave_uint32);
+      else if (A.is_uint64_type ())
+        ACTION (uint64NDArray, uint64_array_value, octave_uint64);
+      else if (A.islogical ())
+        ACTION (boolNDArray, bool_array_value, bool);
+      else if (A.isreal ())
+        {
+          if (A.is_single_type ())
+            ACTION (FloatNDArray, float_array_value, float);
+          else
+            ACTION (NDArray, array_value, double);
+        }
+      else if (A.iscomplex ())
+        {
+          if (A.is_single_type ())
+            ACTION (FloatComplexNDArray, float_complex_array_value, FloatComplex);
+          else
+            ACTION (ComplexNDArray, complex_array_value, Complex);
+        }
       else
-        error ("__spatial_filtering__: first input should be a real, complex, or integer array");
-        
+        error ("__spatial_filtering__: A should be real, complex, or integer");
+
       #undef ACTION
     }
   else if (method == "std")
@@ -560,53 +602,57 @@ NOT IMPLEMENTED (local binary patterns style)\n\
         arg4 = len - 1; // unbiased
       else
         arg4 = len; // max. likelihood
-      
-      // Do the real work
+
       #define ACTION(MT, FUN, ET) \
-              GENERAL_ACTION(MT, FUN, ET, NDArray, double, std_filt)
-      if (args (0).is_real_matrix ())
-        ACTION (NDArray, array_value, double)
-      else if (args (0).is_bool_matrix ())
-        ACTION (boolNDArray, bool_array_value, bool)
-      else if (args (0).is_int8_type ())
-        ACTION (int8NDArray, int8_array_value, octave_int8)
-      else if (args (0).is_int16_type ())
-        ACTION (int16NDArray, int16_array_value, octave_int16)
-      else if (args (0).is_int32_type ())
-        ACTION (int32NDArray, int32_array_value, octave_int32)
-      else if (args (0).is_int64_type ())
-        ACTION (int64NDArray, int64_array_value, octave_int64)
-      else if (args (0).is_uint8_type ())
-        ACTION (uint8NDArray, uint8_array_value, octave_uint8)
-      else if (args (0).is_uint16_type ())
-        ACTION (uint16NDArray, uint16_array_value, octave_uint16)
-      else if (args (0).is_uint32_type ())
-        ACTION (uint32NDArray, uint32_array_value, octave_uint32)
-      else if (args (0).is_uint64_type ())
-        ACTION (uint64NDArray, uint64_array_value, octave_uint64)
+        GENERAL_ACTION(MT, FUN, ET, NDArray, double, std_filt)
+
+      if (A.is_int8_type ())
+        ACTION (int8NDArray, int8_array_value, octave_int8);
+      else if (A.is_int16_type ())
+        ACTION (int16NDArray, int16_array_value, octave_int16);
+      else if (A.is_int32_type ())
+        ACTION (int32NDArray, int32_array_value, octave_int32);
+      else if (A.is_int64_type ())
+        ACTION (int64NDArray, int64_array_value, octave_int64);
+      else if (A.is_uint8_type ())
+        ACTION (uint8NDArray, uint8_array_value, octave_uint8);
+      else if (A.is_uint16_type ())
+        ACTION (uint16NDArray, uint16_array_value, octave_uint16);
+      else if (A.is_uint32_type ())
+        ACTION (uint32NDArray, uint32_array_value, octave_uint32);
+      else if (A.is_uint64_type ())
+        ACTION (uint64NDArray, uint64_array_value, octave_uint64);
+      else if (A.islogical ())
+        ACTION (boolNDArray, bool_array_value, bool);
+      if (A.is_real_matrix ())
+        {
+          if (A.is_single_type ())
+            ACTION (FloatNDArray, float_array_value, float);
+          else
+            ACTION (NDArray, array_value, double);
+        }
       else
-        error ("__spatial_filtering__: first input should be a real, complex, or integer array");
-        
+        error ("__spatial_filtering__: A should be real or logical");
+
       #undef ACTION
     }
   else if (method == "entropy")
     {
-      // Do the real work
+
       #define ACTION(MT, FUN, ET) \
-              GENERAL_ACTION(MT, FUN, ET, NDArray, double, entropy_filt)
-      if (args (0).is_bool_matrix ())
-        ACTION (boolNDArray, bool_array_value, bool)
-      else if (args (0).is_uint8_type ())
-        ACTION (uint8NDArray, uint8_array_value, octave_uint8)
+        GENERAL_ACTION(MT, FUN, ET, NDArray, double, entropy_filt)
+
+      if (A.islogical ())
+        ACTION (boolNDArray, bool_array_value, bool);
+      else if (A.is_uint8_type ())
+        ACTION (uint8NDArray, uint8_array_value, octave_uint8);
       else
-        error ("__spatial_filtering__: first input should be a real, complex, or integer array");
-        
+        error ("__spatial_filtering__: A should be logical or uint8");
+
       #undef ACTION
     }
   else
-    {
-      error ("__spatial_filtering__: unknown method '%s'.", method.c_str ());
-    }
+    error ("__spatial_filtering__: unknown method '%s'.", method.c_str ());
 
   return retval;
 }
