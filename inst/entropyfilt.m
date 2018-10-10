@@ -96,3 +96,20 @@ function retval = entropyfilt (I, domain = true (9), padding = "symmetric", vara
   retval = __spatial_filtering__ (I, domain, "entropy", zeros (size (domain)),
                                   nbins);
 endfunction
+
+%!test
+%! a = log2 (9) * ones (5, 5);
+%! b = -(2*log2 (2/9) + log2 (1/9))/3;
+%! a(1,2:4) = b;
+%! a(5,2:4) = b;
+%! a(2:4,1) = b;
+%! a(2:4,5) = b;
+%! c = -(4*log2 (4/9) + 4*log2 (2/9) + log2 (1/9))/9;
+%! a(1,1) = c;
+%! a(5,1) = c;
+%! a(1,5) = c;
+%! a(5,5) = c;
+%! assert (entropyfilt (uint8 (magic (5)), ones (3, 3)), a, 2*eps);
+
+%!test
+%! assert (entropyfilt (uint8 (ones (10, 10))), zeros (10, 10));
