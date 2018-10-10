@@ -191,9 +191,9 @@ ET_OUT entropy_filt (MT &vals, octave_idx_type len, int nbins)
   // Compute histogram from values
   ColumnVector hist (nbins, 0);
   for (octave_idx_type i = 0; i < len; i++)
-    hist (vals (i) + add) ++;
-  for (octave_idx_type i = 0; i < len; i++)
-    hist (vals (i) + add) /= (double)len;
+    hist(vals(i) + add)++;
+  for (octave_idx_type i = 0; i < nbins; i++)
+    hist(i) /= (double)len;
 
   // Compute entropy
   double entropy = 0;
