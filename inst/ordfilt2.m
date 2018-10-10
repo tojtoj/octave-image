@@ -36,3 +36,33 @@ function A = ordfilt2 (A, nth, domain, varargin)
   A = ordfiltn (A, nth, domain, varargin{:});
 
 endfunction
+
+%!test
+%! order = 3;
+%! domain = ones (3);
+%! A = zeros (3,3);
+%! B = ones (3,3);
+%! C = [1 1 1; 2 2 2; 3 3 3];
+%! D = C';
+%! E = ones (3,3);
+%! E(2,2) = 2;
+%! F = 3 .* ones (3,3);
+%! F(2,2) = 1;
+%! G = [-1 2 7; -5 2 8; -7 pi 9];
+%! H = [5 2 8; 1 -3 1; 5 1 0];
+%! A_out = [0 0 0; 0 0 0; 0 0 0];
+%! B_out = [0 0 0; 0 1 0; 0 0 0];
+%! C_out = [0 0 0; 0 1 0; 0 0 0];
+%! D_out = [0 0 0; 0 1 0; 0 0 0];
+%! E_out = [0 0 0; 0 1 0; 0 0 0];
+%! F_out = [0 0 0; 0 3 0; 0 0 0];
+%! G_out = [0 0 0; -1 -1 0; 0 0 0];
+%! H_out = [0 0 0; 0 1 0; 0 0 0];
+%! assert (ordfilt2 (A, order, domain), A_out);
+%! assert (ordfilt2 (B, order, domain), B_out);
+%! assert (ordfilt2 (C, order, domain), C_out);
+%! assert (ordfilt2 (D, order, domain), D_out);
+%! assert (ordfilt2 (E, order, domain), E_out);
+%! assert (ordfilt2 (F, order, domain), F_out);
+%! assert (ordfilt2 (G, order, domain), G_out);
+%! assert (ordfilt2 (H, order, domain), H_out);

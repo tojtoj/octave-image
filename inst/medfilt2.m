@@ -130,3 +130,31 @@ endfunction
 %!       2.0 10.0 12.0  9.0];
 %!assert (medfilt2 (b, true (4, 1)), f);
 %!assert (medfilt2 (b, [4 1]), f);
+
+%!test
+%! A = zeros (3, 3);
+%! B = ones (3, 3);
+%! C = [1 1 1; 2 2 2; 3 3 3];
+%! D = C';
+%! E = ones (3, 3);
+%! E(2,2) = 2;
+%! F = 3 .* ones (3, 3);
+%! F(2,2) = 1;
+%! G = [-1 2 7; -5 2 8; -7 pi 9];
+%! H = [5 2 8; 1 -3 1; 5 1 0];
+%! A_out = [0 0 0; 0 0 0; 0 0 0];
+%! B_out = [0 1 0; 1 1 1; 0 1 0];
+%! C_out =  [0 1 0; 1 2 1; 0 2 0];
+%! D_out = [0 1 0; 1 2 2; 0 1 0];
+%! E_out = [0 1 0; 1 1 1; 0 1 0];
+%! F_out = [0 3 0; 3 3 3; 0 3 0];
+%! G_out = [0 0 0; 0 2 2; 0 0 0];
+%! H_out = [0 1 0; 1 1 0; 0 0 0];
+%! assert (medfilt2 (A), A_out);
+%! assert (medfilt2 (B), B_out);
+%! assert (medfilt2 (C), C_out);
+%! assert (medfilt2 (D), D_out);
+%! assert (medfilt2 (E), E_out);
+%! assert (medfilt2 (F), F_out);
+%! assert (medfilt2 (G), G_out);
+%! assert (medfilt2 (H), H_out);
