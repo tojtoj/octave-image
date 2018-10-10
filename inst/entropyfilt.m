@@ -92,7 +92,7 @@ function retval = entropyfilt (I, domain = true (9), padding = "symmetric", vara
     idx {k} = (even (k)+1):size (I, k);
   endfor
   I = I (idx {:});
-  ## Perform filtering
-  retval = __spatial_filtering__ (I, domain, "entropy", I, nbins);
 
+  retval = __spatial_filtering__ (I, domain, "entropy", zeros (size (domain)),
+                                  nbins);
 endfunction
