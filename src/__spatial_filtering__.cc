@@ -354,15 +354,6 @@ in @code{entropyfilt}.\n\
 Compute the local range of the data. The corresponding user interface is\n\
 available in @code{rangefilt}.\n\
 \n\
-@item @qcode{\"min\"}\n\
-Computes the smallest value in a local neighbourheed.\n\
-\n\
-@item @qcode{\"max\"}\n\
-Computes the largest value in a local neighbourheed.\n\
-\n\
-@item @qcode{\"encoded sign of difference\"}\n\
-NOT IMPLEMENTED (local binary patterns style)\n\
-\n\
 @end table\n\
 @seealso{ordfilt2}\n\
 @end deftypefn\n\
@@ -432,91 +423,6 @@ NOT IMPLEMENTED (local binary patterns style)\n\
 
       #define ACTION(MT, FUN, ET) \
         GENERAL_ACTION(MT, FUN, ET, MT, ET, selnth)
-
-      if (A.is_int8_type ())
-        ACTION (int8NDArray, int8_array_value, octave_int8);
-      else if (A.is_int16_type ())
-        ACTION (int16NDArray, int16_array_value, octave_int16);
-      else if (A.is_int32_type ())
-        ACTION (int32NDArray, int32_array_value, octave_int32);
-      else if (A.is_int64_type ())
-        ACTION (int64NDArray, int64_array_value, octave_int64);
-      else if (A.is_uint8_type ())
-        ACTION (uint8NDArray, uint8_array_value, octave_uint8);
-      else if (A.is_uint16_type ())
-        ACTION (uint16NDArray, uint16_array_value, octave_uint16);
-      else if (A.is_uint32_type ())
-        ACTION (uint32NDArray, uint32_array_value, octave_uint32);
-      else if (A.is_uint64_type ())
-        ACTION (uint64NDArray, uint64_array_value, octave_uint64);
-      else if (A.islogical ())
-        ACTION (boolNDArray, bool_array_value, bool);
-      else if (A.isreal ())
-        {
-          if (A.is_single_type ())
-            ACTION (FloatNDArray, float_array_value, float);
-          else
-            ACTION (NDArray, array_value, double);
-        }
-      else if (A.iscomplex ())
-        {
-          if (A.is_single_type ())
-            ACTION (FloatComplexNDArray, float_complex_array_value, FloatComplex);
-          else
-            ACTION (ComplexNDArray, complex_array_value, Complex);
-        }
-      else
-        error ("__spatial_filtering__: A should be real, complex, or integer");
-
-      #undef ACTION
-    }
-  else if (method == "min")
-    {
-      #define ACTION(MT, FUN, ET) \
-        GENERAL_ACTION(MT, FUN, ET, MT, ET, min_filt)
-
-      if (A.is_int8_type ())
-        ACTION (int8NDArray, int8_array_value, octave_int8);
-      else if (A.is_int16_type ())
-        ACTION (int16NDArray, int16_array_value, octave_int16);
-      else if (A.is_int32_type ())
-        ACTION (int32NDArray, int32_array_value, octave_int32);
-      else if (A.is_int64_type ())
-        ACTION (int64NDArray, int64_array_value, octave_int64);
-      else if (A.is_uint8_type ())
-        ACTION (uint8NDArray, uint8_array_value, octave_uint8);
-      else if (A.is_uint16_type ())
-        ACTION (uint16NDArray, uint16_array_value, octave_uint16);
-      else if (A.is_uint32_type ())
-        ACTION (uint32NDArray, uint32_array_value, octave_uint32);
-      else if (A.is_uint64_type ())
-        ACTION (uint64NDArray, uint64_array_value, octave_uint64);
-      else if (A.islogical ())
-        ACTION (boolNDArray, bool_array_value, bool);
-      else if (A.isreal ())
-        {
-          if (A.is_single_type ())
-            ACTION (FloatNDArray, float_array_value, float);
-          else
-            ACTION (NDArray, array_value, double);
-        }
-      else if (A.iscomplex ())
-        {
-          if (A.is_single_type ())
-            ACTION (FloatComplexNDArray, float_complex_array_value, FloatComplex);
-          else
-            ACTION (ComplexNDArray, complex_array_value, Complex);
-        }
-      else
-        error ("__spatial_filtering__: A should be real, complex, or integer");
-
-      #undef ACTION
-    }
-  else if (method == "max")
-    {
-
-      #define ACTION(MT, FUN, ET) \
-        GENERAL_ACTION(MT, FUN, ET, MT, ET, max_filt)
 
       if (A.is_int8_type ())
         ACTION (int8NDArray, int8_array_value, octave_int8);
@@ -691,7 +597,6 @@ NOT IMPLEMENTED (local binary patterns style)\n\
 %!          9    4    3    3    3   36    4    4
 %!          9    4    4    4   14   36    4    4
 %!          9    4    4    4   14   23    7    3];
-%!assert (__spatial_filtering__ (a, domain, "min", s), out);
 %!assert (__spatial_filtering__ (a, domain, "ordered", s, 1), out);
 %!
 %! out = [ 97   97   97   94   94   90   90   90
@@ -702,7 +607,6 @@ NOT IMPLEMENTED (local binary patterns style)\n\
 %!         98   98   90   98   98   98   88   79
 %!         98   98   82   98   98   99   99   99
 %!         96   96   84   98   98   99   99   99];
-%!assert (__spatial_filtering__ (a, domain, "max", s), out);
 %!assert (__spatial_filtering__ (a, domain, "ordered", s, nnz (domain)), out);
 %!
 %! out = [ 60   43   43   43   43   43   51   51
@@ -747,7 +651,6 @@ NOT IMPLEMENTED (local binary patterns style)\n\
 %!         11    9    4    3    3   36    4    4
 %!          9    4    4   10   36   36   38    4
 %!         37    9    4    4   33   36    7    7];
-%!assert (__spatial_filtering__ (a, domain, "min", s), out);
 %!assert (__spatial_filtering__ (a, domain, "ordered", s, 1), out);
 %!
 %! out = [ 82   97   97   94   79   76   90   81
@@ -758,7 +661,6 @@ NOT IMPLEMENTED (local binary patterns style)\n\
 %!         98   90   90   90   98   92   79   79
 %!         98   98   50   98   98   90   99   57
 %!         96   82   62   84   98   99   99   53];
-%!assert (__spatial_filtering__ (a, domain, "max", s), out);
 %!assert (__spatial_filtering__ (a, domain, "ordered", s, nnz (domain)), out);
 %!
 %! out = [ 68   78   94   79   77   43   75   75
@@ -803,7 +705,6 @@ NOT IMPLEMENTED (local binary patterns style)\n\
 %!         13    4    3    0    4   36    6   -3
 %!         11    2   -3   11   38   29   35    1
 %!         34    6    1    5   34   33    9    0];
-%!assert (__spatial_filtering__ (a, domain, "min", s), out);
 %!assert (__spatial_filtering__ (a, domain, "ordered", s, 1), out);
 %!
 %! out = [  83    94    98    87    80    79    93    84
@@ -814,7 +715,6 @@ NOT IMPLEMENTED (local binary patterns style)\n\
 %!          91    87    91    92   101    93    76    80
 %!          95    99    53   100    91    91   102    59
 %!          99    75    65    87    95   101    92    50];
-%!assert (__spatial_filtering__ (a, domain, "max", s), out);
 %!assert (__spatial_filtering__ (a, domain, "ordered", s, nnz (domain)), out);
 %!
 %! out = [  71    81    96    79    78    44    77    68
