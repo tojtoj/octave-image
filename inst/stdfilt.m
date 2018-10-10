@@ -47,7 +47,7 @@ function retval = stdfilt (I, domain = true (3), padding = "symmetric", varargin
   if (nargin == 0)
     error ("stdfilt: not enough input arguments");
   endif
-  
+
   if (! isimage (I))
     error ("stdfilt: first input must be a matrix");
   endif
@@ -67,9 +67,7 @@ function retval = stdfilt (I, domain = true (3), padding = "symmetric", varargin
   endfor
   I = I (idx {:});
 
-  ## Perform filtering
-  retval = __spatial_filtering__ (I, domain, "std", I, 0);
-
+  retval = __spatial_filtering__ (I, domain, "std", zeros (size (domain)), 0);
 endfunction
 
 %!test

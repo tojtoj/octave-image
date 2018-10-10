@@ -391,11 +391,14 @@ NOT IMPLEMENTED (local binary patterns style)\n\
     len += domain (i);
 
   const int ndims = domain.ndims ();
-  if (A.ndims () != ndims || S.ndims () != ndims)
-    {
-      error ("__spatial_filtering__: A and S must have the same dimensions");
-      return retval;
-    }
+  if (A.ndims () != ndims)
+    error ("__spatial_filtering__: A and DOMAIN must have same dimensions");
+
+  if (S.ndims () != ndims)
+    error ("__spatial_filtering__: DOMAIN and S must have same size");
+  for (octave_idx_type i = 0; i < ndims; i++)
+    if (domain.size (i) != S.dims ()(i))
+      error ("__spatial_filtering__: DOMAIN and S must have same size");
 
   int arg4 = (nargin == 4) ? 0 : args(4).int_value ();
 
@@ -658,6 +661,13 @@ NOT IMPLEMENTED (local binary patterns style)\n\
 }
 
 /*
+%!error <DOMAIN and S must have same size>
+%!  __spatial_filtering__ (ones (10), ones (3), "std", ones (10), 0)
+%!error <DOMAIN and S must have same size>
+%!  __spatial_filtering__ (ones (10), ones (3), "std", ones (3, 3, 3), 0)
+%!error <DOMAIN and S must have same size>
+%!  __spatial_filtering__ (ones (10), ones (3), "std", ones (1, 9), 0)
+
 %!shared a, domain, s, out
 %! a = [ 82    2   97   43   79   43   41   65   51   11
 %!       60   65   21   56   94   77   36   38   75   39

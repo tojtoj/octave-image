@@ -53,7 +53,7 @@ function retval = rangefilt (I, domain = true (3), padding = "symmetric", vararg
     error ("rangefilt: DOMAIN must be a logical array");
   endif
   domain = logical (domain);
-  
+
   ## Pad image
   pad = floor (size (domain)/2);
   I = padarray (I, pad, padding, varargin {:});
@@ -64,12 +64,9 @@ function retval = rangefilt (I, domain = true (3), padding = "symmetric", vararg
   endfor
   I = I (idx {:});
 
-  ## Perform filtering
-  retval = __spatial_filtering__ (I, domain, "range", I, 0);
-
+  retval = __spatial_filtering__ (I, domain, "range", zeros (size (domain)), 0);
 endfunction
 
 %!test
 %! im = rangefilt (ones (5));
 %! assert (im, zeros (5));
-
