@@ -4,6 +4,11 @@
  ** The functions entropyfilt, rangefilt, and stdfilt were completely
     incorrect and have now been fixed.
 
+ ** Other functions that have been changed for smaller bugfixes, increased
+    Matlab compatibility, or performance:
+
+    graythresh
+
 
  Summary of important user-visible changes for image 2.8.0 (2018/06/19):
 -------------------------------------------------------------------------
