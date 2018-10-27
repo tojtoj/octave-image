@@ -323,6 +323,7 @@ function props = regionprops (bw, varargin)
     "minoraxislength",  {{"local_ellipse"}},
     "orientation",      {{"local_ellipse"}},
     "perimeter",        {{}},
+    "perimeterold",     {{}},
     "solidity",         {{}},
     "maxintensity",     {{"accum_subs", "pixelidxlist"}},
     "meanintensity",    {{"total_intensity", "area"}},
@@ -410,6 +411,8 @@ function props = regionprops (bw, varargin)
         ## in local_ellipse.
       case "perimeter"
         values.perimeter = rp_perimeter (cc);
+      case "perimeterold"
+        values.perimeterold = rp_perimeter_old (cc);
       case "solidity"
         error ("regionprops: property \"Solidity\" not yet implemented");
       case "maxintensity"
@@ -491,6 +494,8 @@ function props = regionprops (bw, varargin)
         [props.Orientation] = num2cell (values.orientation){:};
       case "perimeter"
         [props.Perimeter] = num2cell (values.perimeter){:};
+      case "perimeterold"
+        [props.PerimeterOld] = num2cell (values.perimeterold){:};
 #      case "solidity"
       case "maxintensity"
         [props.MaxIntensity] = num2cell (values.maxintensity){:};
@@ -755,9 +760,83 @@ function perim = rp_perimeter (cc)
   ## FIXME: this should be vectorized.  We were previously using
   ##        bwboundaries (incorrectly, see bug #52926) but
   ##        bwboundaries is doing a similar loop internally.
+  ## regular  CHAIN_CODE = [3, 2, 1, 4, -1, 0, 5, 6, 7];
+  CHAIN_CODE = [1, 2, 1, 4, 1, 0, 1, 6, 1];
+
   no = cc.NumObjects;
   boundaries = cell (no, 1);
   bw = false (cc.ImageSize);
+  perim = zeros(no, 1);
+  for k = 1:no
+    idx = cc.PixelIdxList{k};
+    bw(idx) = true;
+    boundaries{k} = __boundary__ (bw, 8);
+    if (k != no)
+      bw(idx) = false;
+    endif
+    np = size (boundaries{k}, 1);
+    if (np == 2)
+## single pixel - perimeter is 0      
+      perim(k) = 0;
+    else
+
+## calculating perimeter according to Vossepoel and Smeulders,
+## Computer Graphics and Image Processing 20(4):347-364, 1982.
+## see: Cris Luengo, "Measuring boundary length" 
+## http://www.crisluengo.net/index.php/archives/310
+
+## Corners are counted using Hartmut Gimpel observations in
+## http://savannah.gnu.org/bugs/?52933#comment12:
+## 1. corners of 90 deg counted, but only when they are aligned with the coordinate system. 
+## 2. corners of 135  deg are counted 
+## 3. corners of 45 deg are counted 
+## 4. NO other types of corners are counted, especially not "spikes" of 360 deg (aligned with axes or not),
+##   and 90 deg cornes that are tilted (by 45 deg) with regard to the axes.
+
+##  regular  CHAIN_CODE is = [3, 2, 1, 4, -1, 0, 5, 6, 7];
+##  we use:  CHAIN_CODE =    [1, 2, 1, 4, 1, 0, 1, 6, 1];
+##  we preserve even value, while changing odd values to 1
+##  corners of 90 deg which aligned with the coordinate system are change of 2 or 4
+##  in the chain code, but only when the two values are even, 
+##  and that's the reason for the modified chain code.
+##  corners of 45 deg and 135 deg are changes from even to odd or from odd to even in the chain code
+ 
+      # boundary of component k
+      boundary = boundaries {k};
+      # distance between consecutive pixels in the boundary
+      dists = boundary (2:end,:) - boundary (1:end-1,:) + 2;
+      # converting x_y distances to vector
+      dists_vec = dists(:,2) + (dists(:,1)-1)*3;
+      # converting distances to chain code
+      chain_code = CHAIN_CODE (dists_vec);
+      # odd numbers in the chain code - diagonal movement
+      odd =  sum(mod (chain_code, 2));
+      # even entries in the chain code - vetical or horizontal movement
+      even = np - 1 - odd;
+      # counting corners
+      chain_code_change = abs(chain_code - [chain_code(end), chain_code(1:end-1)]);
+      # 45 deg  & 145 deg corners are places where chain code changes from 
+      # odd to even or from even to odd
+      corners = numel (find (mod(chain_code_change, 2) == 1));
+      # 90 deg corners aligned with axes are places where both codes are even,
+      # and there is a jump of 2 or 6 in the chain code 
+      corners += numel (find (chain_code_change == 2));
+      corners += numel (find (chain_code_change == 6));
+      # using Vossepoel and Smeulders formula
+      perim(k) = even*0.980 + odd*1.406 - corners*0.091;
+    endif
+  endfor
+
+endfunction
+
+function perim = rp_perimeter_old (cc)
+  ## FIXME: this should be vectorized.  We were previously using
+  ##        bwboundaries (incorrectly, see bug #52926) but
+  ##        bwboundaries is doing a similar loop internally.
+  no = cc.NumObjects;
+  boundaries = cell (no, 1);
+  bw = false (cc.ImageSize);
+  perim = zeros(no, 1);
   for k = 1:no
     idx = cc.PixelIdxList{k};
     bw(idx) = true;
@@ -1407,20 +1486,30 @@ endfunction
 %! disk = disk ./ max (disk(:));
 %! I(10:30, 10:30) = disk;
 %! bw = im2bw (I, 0.5);
+%! props = regionprops (bw, "PerimeterOld");
+%! assert (props.PerimeterOld, 10*4 + (sqrt (2) * 4)*4, eps*100)
 %! props = regionprops (bw, "Perimeter");
-%! assert (props.Perimeter, 10*4 + (sqrt (2) * 4)*4, eps*100)
+%! assert (props.Perimeter, 59.876)
 %!
+%! props = regionprops (bwconncomp (bw), "PerimeterOld");
+%! assert (props.PerimeterOld, 10*4 + (sqrt (2) * 4)*4, eps*100)
 %! props = regionprops (bwconncomp (bw), "Perimeter");
-%! assert (props.Perimeter, 10*4 + (sqrt (2) * 4)*4, eps*100)
+%! assert (props.Perimeter, 59.876)
 
+%!assert (regionprops (bw2d, "PerimeterOld"),
+%!        struct ("PerimeterOld", {(sqrt (2)*6 + 4); (sqrt (2)*3 + 4)}), eps*10)
 %!assert (regionprops (bw2d, "Perimeter"),
-%!        struct ("Perimeter", {(sqrt (2)*6 + 4); (sqrt (2)*3 + 4)}), eps*10)
+%!        struct ("Perimeter", {11.81; 7.683}))
 
 ## Test Perimeter with nested objects
+%!assert (regionprops (bw2d_insides, "PerimeterOld"),
+%!        struct ("PerimeterOld", {20; 4}))
 %!assert (regionprops (bw2d_insides, "Perimeter"),
-%!        struct ("Perimeter", {20; 4}))
+%!        struct ("Perimeter", {19.236; 3.556}))
+%!assert (regionprops (bwconncomp (bw2d_insides), "PerimeterOld"),
+%!        struct ("PerimeterOld", {20; 4}))
 %!assert (regionprops (bwconncomp (bw2d_insides), "Perimeter"),
-%!        struct ("Perimeter", {20; 4}))
+%!        struct ("Perimeter", {19.236; 3.556}))
 
 ## Test guessing between labelled and binary image
 %!assert (regionprops ([1 0 1; 1 0 1], "Area"), struct ("Area", 4))
@@ -1516,7 +1605,6 @@ endfunction
 %!error <not yet implemented> regionprops (rand (5, 5) > 0.5, "ConvexHull")
 %!error <not yet implemented> regionprops (rand (5, 5) > 0.5, "ConvexImage")
 %!error <not yet implemented> regionprops (rand (5, 5) > 0.5, "Solidity")
-
 %!test # bug #52926
 %! ## Perimeter of objects that would be connected with connectivity 8
 %! ## but have been labeled with connectivity 4.
@@ -1530,5 +1618,87 @@ endfunction
 %!                1 1 1 0 0 0 0 0]);
 %!
 %! L = bwlabel (BW, 4);
+%! props = regionprops(L, "PerimeterOld");
+%! assert ([props.PerimeterOld], [18 4 6+sqrt(2)])
 %! props = regionprops(L, "Perimeter");
-%! assert ([props.Perimeter], [18 4 6+sqrt(2)])
+%! assert ([props.Perimeter], [17.276 3.556 7.013])
+%! L = bwlabel (BW, 8);
+%! props = regionprops(L, "PerimeterOld");
+%! assert ([props.PerimeterOld], [18 10+3*sqrt(2)])
+%! props = regionprops(L, "Perimeter");
+%! assert ([props.Perimeter], [17.276 13.108])
+
+%!test
+%! I = zeros(5);
+%! I(3,3) = 1;
+%! props = regionprops(I, "Perimeter");
+%! assert ([props.Perimeter], [0])
+
+%! I = zeros(5);
+%! I(3,3:4) = 1;
+%! props = regionprops (I, "Perimeter");
+%! assert ([props.Perimeter], [1.96])
+
+%! I = zeros(5);
+%! I(3:4,3) = 1;
+%! props = regionprops (I, "Perimeter");
+%! assert ([props.Perimeter], [1.96])
+
+%! I = zeros(5);
+%! I(3,3) = 1;
+%! I(4,4) = 1;
+%! props = regionprops (I, "Perimeter");
+%! assert ([props.Perimeter], [2.812])
+
+%! I = zeros(5);
+%! I(3,4) = 1;
+%! I(4,3) = 1;
+%! props = regionprops (I, "Perimeter");
+%! assert ([props.Perimeter], [2.812])
+
+%! I = zeros(5);
+%! I(3:4,3:4) = 1;
+%! props = regionprops (I, "Perimeter");
+%! assert ([props.Perimeter], [3.556])
+
+%! I = zeros(5);
+%! I(3:4,3:4) = 1;
+%! I(4,5) = 1;
+%! props=regionprops (I, "Perimeter");
+%! assert ([props.Perimeter], [4.962])
+
+%! I = zeros(5);
+%! I(3:4,3:4) = 1;
+%! I(5,5) = 1;
+%! props = regionprops (I, "Perimeter");
+%! assert ([props.Perimeter], [6.277], 4*eps)
+
+%! I = zeros(5);
+%! I(2,3) = 1;
+%! I(3,2:4) = 1;
+%! I(4,3) = 1;
+%! props = regionprops (I, "Perimeter");
+%! assert ([props.Perimeter], [5.624])
+
+%! I = zeros(5);
+%! I(2,3) = 1;
+%! I(3,2:4) = 1;
+%! I(4,3) = 1;
+%! I(5,3) = 1;
+%! props = regionprops (I, "Perimeter");
+%! assert ([props.Perimeter], [7.402], 4*eps)
+
+%! I = zeros(5);
+%! I(2,3) = 1;
+%! I(3,2:4) = 1;
+%! I(4,3) = 1;
+%! I(5,4) = 1;
+%! props = regionprops (I, "Perimeter");
+%! assert ([props.Perimeter], [8.436])
+
+%! I = zeros(5);
+%! I(2,1:4) = 1;
+%! I(3,4) = 1;
+%! props=regionprops (I, "Perimeter");
+%! assert ([props.Perimeter], [7.013])
+
