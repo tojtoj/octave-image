@@ -15,7 +15,7 @@
  ** Other functions that have been changed for smaller bugfixes, increased
     Matlab compatibility, or performance:
 
-    graythresh
+    graythresh            hough_line
 
 
  Summary of important user-visible changes for image 2.8.1 (2018/10/26):

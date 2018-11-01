@@ -261,7 +261,7 @@ endfunction
 %! assert (theta_max, -3);
 %! assert (rho_max, 4);
 
-%!xtest    # those ones are currently not Matlab compatible
+%!test
 %! [H, theta, rho] = hough (BWx);
 %! H_size = size (H);
 %! [~, max_idx_lin] = max (H(:));
@@ -281,13 +281,13 @@ endfunction
 %! assert (theta_max, -90);
 %! assert (rho_max, -4);
 
-%!xtest    # those ones are currently not Matlab compatible
+%!test
 %! [H, theta, rho] = hough (BWy);
 %! H_size = size (H);
 %! [~, max_idx_lin] = max (H(:));
 %! [max_row, max_column] = ind2sub (size (H), max_idx_lin);
 %! assert (H_size, [27 180]);
-%! assert (max_row, 11);
+%! assert (max_row, 10);
 
 %!demo
 %! BW = zeros (100, 150);
