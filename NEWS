@@ -3,8 +3,10 @@
 
  ** The following functions are new:
 
-      axes2pix              houghlines            houghpeaks
-
+      axes2pix
+      bwpack
+      houghlines
+      houghpeaks
 
  ** The functions entropyfilt, rangefilt, and stdfilt were completely
     incorrect and have now been fixed.
@@ -12,11 +14,11 @@
  ** In function regionprops, "Perimeter" was changed to be compatible with
     Matlab, and "PerimterOld" was added.
 
-
  ** Other functions that have been changed for smaller bugfixes, increased
     Matlab compatibility, or performance:
 
-    graythresh            hough_line
+    graythresh
+    hough_line
 
 
  Summary of important user-visible changes for image 2.8.1 (2018/10/26):

@@ -50,6 +50,7 @@ Black and white image functions
  bwlabel
  bwlabeln
  bwmorph
+ bwpack
  bwperim
  bwpropfilt
  bwselect
