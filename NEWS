@@ -3,7 +3,8 @@
 
  ** The following functions are new:
 
-      axes2pix
+      axes2pix              houghlines            houghpeaks
+
 
  ** The functions entropyfilt, rangefilt, and stdfilt were completely
     incorrect and have now been fixed.

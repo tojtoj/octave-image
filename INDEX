@@ -13,6 +13,8 @@ Analysis and Statistics
  qtsetblk
  graycomatrix
  hough
+ houghlines
+ houghpeaks
  houghtf
  hough_line
  hough_circle
