@@ -70,3 +70,32 @@ endfunction
 %!test
 %! im = rangefilt (ones (5));
 %! assert (im, zeros (5));
+
+## some (Matlab compatible) tests on simple 2D-images:
+%!test
+%! A = zeros (3,3);
+%! B = ones (3,3);
+%! C = [1 1 1; 2 2 2; 3 3 3];
+%! D = C';
+%! E = ones (3,3);
+%! E(2,2) = 2;
+%! F = 3 .* ones (3,3);
+%! F(2,2) = 1;
+%! G = [-1 2 7; -5 2 8; -7 pi 9];
+%! H = [5 2 8; 1 -3 1; 5 1 0];
+%! A_out = [0 0 0; 0 0 0; 0 0 0];
+%! B_out = [0 0 0; 0 0 0; 0 0 0];
+%! C_out = [1 1 1; 2 2 2; 1 1 1];
+%! D_out = [1 2 1; 1 2 1; 1 2 1];
+%! E_out = [1 1 1; 1 1 1; 1 1 1];
+%! F_out = [2 2 2; 2 2 2; 2 2 2];
+%! G_out = [7 13 6; 7+pi 16 7; 7+pi 16 7];
+%! H_out = [8 11 11; 8 11 11; 8 8 4];
+%! assert (rangefilt (A), A_out)
+%! assert (rangefilt (B), B_out)
+%! assert (rangefilt (C), C_out)
+%! assert (rangefilt (D), D_out)
+%! assert (rangefilt (E), E_out)
+%! assert (rangefilt (F), F_out)
+%! assert (rangefilt (G), G_out, eps)
+%! assert (rangefilt (H), H_out)
