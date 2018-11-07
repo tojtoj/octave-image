@@ -15,23 +15,23 @@
 ## <https://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn {} {@var{bwp} =} bwpack (@var{bw})
+## @deftypefn {} {} bwpack (@var{bw})
 ## Pack binary image.
 ##
-## Packs binary image @var{bw} along the first (vertical) dimension so that
-## each column of every 32 rows represents bit values of a single uint32
-## integer.  The first row corresponds to the least significant bit and the
-## 32th row corresponds to the most significant bit.
+## Packs binary image @var{bw} into an array of 32 bit unsigned
+## integers.  Each 32 elements of @var{bw} are packed into a uint32
+## integer, the first row corresponding to the least significant bit
+## and the 32th row corresponding to the most significant bit.
 ##
-## The original image is zero-padded if its height isn't an exact multiple
-## of 32.  It is thus necessary to remember the height of the original image
-## in order to retrieve it from the packed version (e.g. by calling bwunpack).
+## Packing is performed along the first dimension (rows), so that each
+## 32 rows on each column correspond to one element in the packed
+## image.  @var{bw} is zero-padded if its height isn't an exact
+## multiple of 32.  It is thus necessary to remember the height of the
+## original image in order to retrieve it from the packed version,
+## e.g. by calling @code{bwunpack}.
 ##
-## @var{bw} can be scalar or n-dimensional real matrix so it is possible to
-## pack multiple binary 2-D images at once.  Nonzero elements of @var{bw} are
-## treated as 1 (true). Outputs uint32 matrix @var{bwp}.
-##
-## Implementation note: bwpack uses bitpack internally.
+## @var{bw} is converted to logical before packing, non-zero elements
+## being converted to @code{true}.
 ##
 ## @seealso{bwunpack, bitpack, bitunpack}
 ## @end deftypefn
@@ -41,32 +41,46 @@ function bw = bwpack (bw)
     print_usage ();
   endif
 
-  if (! isreal (bw))
-    error ("Octave:invalid-input-arg", "bwpack: BW must be a real valued matrix");
-  endif
+  try
+    bw = logical (bw);
+  catch
+    error ("Octave:invalid-input-arg",
+           "bwpack: BW must be logical or conversible to logical")
+  end_try_catch
 
-  dim = size (bw);
   class_size = 32; # number of pixels packed into a single unsigned int
 
-  ## pad input with zeros if heigh isn't an exact multiple of class_size
-  if (dim(1) > 0 && mod (dim(1), class_size) > 0)
-    pad_size = class_size - mod (dim(1), class_size);
-    bw = padarray (bw, pad_size, "post");
+  dims = size (bw);
+  out_nrows = ceil (dims(1) / class_size);
+
+  in_nrows = out_nrows * class_size;
+  if (in_nrows != dims(1))
+    bw = resize (bw, [in_nrows dims(2:end)]);
   endif
 
-  bw = logical (bw);
-  new_dim = dim;
-  new_dim(1) = ceil (dim(1) / class_size);
-
-  bw = reshape (bitpack (bw(:), "uint32"), new_dim);
+  bw = reshape (bitpack (bw(:), "uint32"), [out_nrows dims(2:end)]);
 endfunction
 
-## test argument checking
-%!error id=Octave:invalid-fun-call bwpack()
-%!error id=Octave:invalid-input-arg bwpack(j * ones(3, 4))
+%!error id=Octave:invalid-fun-call bwpack ()
+%!error id=Octave:invalid-input-arg bwpack ("text")
 
-## simple cases
-%!assert (bwpack([]), uint32([]))
-%!assert (bwpack(eye(5)), uint32([1, 2, 4, 8, 16]))
-%!assert (bwpack([eye(8); eye(8); eye(8); eye(8)]), uint32([16843009, 33686018, 67372036, 134744072, 269488144, 538976288, 1077952576, 2155905152]))
-%!assert (bwpack(ones(3, 3, 3, 3)), uint32(7 * ones(1, 3, 3, 3)))
+%!assert (bwpack (eye (5)), uint32 ([1 2 4 8 16]))
+
+%!assert (bwpack (repmat (eye (4), 15, 1)),
+%!        uint32 ([286331153    572662306    1145324612    2290649224
+%!                  17895697     35791394      71582788     143165576]))
+
+%!assert (bwpack (ones (3, 3, 3, 3)), repmat (uint32 (7), 1, 3, 3, 3))
+
+%!assert (bwpack (false (0, 10)), uint32 (zeros (0, 10)))
+%!assert (bwpack (false (0, 0)), uint32 (zeros (0, 0)))
+%!assert (bwpack (false (32, 0)), uint32 (zeros (1, 0)))
+%!assert (bwpack (false (33, 0)), uint32 (zeros (2, 0)))
+%!assert (bwpack (false (0, 10, 3)), uint32 (zeros (0, 10, 3)))
+%!assert (bwpack (false (33, 0, 3)), uint32 (zeros (2, 0, 3)))
+
+## This would error in Matlab but works in Octave.  Reason is that
+## `logical (i)` fails in Matlab so `bwpack (i)` makes no sense and
+## fails too. However, `logical (i)` works fine in Octave so `bwpack
+## (i)` must also work.
+%!assert (bwpack (i), bwpack (logical (i)))
