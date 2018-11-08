@@ -226,7 +226,7 @@ function [thresh] = otsu (ihist, compute_good)
   ## made for values "greater or equal than" but that is not the case (in im2bw
   ## and also not ImageJ) so we subtract 1 at the end.
 
-  if (numel (ihist) == 1)
+  if (numel (ihist) == 1 || sum (ihist) == 0)
     thresh{1} = 0;
     thresh{2} = 0;
     return;
