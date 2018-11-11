@@ -15,6 +15,9 @@
  ** In function regionprops, "Perimeter" was changed to be compatible with
     Matlab, and "PerimterOld" was added.
 
+ ** In function regionprops, properties ConvexHull, ConvexImage, 
+    ConvexArea and Solidity were added
+
  ** Other functions that have been changed for smaller bugfixes, increased
     Matlab compatibility, or performance:
 

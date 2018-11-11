@@ -1,6 +1,6 @@
 ## Copyright (C) 2010 Søren Hauberg <soren@hauberg.org>
 ## Copyright (C) 2012 Jordi Gutiérrez Hermoso <jordigh@octave.org>
-## Copyright (C) 2015 Hartmut Gimpel <hg_code@gmx.de>
+## Copyright (C) 2015, 2017 Hartmut Gimpel <hg_code@gmx.de>
 ## Copyright (C) 2015 Carnë Draug <carandraug@octave.org>
 ##
 ## This program is free software; you can redistribute it and/or modify it under
@@ -98,7 +98,7 @@
 ## @code{bwarea} where each pixel has different weights.
 ##
 ## @item @qcode{"BoundingBox"}
-## The smalles rectangle that encloses the region.  This is represented
+## The smallest rectangle that encloses the region.  This is represented
 ## as a row vector such as
 ## @code{[x y z @dots{} x_length y_length z_length @dots{}]}.
 ##
@@ -111,6 +111,22 @@
 ## @item @qcode{"Centroid"}
 ## The coordinates for the region centre of mass.  This is a row vector
 ## with one element per dimension, such as @code{[x y z @dots{}]}.
+##
+## @item @qcode{"ConvexArea"}
+## Number of pixels in the ConvexImage.
+## Only supported for 2D images.
+##
+## @item @qcode{"ConvexHull"}
+## The coordinates of the smallest convex polygon that fully encloses
+## the region. Returns a m*2 matrix with each row containing the
+## x- and y-coordinate of one corner point of the polygon.
+## Only supported for 2D images. (see also: convhull)
+##
+## @item @qcode{"ConvexImage"}
+## A binary image containing all pixels inside the convex hull. The
+## size of this image is the bounding box. Only supported for
+## 2D images.
+## (see also: poly2mask)
 ##
 ## @item @qcode{"Eccentricity"}
 ## The eccentricity of the ellipse that has the same normalized
@@ -183,6 +199,10 @@
 ## The actual pixel values inside each region in a column vector.
 ## Requires a grayscale image @var{I}.
 ##
+## @item @qcode{"Solidity"}
+## Ratio of Area / ConvexArea.
+## Only supported for 2D images.
+##
 ## @item @qcode{"SubarrayIdx"}
 ## A cell array with subscript indices for the bounding box.  This can
 ## be used as @code{@var{I}(@var{props}(@var{p}).SubarrayIdx@{:@})}, where
@@ -211,7 +231,7 @@
 ##
 ## @end table
 ##
-## @seealso{bwlabel, bwperim, bweuler}
+## @seealso{bwlabel, bwperim, bweuler, convhull, poly2mask}
 ## @end deftypefn
 
 function props = regionprops (bw, varargin)
@@ -310,9 +330,9 @@ function props = regionprops (bw, varargin)
     "pixelidxlist",     {{}},
     "pixellist",        {{"pixelidxlist"}},
     "subarrayidx",      {{"boundingbox"}},
-    "convexarea",       {{}},
-    "convexhull",       {{}},
-    "conveximage",      {{}},
+    "convexarea",       {{"conveximage"}},
+    "convexhull",       {{"boundingbox", "image"}},
+    "conveximage",      {{"boundingbox", "convexhull"}},
     "eccentricity",     {{"minoraxislength", "majoraxislength"}},
     "equivdiameter",    {{"area"}},
     "eulernumber",      {{"image"}},
@@ -324,7 +344,7 @@ function props = regionprops (bw, varargin)
     "orientation",      {{"local_ellipse"}},
     "perimeter",        {{}},
     "perimeterold",     {{}},
-    "solidity",         {{}},
+    "solidity",         {{"area", "convexarea"}},
     "maxintensity",     {{"accum_subs", "pixelidxlist"}},
     "meanintensity",    {{"total_intensity", "area"}},
     "minintensity",     {{"accum_subs", "pixelidxlist"}},
@@ -385,11 +405,13 @@ function props = regionprops (bw, varargin)
       case "subarrayidx"
         values.subarrayidx = rp_subarray_idx (cc, values.boundingbox);
       case "convexarea"
-        error ("regionprops: property \"ConvexArea\" not yet implemented");
+        values.convexarea = rp_convex_area (values.conveximage);
       case "convexhull"
-        error ("regionprops: property \"ConvexHull\" not yet implemented");
+        values.convexhull = rp_convex_hull (values.boundingbox,
+                                              values.image);
       case "conveximage"
-        error ("regionprops: property \"ConvexImage\" not yet implemented");
+        values.conveximage = rp_convex_image (values.boundingbox,
+                                              values.convexhull);
       case "eccentricity"
         values.eccentricity = rep_eccentricity (values.minoraxislength,
                                                 values.majoraxislength);
@@ -414,7 +436,7 @@ function props = regionprops (bw, varargin)
       case "perimeterold"
         values.perimeterold = rp_perimeter_old (cc);
       case "solidity"
-        error ("regionprops: property \"Solidity\" not yet implemented");
+        values.solidity = rp_solidity (values.area, values.convexarea);
       case "maxintensity"
         values.maxintensity = rp_max_intensity (cc, img,
                                                 values.pixelidxlist,
@@ -472,9 +494,12 @@ function props = regionprops (bw, varargin)
         [props.PixelList] = mat2cell (values.pixellist, Area){:};
       case "subarrayidx"
         [props.SubarrayIdx] = values.subarrayidx{:};
-#      case "convexarea"
-#      case "convexhull"
-#      case "conveximage"
+      case "convexarea"
+        [props.ConvexArea] = num2cell (values.convexarea){:};
+      case "convexhull"
+          [props.ConvexHull] = values.convexhull{:};
+      case "conveximage"
+          [props.ConvexImage] = values.conveximage{:};
       case "eccentricity"
         [props.Eccentricity] = num2cell (values.eccentricity){:};
       case "equivdiameter"
@@ -496,7 +521,8 @@ function props = regionprops (bw, varargin)
         [props.Perimeter] = num2cell (values.perimeter){:};
       case "perimeterold"
         [props.PerimeterOld] = num2cell (values.perimeterold){:};
-#      case "solidity"
+      case "solidity"
+        [props.Solidity] = num2cell (values.solidity){:};
       case "maxintensity"
         [props.MaxIntensity] = num2cell (values.maxintensity){:};
       case "meanintensity"
@@ -522,9 +548,9 @@ function props = select_properties (props, is_2d, has_gray)
     "centroid",
   };
   persistent props_2d = {
-#    "convexarea",
-#    "convexhull",
-#    "conveximage",
+    "convexarea",
+    "convexhull",
+    "conveximage",
     "eccentricity",
     "equivdiameter",
     "extrema",
@@ -532,7 +558,7 @@ function props = select_properties (props, is_2d, has_gray)
     "minoraxislength",
     "orientation",
     "perimeter",
-#    "solidity",
+    "solidity",
   };
   persistent props_gray = {
     "maxintensity",
@@ -914,6 +940,82 @@ function weighted_centroid = rp_weighted_centroid (cc, img, pixel_list,
   weighted_centroid = accumarray (subs_nd, weighted_pixel_list(:), [no nd]);
 endfunction
 
+function convexhull = rp_convex_hull (boundingbox, image)
+  convexhull = {};
+  for idx = 1:numel (image)
+    ## 1. calculate perimeter image
+    perim_image =  bwperim (image{idx}, 8);
+    if numel (image{idx}) == 1   # work around bug 50153
+      perim_image = [true];
+    endif
+    ## 2. calculate global indices of perimeter pixels
+    [r, c] = find (perim_image);
+    r0 = boundingbox(idx, 2) - 0.5; 
+    c0 = boundingbox(idx, 1) - 0.5;
+    R = r(:) + r0;
+    C = c(:) + c0;
+    RR = [R-0.5; R; R+0.5; R]; # use 4 corners of each pixel
+    CC = [C; C+0.5; C; C-0.5];
+    ## 3. calculate convex hull around those perimeter pixels
+    if (isempty (RR)) 
+      convexhull{idx} = zeros (0,2);
+    else
+      hull_idx = convhull  (RR, CC); # Matlab also gives points along the lines, we don't do that.
+                                                      # (This is also closer to the definition of a 'convex hull'.)
+      convexhull{idx} = [CC, RR](hull_idx, :); 
+    endif
+  endfor
+endfunction
+
+function conveximage = rp_convex_image (boundingbox, convexhull)
+  conveximage = {};
+  for idx = 1:numel (convexhull)
+    ## to work around a Matlab incompatible poly2mask
+    ## (bug #50188, currently does rounding of vertex 
+    ##  coodinates to nearest integer)
+    ## we do the following (see Matlab help for poly2mask):
+    ## * subdivide each pixel into 5*5 pieces
+    ## * make the pixel part of the convex image if
+    ##    more than half of its pieces are inside the hull
+    ## (This uses 25 times more memory as the region itself.
+    ##  There might be a more memory saving way to do this.)
+    M = boundingbox(idx, 4) * 5;
+    N = boundingbox(idx, 3)* 5;
+    hull = convexhull{idx} * 5;
+    if (isempty (hull))
+        conveximage{idx} = false (M/5,N/5);
+    else
+        y0 = boundingbox(idx, 2) * 5;
+        x0 = boundingbox(idx, 1) * 5;
+        Y = hull(:,2) - y0 + 0;
+        X = hull(:,1) - x0 + 0;
+        X = round (X); # reason: independence of bug #50188
+        Y = round (Y); 
+        cimage5 = poly2mask (X,Y,M,N);
+        collect = zeros (5, 5, M/5, N/5);
+        for m = 1:5
+            for n = 1:5
+                collect(m, n, :, :) = cimage5(m:5:end, n:5:end);
+            endfor
+        endfor
+        summed = sum (sum (collect,1), 2);
+        conveximage{idx} = reshape (summed, M/5, N/5) > 25*0.5;  
+      endif
+  endfor
+endfunction
+
+function convexarea = rp_convex_area (conveximage)
+  n = numel  (conveximage);
+  convexarea = zeros (n);
+  for idx = 1:n
+    convexarea(idx) = sum (conveximage{idx}(:));
+    endfor;
+endfunction
+
+function solidity = rp_solidity (area, convexarea)
+  solidity = area ./ convexarea;
+  solidity(area == 0) = NaN;
+endfunction
 
 ##
 ## Intermediary steps -- no match to specific property
@@ -1511,6 +1613,204 @@ endfunction
 %!assert (regionprops (bwconncomp (bw2d_insides), "Perimeter"),
 %!        struct ("Perimeter", {19.236; 3.556}))
 
+## Test ConvexHull, ConvexImage, ConvexArea and Solidity
+%!test
+%! BW = false (5);
+%! BW(2:4, 2:4) = true;    # region with simple shape
+%! hull_test = [4.5 4; 4.5 2; 4 1.5; 2 1.5; 1.5 2; 1.5 4; 2 4.5; 4 4.5];
+%! cimage_test = true(3);
+%! carea_test = 9;
+%! csolid_test = 1;
+%! props = regionprops (BW, {'ConvexHull', 'ConvexImage', 'ConvexArea', 'Solidity'});
+%! hull = props.ConvexHull;
+%! # test only for existence of the correct corner points
+%! # because Matlab returns more points (than necessary)
+%! # (The correct shape of the ConvexHull results will only
+%! #  be tested indirectly via the tests of ConvexArea.)
+%! assert (sum (ismember (hull_test, hull, "rows")), rows (hull_test))
+%! assert (all (hull(1,:) == hull(end,:)))
+%! cimage = props.ConvexImage;
+%! assert (cimage, cimage_test);
+%! carea = props.ConvexArea;
+%! assert (carea, carea_test);
+%! csolid = props.Solidity;
+%! assert (csolid, csolid_test);
+
+%!test
+%! BW = logical ([...   # region with non-trivial shape
+%!  0 0 0 0 0 0 0 0 0 0 0 0 0 0
+%!  0 0 0 1 1 1 1 0 0 0 0 0 0 0
+%!  0 0 1 1 1 1 1 0 0 0 0 0 0 0
+%!  0 1 1 1 1 1 1 0 0 0 0 0 0 0
+%!  0 0 1 1 1 1 1 1 1 1 1 0 0 0
+%!  0 0 0 1 1 1 1 1 1 1 1 1 0 0
+%!  0 0 0 0 1 1 1 1 1 1 1 1 1 0
+%!  0 0 0 0 0 1 1 1 0 1 1 1 1 0
+%!  0 0 0 0 0 0 1 0 0 0 1 1 1 0
+%!  0 0 0 0 0 0 0 0 0 0 0 0 0 0]);
+%! hull_test = [4 1.5; 1.5 4; 7 9.5; 13 9.5; 13.5 9; 13.5 7; 11 4.5; 7 1.5];
+%! cimage_test = logical ([...
+%!  0 0 1 1 1 1 0 0 0 0 0 0
+%!  0 1 1 1 1 1 1 1 0 0 0 0
+%!  1 1 1 1 1 1 1 1 1 0 0 0
+%!  0 1 1 1 1 1 1 1 1 1 0 0
+%!  0 0 1 1 1 1 1 1 1 1 1 0
+%!  0 0 0 1 1 1 1 1 1 1 1 1
+%!  0 0 0 0 1 1 1 1 1 1 1 1
+%!  0 0 0 0 0 1 1 1 1 1 1 1]);
+%! carea_test = 62;
+%! csolid_test = 0.8548;
+%! props = regionprops (BW, {'ConvexHull', 'ConvexImage', 'ConvexArea', 'Solidity'});
+%! hull = props.ConvexHull;
+%! assert (sum (ismember (hull_test, hull, "rows")), rows (hull_test))
+%! assert (all (hull(1,:) == hull(end,:)))
+%! cimage = props.ConvexImage;
+%! assert (cimage, cimage_test);
+%! carea = props.ConvexArea;
+%! assert (carea, carea_test);
+%! csolid = props.Solidity;
+%! assert (csolid, csolid_test, 1e-4);
+
+%!test
+%! BW = false (7);
+%! BW(2:6, 2:6) = true;
+%! BW(4,4) = false;     # region with hole
+%! hull_test = [6.5 6; 6.5 2; 6 1.5; 2 1.5; 1.5 2; 1.5 6; 2 6.5; 6 6.5];
+%! cimage_test = true(5);
+%! carea_test = 25;
+%! csolid_test = 0.96;
+%! props = regionprops (BW, {'ConvexHull', 'ConvexImage', 'ConvexArea', 'Solidity'});
+%! hull = props.ConvexHull;
+%! assert (sum (ismember (hull_test, hull, "rows")), rows (hull_test))
+%! assert (all (hull(1,:) == hull(end,:)))
+%! cimage = props.ConvexImage;
+%! assert (cimage, cimage_test);
+%! carea = props.ConvexArea;
+%! assert (carea, carea_test);
+%! csolid = props.Solidity;
+%! assert (csolid, csolid_test, 1e-4);
+
+%!test
+%! BW = false (5);
+%! BW(3, 3) = true;     # region with single pixel
+%! hull_test = [3.5 3; 3 2.5; 2.5 3];
+%! cimage_test = true;
+%! carea_test = 1;
+%! csolid_test = 1;
+%! props = regionprops (BW, {'ConvexHull', 'ConvexImage', 'ConvexArea', 'Solidity'});
+%! hull = props.ConvexHull;
+%! assert (sum (ismember (hull_test, hull, "rows")), rows (hull_test))
+%! assert (all (hull(1,:) == hull(end,:)))
+%! cimage = props.ConvexImage;
+%! assert (cimage, cimage_test);
+%! carea = props.ConvexArea;
+%! assert (carea, carea_test);
+%! csolid = props.Solidity;
+%! assert (csolid, csolid_test);
+
+%!test
+%! BW = false (5);
+%! BW(3, 2:4) = true;     # regions with pixel line
+%! BW2 = BW';
+%! hull_test =  [2 2.5; 1.5 3; 2 3.5; 4 3.5; 4.5 3; 4 2.5];
+%! hull_test2 = fliplr (hull_test);
+%! cimage_test = true(1,3);
+%! cimage_test2 = cimage_test';
+%! carea_test = 3;
+%! csolid_test = 1;
+%! props = regionprops (BW, {'ConvexHull', 'ConvexImage', 'ConvexArea', 'Solidity'});
+%! hull = props.ConvexHull;
+%! assert (sum (ismember (hull_test, hull, "rows")), rows (hull_test))
+%! assert (all (hull(1,:) == hull(end,:)))
+%! cimage = props.ConvexImage;
+%! assert (cimage, cimage_test);
+%! carea = props.ConvexArea;
+%! assert (carea, carea_test);
+%! csolid = props.Solidity;
+%! assert (csolid, csolid_test);
+%! props2 = regionprops (BW2, {'ConvexHull', 'ConvexImage', 'ConvexArea', 'Solidity'});
+%! hull2 = props2.ConvexHull;
+%! assert (sum (ismember (hull_test2, hull2, "rows")), rows (hull_test2))
+%! assert (all (hull2(1,:) == hull2(end,:)))
+%! cimage2 = props2.ConvexImage;
+%! assert (cimage2, cimage_test2);
+%! carea2 = props2.ConvexArea;
+%! assert (carea2, carea_test);
+%! csolid2 = props2.Solidity;
+%! assert (csolid2, csolid_test);
+
+%!test
+%! BW = logical ([ ...
+%! 1 0 1 0
+%! 1 0 1 0
+%! 1 0 1 0
+%! 1 0 1 0]);     # two seperate regions
+%! hull_test_1 = [1.5 1; 1 0.5; 0.5 1; 0.5 4; 1 4.5; 1.5 4];
+%! hull_test_2 = [3.5 1; 3 0.5; 2.5 1; 2.5 4; 3 4.5; 3.5 4];
+%! cimage_test_1 = true(4,1);
+%! cimage_test_2 = true(4,1);
+%! carea_test1 = 4;
+%! carea_test2 = 4;
+%! csolid_test1 = 1;
+%! csolid_test2 = 1;
+%! props = regionprops (BW, {'ConvexHull', 'ConvexImage', 'ConvexArea', 'Solidity'});
+%! hull1 = {props.ConvexHull}{1};
+%! assert (sum (ismember (hull_test_1, hull1, "rows")), rows (hull_test_1))
+%! assert (all (hull1(1,:) == hull1(end,:)))
+%! hull2 = {props.ConvexHull}{2};
+%! assert (sum (ismember (hull_test_2, hull2, "rows")), rows (hull_test_2))
+%! assert (all (hull2(1,:) == hull2(end,:)))
+%! cimage1 = {props.ConvexImage}{1};
+%! assert (cimage1, cimage_test_1);
+%! cimage2 = {props.ConvexImage}{2};
+%! assert (cimage2, cimage_test_2);
+%! carea1 = {props.ConvexArea}{1};
+%! assert (carea1, carea_test1);
+%! carea2 = {props.ConvexArea}{2};
+%! assert (carea2, carea_test2);
+%! csolid1 = {props.Solidity}{1};
+%! assert (csolid1, csolid_test1);
+%! csolid2 = {props.Solidity}{2};
+%! assert (csolid2, csolid_test2);
+
+%!test
+%! L = zeros (5);
+%! L(1:2:5, :) = 1;    # labelled region with 3 disconnected parts
+%! hull_test =  [5.5 5; 5.5 1; 5 0.5; 1 0.5; 0.5 1; 0.5 5; 1 5.5; 5 5.5];
+%! cimage_test = true(5);
+%! carea_test = 25;
+%! csolid_test = 0.6;
+%! props = regionprops (L, {'ConvexHull', 'ConvexImage', 'ConvexArea', 'Solidity'});
+%! hull = props.ConvexHull;
+%! assert (sum (ismember (hull_test, hull, "rows")), rows (hull_test))
+%! assert (all (hull(1,:) == hull(end,:)))
+%! cimage = props.ConvexImage;
+%! assert (cimage, cimage_test);
+%! carea = props.ConvexArea;
+%! assert (carea, carea_test);
+%! csolid = props.Solidity;
+%! assert (csolid, csolid_test);
+
+%!xtest <50188>     # Matlab compatible, currently fails because of bug #50188
+%! BW = false(4,16);
+%! BW(2,2) = true;
+%! BW(3,2:end-1) = true  # L-shaped region (small angle)
+%! hull_test = [2 1.5; 1.5 2; 1.5 3; 2 3.5; 15 3.5; 15.5 3; 15 2.5];
+%! cimage_test = true (2,14);
+%! cimage_test(1, 8:end) = false;  # this is the Matlab result
+%! carea_test = 21;
+%! csolid_test = 0.7143;
+%! props = regionprops (BW, {'ConvexHull', 'ConvexImage', 'ConvexArea', 'Solidity'});
+%! hull = props.ConvexHull;
+%! assert (sum (ismember (hull_test, hull, "rows")), rows (hull_test))
+%! assert (all (hull(1,:) == hull(end,:)))
+%! cimage = props.ConvexImage;
+%! assert (cimage, cimage_test);
+%! carea = props.ConvexArea;
+%! assert (carea, carea_test);
+%! csolid = props.Solidity;
+%! assert (csolid, csolid_test, 1e-4);
+
 ## Test guessing between labelled and binary image
 %!assert (regionprops ([1 0 1; 1 0 1], "Area"), struct ("Area", 4))
 %!assert (regionprops ([1 0 2; 1 1 2], "Area"), struct ("Area", {3; 2}))
@@ -1601,10 +1901,6 @@ endfunction
 %!error <L must be non-negative integers only>
 %!      regionprops (int8 ([0 -1 3 4; 0 -1 3 4]))
 
-%!error <not yet implemented> regionprops (rand (5, 5) > 0.5, "ConvexArea")
-%!error <not yet implemented> regionprops (rand (5, 5) > 0.5, "ConvexHull")
-%!error <not yet implemented> regionprops (rand (5, 5) > 0.5, "ConvexImage")
-%!error <not yet implemented> regionprops (rand (5, 5) > 0.5, "Solidity")
 %!test # bug #52926
 %! ## Perimeter of objects that would be connected with connectivity 8
 %! ## but have been labeled with connectivity 4.
