@@ -75,7 +75,7 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
        error ("bwfill: first input argument must be a matrix");
        return retval;
      }
-     
+
   const int imM = im.rows ();
   const int imN = im.columns ();
 
@@ -91,6 +91,7 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
   bool fillmode= false;
   if (args (1).is_string () && args (1).string_value () == "holes")
     {
+      // usage: bwfill (A, "holes", [N])
       fillmode= true;
 
       npoints= 2 * (imM + imN - 4); // don't start fill from corners
@@ -117,8 +118,12 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
       if (nargin >= 3)
          nb = (int)args (2).double_value ();
      }
-  else // end: holes mode?
+  else
     {
+      // usage: bwfill (A, C, R, [N])
+      if (nargin < 3)
+        print_usage ();
+
       {
         ColumnVector tmp (args (1).vector_value ());
         if (error_state)
@@ -140,7 +145,7 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
       npoints= xseed.numel ();
       if (nargin >= 4)
         nb = (int)args (3).double_value ();
-  } // holes mode?
+  }
 
 /*
  * put a one pixel thick boundary around the image
@@ -183,12 +188,12 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
     {
       npoints--;
       int pt = ptstack[npoints];
-      
+
       checkpoint (pt + ptLF, imo.data (), ptstack.data (), &npoints);
       checkpoint (pt + ptRT, imo.data (), ptstack.data (), &npoints);
       checkpoint (pt + ptUP, imo.data (), ptstack.data (), &npoints);
       checkpoint (pt + ptDN, imo.data (), ptstack.data (), &npoints);
-      
+
       if (nb==8)
         {
           checkpoint (pt + ptLF + ptUP, imo.data (), ptstack.data (), &npoints);
@@ -233,3 +238,7 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
     retval (1)= ColumnVector (0);
   return retval;
 }
+
+/*
+%!error id=Octave:invalid-fun-call bwfill (rand (5) > 0.5, 2)
+*/
