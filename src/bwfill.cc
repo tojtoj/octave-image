@@ -47,6 +47,9 @@ be a starting point for a flood-fill operation.\n\
 The argument @var{n} changes the neighborhood connectivity (of the holes) for the flood-fill\n\
 operation. @var{n} can be either 4 or 8, and has a default value of 8.\n\
 \n\
+Note that  @var{n} is the connectivity of the foreground, and not of the background,\n\
+even though the function acts on the background.\n\
+\n\
 The output is the processed image @var{bw2} and the indexes of the filled\n\
 pixels @var{idx}\n\
 \n\
@@ -54,6 +57,8 @@ pixels @var{idx}\n\
 @deftypefn {Loadable Function} {[@var{bw2}, @var{idx}] =} bwfill(@var{bw1}, \"holes\", @var{n})\n\
 If the string \"holes\" is given instead of starting points for the flood-fill\n\
 operation, the function finds interior holes in @var{bw1} and fills them.\n\
+\n\
+Note: bwfill is not recommended. Please use \"imfill\" instead.\n\
 @seealso{imfill}\n\
 @end deftypefn\n\
 ")
@@ -63,7 +68,7 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
   ColumnVector xseed, yseed ;
   const int nargin = args.length ();
 
-  if (nargin < 2 )
+  if (nargin < 2 || nargin > 4)
     {
       print_usage ();
       return retval;
@@ -81,25 +86,30 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
 
   if (imM == 1 || imN == 1) // check for vector inputs.
      {
-       retval (0)= im;
-       retval (1)= ColumnVector (0);
+       retval (0) = im;
+       retval (1) = ColumnVector (0);
        return retval;
      }
 
   int nb = 8;
   int npoints = 0;
-  bool fillmode= false;
+  bool fillmode = false;
   if (args (1).is_string () && args (1).string_value () == "holes")
     {
       // usage: bwfill (A, "holes", [N])
-      fillmode= true;
+     if (nargin > 3)
+      {
+         print_usage ();
+         return retval;
+      }
+      fillmode = true;
 
-      npoints= 2 * (imM + imN - 4); // don't start fill from corners
+      npoints = 2 * (imM + imN - 4); // don't start fill from corners
 
       xseed = ColumnVector (npoints);
       yseed = ColumnVector (npoints);
-      int idx= 0;
-      for (int j=2; j<= imN-1; j++)
+      int idx = 0;
+      for (int j = 2; j <= imN-1; j++)
         {
           xseed (idx)   = j;
           yseed (idx++) = 1;
@@ -107,7 +117,7 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
           yseed (idx++) = imM;
         }
 
-      for (int i=2; i<= imM-1; i++)
+      for (int i = 2; i <= imM-1; i++)
         {
           yseed (idx)   = i;
           xseed (idx++) = 1;
@@ -116,8 +126,15 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
         }
 
       if (nargin >= 3)
-         nb = (int)args (2).double_value ();
-     }
+        {
+          nb = (int)args (2).double_value ();
+          if (nb != 4 && nb != 8) 
+            {
+               error ("bwfill: connectivity must be 4 or 8");
+               return retval;              
+            }
+        }
+    }
   else
     {
       // usage: bwfill (A, C, R, [N])
@@ -144,7 +161,14 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
       }
       npoints= xseed.numel ();
       if (nargin >= 4)
-        nb = (int)args (3).double_value ();
+        {
+           nb = (int)args (3).double_value ();
+          if (nb != 4 && nb != 8) 
+            {
+               error ("bwfill: connectivity must be 4 or 8");
+               return retval;              
+            }
+        }
   }
 
 /*
@@ -169,8 +193,8 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
   std::vector<int> ptstack (ioM*imN);
 
   int seedidx = npoints;
-  npoints= 0;
-  while ( (--seedidx) >= 0 )
+  npoints = 0;
+  while ((--seedidx) >= 0)
     {
       // no need to add 1 to convert indexing style because we're adding a boundary
       const int x = xseed (seedidx);
@@ -194,7 +218,7 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
       checkpoint (pt + ptUP, imo.data (), ptstack.data (), &npoints);
       checkpoint (pt + ptDN, imo.data (), ptstack.data (), &npoints);
 
-      if (nb==8)
+      if (nb==4)
         {
           checkpoint (pt + ptLF + ptUP, imo.data (), ptstack.data (), &npoints);
           checkpoint (pt + ptRT + ptUP, imo.data (), ptstack.data (), &npoints);
@@ -203,7 +227,7 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
         }
     } // while ( npoints > 0)
 
-  boolNDArray imout ( dim_vector (imM, imN));
+  boolNDArray imout (dim_vector (imM, imN));
   ColumnVector idxout (imM*imN);
   int idx = 0;
 
@@ -230,15 +254,47 @@ operation, the function finds interior holes in @var{bw1} and fills them.\n\
       imout(i,j) = (double) imo[i + ioM*j];
   */
 
-  retval (0)= imout;
+  retval (0) = imout;
   // we need to do this to be able to return a proper empty vector
   if (idx > 0)
-    retval (1)= idxout.extract (0, idx-1);
+    retval (1) = idxout.extract (0, idx-1);
   else
-    retval (1)= ColumnVector (0);
+    retval (1) = ColumnVector (0);
   return retval;
 }
 
 /*
+%!test
+%! A = [0 1 0 0 1; 1 0 1 0 0; 1 0 1 1 0; 1 1 1 0 0; 1 0 0 1 0];
+%! R4 = logical(ones(5));
+%! R8 = logical([1 1 0 0 1; 1 0 1 0 0; 1 0 1 1 0; 1 1 1 0 0; 1 0 0 1 0]);
+%! assert (bwfill (A,1,1,4), R4)
+%! assert (bwfill (A,1,1,8), R8)
+%! assert (bwfill (A,1,1), R8)
+%! B = logical([0 1 0 0 1; 1 0 1 0 0; 1 0 1 1 0; 1 1 1 0 0; 1 0 0 1 0]);
+%! assert (bwfill (A,3,3,4), B)
+%! assert (bwfill (A,3,3,8), B)
+%! assert (bwfill (A,3,3), B)
+%! C = logical ([0 1 1 1 1; 1 0 1 1 1; 1 0 1 1 1; 1 1 1 1 1; 1 0 0 1 1]);
+%! assert (bwfill (A,3,1,8), C)
+%! assert (bwfill (A,3,1,4), R4)
+%! assert (bwfill (A, [3 1], [1 3], 4), R4);
+%! D = logical([0 1 1 1 1; 1 0 1 1 1; 1 0 1 1 1; 1 1 1 1 1; 1 0 0 1 1]);
+%! assert (bwfill (A, [3 1], [1 3], 8), D);
+%! assert (bwfill (A, [3 1], [1 3]), D);
+%! E = logical ([0 1 0 0 1; 1 0 1 0 0; 1 0 1 1 0; 1 1 1 0 0; 1 0 0 1 0]);
+%! assert (bwfill (A, "holes", 4), E);
+%! F = logical ([1 1 0 0 1; 1 1 1 0 0; 1 1 1 1 0; 1 1 1 0 0; 1 0 0 1 0]); 
+%! assert (bwfill (A, "holes", 8), F);
+%! assert (bwfill (A, "holes"), F);
+
+%!error id=Octave:invalid-fun-call bwfill ()
+%!error id=Octave:invalid-fun-call bwfill ("aaa")
+%!error id=Octave:invalid-fun-call bwfill (rand (5) > 0.5)
 %!error id=Octave:invalid-fun-call bwfill (rand (5) > 0.5, 2)
+%!error <bwfill: connectivity must be 4 or 8> bwfill (rand (5) > 0.5, "holes", 1)
+%!error <bwfill: connectivity must be 4 or 8> bwfill (rand (5) > 0.5, 2, 2, 5)
+%!error id=Octave:invalid-fun-call bwfill (rand (5) > 0.5, "xxx")
+%!error id=Octave:invalid-fun-call bwfill (rand (5) > 0.5, 2, 2, 4, 5)
+%!error id=Octave:invalid-fun-call bwfill (rand (5) > 0.5, "holes", 4, 2)
 */
