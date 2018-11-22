@@ -12,22 +12,22 @@
  ** The functions entropyfilt, rangefilt, and stdfilt were completely
     incorrect and have now been fixed.
 
- ** In function regionprops, "Perimeter" was changed to be compatible with
-    Matlab, and "PerimterOld" was added.
+ ** In function regionprops, "Perimeter" was changed to be compatible
+    with Matlab, and "PerimterOld" was added.
 
- ** In function regionprops, properties "ConvexHull", "ConvexImage", 
+ ** In function regionprops, properties "ConvexHull", "ConvexImage",
     "ConvexArea" and "Solidity" were added.
 
- ** In function bwfill, the usage of parameter connectivity was changed 
-    such that it specifies the connectedness of the foreground and 
-    not of the background, as it used to be. 
-    This change was done to increase Matlab compatibility.
-	
- ** Other functions that have been changed for smaller bugfixes, increased
-    Matlab compatibility, or performance:
+ ** In function bwfill, the usage of parameter connectivity was
+    changed such that it specifies the connectedness of the foreground
+    and not of the background, as it used to be.  This change was done
+    to increase Matlab compatibility.
 
-    graythresh
-    hough_line
+ ** Other functions that have been changed for smaller bugfixes,
+    increased Matlab compatibility, or performance:
+
+      graythresh
+      hough_line
 
 
  Summary of important user-visible changes for image 2.8.1 (2018/10/26):
@@ -462,7 +462,7 @@ Summary of important user-visible changes for image 2.6.2 (2017/11/09):
     threshold value (within class variance).
 
  ** Alternative algorithms for automatic threshold have been implemented in
-    `graythresh' (thanks to Antti Niemistö for releasing HistThresh toolbox 
+    `graythresh' (thanks to Antti Niemistö for releasing HistThresh toolbox
     http://www.cs.tut.fi/~ant/histthresh/ from where many were ported, under a
     GPL license). Currently, the following algorithms have been implemented
     (see graythresh for notes and references):
