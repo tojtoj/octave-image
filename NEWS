@@ -6,6 +6,7 @@
       axes2pix
       bwpack
       bwunpack
+      colorangle
       houghlines
       houghpeaks
 

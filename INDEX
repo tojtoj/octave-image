@@ -59,6 +59,7 @@ Black and white image functions
  labelmatrix
  makelut
 Colour maps and Colour controls
+ colorangle
  colorgradient
  rgb2ycbcr
  wavelength2rgb
