@@ -67,16 +67,10 @@ function retval = entropyfilt (I, domain = true (9), padding = "symmetric", vara
   endif
 
   ## Convert to 8 or 16 bit integers if needed
+  ## (accepting single, int8, int16, int32, int64, uint64 is Octave-only)
   switch (class (I))
     case {"double", "single", "int16", "int32", "int64", "uint16", "uint32", "uint64"}
-      min_val = double (min (I (:)));
-      max_val = double (max (I (:)));
-      if (min_val == max_val)
-        retval = zeros (size (I));
-        return;
-      endif
-      I = (double (I) - min_val)./(max_val - min_val);
-      I = uint8 (255 * I);
+      I = im2uint8 (I); # because this is what Matlab seems to do
     case {"logical", "int8", "uint8"}
       ## Do nothing
     otherwise
@@ -113,3 +107,58 @@ endfunction
 
 %!test
 %! assert (entropyfilt (uint8 (ones (10, 10))), zeros (10, 10));
+
+## some (Matlab compatible) tests on simple 2D-images (classes double, uint8, uint16):
+%!test
+%! A = zeros (3,3);
+%! B = ones (3,3);
+%! C = [1 1 1; 2 2 2; 3 3 3];
+%! D = C';
+%! E = ones (3,3);
+%! E(2,2) = 2;
+%! F = 3 .* ones (3,3);
+%! F(2,2) = 1;
+%! G = [-1 2 7; -5 2 8; -7 pi 9];
+%! H = [5 2 8; 1 -3 1; 5 1 0];
+%! Hf = mat2gray(H);
+%! X = uint8(abs(H));
+%! P = [0.2 0.201 0.204; 0.202 0.203 0.205; 0.205 0.206 0.202];
+%! Q = uint16([100 101 103; 100 105 102; 100 102 103]);
+%! R = uint8([1 2 3 4 5; 11 12 13 14 15; 21 22 4 5 6; 5 5 3 2 1; 15 14 14 14 14]);
+%! Aout = zeros (3);
+%! Bout = zeros (3);
+%! Cout = zeros (3);
+%! Dout = zeros (3);
+%! Eout = zeros (3);
+%! Fout = zeros (3);
+%! Gout_1 = -sum([2 7]./9.*log2([2 7]./9));
+%! Gout_2 = -sum([3 6]./9.*log2([3 6]./9));
+%! Gout_3 = -sum([4 5]./9.*log2([4 5]./9));
+%! Gout = [Gout_1 Gout_2 Gout_3; Gout_1 Gout_2 Gout_3; Gout_1 Gout_2 Gout_3];
+%! Hout_5 = -sum([2 7]./9.*log2([2 7]./9)) ;
+%! Hout = [0.8916 0.8256 0.7412; 0.8256 Hout_5 0.6913; 0.7412 0.6913 0.6355];
+%! Hfout_5 =  -sum([3 2 1 1 1 1]./9.*log2([3 2 1 1 1 1]./9));
+%! Hfout = [2.3613 2.3296 2.2252; 2.4571 Hfout_5 2.3090; 2.4805 2.4488 2.3445];
+%! Xout_5 = -sum([1 1 1 1 2 3]./9.*log2([1 1 1 1 2 3]./9));
+%! Xout  = [2.3613 2.3296 2.2252; 2.4571 Xout_5 2.3090; 2.4805 2.4488 2.3445];
+%! Pout_5 = -sum([1 2 6]./9.*log2([1 2 6]./9));
+%! Pout = [1.1137 1.1730 1.2251; 1.1595 Pout_5 1.2774; 1.1556 1.2183 1.2635];
+%! Qout = zeros(3);
+%! Rout = [3.5143 3.5700 3.4871 3.4957 3.4825;
+%!            3.4705 3.5330 3.4341 3.4246 3.3890;
+%!            3.3694 3.4063 3.3279 3.3386 3.3030;
+%!            3.3717 3.4209 3.3396 3.3482 3.3044;
+%!            3.4361 3.5047 3.3999 3.4236 3.3879];
+%! assert (entropyfilt (A), Aout);
+%! assert (entropyfilt (B), Bout);
+%! assert (entropyfilt (C), Cout);
+%! assert (entropyfilt (D), Dout);
+%! assert (entropyfilt (E), Eout);
+%! assert (entropyfilt (F), Fout);
+%! assert (entropyfilt (G), Gout, 1e-4);
+%! assert (entropyfilt (H), Hout, 1e-4);
+%! assert (entropyfilt (Hf), Hfout, 1e-4);
+%! assert (entropyfilt (X), Xout, 1e-4);
+%! assert (entropyfilt (P), Pout, 1e-4);
+%! assert (entropyfilt (Q), Qout);
+%! assert (entropyfilt (R), Rout, 1e-4);
