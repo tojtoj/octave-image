@@ -82,6 +82,11 @@ endfunction
 
 %!function gs = test_grayslice_vector (I, v)
 %!  gs = zeros (size (I));
+%!  if (strcmp (class(I), "uint8"))
+%!    v = v*255;
+%!  elseif (strcmp (class(I), "uint16"))
+%!    v = v*65535;
+%!  end
 %!  for idx = 1:numel (v)
 %!    gs(I >= v(idx)) = idx;
 %!  endfor
@@ -110,7 +115,7 @@ endfunction
 %!assert (grayslice (I3d, [0.3 0.5 0.7]),
 %!        uint8 (test_grayslice_vector (I3d, [0.3 0.5 0.7])))
 
-### FIXME investigate why this sometimes fails
-%!assert (grayslice (im2uint8 (I2d), 3), uint8 (test_grayslice_scalar (I2d, 3)))
-%!assert (grayslice (im2uint16 (I2d), 3), uint8 (test_grayslice_scalar (I2d, 3)))
+%!test
+%!assert (grayslice (im2uint8 (I2d), 3), uint8 (test_grayslice_scalar (im2uint8 (I2d), 3)))
+%!assert (grayslice (im2uint16 (I2d), 3), uint8 (test_grayslice_scalar (im2uint16 (I2d), 3)))
 
