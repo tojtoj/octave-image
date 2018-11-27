@@ -31,6 +31,13 @@
       hough_line
 
 
+ Summary of important user-visible changes for image 2.8.2 (201x/xx/xx):
+-------------------------------------------------------------------------
+
+ ** image 2.8.2 is a patch release.
+
+ ** Fix tests in grayslice. 
+
  Summary of important user-visible changes for image 2.8.1 (2018/10/26):
 -------------------------------------------------------------------------
 
@@ -463,7 +470,7 @@ Summary of important user-visible changes for image 2.6.2 (2017/11/09):
     threshold value (within class variance).
 
  ** Alternative algorithms for automatic threshold have been implemented in
-    `graythresh' (thanks to Antti Niemistö for releasing HistThresh toolbox
+    `graythresh' (thanks to Antti Niemistö for releasing HistThresh toolbox 
     http://www.cs.tut.fi/~ant/histthresh/ from where many were ported, under a
     GPL license). Currently, the following algorithms have been implemented
     (see graythresh for notes and references):
