@@ -27,6 +27,7 @@
  ** Other functions that have been changed for smaller bugfixes,
     increased Matlab compatibility, or performance:
 
+      grayslice
       graythresh
       hough_line
 
