@@ -85,11 +85,11 @@ Note: bwfill is not recommended. Please use \"imfill\" instead.\n\
   const int imN = im.columns ();
 
   if (imM == 1 || imN == 1) // check for vector inputs.
-     {
-       retval (0) = im;
-       retval (1) = ColumnVector (0);
-       return retval;
-     }
+    {
+      retval (0) = im;
+      retval (1) = ColumnVector (0);
+      return retval;
+    }
 
   int nb = 8;
   int npoints = 0;
@@ -97,11 +97,11 @@ Note: bwfill is not recommended. Please use \"imfill\" instead.\n\
   if (args (1).is_string () && args (1).string_value () == "holes")
     {
       // usage: bwfill (A, "holes", [N])
-     if (nargin > 3)
-      {
-         print_usage ();
-         return retval;
-      }
+      if (nargin > 3)
+        {
+          print_usage ();
+          return retval;
+        }
       fillmode = true;
 
       npoints = 2 * (imM + imN - 4); // don't start fill from corners
@@ -126,14 +126,7 @@ Note: bwfill is not recommended. Please use \"imfill\" instead.\n\
         }
 
       if (nargin >= 3)
-        {
-          nb = (int)args (2).double_value ();
-          if (nb != 4 && nb != 8) 
-            {
-               error ("bwfill: connectivity must be 4 or 8");
-               return retval;              
-            }
-        }
+        nb = (int)args (2).double_value ();
     }
   else
     {
@@ -161,15 +154,14 @@ Note: bwfill is not recommended. Please use \"imfill\" instead.\n\
       }
       npoints= xseed.numel ();
       if (nargin >= 4)
-        {
-           nb = (int)args (3).double_value ();
-          if (nb != 4 && nb != 8) 
-            {
-               error ("bwfill: connectivity must be 4 or 8");
-               return retval;              
-            }
-        }
-  }
+        nb = (int)args (3).double_value ();
+    }
+
+  if (nb != 4 && nb != 8)
+    {
+      error ("bwfill: connectivity must be 4 or 8");
+      return retval;
+    }
 
 /*
  * put a one pixel thick boundary around the image
@@ -284,7 +276,7 @@ Note: bwfill is not recommended. Please use \"imfill\" instead.\n\
 %! assert (bwfill (A, [3 1], [1 3]), D);
 %! E = logical ([0 1 0 0 1; 1 0 1 0 0; 1 0 1 1 0; 1 1 1 0 0; 1 0 0 1 0]);
 %! assert (bwfill (A, "holes", 4), E);
-%! F = logical ([1 1 0 0 1; 1 1 1 0 0; 1 1 1 1 0; 1 1 1 0 0; 1 0 0 1 0]); 
+%! F = logical ([1 1 0 0 1; 1 1 1 0 0; 1 1 1 1 0; 1 1 1 0 0; 1 0 0 1 0]);
 %! assert (bwfill (A, "holes", 8), F);
 %! assert (bwfill (A, "holes"), F);
 
