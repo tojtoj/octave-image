@@ -13,6 +13,9 @@
  ** The functions entropyfilt, rangefilt, and stdfilt were completely
     incorrect and have now been fixed.
 
+ ** The function entropy was changed to be Matlab compatible and now gives
+    different results.
+
  ** In function regionprops, "Perimeter" was changed to be compatible
     with Matlab, and "PerimterOld" was added.
 
