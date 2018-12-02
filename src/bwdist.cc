@@ -493,41 +493,63 @@ Currently, only 2D images are supported.\n\
   for (octave_idx_type q = 0; q < octave_idx_type (method.length ()); q++)
     method[q] = tolower (method[q]);
 
-  // Allocate two arrays for temporary output values
-  const int numel = bw.numel ();
-  std::vector<short> xdist (numel, 0);
-  std::vector<short> ydist (numel, 0);
 
-  FloatMatrix dist;
-  if (method == "euclidean")
+  // Special case of there being no foreground element (bug #50874).
+  // Because of the way the function was originally structured,
+  // handling this case as part of the rest gets a bit hairy.
+  if (! (static_cast<boolNDArray>(bw.as_column())).any()(0))
     {
-      dist = calc_distances (euclidean, bw, xdist, ydist);
-      const Array<octave_idx_type> positions = (!bw).find ();
-      const int zpos = positions.numel();
-      const octave_idx_type* pos_vec = positions.fortran_vec ();
-      float* dist_vec = dist.fortran_vec ();
-      for (int i = 0; i < zpos; i++)
-        dist_vec[pos_vec[i]] = sqrt (dist_vec[pos_vec[i]]);
+      FloatMatrix dist (bw.dims (), std::numeric_limits<float>::infinity ());
+      retval(0) = dist;
+
+      // Compute optional 'index to closest object pixel', only if
+      // requested.
+      if (nargout > 1)
+        {
+          if (bw.numel () >= pow (2, 32))
+            retval(1) = uint64NDArray (bw.dims (), 0);
+          else
+            retval(1) = uint32NDArray (bw.dims (), 0);
+        }
     }
-  else if (method == "chessboard")
-    dist = calc_distances (chessboard, bw, xdist, ydist);
-  else if (method == "cityblock")
-    dist = calc_distances (cityblock, bw, xdist, ydist);
-  else if (method == "quasi-euclidean")
-    dist = calc_distances (quasi_euclidean, bw, xdist, ydist);
   else
-    error ("bwdist: unknown METHOD '%s'", method.c_str ());
-
-  retval(0) = dist;
-
-  // Compute optional 'index to closest object pixel', only if
-  // requested
-  if (nargout > 1)
     {
-      if (numel >= pow (2, 32))
-        retval(1) = calc_index<uint64NDArray> (bw, xdist, ydist);
+      // Allocate two arrays for temporary output values
+      const int numel = bw.numel ();
+      std::vector<short> xdist (numel, 0);
+      std::vector<short> ydist (numel, 0);
+
+      FloatMatrix dist;
+      if (method == "euclidean")
+        {
+          dist = calc_distances (euclidean, bw, xdist, ydist);
+          const Array<octave_idx_type> positions = (!bw).find ();
+          const int zpos = positions.numel();
+          const octave_idx_type* pos_vec = positions.fortran_vec ();
+          float* dist_vec = dist.fortran_vec ();
+          for (int i = 0; i < zpos; i++)
+            dist_vec[pos_vec[i]] = sqrt (dist_vec[pos_vec[i]]);
+        }
+      else if (method == "chessboard")
+        dist = calc_distances (chessboard, bw, xdist, ydist);
+      else if (method == "cityblock")
+        dist = calc_distances (cityblock, bw, xdist, ydist);
+      else if (method == "quasi-euclidean")
+        dist = calc_distances (quasi_euclidean, bw, xdist, ydist);
       else
-        retval(1) = calc_index<uint32NDArray> (bw, xdist, ydist);
+        error ("bwdist: unknown METHOD '%s'", method.c_str ());
+
+      retval(0) = dist;
+
+      // Compute optional 'index to closest object pixel', only if
+      // requested
+      if (nargout > 1)
+        {
+          if (numel >= pow (2, 32))
+            retval(1) = calc_index<uint64NDArray> (bw, xdist, ydist);
+          else
+            retval(1) = calc_index<uint32NDArray> (bw, xdist, ydist);
+        }
     }
 
   return retval;
@@ -652,4 +674,17 @@ Currently, only 2D images are supported.\n\
 %! assert (bwdist (bw, "quasi-euclidean"), out);
 
 %!error <unknown METHOD> bwdist (bw, "not a valid method");
+
+%!test
+%! ## Special case of there being no foreground element (bug #50874)
+%! expected_dist = single (Inf (2, 2));
+%! expected_idx = uint32 ([0 0; 0 0]);
+%!
+%! [dist, idx] = bwdist (false (2, 2));
+%! assert (dist, expected_dist)
+%! assert (idx, expected_idx)
+%!
+%! [dist, idx] = bwdist (zeros (2, 2));
+%! assert (dist, expected_dist)
+%! assert (idx, expected_idx)
 */
