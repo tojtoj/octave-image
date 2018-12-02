@@ -493,19 +493,6 @@ Currently, only 2D images are supported.\n\
   for (octave_idx_type q = 0; q < octave_idx_type (method.length ()); q++)
     method[q] = tolower (method[q]);
 
-  if (method.length () <= 2) {
-    static bool warned = false;
-    if (! warned )
-      {
-        warning ("bwdist: specifying METHOD with abbreviation is deprecated");
-        warned = true;
-      }
-    if      (method == "e" ) { method = "euclidean";       }
-    else if (method == "ch") { method = "chessboard";      }
-    else if (method == "ci") { method = "cityblock";       }
-    else if (method == "q" ) { method = "quasi-euclidean"; }
-  }
-
   // Allocate two arrays for temporary output values
   const int numel = bw.numel ();
   std::vector<short> xdist (numel, 0);
