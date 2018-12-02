@@ -687,4 +687,29 @@ Currently, only 2D images are supported.\n\
 %! [dist, idx] = bwdist (zeros (2, 2));
 %! assert (dist, expected_dist)
 %! assert (idx, expected_idx)
+
+%!xtest
+%! ## This is Matlab incompatible because the bottom right corners is
+%! ## equally distant to the top right and bottom left corners.  However,
+%! ## both are correct answers, and the returned value is just
+%! ## implementation dependent.
+%! bw = logical ([
+%!   0 0 1
+%!   0 0 0
+%!   1 0 0
+%! ]);
+%! expected_dist = single ([
+%!    2.0     1.0     0.0
+%!    1.0   sqrt(2)   1.0
+%!    0.0     1.0     2.0
+%! ]);
+%! expected_idx = uint32 ([
+%!    3   7   7
+%!    3   3   7
+%!    3   3   3
+%! ]);
+%! [dist, idx] = bwdist (bw);
+%! assert (dist, expected_dist)
+%! assert (idx, expected_idx)
+
 */
