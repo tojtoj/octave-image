@@ -21,8 +21,8 @@
 ## @end deftypefn
 
 function r = subsref (val, idx)
-  if (strcmp (idx.type, "."))
-    switch (idx.subs)
+  if (strcmp (idx(1).type, "."))
+    switch (idx(1).subs)
       case "ImageSize"
         r = val.ImageSize;
       case "XWorldLimits"
@@ -51,7 +51,17 @@ function r = subsref (val, idx)
         r = val.ZIntrinsicLimits;
       otherwise
         error ("Octave:invalid-indexing", ...
-        strcat ("unknown property '", idx.subs, "' for class imref3d"));
+        strcat ("unknown property '", idx(1).subs, "' for class imref3d"));
     endswitch
+    if (length (idx) > 1)
+      switch (idx(2).type)
+        case "()"
+          i = idx(2).subs;
+          r = r(i{1});
+        otherwise
+          error ("Octave:invalid-indexing", ...
+          strcat ("can't index '", idx(1).subs, "' with ", idx(2).type));
+      endswitch
+    endif
   endif
 endfunction
