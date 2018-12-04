@@ -36,10 +36,8 @@
 ## @end verbatim
 ## @end ifnottex
 ##
-## For irregularly spaced intervals, the numeric vector @var{v} can be
-## specified instead.  The values in @var{v} must be in the range [0 1]
-## independently of the class of @var{I}.  These will be adjusted by
-## @code{grayslice} according to the image.
+## For irregularly spaced intervals, a numeric vector @var{v} of
+## threshold values can be used instead.
 ##
 ## The output image will be of class uint8 if the number of levels is
 ## less than 256, otherwise it will be double.
@@ -61,6 +59,7 @@ function sliced = grayslice (I, n = 10)
     ## don't allow n < 1 either.
     n = double (n);
     v = (1:(n-1)) ./ n;
+    v = imcast (v, class (I));
   elseif ((isvector (n) && ! isscalar (n)) || (isscalar (n) && n > 0 && n <1))
     ## For Matlab compatibility, a 0>N>1 is handled like V.
     v = sort (n(:));
@@ -82,7 +81,6 @@ function sliced = grayslice (I, n = 10)
            "grayslice: N and V must be a numeric scalar an vector");
   endif
 
-  v = imcast (v, class (I));
   sliced_tmp = lookup (v, I);
 
   if (n < 256)
@@ -148,7 +146,6 @@ endfunction
 %!assert (grayslice ([0 .5 1], [-1 .5 1 2]), uint8 ([1 2 4]))
 %!assert (grayslice ([-2 -1 .5 1], [-1 .5 1]), uint8 ([0 1 2 3]))
 
-
 %!test
 %! sliced = [
 %!   repmat(0, [26 1])
@@ -178,45 +175,87 @@ endfunction
 %! assert (grayslice (uint8 (0:255), 256),
 %!         grayslice (uint8 (0:255), (1:255)./256))
 
-%!function gs = test_grayslice_vector (I, v)
+%!test
+%! ## Use of threshold in the [0 1] range for images of integer type does
+%! ## not really work despite the Matlab documentation.  It's Matlab
+%! ## documentation that is wrong, see bug #55059
+%!
+%! assert (grayslice (uint8([0 100 200 255]), [.1 .4 .5]),
+%!         uint8 ([0 3 3 3]))
+%! assert (grayslice (uint8([0 100 200 255]), [100 199 200 210]),
+%!         uint8 ([0 1 3 4]))
+%!
+%! ## P (penny) is a 2d image of class double in [1 255] range
+%! load penny.mat
+%! assert (grayslice (P), repmat (uint8 (9), size (P)))
+
+%!function gs = test_grayslice_v (I, v)
+%!  ## This is effectively what grayslice does but slower with a for
+%!  ## loop internally.
 %!  gs = zeros (size (I));
-%!  if (strcmp (class(I), "uint8"))
-%!    v = v*255;
-%!  elseif (strcmp (class(I), "uint16"))
-%!    v = v*65535;
-%!  end
 %!  for idx = 1:numel (v)
 %!    gs(I >= v(idx)) = idx;
 %!  endfor
-%!endfunction
-
-%!function gs = test_grayslice_scalar (I, n)
-%!  v = (1:(n-1)) / n;
-%!  gs = test_grayslice_vector (I, v);
+%! if (numel (v) >= 256)
+%!   gs = gs +1;
+%! else
+%!   gs = uint8 (gs);
+%! endif
 %!endfunction
 
 %!test
-%! I2d = rand (10, 10);
-%! assert (grayslice (I2d), grayslice (I2d, 10))
-%! assert (grayslice (I2d, 10), uint8 (test_grayslice_scalar (I2d, 10)))
-%! assert (grayslice (I2d, [0.3 0.5 0.7]),
-%!         uint8 (test_grayslice_vector (I2d, [0.3 0.5 0.7])))
-
-%!test
-%! I3d = rand (10, 10, 3);
-%! I5d = rand (10, 10, 4, 3, 5);
+%! load penny.mat;
 %!
-%! assert (grayslice (I3d, 10), uint8 (test_grayslice_scalar (I3d, 10)))
-%! assert (grayslice (I5d, 300), test_grayslice_scalar (I5d, 300)+1)
-%! assert (grayslice (I3d, [0.3 0.5 0.7]),
-%!         uint8 (test_grayslice_vector (I3d, [0.3 0.5 0.7])))
+%! ## The loaded P in penny.mat is of size 128x128, class double, and
+%! ## with values in the [1 255] range
+%! penny_uint8 = uint8 (P);
+%! penny_double = im2double (penny_uint8); # rescales to [0 1] range]
+%!
+%! ## default of N = 10
+%! expected = test_grayslice_v (penny_uint8,
+%!                              [26 51 77 102 128 153 179 204 230]);
+%! assert (grayslice (penny_uint8, 10), expected)
+%! assert (grayslice (penny_uint8), expected)
+%!
+%! expected = test_grayslice_v (penny_double,
+%!                              [.1 .2 .3 .4 .5 .6 .7 .8 .9]);
+%! assert (grayslice (penny_double, 10), expected)
+%! assert (grayslice (penny_double), expected)
 
 %!test
-%! I2d = rand (10, 10);
-%! assert (grayslice (im2uint8 (I2d), 3),
-%!         uint8 (test_grayslice_scalar (im2uint8 (I2d), 3)))
-%! assert (grayslice (im2uint16 (I2d), 3),
-%!         uint8 (test_grayslice_scalar (im2uint16 (I2d), 3)))
+%! ## For images with more than 2d
+%! load penny.mat;
+%! penny_double = im2double (uint8 (P));
+%! P_3d = repmat (penny_double, [1 1 3]);
+%! P_5d = repmat (penny_double, [1 1 3 2 3]);
+%!
+%! v = [.3 .5 .7];
+%! expected_2d = test_grayslice_v (penny_double, v);
+%! assert (grayslice (P_3d, v), repmat (expected_2d, [1 1 3]))
+%! assert (grayslice (P_5d, v), repmat (expected_2d, [1 1 3 2 3]))
+
+%!test
+%! load penny.mat;
+%! penny_double = uint8 (P);
+%!
+%! ## Test that change from uint8 to double happens at 256 exactly
+%! assert (class (grayslice (penny_double, 255)), "uint8")
+%! assert (class (grayslice (penny_double, 256)), "double")
+%!
+%! ## If returns in class double, it's +1.
+%! v = [10 150 200];
+%! v_long = [v 256:600];
+%! assert (double (grayslice (penny_double, v)) +1,
+%!         grayslice (penny_double, v_long))
+
+%!test
+%! ## If there's a vector for floating point and goes outside the
+%! ## range, it uses the last index of the vector.
+%! load penny.mat;
+%! penny_double = im2double (uint8 (P));
+%! v = [.3 .5 .7 2:10];
+%! idx_1 = find (penny_double == 1);
+%! assert (grayslice (penny_double, v)(idx_1), uint8 ([12; 12]))
 
 %!error <N must be a positive number> x = grayslice ([1 2; 3 4], 0)
 %!error <N must be a positive number> x = grayslice ([1 2; 3 4], -1)
