@@ -120,7 +120,7 @@ endfunction
 %!test
 %! psf = rand (16);
 %! otf = psf2otf (psf);
-%! assert (otf2psf (otf), psf, 2*eps);
+%! assert (otf2psf (otf), psf, 4*eps);
 %!test
 %! psf = rand (8);
 %! otf = psf2otf (psf, [16 16]);

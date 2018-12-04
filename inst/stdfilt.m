@@ -47,7 +47,7 @@ function retval = stdfilt (I, domain = true (3), padding = "symmetric", varargin
   if (nargin == 0)
     error ("stdfilt: not enough input arguments");
   endif
-  
+
   if (! isimage (I))
     error ("stdfilt: first input must be a matrix");
   endif
@@ -67,11 +67,44 @@ function retval = stdfilt (I, domain = true (3), padding = "symmetric", varargin
   endfor
   I = I (idx {:});
 
-  ## Perform filtering
-  retval = __spatial_filtering__ (I, domain, "std", I, 0);
-
+  retval = __spatial_filtering__ (I, domain, "std", zeros (size (domain)), 0);
 endfunction
 
 %!test
 %! im = stdfilt (ones (5));
 %! assert (im, zeros (5));
+
+## some (Matlab compatible) tests on simple 2D-images:
+%!test
+%! A = zeros (3,3);
+%! B = ones (3,3);
+%! C = [1 1 1; 2 2 2; 3 3 3];
+%! D = C';
+%! E = ones (3,3);
+%! E(2,2) = 2;
+%! F = 3 .* ones (3,3);
+%! F(2,2) = 1;
+%! G = [-1 2 7; -5 2 8; -7 pi 9];
+%! H = [5 2 8; 1 -3 1; 5 1 0];
+%! A_out = [0 0 0; 0 0 0; 0 0 0];
+%! B_out = [0 0 0; 0 0 0; 0 0 0];
+%! C_out = repmat ([std([1 1 1 1 1 1 2 2 2])
+%!                 std([1 1 1 2 2 2 3 3 3])
+%!                 std([2 2 2 3 3 3 3 3 3])], [1 3]);
+%! D_out = C_out';
+%! E_out = (1/3) .* ones (3,3);
+%! F_out = (2/3) .* ones (3,3);
+%! G_out = [std([-1 -1 2 -1 -1 2 -5 -5 2]), std([-1 2 7 -1 2 7 -5 2 8]), std([2 7 7 2 7 7 2 8 8]);
+%!               std([-1 -1 2 -5 -5 2 -7 -7 pi]), std([-1 2 7 -5 2 8 -7 pi 9]), std([2 7 7 2 8 8 pi 9 9]);
+%!               std([-5 -5 2 -7 -7 pi -7 -7 pi]), std([-5 2 8 -7 pi 9 -7 pi 9]), std([2 8 8 pi 9 9 pi 9 9])];
+%! H_out = [std([5 5 2 5 5 2 1 1 -3]), std([5 2 8 5 2 8 1 -3 1]), std([2 8 8 2 8 8 -3 1 1]);
+%!                std([5 5 2 1 1 -3 5 5 1]), std([5 2 8 1 -3 1 5 1 0]), std([2 8 8 -3 1 1 1 0 0]);
+%!                std([1 1 -3 5 5 1 5 5 1]), std([1 -3 1 5 1 0 5 1 0]), std([-3 1 1 1 0 0 1 0 0])];
+%! assert (stdfilt (A), A_out)
+%! assert (stdfilt (B), B_out)
+%! assert (stdfilt (C), C_out, 4*eps)
+%! assert (stdfilt (D), D_out, 4*eps)
+%! assert (stdfilt (E), E_out, 4*eps)
+%! assert (stdfilt (F), F_out, 4*eps)
+%! assert (stdfilt (G), G_out, 4*eps)
+%! assert (stdfilt (H), H_out, 4*eps)

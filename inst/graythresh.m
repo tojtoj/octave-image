@@ -204,7 +204,9 @@ function [varargout] = graythresh (img, algo = "otsu", varargin)
     otherwise, error ("graythresh: unknown method '%s'", algo);
   endswitch
   ## normalize the threshold value to the [0 1] range
-  thresh{1} = double (thresh{1}) / (numel (ihist) - 1);
+  if (numel (ihist) > 1)
+    thresh{1} = double (thresh{1}) / (numel (ihist) - 1);
+  endif
 
   ## some algorithms may return more than one value...
   for i = 1:numel (thresh)
@@ -224,6 +226,12 @@ function [thresh] = otsu (ihist, compute_good)
   ## made for values "greater or equal than" but that is not the case (in im2bw
   ## and also not ImageJ) so we subtract 1 at the end.
 
+  if (numel (ihist) == 1 || sum (ihist) == 0)
+    thresh{1} = 0;
+    thresh{2} = 0;
+    return;
+  endif
+  
   bins  = 0:(numel (ihist) - 1);
   total = sum (ihist);
   ## b = black, w = white
@@ -248,7 +256,7 @@ function [thresh] = otsu (ihist, compute_good)
     ## In case there's more than one place with best maximum (for
     ## example, a group of empty bins), we select the one in the
     ## center (this is compatible with ImageJ).
-    thresh{1} = ceil (mean (find (bcv == max_bcv))) - 2;
+    thresh{1} = (mean (find (bcv == max_bcv))) - 2;
     ## We subtract 2, once for the 1 based indexes and another for the
     ## greater than or equal problem.
 
@@ -710,9 +718,9 @@ endfunction
 %!assert (graythresh (img, "minimum"),          93/255);
 %!assert (graythresh (img, "maxentropy"),      150/255);
 %!assert (graythresh (img, "intermodes"),       99/255);
-%!assert (graythresh (img, "otsu"),            115/255);
+%!assert (graythresh (img, "otsu"),            114.5/255);
 %! histo = hist (img(:), 0:255);
-%!assert (graythresh (histo, "otsu"),          115/255);
+%!assert (graythresh (histo, "otsu"),          114.5/255);
 
 ## for the mean our results differ from matlab because we do not calculate it
 ## from the histogram. Our results should be more accurate.
@@ -730,6 +738,11 @@ endfunction
 %!test
 %! im = [-2  1  0; 43  .5 .2];
 %! clip_im = [ 0  1  0;  1  .5 .2];
-%! t =graythresh (clip_im);
+%! t = graythresh (clip_im);
 %! assert (graythresh (im), t)
 %! assert (graythresh (single (im)), t)
+
+## test for bug #45333
+%!test
+%! H(1) = 100;
+%! assert (graythresh (H), 0)

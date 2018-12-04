@@ -20,32 +20,32 @@
 
 /*
  edtfunc - Euclidean distance transform of a binary image
- 
+
  This is a sweep-and-update Euclidean distance transform of
  a binary image. All positive pixels are considered object
  pixels, zero or negative pixels are treated as background.
- 
+
  By Stefan Gustavson (stefan.gustavson@gmail.com).
- 
+
  Originally written in 1994, based on paper-only descriptions
  of the SSED8 algorithm, invented by Per-Erik Danielsson
  and improved by Ingemar Ragnemalm. This is a classic algorithm
  with roots in the 1980s, still very good for the 2D case.
- 
+
  Updated in 2004 to treat pixels at image edges correctly,
  and to improve code readability.
- 
+
  Edited in 2009 to form the foundation for Octave BWDIST:
  added #define-configurable distance measure and function name
- 
+
  Edited in 2013 for C++, removed the #define stuff, and other
  fixes for matlab compatibility.
  */
 
 void edtfunc (float (*func)(short int, short int),
               const boolNDArray &img,
-              short *distx,
-              short *disty)
+              std::vector<short>& distx,
+              std::vector<short>& disty)
 {
   const int w     = img.cols  ();
   const int h     = img.rows  ();
@@ -54,18 +54,13 @@ void edtfunc (float (*func)(short int, short int),
   // Initialize the distance images to be all large values
   const bool* elem = img.fortran_vec ();
   for (octave_idx_type i = 0; i < numel; i++)
-    {
-      if(elem[i])
-        {
-          distx[i] = 0;
-          disty[i] = 0;
-        }
-      else
-        {
-          distx[i] = 32000; // Large but still representable in a short, and
-          disty[i] = 32000; // 32000^2 + 32000^2 does not overflow an int
-        }
-    }
+    if(! elem[i])
+      {
+        // Large but still representable in a short, and 32000^2 +
+        // 32000^2 does not overflow an int
+        distx[i] = 32000;
+        disty[i] = 32000;
+      }
 
   double olddist2, newdist2, newdistx, newdisty;
   bool changed;
@@ -219,7 +214,7 @@ void edtfunc (float (*func)(short int, short int),
             {
               olddist2 = (*func)(distx[i], disty[i]);
               if(olddist2 == 0) continue; // Already zero distance
-              
+
               newdistx = distx[i+offset_r]-1;
               newdisty = disty[i+offset_r];
               newdist2 = (*func)(newdistx, newdisty);
@@ -231,7 +226,7 @@ void edtfunc (float (*func)(short int, short int),
                 }
             }
         }
-      
+
       /* Scan rows in reverse order, except last row */
       for(y=w-2; y>=0; y--)
         {
@@ -409,7 +404,7 @@ quasi_euclidean (short x, short y)
 
 static FloatMatrix
 calc_distances (float (*func)(short, short), const boolNDArray& bw,
-                short *xdist, short *ydist)
+                std::vector<short>& xdist, std::vector<short>& ydist)
 {
   FloatMatrix dist (bw.dims ());
   edtfunc (func, bw, xdist, ydist);
@@ -421,7 +416,8 @@ calc_distances (float (*func)(short, short), const boolNDArray& bw,
 }
 
 template <class T>
-T calc_index (const boolNDArray& bw, const short *xdist, const short *ydist)
+T calc_index (const boolNDArray& bw, const std::vector<short>& xdist,
+              const std::vector<short>& ydist)
 {
   typedef typename T::element_type P;
 
@@ -497,53 +493,63 @@ Currently, only 2D images are supported.\n\
   for (octave_idx_type q = 0; q < octave_idx_type (method.length ()); q++)
     method[q] = tolower (method[q]);
 
-  if (method.length () <= 2) {
-    static bool warned = false;
-    if (! warned )
-      {
-        warning ("bwdist: specifying METHOD with abbreviation is deprecated");
-        warned = true;
-      }
-    if      (method == "e" ) { method = "euclidean";       }
-    else if (method == "ch") { method = "chessboard";      }
-    else if (method == "ci") { method = "cityblock";       }
-    else if (method == "q" ) { method = "quasi-euclidean"; }
-  }
 
-  // Allocate two arrays for temporary output values
-  const int numel = bw.numel ();
-  std::vector<short> xdist (numel);
-  std::vector<short> ydist (numel);
-
-  FloatMatrix dist;
-  if (method == "euclidean")
+  // Special case of there being no foreground element (bug #50874).
+  // Because of the way the function was originally structured,
+  // handling this case as part of the rest gets a bit hairy.
+  if (! (static_cast<boolNDArray>(bw.as_column())).any()(0))
     {
-      dist = calc_distances (euclidean, bw, xdist.data (), ydist.data ());
-      const Array<octave_idx_type> positions = (!bw).find ();
-      const int zpos = positions.numel();
-      const octave_idx_type* pos_vec = positions.fortran_vec ();
-      float* dist_vec = dist.fortran_vec ();
-      for (int i = 0; i < zpos; i++)
-        dist_vec[pos_vec[i]] = sqrt (dist_vec[pos_vec[i]]);
+      FloatMatrix dist (bw.dims (), std::numeric_limits<float>::infinity ());
+      retval(0) = dist;
+
+      // Compute optional 'index to closest object pixel', only if
+      // requested.
+      if (nargout > 1)
+        {
+          if (bw.numel () >= pow (2, 32))
+            retval(1) = uint64NDArray (bw.dims (), 0);
+          else
+            retval(1) = uint32NDArray (bw.dims (), 0);
+        }
     }
-  else if (method == "chessboard")
-    dist = calc_distances (chessboard,      bw, xdist.data (), ydist.data ());
-  else if (method == "cityblock")
-    dist = calc_distances (cityblock,       bw, xdist.data (), ydist.data ());
-  else if (method == "quasi-euclidean")
-    dist = calc_distances (quasi_euclidean, bw, xdist.data (), ydist.data ());
   else
-    error ("bwdist: unknown METHOD '%s'", method.c_str ());
-
-  retval(0) = dist;
-
-  // Compute optional 'index to closest object pixel', only if requested
-  if (nargout > 1)
     {
-      if (numel >= pow (2, 32))
-        retval(1) = calc_index<uint64NDArray> (bw, xdist.data (), ydist.data ());
+      // Allocate two arrays for temporary output values
+      const int numel = bw.numel ();
+      std::vector<short> xdist (numel, 0);
+      std::vector<short> ydist (numel, 0);
+
+      FloatMatrix dist;
+      if (method == "euclidean")
+        {
+          dist = calc_distances (euclidean, bw, xdist, ydist);
+          const Array<octave_idx_type> positions = (!bw).find ();
+          const int zpos = positions.numel();
+          const octave_idx_type* pos_vec = positions.fortran_vec ();
+          float* dist_vec = dist.fortran_vec ();
+          for (int i = 0; i < zpos; i++)
+            dist_vec[pos_vec[i]] = sqrt (dist_vec[pos_vec[i]]);
+        }
+      else if (method == "chessboard")
+        dist = calc_distances (chessboard, bw, xdist, ydist);
+      else if (method == "cityblock")
+        dist = calc_distances (cityblock, bw, xdist, ydist);
+      else if (method == "quasi-euclidean")
+        dist = calc_distances (quasi_euclidean, bw, xdist, ydist);
       else
-        retval(1) = calc_index<uint32NDArray> (bw, xdist.data (), ydist.data ());
+        error ("bwdist: unknown METHOD '%s'", method.c_str ());
+
+      retval(0) = dist;
+
+      // Compute optional 'index to closest object pixel', only if
+      // requested
+      if (nargout > 1)
+        {
+          if (numel >= pow (2, 32))
+            retval(1) = calc_index<uint64NDArray> (bw, xdist, ydist);
+          else
+            retval(1) = calc_index<uint32NDArray> (bw, xdist, ydist);
+        }
     }
 
   return retval;
@@ -668,4 +674,42 @@ Currently, only 2D images are supported.\n\
 %! assert (bwdist (bw, "quasi-euclidean"), out);
 
 %!error <unknown METHOD> bwdist (bw, "not a valid method");
+
+%!test
+%! ## Special case of there being no foreground element (bug #50874)
+%! expected_dist = single (Inf (2, 2));
+%! expected_idx = uint32 ([0 0; 0 0]);
+%!
+%! [dist, idx] = bwdist (false (2, 2));
+%! assert (dist, expected_dist)
+%! assert (idx, expected_idx)
+%!
+%! [dist, idx] = bwdist (zeros (2, 2));
+%! assert (dist, expected_dist)
+%! assert (idx, expected_idx)
+
+%!xtest
+%! ## This is Matlab incompatible because the bottom right corners is
+%! ## equally distant to the top right and bottom left corners.  However,
+%! ## both are correct answers, and the returned value is just
+%! ## implementation dependent.
+%! bw = logical ([
+%!   0 0 1
+%!   0 0 0
+%!   1 0 0
+%! ]);
+%! expected_dist = single ([
+%!    2.0     1.0     0.0
+%!    1.0   sqrt(2)   1.0
+%!    0.0     1.0     2.0
+%! ]);
+%! expected_idx = uint32 ([
+%!    3   7   7
+%!    3   3   7
+%!    3   3   3
+%! ]);
+%! [dist, idx] = bwdist (bw);
+%! assert (dist, expected_dist)
+%! assert (idx, expected_idx)
+
 */

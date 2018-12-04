@@ -13,6 +13,8 @@ Analysis and Statistics
  qtsetblk
  graycomatrix
  hough
+ houghlines
+ houghpeaks
  houghtf
  hough_line
  hough_circle
@@ -48,18 +50,22 @@ Black and white image functions
  bwlabel
  bwlabeln
  bwmorph
+ bwpack
  bwperim
  bwpropfilt
  bwselect
+ bwunpack
  fchcode
  labelmatrix
  makelut
 Colour maps and Colour controls
+ colorangle
  colorgradient
  rgb2ycbcr
  wavelength2rgb
  ycbcr2rgb
 Display
+ axes2pix
  montage
  subimage
  viscircles
