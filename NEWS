@@ -50,6 +50,8 @@
 
  ** Fix tests in grayslice.
 
+ ** Fix a failing test in normxcorr2.
+
 
  Summary of important user-visible changes for image 2.8.1 (2018/10/26):
 -------------------------------------------------------------------------

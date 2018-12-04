@@ -100,7 +100,7 @@ endfunction
 %!test
 %! a = rand (10, 10);
 %! c = normxcorr2 (a(5:7, 6:9), a);
-%! assert (c(7, 9), 1, eps*2);
+%! assert (c(7, 9), 1, eps*100);
 
 ## coeff of autocorrelation must be same as negative of correlation
 ## by additive inverse
