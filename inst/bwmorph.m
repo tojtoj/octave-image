@@ -586,7 +586,7 @@ endfunction
 %! bwmorph (true (11), "shrink", Inf)
 %! # Should return 0 matrix with 1 pixel set to 1 at (6,6)
 
-## Test skel-lantuejoul using Gozalez&Woods example (fig 8.39)
+## Test skel-lantuejoul using Gonzalez & Woods example (fig 8.39)
 %!test
 %! slBW = logical ([  0   0   0   0   0   0   0
 %!                    0   1   0   0   0   0   0
