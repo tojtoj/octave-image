@@ -1794,7 +1794,7 @@ endfunction
 %!xtest <50188>     # Matlab compatible, currently fails because of bug #50188
 %! BW = false(4,16);
 %! BW(2,2) = true;
-%! BW(3,2:end-1) = true  # L-shaped region (small angle)
+%! BW(3,2:end-1) = true; # L-shaped region (small angle)
 %! hull_test = [2 1.5; 1.5 2; 1.5 3; 2 3.5; 15 3.5; 15.5 3; 15 2.5];
 %! cimage_test = true (2,14);
 %! cimage_test(1, 8:end) = false;  # this is the Matlab result
