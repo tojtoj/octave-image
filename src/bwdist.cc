@@ -62,6 +62,29 @@ void edtfunc (float (*func)(short int, short int),
         disty[i] = 32000;
       }
 
+  if (h == 1 || w == 1)
+    {
+      // special treatment for 1D input
+      for (octave_idx_type i = 0; i < numel; i++)
+        disty[i] = 0;
+      for (octave_idx_type i = 1; i < numel; i++)
+        if (distx[i] != 0)
+          distx[i] = distx[i-1] +1;
+
+      for (octave_idx_type i = numel-2; i >= 0; i--)
+        {
+          if (distx[i] != 0)
+            {
+              int tmp = distx[i+1] -1;
+              // signed distance, to allow index calculation
+              if (abs (tmp) < distx[i])
+                distx[i] = tmp;
+            }
+        }
+
+      return;
+    }
+
   double olddist2, newdist2, newdistx, newdisty;
   bool changed;
 
@@ -687,6 +710,52 @@ Currently, only 2D images are supported.\n\
 %! [dist, idx] = bwdist (zeros (2, 2));
 %! assert (dist, expected_dist)
 %! assert (idx, expected_idx)
+
+%!test
+%! ## Special case of 1D input (bug #50874)
+%! assert (bwdist ([1 0]), single ([0 1]))
+%! assert (bwdist ([1 0]'), single ([0 1]'))
+%! assert (bwdist ([0 1 0 0 0 0 1 1]), single ([1 0 1 2 2 1 0 0]))
+%! assert (bwdist ([1 1 0 0 0 0 1 1]'), single ([0 0 1 2 2 1 0 0])')
+%! assert (bwdist ([1 0], "euclidean"), single ([0 1]))
+%! assert (bwdist ([1 0], "chessboard"), single ([0 1]))
+%! assert (bwdist ([1 0], "cityblock"), single ([0 1]))
+%! assert (bwdist ([1 0], "quasi-euclidean"), single ([0 1]))
+
+%!test
+%! ## test 1D input with 2nd output argument (indices) (bug #50874)
+%! expected_dist = single ([1 0 1]);
+%! expected_idx = uint32 ([2 2 2]);
+%!
+%! [dist, idx] = bwdist ([0 1 0]);
+%! assert (dist, expected_dist)
+%! assert (idx, expected_idx)
+%!
+%! [dist, idx] = bwdist ([0 1 0]');
+%! assert (dist, expected_dist')
+%! assert (idx, expected_idx')
+%!
+%! expected_dist = single ([0 0 1 0 0]);
+%! expected_idx = uint32 ([1 2 2 4 5]);
+%! [dist, idx] = bwdist ([1 1 0 1 1]);
+%! assert (dist, expected_dist)
+%! assert (idx, expected_idx)
+%!
+%! expected_dist = single ([1 0 1 2 1 0 0 0 1 1 0 0 0 0 1 2 3 4]);
+%! expected_idx = uint32 ([2 2 2 2 6 6 7 8 8 11 11 12 13 14 14 14 14 14]);
+%! [dist, idx] = bwdist ([0 1 0 0 0 1 1 1 0 0 1 1 1 1 0 0 0 0]);
+%! assert (dist, expected_dist)
+%! assert (idx, expected_idx)
+%!
+%! expected_dist = single ([0 0 1 2 1 0 0 0 1 1 0 0 0 0 1 2 1 0]);
+%! expected_idx = uint32 ([1 2 2 2 6 6 7 8 8 11 11 12 13 14 14 14 18 18]);
+%! [dist, idx] = bwdist ([1 1 0 0 0 1 1 1 0 0 1 1 1 1 0 0 0 1]);
+%! assert (dist, expected_dist)
+%! assert (idx, expected_idx)
+
+%!test
+%! assert (bwdist ([0 0]), single ([Inf, Inf]))
+%! assert (bwdist ([0 0]'), single ([Inf, Inf]'))
 
 %!xtest
 %! ## This is Matlab incompatible because the bottom right corners is
