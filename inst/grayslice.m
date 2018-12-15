@@ -186,7 +186,10 @@ endfunction
 %!         uint8 ([0 1 3 4]))
 %!
 %! ## P (penny) is a 2d image of class double in [1 255] range
-%! load penny.mat
+%! q = warning ("query", "Octave:data-file-in-path");
+%! warning ("off", "Octave:data-file-in-path");
+%! load ("penny.mat");
+%! warning (q.state, "Octave:data-file-in-path");
 %! assert (grayslice (P), repmat (uint8 (9), size (P)))
 
 %!function gs = test_grayslice_v (I, v)
@@ -204,7 +207,10 @@ endfunction
 %!endfunction
 
 %!test
-%! load penny.mat;
+%! q = warning ("query", "Octave:data-file-in-path");
+%! warning ("off", "Octave:data-file-in-path");
+%! load ("penny.mat");
+%! warning (q.state, "Octave:data-file-in-path");
 %!
 %! ## The loaded P in penny.mat is of size 128x128, class double, and
 %! ## with values in the [1 255] range
@@ -224,7 +230,10 @@ endfunction
 
 %!test
 %! ## For images with more than 2d
-%! load penny.mat;
+%! q = warning ("query", "Octave:data-file-in-path");
+%! warning ("off", "Octave:data-file-in-path");
+%! load ("penny.mat");
+%! warning (q.state, "Octave:data-file-in-path");
 %! penny_double = im2double (uint8 (P));
 %! P_3d = repmat (penny_double, [1 1 3]);
 %! P_5d = repmat (penny_double, [1 1 3 2 3]);
@@ -235,7 +244,10 @@ endfunction
 %! assert (grayslice (P_5d, v), repmat (expected_2d, [1 1 3 2 3]))
 
 %!test
-%! load penny.mat;
+%! q = warning ("query", "Octave:data-file-in-path");
+%! warning ("off", "Octave:data-file-in-path");
+%! load ("penny.mat");
+%! warning (q.state, "Octave:data-file-in-path");
 %! penny_double = uint8 (P);
 %!
 %! ## Test that change from uint8 to double happens at 256 exactly
@@ -251,7 +263,10 @@ endfunction
 %!test
 %! ## If there's a vector for floating point and goes outside the
 %! ## range, it uses the last index of the vector.
-%! load penny.mat;
+%! q = warning ("query", "Octave:data-file-in-path");
+%! warning ("off", "Octave:data-file-in-path");
+%! load ("penny.mat");
+%! warning (q.state, "Octave:data-file-in-path");
 %! penny_double = im2double (uint8 (P));
 %! v = [.3 .5 .7 2:10];
 %! idx_1 = find (penny_double == 1);
