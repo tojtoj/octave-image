@@ -79,6 +79,7 @@ Enhancement and Restoration
  ordfiltn
  stretchlim
 Filtering and Transforms
+ deconvwnr
  findbounds
  fspecial
  imfilter
