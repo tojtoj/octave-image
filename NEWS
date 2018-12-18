@@ -35,6 +35,10 @@
     Other small changes were done to be Matlab compatible in multiple
     corner cases.
 
+ ** The function operation "thin" in bwmorph was changed to be Matlab
+    compatible.  The previous implementation, based on the book by
+    W. K. Pratt, is available under the name "thin-pratt".
+
  ** Other functions that have been changed for smaller bugfixes,
     increased Matlab compatibility, or performance:
 
