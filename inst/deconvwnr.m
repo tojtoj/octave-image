@@ -33,12 +33,12 @@
 ## single, or double.  The output image has the same class and size as
 ## @var{I}.
 ##
-## The filter @var{PSF} should be an array of class double.  It can
+## The filter @var{PSF} should be a float array.  It can
 ## have any size that is smaller or equal to the size of @var{I}.
 ##
 ## The noise parameter @var{NSR} must be non-negative and can either
-## be given as a single number of class double, or as a double array
-## (in Fourier domain) of the same size as @var{I}.  Defaults to 0
+## be given as a single float number, or as a float array
+## (in Fourier domain) of the same size as @var{I}.  It defaults to 0
 ## (zero) which produces the, generally bad quality, direct inverse
 ## filtering.
 ##
@@ -68,8 +68,8 @@ function deconvolved = deconvwnr (img, psf, varargin)
     error ("deconvwnr: I must be an non-logical image");
   endif
 
-  if (! isreal (psf) || ! isa (psf, "double"))
-    error("deconvwnr: PSF must be real and of class double");
+  if (! isreal (psf) || ! isfloat (psf) )
+    error("deconvwnr: PSF must be real and float");
   elseif (ndims (psf) > ndims (img))
     error ("deconvwnr: PSF must have less dimensions than I");
   endif
@@ -80,8 +80,8 @@ function deconvolved = deconvwnr (img, psf, varargin)
     error ("deconvwnr: PSF dimensions length must not be longer than I");
   endif
 
-  if (! isa (nsr, "double") || any (nsr < 0))
-    error ("deconvwnr: NSR must be non-negative and of class double");
+  if (! isfloat (nsr) || any (nsr < 0))
+    error ("deconvwnr: NSR must be non-negative and float");
   elseif (numel (nsr) != 1 && ! size_equal (nsr, img))
     error ("deconvwnr: NSR must be a scalar or array of same size as I");
   endif
@@ -89,6 +89,16 @@ function deconvolved = deconvwnr (img, psf, varargin)
   cls = class (img);
   if (! isa (img, "double"))
     img = im2double (img);
+  endif
+
+  ## Allow psf and nsr inputs to be of class single, but cast them
+  ## to double for calculations. (This behavior is Octave-only.)
+  if (isa (psf, "single"))
+    psf = double (psf);
+  endif
+
+  if (isa (nsr, "single"))
+  nsr = double (nsr);
   endif
 
   deconvolved = wiener_deconvolution (img, psf, nsr);
@@ -166,6 +176,7 @@ endfunction
 
 ## test dimensions and classes:
 %!assert (deconvwnr (im0, psf0), im0_out, 1e-5)
+%!assert (deconvwnr (im0, single (psf0)), im0_out, 1e-5)
 %!assert (class (deconvwnr  (im0, psf0)), "double")
 %!assert (deconvwnr (single (im0), psf0), single (im0_out), 1e-5)
 %!assert (class (deconvwnr  (single (im0), psf0)), "single")
