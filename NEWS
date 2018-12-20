@@ -42,6 +42,9 @@
 
  ** imcast now also converts images to logical type.
 
+ ** wiener2 is now able to handle images with arbitrary number of
+    dimensions.
+
  ** Other functions that have been changed for smaller bugfixes,
     increased Matlab compatibility, or performance:
 
