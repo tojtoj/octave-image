@@ -68,7 +68,7 @@ function deconvolved = deconvwnr (img, psf, varargin)
     error ("deconvwnr: I must be an non-logical image");
   endif
 
-  if (! isreal (psf) || ! isfloat (psf) )
+  if (! isreal (psf) || ! isfloat (psf))
     error("deconvwnr: PSF must be real and float");
   elseif (ndims (psf) > ndims (img))
     error ("deconvwnr: PSF must have less dimensions than I");
@@ -98,7 +98,7 @@ function deconvolved = deconvwnr (img, psf, varargin)
   endif
 
   if (isa (nsr, "single"))
-  nsr = double (nsr);
+    nsr = double (nsr);
   endif
 
   deconvolved = wiener_deconvolution (img, psf, nsr);
@@ -207,12 +207,12 @@ endfunction
 %!    0.2481    0.7979    0.1731   -0.4517    0.0982;
 %!    0.7210    0.2904   -0.5305    0.0194    0.3654;
 %!    0.2116   -0.4132   -0.0575    0.4826    0.6422];
-%! assert (deconvwnr (im1, psf0, 0.01), out1_0, 1e-4);
-%! assert (deconvwnr (im1, psf1, 0.01), out1_1, 1e-4);
+%! assert (deconvwnr (im1, psf0, 0.01), out1_0, 1e-4)
+%! assert (deconvwnr (im1, psf1, 0.01), out1_1, 1e-4)
 
 %!test
-%! assert (deconvwnr (im2, psf0, 0.01), out2_0, 1e-4);
-%! assert (deconvwnr (im2, psf1, 0.01), out2_1, 1e-4);
+%! assert (deconvwnr (im2, psf0, 0.01), out2_0, 1e-4)
+%! assert (deconvwnr (im2, psf1, 0.01), out2_1, 1e-4)
 
 %!test
 %! out3_0_x = [
@@ -287,14 +287,14 @@ endfunction
 %!    0.0625    0.1250    0.0625    0.1250    0.0625   -0.0625   -0.0625    0.1250;
 %!    0.1250    0.0625    0.1250    0.0625   -0.1250   -0.0625   -0.0089    0.0625;
 %!    0.0625    0.1250    0.0625   -0.1250   -0.0625    0.1250    0.0625    0.0268];
-%! assert (deconvwnr (im3, psf0), out3_0_x, 1e-4);
-%! assert (deconvwnr (im3, psf0, 0.1), out3_0_01, 1e-4);
-%! assert (deconvwnr (im3, psf0, 0.0001), out3_0_00001, 1e-4);
-%! assert (deconvwnr (im3, psf0, 3), out3_0_3, 1e-4);
-%! assert (deconvwnr (im3, psf1), out3_1_x, 1e-4);
-%! assert (deconvwnr (im3, psf1, 0.1), out3_1_01, 1e-4);
-%! assert (deconvwnr (im3, psf1, 0.0001), out3_1_00001, 1e-4);
-%! assert (deconvwnr (im3, psf1, 3), out3_1_3, 1e-4);
+%! assert (deconvwnr (im3, psf0), out3_0_x, 1e-4)
+%! assert (deconvwnr (im3, psf0, 0.1), out3_0_01, 1e-4)
+%! assert (deconvwnr (im3, psf0, 0.0001), out3_0_00001, 1e-4)
+%! assert (deconvwnr (im3, psf0, 3), out3_0_3, 1e-4)
+%! assert (deconvwnr (im3, psf1), out3_1_x, 1e-4)
+%! assert (deconvwnr (im3, psf1, 0.1), out3_1_01, 1e-4)
+%! assert (deconvwnr (im3, psf1, 0.0001), out3_1_00001, 1e-4)
+%! assert (deconvwnr (im3, psf1, 3), out3_1_3, 1e-4)
 
 %!test
 %! im_rgb = cat (3, im2, im3, magic (8)./64);
@@ -336,25 +336,25 @@ endfunction
 %!   -0.6326    0.1654    0.8803    0.2633   -0.6910    0.1047    1.0577    0.2049;
 %!    0.6191    0.7001   -0.2523   -0.3905    0.5607    0.8776   -0.3130   -0.4489;
 %!    0.2469   -0.0561    0.1818    0.3038    0.3052    0.0047    0.0043    0.3621];
-%! assert (deconvwnr (im_rgb, psf0, 0.01), out_rgb_0, 1e-4);
-%! assert (deconvwnr (im_rgb, psf1, 0.01), out_rgb_1, 1e-4);
+%! assert (deconvwnr (im_rgb, psf0, 0.01), out_rgb_0, 1e-4)
+%! assert (deconvwnr (im_rgb, psf1, 0.01), out_rgb_1, 1e-4)
 
 
 ## show instructive demo:
 %!demo
 %! I = phantom ();
-%! figure, imshow(I);
-%! title("Original image");
-%! psf = fspecial ('motion', 30, 15);
+%! figure, imshow (I);
+%! title ("Original image");
+%! psf = fspecial ("motion", 30, 15);
 %! blurred = imfilter (I, psf, "conv");
 %! figure, imshow (blurred);
 %! title ("Image with added motion blur");
 %! var_noise = 0.00005;
 %! blurred_noisy = imnoise (blurred, "gaussian", 0, var_noise);
-%! figure, imshow(blurred_noisy);
-%! title("Image with motion blur and added Gaussian noise");
-%! estimated_nsr = var_noise / ( var(blurred_noisy(:)) - var_noise );
-%! J = deconvwnr(blurred_noisy, psf, estimated_nsr);
-%! figure, imshow(J)
-%! title({"restored image after Wiener deconvolution",
+%! figure, imshow (blurred_noisy);
+%! title ("Image with motion blur and added Gaussian noise");
+%! estimated_nsr = var_noise / (var(blurred_noisy(:)) - var_noise);
+%! J = deconvwnr (blurred_noisy, psf, estimated_nsr);
+%! figure, imshow (J)
+%! title ({"restored image after Wiener deconvolution",
 %!           "with known PSF and estimated NSR"});
