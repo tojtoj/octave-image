@@ -13,6 +13,8 @@ Analysis and Statistics
  qtsetblk
  graycomatrix
  hough
+ houghlines
+ houghpeaks
  houghtf
  hough_line
  hough_circle
@@ -23,6 +25,7 @@ Analysis and Statistics
  immaximas
  immse
  normxcorr2
+ otsuthresh
  psnr
  rangefilt
  regionprops
@@ -48,18 +51,22 @@ Black and white image functions
  bwlabel
  bwlabeln
  bwmorph
+ bwpack
  bwperim
  bwpropfilt
  bwselect
+ bwunpack
  fchcode
  labelmatrix
  makelut
 Colour maps and Colour controls
+ colorangle
  colorgradient
  rgb2ycbcr
  wavelength2rgb
  ycbcr2rgb
 Display
+ axes2pix
  montage
  subimage
  viscircles
@@ -73,6 +80,7 @@ Enhancement and Restoration
  ordfiltn
  stretchlim
 Filtering and Transforms
+ deconvwnr
  findbounds
  fspecial
  imfilter

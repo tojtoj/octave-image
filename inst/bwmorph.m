@@ -142,6 +142,10 @@
 ## background. That is, thinning on negated image. Finally a diagonal
 ## fill operation is performed to avoid "eight-connecting" objects.
 ##
+## @item thin-pratt
+## Performs a thinning operation, according to W. K. Pratt,
+## "Digital Image Processing", 3rd Edition, pp 413-414.
+##
 ## @item thin
 ## Performs a thinning operation. When n=Inf, thinning sets pixels to 0
 ## such that an object without holes is converted to a stroke
@@ -179,7 +183,7 @@
 ## It refers to all pixels which are connected to X: X0, X1, X2, X3, X4,
 ## X5, X6 and X7.
 ## @end table
-## 
+##
 ## @strong{Compatibility notes:}
 ## @table @code
 ## @item 'skel'
@@ -190,6 +194,8 @@
 ## @item 'skel-pratt'
 ## This option is not available in MATLAB.
 ## @item 'skel-lantuejoul'
+## This option is not available in MATLAB.
+## @item 'thin-pratt'
 ## This option is not available in MATLAB.
 ## @item 'thicken'
 ## This implementation also thickens image borders. This can easily be
@@ -489,14 +495,22 @@ function bw2 = bwmorph (bw, operation, n = 1)
       morph = @(x) applylut (x, lut);
 
     case "thicken"
-      ## This implementation also "thickens" the border. To avoid this,
-      ## a simple solution could be to add a border of 1 to the reversed
-      ## image.
-      bw = bwmorph (! bw, "thin", n);
-      loop_once = true;
-      morph = @(x) bwmorph (x, "diag");
+      if (n > 0)
+        pads = repmat (2 * min ([max(size (bw)) n]),
+                       [1 ndims(bw)]);
+        bw = padarray (bw, pads, false);
+        bw = bwmorph (! bw, "thin-pratt", n);
 
-    case "thin"
+        loop_once = true;
+        morph = @(x) bwmorph (x, "diag");
+
+        ## Remove ND padding
+        idx = arrayfun (@colon, pads +1, size (bw) -pads,
+                        "UniformOutput", false);
+        post_morph = @(x) ! x(idx{:});
+      endif
+
+    case "thin-pratt"
       ## lut1 = makelut ("__conditional_mark_patterns_lut_fun__", 3, "T");
       lut1 = logical ([0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;1;1;0;0;1;1;
                        0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;0;0;1;1;0;0;0;0;0;0;0;1;
@@ -532,6 +546,45 @@ function bw2 = bwmorph (bw, operation, n = 1)
                        1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;0;1;1;1;1;1;1;1;
                        1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1]);
       morph = @(x) x & applylut (applylut (x, lut1), lut2);
+
+    case "thin"
+      ## lut1 = makelut (@__thin_fun1__, 3);
+      lut1 = logical ([0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;0;1;1;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;0;1;0;1;1;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;0;0;1;0;1;1;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;0;1;1;1;0;0;1;1;0;1;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;0;0;1;0;1;1;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;0;1;1;1;0;0;1;1;0;1;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;0;1;1;1;1;1;1;1;1;1;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;0;0;1;0;1;1;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;0;1;1;1;0;0;1;1;0;1;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;0;0;1;0;1;1;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;0;1;1;1;0;0;1;1;0;1;1;1;]);
+
+      ## lut2 = makelut (@__thin_fun2__, 3);
+      lut2 = logical ([0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;0;1;1;0;0;1;1;0;0;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;0;0;1;1;0;0;1;1;0;0;1;1;0;0;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;0;0;0;1;1;0;0;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;0;0;1;1;0;0;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;0;0;0;1;0;0;1;1;0;0;1;1;0;0;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;1;0;0;1;1;1;1;1;1;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;
+                       0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;]);
+
+      morph = @(x) applylut (applylut (x, lut1), lut2);
 
     case "tophat"
       ## top hat filtering has no effect after being performed once
@@ -573,11 +626,12 @@ function bw2 = bwmorph (bw, operation, n = 1)
 
 endfunction
 
+
 %!demo
 %! bwmorph (true (11), "shrink", Inf)
 %! # Should return 0 matrix with 1 pixel set to 1 at (6,6)
 
-## Test skel-lantuejoul using Gozalez&Woods example (fig 8.39)
+## Test skel-lantuejoul using Gonzalez & Woods example (fig 8.39)
 %!test
 %! slBW = logical ([  0   0   0   0   0   0   0
 %!                    0   1   0   0   0   0   0
@@ -733,6 +787,82 @@ endfunction
 %!                 1  1  1  1  1]);
 %! assert (bwmorph (in, "spur", Inf), out);
 
+## several tests for "thicken":
+%!test
+%! bw = false (3, 3);
+%! bw(3, 1) = true;
+%! out = bwmorph (bw, "thicken", 0);
+%! assert (out, bw)
+
+%!test
+%! bw = false (8, 7);
+%! bw(8, 1) = true;
+%! expected = logical ([
+%!  0  0  0  0  0  0  0
+%!  1  0  0  0  0  0  0
+%!  1  1  0  0  0  0  0
+%!  1  1  1  0  0  0  0
+%!  1  1  1  1  0  0  0
+%!  1  1  1  1  1  0  0
+%!  1  1  1  1  1  1  0
+%!  1  1  1  1  1  1  1]);
+%! out = bwmorph (bw, "thicken", 6);
+%! assert (out, expected)
+
+%!test
+%! bw = false (8, 7);
+%! bw(2, 4) = true;
+%! expected = logical ([
+%!  0  0  1  1  1  0  0
+%!  0  1  1  1  1  1  0
+%!  0  0  1  1  1  0  0
+%!  0  0  0  1  0  0  0
+%!  0  0  0  0  0  0  0
+%!  0  0  0  0  0  0  0
+%!  0  0  0  0  0  0  0
+%!  0  0  0  0  0  0  0]);
+%! out = bwmorph (bw, "thicken", 2);
+%! assert (out, expected)
+
+%!test
+%! bw = false (8, 7);
+%! bw (6, 3) = true ;
+%! expected1 = logical ([
+%!  0  0  0  0  0  0  0
+%!  0  0  0  0  0  0  0
+%!  0  0  0  0  0  0  0
+%!  0  0  0  0  0  0  0
+%!  0  0  1  0  0  0  0
+%!  0  1  1  1  0  0  0
+%!  0  0  1  0  0  0  0
+%!  0  0  0  0  0  0  0]);
+%! expected3 = logical ([
+%!  0  0  0  0  0  0  0
+%!  0  0  0  0  0  0  0
+%!  0  0  1  0  0  0  0
+%!  0  1  1  1  0  0  0
+%!  1  1  1  1  1  0  0
+%!  1  1  1  1  1  1  0
+%!  1  1  1  1  1  0  0
+%!  0  1  1  1  0  0  0]);
+%! out1 = bwmorph (bw, "thicken", 1);
+%! out3 = bwmorph (bw, "thicken", 3);
+%! assert (out1, expected1)
+%! assert (out3, expected3)
+
+%!test
+%! bw = false (10, 10);
+%! bw(2, 3) = true;
+%! bw(7, 7) = true;
+%! out_inf = bwmorph (bw, "thicken", Inf);
+%! assert (out_inf(1, 9), false)
+
+%!test
+%! bw = false (3, 3);
+%! bw(3, 1) = true;
+%! out = bwmorph (bw, "thicken", 4);
+%! assert (out, true (3, 3))
+
 %!xtest
 %! ## bug #44396
 %! in = [
@@ -748,3 +878,57 @@ endfunction
 %!   0   0   0   0   0
 %!   0   0   0   0   0];
 %! assert (bwmorph (in, "shrink"), logical (out));
+
+%!test
+%! H = false (7,7);
+%! H(2:3,2:3) = 1;
+%! H(5:6,5:6) = 1;
+%! T = logical([0  0  0  0  0  0  0;
+%!      0  0  0  0  0  0  0;
+%!      0  1  0  0  0  0  0;
+%!      0  0  0  0  0  0  0;
+%!      0  0  0  0  0  0  0;
+%!      0  0  0  0  1  0  0;
+%!      0  0  0  0  0  0  0]);
+%! out = bwmorph (H, "thin", 1);
+%! assert (T, out)
+%!
+%! H(4:6,4:6) = 1;
+%! T = logical([0  0  0  0  0  0  0;
+%!      0  0  0  0  0  0  0;
+%!      0  1  1  0  0  0  0;
+%!      0  0  0  1  0  0  0;
+%!      0  0  0  0  1  0  0;
+%!      0  0  0  0  0  0  0;
+%!      0  0  0  0  0  0  0]);
+%! out = bwmorph (H, "thin", 1);
+%! assert (T, out)
+%!
+%! H3 = [0 0 0 0 0 0;
+%!       0 1 1 1 0 0;
+%!       0 1 1 1 0 0;
+%!       0 0 0 1 0 1;
+%!       0 0 0 0 1 1;
+%!       0 0 0 1 1 1];
+%! out3 = bwmorph (H3, "thin", 1);
+%! expected3 = logical(
+%!     [0   0   0   0   0   0;
+%!      0   0   0   0   0   0;
+%!      0   1   1   0   0   0;
+%!      0   0   0   1   0   1;
+%!      0   0   0   0   1   0;
+%!      0   0   0   1   1   0]);
+%! assert (out3, expected3)
+%!
+%! out33 = bwmorph (H3, "thin", 2);
+%! expected33 = logical(
+%!     [0   0   0   0   0   0;
+%!      0   0   0   0   0   0;
+%!      0   1   1   0   0   0;
+%!      0   0   0   1   0   1;
+%!      0   0   0   0   1   0;
+%!      0   0   0   1   0   0]);
+%! assert (out33, expected33)
+%!
+%! out333 = bwmorph (H3, "thin", inf);
+%! assert  (out333, expected33)

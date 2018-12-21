@@ -1,11 +1,58 @@
- Summary of important user-visible changes for image 2.8.2 (201x/xx/xx):
+ Summary of important user-visible changes for image 2.10.0 (yyyy/mm/dd):
 -------------------------------------------------------------------------
 
- ** image 2.8.2 is a patch release.
+ ** The following functions are new:
 
- ** Fix tests in grayslice.
+      axes2pix
+      bwpack
+      bwunpack
+      colorangle
+      deconvwnr
+      houghlines
+      houghpeaks
+      otsuthresh
 
- ** Fix a failing test in normxcorr2.
+ ** The functions entropyfilt, rangefilt, and stdfilt were completely
+    incorrect and have now been fixed.
+
+ ** The function entropy was changed to be Matlab compatible and now gives
+    different results.
+
+ ** In function regionprops, "Perimeter" was changed to be compatible
+    with Matlab, and "PerimterOld" was added.
+
+ ** In function regionprops, properties "ConvexHull", "ConvexImage",
+    "ConvexArea" and "Solidity" were added.
+
+ ** In function bwfill, the usage of parameter connectivity was
+    changed such that it specifies the connectedness of the foreground
+    and not of the background, as it used to be.  This change was done
+    to increase Matlab compatibility.
+
+ ** grayslice now expects argument V to be a vector with the actual
+    values used to perform threshold.  Previously it expected values
+    in the [0 1] range which would be adjust to the correct type
+    internally.  This change was done for Matlab compatibility (which
+    does the same despite their documentation stating otherwise).
+    Other small changes were done to be Matlab compatible in multiple
+    corner cases.
+
+ ** The function operation "thin" in bwmorph was changed to be Matlab
+    compatible.  The previous implementation, based on the book by
+    W. K. Pratt, is available under the name "thin-pratt".
+
+ ** imcast now also converts images to logical type.
+
+ ** wiener2 is now able to handle images with arbitrary number of
+    dimensions.
+
+ ** Other functions that have been changed for smaller bugfixes,
+    increased Matlab compatibility, or performance:
+
+      bwdist
+      bwmorph
+      graythresh
+      hough_line
 
 
  Summary of important user-visible changes for image 2.8.1 (2018/10/26):

@@ -62,10 +62,8 @@ For a Matlab compatible Hough transform see hough.m\n\
   const int c = I.columns ();
   const int thetas_length = thetas.numel ();
 
-  Matrix size (1, 2);
-  size (0) = r; size (1) = c;
-  const double diag_length = sqrt (size.sumsq ()(0));
-  const int nr_bins = 2 * (int)ceil (diag_length) - 1;
+  const double diag_length = sqrt ((r-1)*(r-1) + (c-1)*(c-1));
+  const int nr_bins = 2 * (int)ceil (diag_length) + 1;
   RowVector bins = RowVector (Range(1, nr_bins).matrix_value ()) - ceil (nr_bins/2.0);
   const int bins_length = bins.numel ();
 

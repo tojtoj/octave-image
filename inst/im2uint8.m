@@ -77,3 +77,5 @@ endfunction
 %!error <range of values> im2uint8 (uint16 (256), "indexed");
 %!error <range of values> im2uint8 (257, "indexed");
 
+%!assert (im2uint8 ((1:255) ./ 256), uint8 ([1:128 128:254]))
+%!assert (im2uint8 ((0:255) ./ 256), uint8 ([0:128 128:254]))
