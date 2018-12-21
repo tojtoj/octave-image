@@ -346,11 +346,12 @@ endfunction
 %! ## internally as doubles.  Matlab requires everything all to be
 %! ## double so this is Matlab incompatible behaviour by design.
 %! nsr = 0.1;
-%! deconvolved = deconvwnr (im2, double (single (psf1)), nsr)
-%! assert (deconvwnr (im2, single (psf), single (nsr)), deconvolved)
-%! assert (deconvwnr (im2, single (psf), single (nsr)), deconvolved)
-%! assert (deconvwnr (im2, single (psf), nsr), deconvolved)
-%! assert (deconvwnr (im2, psf, single (nsr)), deconvolved)
+%! psf1_recast = double (single (psf1));
+%! nsr_recast = double (single (0.1));
+%! deconvolved = deconvwnr (im2, psf1_recast, nsr_recast);
+%! assert (deconvwnr (im2, single (psf1), single (nsr)), deconvolved)
+%! assert (deconvwnr (im2, single (psf1), nsr_recast), deconvolved)
+%! assert (deconvwnr (im2, psf1_recast, single (nsr)), deconvolved)
 
 
 ## show instructive demo:
