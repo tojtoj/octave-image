@@ -125,7 +125,7 @@ endfunction
 ## have for Matlab compatibility.  This is specially true for elements
 ## in the border, and worse when expanding.
 
-%!test
+%!test <51979>
 %! in = [116  227  153   69  146  194   59  130  139  106
 %!         2   47  137  249   90   75   16   24  158   44
 %!       155   68   46   84  166  156   69  204   32  152
@@ -199,13 +199,13 @@ endfunction
 %!   endfor
 %! endfor
 
-%!test
+%!test <51979>
 %! in = repmat (uint8 (255), [10 10]);
 %! assert (impyramid (in, "reduce"), repmat (uint8 (255), [5 5]))
 %! assert (impyramid (in, "expand"), repmat (uint8 (255), [19 19]))
 
 ## This test is failing because it uses the expected Matlab results
-%!test
+%!test <51979>
 %! in = logical ([
 %!   1  0  1  1  0  0  1  1  0  0
 %!   1  1  0  0  0  1  0  0  1  0
