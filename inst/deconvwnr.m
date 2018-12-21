@@ -91,8 +91,10 @@ function deconvolved = deconvwnr (img, psf, varargin)
     img = im2double (img);
   endif
 
-  ## Allow psf and nsr inputs to be of class single, but cast them
-  ## to double for calculations. (This behavior is Octave-only.)
+  ## Allow psf and nsr inputs to be of class single too, but cast them
+  ## to double for calculations.  This behavior is Octave-only, Matlab
+  ## requires everything to be double and the user needs to explictely
+  ## cast them to double.
   if (isa (psf, "single"))
     psf = double (psf);
   endif
@@ -338,6 +340,17 @@ endfunction
 %!    0.2469   -0.0561    0.1818    0.3038    0.3052    0.0047    0.0043    0.3621];
 %! assert (deconvwnr (im_rgb, psf0, 0.01), out_rgb_0, 1e-4)
 %! assert (deconvwnr (im_rgb, psf1, 0.01), out_rgb_1, 1e-4)
+
+%!test
+%! ## Test that psf and nsr can be of class single, but are usually
+%! ## internally as doubles.  Matlab requires everything all to be
+%! ## double so this is Matlab incompatible behaviour by design.
+%! nsr = 0.1;
+%! deconvolved = deconvwnr (im2, double (single (psf1)), nsr)
+%! assert (deconvwnr (im2, single (psf), single (nsr)), deconvolved)
+%! assert (deconvwnr (im2, single (psf), single (nsr)), deconvolved)
+%! assert (deconvwnr (im2, single (psf), nsr), deconvolved)
+%! assert (deconvwnr (im2, psf, single (nsr)), deconvolved)
 
 
 ## show instructive demo:
