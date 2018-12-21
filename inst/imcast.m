@@ -20,17 +20,18 @@
 ##
 ## Converts a valid image @var{img} into another class @var{type}.  A valid
 ## image must be of class logical, uint8, uint16, int16, single, or double.
-## Conversion of images of class logical is valid, but not the inverse, i.e.,
-## conversion of images into logical class is not supported. Use of
-## @code{im2bw} is recommended for such cases.
 ##
 ## If the image is indexed, the last argument may be the string
-## @qcode{"indexed"}.  An indexed image may not be of class int16 or
-## single (see @code{isind} for details).
+## @qcode{"indexed"}.  An indexed image may not be of class int16,
+## single, or logical (see @code{isind} for details).
 ##
-## Details on how the conversion is performed is class dependent, and can
-## be seen on the help text of @code{im2double}, @code{im2single},
-## @code{im2uint8}, @code{im2uint16}, and @code{im2int16}.
+## Details on how the conversion is performed is class dependent, and
+## can be seen on the help text of @code{im2double}, @code{im2single},
+## @code{im2uint8}, @code{im2uint16}, and @code{im2int16}.  For the
+## case of logical, conversion to logical is equivalent to simply
+## casting @var{img} to logical data type.  Conversion from logical,
+## true elements are converted to 1 in the case of floating point, or
+## the maximum value in the case of integer types.
 ##
 ## @seealso{im2bw, im2uint8, im2double, im2int16, im2single, im2uint16}
 ## @end deftypefn
@@ -95,6 +96,7 @@ function imout = imcast (img, outcls, varargin)
           case "uint16", imout = uint16 (img * 65535);
           case "int16",  imout = int16 (double (img * uint16 (65535)) -32768);
           case {"double", "single"}, imout = cast (img, outcls);
+          case "logical", imout = logical (img);
           otherwise, problem = true;
         endswitch
 
@@ -104,6 +106,7 @@ function imout = imcast (img, outcls, varargin)
           case "single", imout = single (img) / 255;
           case "uint16", imout = uint16 (img) * 257; # 257 comes from 65535/255
           case "int16",  imout = int16 ((double (img) * 257) -32768); # 257 comes from 65535/255
+          case "logical", imout = logical (img);
           otherwise, problem = true;
         endswitch
 
@@ -113,6 +116,7 @@ function imout = imcast (img, outcls, varargin)
           case "single", imout = single (img) / 65535;
           case "uint8",  imout = uint8 (img / 257); # 257 comes from 65535/255
           case "int16",  imout = int16 (double (img) -32768);
+          case "logical", imout = logical (img);
           otherwise, problem = true;
         endswitch
 
@@ -133,6 +137,7 @@ function imout = imcast (img, outcls, varargin)
           case "single", imout = (single (img) + 32768) / 65535;
           case "uint8",  imout = uint8 ((double (img) + 32768) / 257); # 257 comes from 65535/255
           case "uint16", imout = uint16 (double (img) + 32768);
+          case "logical", imout = logical (img);
           otherwise, problem = true;
         endswitch
 
@@ -182,3 +187,4 @@ endfunction
 %!error <unsupported TYPE> imcast (randi (255, 40, "uint8"), "not a class")
 %!error <range of values> imcast (randi ([0 65535], 40, "uint16"), "uint8", "indexed")
 
+%!assert (imcast ([0 1 .2; 2 -0 Inf], "logical"), logical ([0 1 1; 1 0 1]))

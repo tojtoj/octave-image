@@ -44,7 +44,7 @@
 ## bw = im2bw (img, graythresh (img, "moments"));
 ## @end example
 ##
-## @seealso{graythresh, ind2gray, rgb2gray}
+## @seealso{graythresh, ind2gray, otsuthresh, rgb2gray}
 ## @end deftypefn
 
 function BW = im2bw (img, cmap, thresh = 0.5)

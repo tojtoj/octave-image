@@ -96,19 +96,17 @@ endfunction
 ## @end deftypefn
 
 function ZI = graybicubic (Z, XI, YI, extrapval = 0)
-  
   ## Allocate output
-  [X, Y] = meshgrid(1:columns(Z), 1:rows(Z));
   [Zr, Zc] = size(XI);
   ZI = zeros(Zr, Zc);
-  
+
   ## Find inliers
-  inside = !( XI < X(1) | XI > X(end) | YI < Y(1) | YI > Y(end) );
-  
+  inside = ! (XI < 1 | XI > columns (Z) | YI < 1 | YI > rows (Z));
+
   ## Scale XI and YI to match indices of Z (not needed when interpolating images)
-  #XI = (columns(Z)-1) * ( XI - X(1) ) / (X(end)-X(1)) + 1;
-  #YI = (rows(Z)-1)    * ( YI - Y(1) ) / (Y(end)-Y(1)) + 1;
-  
+  #XI = (columns(Z)-1) * (XI - 1) / (columns (Z) -1)) + 1;
+  #YI = (rows(Z)-1)    * (YI - 1) / (rows (Z) -1)) + 1;
+
   ## Start the real work
   K = floor(XI);
   L = floor(YI);
