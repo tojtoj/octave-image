@@ -109,7 +109,16 @@ endfunction
 %!assert(mat2gray(repmat ([1 2; 3 3], [1 1 3])), repmat ([0 0.5; 1 1], [1 1 3])); # setting min and max
 %!assert(mat2gray([1 2 3], [2 2]), [1 1 1]);      # equal min and max
 %!assert(mat2gray([-1 0 0.5 3], [2 2]), [0 0 0.5 1]);      # equal min and max
-%!assert(mat2gray(ones(3*0.5)), ones(3*0.5));      # equal min and max from the image (not set)
+
+%!test
+%! ## SCALE is unset and all values in the input IMAGE are the same:
+%! ## case 1: all values are in the [0 1] range]
+%! assert (mat2gray ([.5 .5; .5 .5]), [.5 .5; .5 .5])
+%! ## case 2: all values are above the [0 1] range
+%! assert (mat2gray ([3 3; 3 3]), [1 1; 1 1])
+%! ## case 2: all values are below the [0 1] range
+%! assert (mat2gray ([-3 -3; -3 -3]), [0 0; 0 0])
+
 %!assert(mat2gray([1 2 3], [3 1]), [1 0.5 0]);    # max and min inverted
 
 ## bug #47516 (when MIN is greater than input max value)
