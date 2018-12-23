@@ -1791,7 +1791,8 @@ endfunction
 %! csolid = props.Solidity;
 %! assert (csolid, csolid_test);
 
-%!xtest <50188>     # Matlab compatible, currently fails because of bug #50188
+%!xtest
+%! ## Matlab compatible, currently fails because of bug #50188
 %! BW = false(4,16);
 %! BW(2,2) = true;
 %! BW(3,2:end-1) = true; # L-shaped region (small angle)
