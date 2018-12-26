@@ -205,11 +205,11 @@ endfunction
 ## expand on the first 2 dimensions.
 %!assert (imresize (repmat (5, [3 3 2]), 2), repmat (5, [6 6 2]), eps*100)
 
-## The following are the matlab results. We have slighlty different results but
-## not by much. If there's would be any fixes, they would have to be on interp2
-## or maybe in imremap.
+## The following are the matlab results. We have slighlty different
+## results but not by much. If there's would be any fixes, they
+## would have to be on interp2 or maybe in imremap.
 
-%!shared in, out
+%!shared in
 %! in = [116  227  153   69  146  194   59  130  139  106
 %!         2   47  137  249   90   75   16   24  158   44
 %!       155   68   46   84  166  156   69  204   32  152
@@ -217,7 +217,8 @@ endfunction
 %!       107  143  108   52   51   73  101   21  175   90
 %!        54  158  143   77   26  168  113  229  165  225
 %!         9   47  133  135  130  207  236   43   19   73];
-%!
+
+%!xtest
 %! out = [116  185  235  171   96   64  134  189  186   74   90   141  140  124  108
 %!         44   92  143  149  164  163  119  123  118   44   38    80  151  118   63
 %!         14   21   47  107  195  228  115   81   70   24   19    56  137  105   49
@@ -229,8 +230,9 @@ endfunction
 %!         40   96  152  149  117   74   34  108  179  131  175   215  153  177  219
 %!         11   33   73  127  137  125  113  158  212  229  148    55   35   63   96
 %!          4   17   53  121  141  138  133  171  220  253  141    16    7   36   67];
-%!xtest assert (imresize (uint8 (in), 1.5, "bicubic"), uint8 (out))
-%!
+%! assert (imresize (uint8 (in), 1.5, "bicubic"), uint8 (out))
+
+%!xtest
 %! out = [116  172  215  165  111   82  133  170  171   81   95   132  138  123  106
 %!         59   98  138  144  152  152  125  127  119   54   58    89  137  112   75
 %!         27   39   62  110  172  202  123   96   78   36   40    68  123  100   62
@@ -242,16 +244,22 @@ endfunction
 %!         46   93  139  141  114   80   50  109  168  141  166   189  151  171  200
 %!         16   41   77  123  130  123  115  157  204  214  145    69   48   71   98
 %!          9   28   61  119  134  134  131  169  212  231  140    39   23   46   73];
-%!xtest assert (imresize (uint8 (in), 1.5, "bilinear"), uint8 (out))
-%!
+%! assert (imresize (uint8 (in), 1.5, "bilinear"), uint8 (out))
+
+%!xtest
 %! out = [108  136  125   89  107
 %!        111  132  143  114   99
 %!        106  110  106  127  136
 %!         47  121  163  138   68];
-%!xtest assert (imresize (uint8 (in), 0.5, "bilinear"), uint8 (out))
-%!
+%! assert (imresize (uint8 (in), 0.5, "bilinear"), uint8 (out))
+
+%!xtest
 %! out = [103  141  124   78  110
 %!        111  134  153  114   91
 %!        115  108   93  128  146
 %!         38  124  175  143   54];
-%!xtest assert (imresize (uint8 (in), 0.5, "bicubic"), uint8 (out))
+%! assert (imresize (uint8 (in), 0.5, "bicubic"), uint8 (out))
+
+%!xtest
+%! ## bug #55202
+%! assert (imresize (zeros (1, 20), [1 30], "nearest"), zeros (1, 30))
