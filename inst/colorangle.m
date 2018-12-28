@@ -55,8 +55,8 @@ function angles = colorangle (rgb1, rgb2)
            "colorangle: RGB1 and RGB2 must have one or same number of colors");
   endif
 
-  norm1 = vecnorm (rgb1, 2, 2);
-  norm2 = vecnorm (rgb2, 2, 2);
+  norm1 = sqrt (sumsq (rgb1, 2));
+  norm2 = sqrt (sumsq (rgb2, 2));
 
   ## Would be nice if dot() had automatic broadcasting, see
   ## https://savannah.gnu.org/bugs/index.php?55077. In the mean time,

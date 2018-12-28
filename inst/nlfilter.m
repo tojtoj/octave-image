@@ -132,9 +132,47 @@ endfunction
 %!               0 1 2 2
 %!               0 0 1 1]));
 
+%!test
+%! ## Effect of out of border elements.
+%! expected = [
+%!    0.5    6.0    6.0    0.5    0
+%!    5.5   10.5   13.5   10.5    4.0
+%!    6.5   12.5   13.5   13.5    1.5
+%!   10.5   12.5   15.5   11.0    1.0
+%!    5.0   10.5    6.0    1.0    0
+%! ];
+%! assert (nlfilter (magic (5), [3 4], @(x) median (x(:))), expected)
+
+
+%!test
+%! ## The center pixel of a sliding window when its length is even
+%! ## sized is ceil ((size (NHOOD) +1) /2)
+%! expected = [
+%!   24  24  24  16  16
+%!   24  24  24  22  22
+%!   23  23  22  22  22
+%!   25  25  25  25  22
+%!   25  25  25  25  21
+%! ];
+%! assert (nlfilter (magic (5), [3 4], @(x) max (x(:))), expected)
+
+## nlfilter and imdilate use a different center pixel when the
+## window/nhood have an even sized length.  So to have imdilate behave
+## like nlfilter, we need to flip those dimensions.
+%!function dilated = imdilate_like_nlfilter (im, nhood)
+%!  even_nhood_dims = find (mod (size (nhood), 2) == 0);
+%!  for i = 1:even_nhood_dims
+%!    im = flip (im, i);
+%!  endfor
+%!  dilated = imdilate (im, nhood);
+%!  for i = 1:even_nhood_dims
+%!    dilated = flip (dilated, i);
+%!  endfor
+%!endfunction
+
 ## Test N-dimensional
 %!test
-%! a = randi (10, 20, 20, 20);
+%! a = randi (65535, 20, 20, 20, "uint16");
 %! ## extra dimensions on matrix only
 %! assert (nlfilter (a, [5 5], @(x) max(x(:))), imdilate (a, ones (5)))
 %! ## extra dimensions on both matrix and block
@@ -144,13 +182,13 @@ endfunction
 %! assert (nlfilter (a, [3 7 3], @(x) max(x(:))), imdilate (a, ones ([3 7 3])))
 
 %!test
-%! a = randi (10, 15, 15, 4, 8, 3);
+%! a = randi (65535, 15, 15, 4, 8, 3, "uint16");
 %! assert (nlfilter (a, [3 4 7 5], @(x) max(x(:))),
-%!         imdilate (a, ones ([3 4 7 5])))
+%!         imdilate_like_nlfilter (a, ones ([3 4 7 5])))
 
 ## Just to make sure it's not a bug in imdilate
 %!test
-%! a = randi (10, 15, 15, 4, 3, 8);
+%! a = randi (65535, 15, 15, 4, 3, 8, "uint16");
 %! ord = ordfiltn (a, 3, ones ([3 7 3 1 5]));
 %! assert (nlfilter (a, [3 7 3 1 5], @(x) sort (x(:))(3)), ord)
 %! assert (nlfilter (a, [3 7 3 1 5], @(x, y) sort (x(:))(y), 3), ord)

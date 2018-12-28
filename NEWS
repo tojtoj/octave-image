@@ -1,33 +1,28 @@
- Summary of important user-visible changes for image 2.10.0 (yyyy/mm/dd):
+ Summary of important user-visible changes for image 2.10.0 (2018/12/26):
 -------------------------------------------------------------------------
 
  ** The following functions are new:
 
-      axes2pix
-      bwpack
-      bwunpack
-      colorangle
-      deconvwnr
-      houghlines
-      houghpeaks
-      otsuthresh
+      axes2pix              colorangle            houghpeaks
+      bwpack                deconvwnr             otsuthresh
+      bwunpack              houghlines
 
  ** The functions entropyfilt, rangefilt, and stdfilt were completely
     incorrect and have now been fixed.
-
- ** The function entropy was changed to be Matlab compatible and now gives
-    different results.
 
  ** In function regionprops, "Perimeter" was changed to be compatible
     with Matlab, and "PerimterOld" was added.
 
  ** In function regionprops, properties "ConvexHull", "ConvexImage",
-    "ConvexArea" and "Solidity" were added.
+    "ConvexArea", and "Solidity" were added.
 
- ** In function bwfill, the usage of parameter connectivity was
-    changed such that it specifies the connectedness of the foreground
-    and not of the background, as it used to be.  This change was done
-    to increase Matlab compatibility.
+ ** In function bwfill, the parameter connectivity was changed.  In
+    previous versions, the parameter referred to background
+    connectivity but now refers to the foreground connectivity.  This
+    backwards incompatible changes was done for Matlab compatibility.
+    Effectively, to obtain the same results as in previous versions
+    use a value of 8 instead of 4, and a value of 4 instead of 8 (the
+    default was 8).
 
  ** grayslice now expects argument V to be a vector with the actual
     values used to perform threshold.  Previously it expected values
@@ -49,10 +44,8 @@
  ** Other functions that have been changed for smaller bugfixes,
     increased Matlab compatibility, or performance:
 
-      bwdist
-      bwmorph
-      graythresh
-      hough_line
+      bwdist                entropy               hough_line
+      bwmorph               graythresh
 
 
  Summary of important user-visible changes for image 2.8.1 (2018/10/26):

@@ -159,7 +159,6 @@ Types and Type conversions
  im2uint16
  im2uint8
  imcast
- imdither
  imquantize
  isbw
  isgray

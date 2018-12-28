@@ -229,10 +229,10 @@ center.\n\
       error ("iptcheckconn: VAR must be a string");
       return octave_value ();
     }
-  octave_idx_type pos (0);
+  int pos = 0;
   if (nargin > 3)
     {
-      pos = args(3).idx_type_value (true);
+      pos = args(3).int_value ();
       if (error_state || pos < 1)
         {
           error ("iptcheckconn: POS must be a positive integer");

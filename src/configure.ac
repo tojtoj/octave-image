@@ -1,5 +1,5 @@
 AC_PREREQ([2.67])
-AC_INIT([Octave-Forge image package], [2.9.0+])
+AC_INIT([Octave-Forge image package], [2.10.0])
 
 AC_CONFIG_HEADERS([config.h])
 
@@ -141,7 +141,7 @@ fi
 M_FILES=""
 m4_foreach([FNAME], [im2double, ntsc2rgb, rgb2gray, rgb2ntsc], [
   AC_MSG_CHECKING([Octave core for function FNAME])
-  HAS_FUNCTION=`$OCTAVE -qf --eval "printf ('%i', exist ('FNAME'))"`
+  HAS_FUNCTION=`$OCTAVE -qfH --eval "printf ('%i', exist ('FNAME'))"`
   if test "$HAS_FUNCTION" == 0; then
     AC_MSG_RESULT([no])
     M_FILES="${M_FILES} FNAME.m"

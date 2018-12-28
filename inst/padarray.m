@@ -73,7 +73,7 @@
 ##
 ## @end table
 ##
-## @seealso{cat, flipdim, resize, prepad, postpad}
+## @seealso{cat, flip, resize, prepad, postpad}
 ## @end deftypefn
 
 function B = padarray(A, padsize, varargin)
@@ -298,7 +298,7 @@ function B = padarray(A, padsize, varargin)
               B(dim_idx{:})   = B(source_idx{:});
             else
               source_idx{dim} = A_idx_ini:(A_idx_ini + bits(dim) -1);
-              B(dim_idx{:})   = flipdim (B(source_idx{:}), dim);
+              B(dim_idx{:})   = flip (B(source_idx{:}), dim);
             endif
           endif
         endif
@@ -310,7 +310,7 @@ function B = padarray(A, padsize, varargin)
               B(dim_idx{:})   = B(source_idx{:});
             else
               source_idx{dim} = (A_idx_end - bits(dim) +1):A_idx_end;
-              B(dim_idx{:})   = flipdim (B(source_idx{:}), dim);
+              B(dim_idx{:})   = flip (B(source_idx{:}), dim);
             endif
           endif
         endif
@@ -318,7 +318,7 @@ function B = padarray(A, padsize, varargin)
         if (complete(dim))
           dim_pad_size(1:B_ndims) = 1;
           source_idx{dim}         = A_idx{dim};
-          flipped_source          = flipdim (B(source_idx{:}), dim);
+          flipped_source          = flip (B(source_idx{:}), dim);
         endif
 
         if (pair_complete(dim))
@@ -360,7 +360,7 @@ function B = padarray(A, padsize, varargin)
               B(dim_idx{:})   = B(source_idx{:});
             else
               source_idx{dim} = (A_idx_ini +1):(A_idx_ini + bits(dim));
-              B(dim_idx{:})   = flipdim (B(source_idx{:}), dim);
+              B(dim_idx{:})   = flip (B(source_idx{:}), dim);
             endif
           endif
         endif
@@ -372,7 +372,7 @@ function B = padarray(A, padsize, varargin)
               B(dim_idx{:})   = B(source_idx{:});
             else
               source_idx{dim} = (A_idx_end - bits(dim)):(A_idx_end -1);
-              B(dim_idx{:})   = flipdim (B(source_idx{:}), dim);
+              B(dim_idx{:})   = flip (B(source_idx{:}), dim);
             endif
           endif
         endif
@@ -380,7 +380,7 @@ function B = padarray(A, padsize, varargin)
         if (complete(dim))
           dim_pad_size(1:B_ndims) = 1;
           source_idx{dim}         = A_idx{dim};
-          flipped_source          = flipdim (B(source_idx{:}), dim);
+          flipped_source          = flip (B(source_idx{:}), dim);
         endif
 
         if (pair_complete(dim))
