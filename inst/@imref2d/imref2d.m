@@ -37,10 +37,10 @@
 ## in pixels.
 ##
 ## XWorldLimits - limits of the image along the x-axis in world units
-## specified as a two element real vector.
+## specified as a two element real vector @code{[xMin, xMax]}.
 ##
 ## YWorldLimits - limits of the image along the y-axis in world units
-## specified as a two element real vector.
+## specified as a two element real vector @code{[yMin, yMax]}.
 ##
 ## PixelExtentInWorldX - pixel extent along the x-axis in world units
 ## specified as a real scalar.
@@ -99,9 +99,11 @@ function r = imref2d (imageSize, varargin)
       pixelExtentInWorldY = varargin{2};
     else
       validateattributes (varargin{1}, {"numeric"}, ...
-      {"real", "vector", "size", [1, 2]}, "imref2d", "xWorldLimits");
+      {"real", "increasing", "vector", "size", [1, 2]}, "imref2d", ...
+      "xWorldLimits");
       validateattributes (varargin{2}, {"numeric"}, ...
-      {"real", "vector", "size", [1, 2]}, "imref2d", "yWorldLimits");
+      {"real", "increasing", "vector", "size", [1, 2]}, "imref2d", ...
+      "yWorldLimits");
       xWorldLimits = varargin{1};
       yWorldLimits = varargin{2};
     endif
@@ -157,6 +159,8 @@ endfunction
 %!error id=Octave:incorrect-size imref2d ([4, 2], [1; 2], [1, 2])
 %!error id=Octave:incorrect-size imref2d ([4, 2], [1, 2], [1; 2])
 %!error id=Octave:invalid-indexing imref2d().InvalidProperty
+%!error id=Octave:expected-increasing imref2d ([100 200], [1.5 0.5], [2.5 3.5])
+%!error id=Octave:expected-increasing imref2d ([100 200], [1.5 2.5], [2.5 1.5])
 
 %!test
 %! r = imref2d;

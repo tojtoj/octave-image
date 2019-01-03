@@ -38,13 +38,13 @@
 ## in pixels.
 ##
 ## XWorldLimits - limits of the image along the x-axis in world units
-## specified as a two element real vector.
+## specified as a two element real vector @code{[xMin, xMax]}.
 ##
 ## YWorldLimits - limits of the image along the y-axis in world units
-## specified as a two element real vector.
+## specified as a two element real vector @code{[yMin, yMax]}.
 ##
 ## ZWorldLimits - limits of the image along the z-axis in world units
-## specified as a two element real vector.
+## specified as a two element real vector @code{[zMin, zMax]}.
 ##
 ## PixelExtentInWorldX - pixel extent along the x-axis in world units
 ## specified as a real scalar.
@@ -112,11 +112,14 @@ function r = imref3d (imageSize, varargin)
       pixelExtentInWorldZ = varargin{3};
     else
       validateattributes (varargin{1}, {"numeric"}, ...
-      {"real", "vector", "size", [1, 2]}, "imref3d", "xWorldLimits");
+      {"real", "increasing", "vector", "size", [1, 2]}, "imref3d", ...
+      "xWorldLimits");
       validateattributes (varargin{2}, {"numeric"}, ...
-      {"real", "vector", "size", [1, 2]}, "imref3d", "yWorldLimits");
+      {"real", "increasing", "vector", "size", [1, 2]}, "imref3d", ...
+      "yWorldLimits");
       validateattributes (varargin{3}, {"numeric"}, ...
-      {"real", "vector", "size", [1, 2]}, "imref3d", "zWorldLimits");
+      {"real", "increasing", "vector", "size", [1, 2]}, "imref3d", ...
+      "zWorldLimits");
       xWorldLimits = varargin{1};
       yWorldLimits = varargin{2};
       zWorldLimits = varargin{3};
@@ -193,6 +196,9 @@ endfunction
 %!error id=Octave:incorrect-size imref3d ([4, 2, 3], [1, 2], [3; 4], [5, 6])
 %!error id=Octave:incorrect-size imref3d ([4, 2, 3], [1, 2], [3, 4], [5; 6])
 %!error id=Octave:invalid-indexing imref3d().InvalidProperty
+%!error id=Octave:expected-increasing imref3d ([100, 200, 3], [1.5 0.5], [2.5, 3.5], [0.5, 1.5])
+%!error id=Octave:expected-increasing imref3d ([100, 200, 3], [1.5 2.5], [2.5, 1.5], [0.5, 1.5])
+%!error id=Octave:expected-increasing imref3d ([100, 200, 3], [1.5 2.5], [2.5, 3.5], [1.5, 0.5])
 
 %!assert (imref3d ([4, 2, 3]).ImageSize, [4, 2, 3])
 
