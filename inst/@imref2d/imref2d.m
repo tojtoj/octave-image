@@ -108,8 +108,8 @@ function r = imref2d (imageSize, varargin)
   endif
 
   if (exist ("pixelExtentInWorldX") && exist ("pixelExtentInWorldY"))
-    imageExtentInWorldX = pixelExtentInWorldX * m;
-    imageExtentInWorldY = pixelExtentInWorldY * n;
+    imageExtentInWorldX = pixelExtentInWorldX * n;
+    imageExtentInWorldY = pixelExtentInWorldY * m;
     xWorldLimits = [pixelExtentInWorldX / 2, imageExtentInWorldX + ...
     pixelExtentInWorldX / 2];
     yWorldLimits = [pixelExtentInWorldY / 2, imageExtentInWorldY + ...
@@ -209,6 +209,20 @@ endfunction
 %! assert (r.ImageExtentInWorldY, 160)
 %! assert (r.XIntrinsicLimits, [0.5, 512.5])
 %! assert (r.YIntrinsicLimits, [0.5, 512.5])
+
+%!test
+%! pixelExtentInWorldX = 0.1;
+%! pixelExtentInWorldY = 0.4;
+%! r = imref2d ([100, 200], pixelExtentInWorldX, pixelExtentInWorldY);
+%! assert (r.XWorldLimits, [0.05, 20.05], 1e-4)
+%! assert (r.YWorldLimits, [0.2, 40.2], 1e-4)
+%! assert (r.ImageSize, [100, 200])
+%! assert (r.PixelExtentInWorldX, 0.1)
+%! assert (r.PixelExtentInWorldY, 0.4)
+%! assert (r.ImageExtentInWorldX, 20)
+%! assert (r.ImageExtentInWorldY, 40)
+%! assert (r.XIntrinsicLimits, [0.5, 200.5])
+%! assert (r.YIntrinsicLimits, [0.5, 100.5])
 
 ## changing ImageSize
 %!test
