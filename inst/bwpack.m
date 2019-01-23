@@ -65,6 +65,7 @@ endfunction
 %!error id=Octave:invalid-input-arg bwpack ("text")
 
 %!xtest
+%! ## bug #55521
 %! assert (bwpack (eye (5)), uint32 ([1 2 4 8 16]))
 
 %!xtest
