@@ -1,3 +1,10 @@
+ Summary of important user-visible changes for image 2.12.0 (201x/xx/xx):
+-------------------------------------------------------------------------
+
+ ** The following functions are new:
+
+    imref2d                 imref3d
+
  Summary of important user-visible changes for image 2.10.0 (2018/12/26):
 -------------------------------------------------------------------------
 
