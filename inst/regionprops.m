@@ -767,7 +767,7 @@ function bb_images = rp_image (cc, bw, idx, subs, subarray_idx)
     if (no < 255)
       cls = "uint8";
     elseif (no < 65535)
-      cls = "uint16"
+      cls = "uint16";
     elseif (no < 4294967295)
       cls = "uint32";
     else
