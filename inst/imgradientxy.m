@@ -37,11 +37,11 @@
 ## derivatives.  This method works just like Sobel except a different
 ## approximation of the gradient is used.
 ##
-## @item @qcode{"central difference"}
+## @item @qcode{"central"} or @qcode{"centraldifference"}
 ## Calculates the gradient using the central difference approximation to the
 ## derivatives: @code{(x(i-1) - x(i+1))/2}.
 ##
-## @item @qcode{"intermediate difference"}
+## @item @qcode{"intermediate"} or @qcode{"intermediatedifference"}
 ## Calculates the gradient in using the intermediate difference approximation
 ## to the derivatives: @code{x(i) - x(i+1)}.
 ##
@@ -64,10 +64,10 @@ function [gradX, gradY] = imgradientxy (img, method = "sobel")
     case {"sobel", "prewitt"}
       ker = fspecial (method); # horizontal
 
-    case {"centraldifference"}
+    case {"central", "centraldifference"}
       ker = [0.5; 0; -0.5];
 
-    case {"intermediatedifference"}
+    case {"intermediate", "intermediatedifference"}
       ker = [1; -1];
 
     otherwise
@@ -121,7 +121,27 @@ endfunction
 %!           0     0     0
 %!          -0.5  -0.5  -0.5]);
 %!
+%! [gxCd, gyCd] = imgradientxy (A, "Central");
+%! assert (gxCd,
+%!         [ 0.5   0.0  -0.5
+%!           0.5   0.0  -0.5
+%!           0.5   0.0  -0.5]);
+%! assert (gyCd,
+%!         [ 0.5   0.5   0.5
+%!           0     0     0
+%!          -0.5  -0.5  -0.5]);
+%!
 %! [gxId, gyId] = imgradientxy(A, "IntermediateDifference");
+%! assert (gxId,
+%!         [ 1  -1   0
+%!           0   0  -1
+%!           1  -1   0]);
+%! assert (gyId,
+%!         [ 1   0   1
+%!          -1   0  -1
+%!           0  -1   0]);
+%!
+%! [gxId, gyId] = imgradientxy(A, "Intermediate");
 %! assert (gxId,
 %!         [ 1  -1   0
 %!           0   0  -1
