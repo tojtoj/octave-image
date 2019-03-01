@@ -6,6 +6,9 @@
 
  ** Fix imgradientxy such that "central" and "intermediate" are valid methods.
 
+ ** Fix __spatial_filtering__.cc such that stdfilt.m will handle all 
+    acceptable image types.
+
 
  Summary of important user-visible changes for image 2.10.0 (2018/12/26):
 -------------------------------------------------------------------------

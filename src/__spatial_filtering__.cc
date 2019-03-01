@@ -533,7 +533,7 @@ available in @code{rangefilt}.\n\
         ACTION (uint64NDArray, uint64_array_value, octave_uint64);
       else if (A.islogical ())
         ACTION (boolNDArray, bool_array_value, bool);
-      if (A.is_real_matrix ())
+      else if (A.is_real_matrix ())
         {
           if (A.is_single_type ())
             ACTION (FloatNDArray, float_array_value, float);

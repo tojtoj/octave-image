@@ -72,7 +72,7 @@ endfunction
 
 %!test
 %! im = stdfilt (ones (5));
-%! assert (im, zeros (5));
+%! assert (im, zeros (5))
 
 ## some (Matlab compatible) tests on simple 2D-images:
 %!test
@@ -108,3 +108,17 @@ endfunction
 %! assert (stdfilt (F), F_out, 4*eps)
 %! assert (stdfilt (G), G_out, 4*eps)
 %! assert (stdfilt (H), H_out, 4*eps)
+## testing all input types
+%! im = stdfilt (ones (5, 'logical'));
+%! assert (im, zeros (5))
+%! im = stdfilt (ones (5, 'uint8'));
+%! assert (im, zeros (5))
+%! assert (stdfilt (int8(H), H_out, 4*eps))
+%! assert (stdfilt (uint8(H), H_out, 4*eps))
+%! assert (stdfilt (int16(H), H_out, 4*eps))
+%! assert (stdfilt (uint16(H), H_out, 4*eps))
+%! assert (stdfilt (int32(H), H_out, 4*eps))
+%! assert (stdfilt (uint32(H), H_out, 4*eps))
+%! assert (stdfilt (int64(H), H_out, 4*eps))
+%! assert (stdfilt (uint64(H), H_out, 4*eps))
+%! assert (stdfilt (single(H), H_out, 4*eps))
