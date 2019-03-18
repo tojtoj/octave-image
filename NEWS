@@ -3,9 +3,12 @@
 
  ** The following functions are new:
 
-    imref2d                 imref3d
+      imref2d
+      imref3d
 
- ** Fix cubic interpolation (imremap.m)
+ ** Improved the cubic interpolation method in imremap.  This should
+    also cause improved results in the functions imperspectivewarp,
+    imresize, and imrotate when using the cubic or bicubic methods.
 
 
  Summary of important user-visible changes for image 2.10.1 (2019/xx/xx):
