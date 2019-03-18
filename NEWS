@@ -1,13 +1,12 @@
-
  Summary of important user-visible changes for image 2.10.1 (2019/xx/xx):
 -------------------------------------------------------------------------
 
  ** image 2.10.1 is a patch release.
 
- ** Fix imgradientxy such that "central" and "intermediate" are valid methods.
+ ** Added "central" and "intermediate" imgradientxy methods as alias
+    to the "CentralDifference" and "IntermediateDifference" methods.
 
- ** Fix __spatial_filtering__.cc such that stdfilt.m will handle all 
-    acceptable image types.
+ ** Fix regression in stdfilt to accept floating point images again.
 
 
  Summary of important user-visible changes for image 2.10.0 (2018/12/26):
