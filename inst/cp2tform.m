@@ -35,8 +35,8 @@
 ##
 ## @example
 ## @group
-## @var{in_cp} = [@var{out_cp} ones(rows (out_cp,1))] * Tinv
-## @var{out_cp} = [@var{in_cp} ones(rows (in_cp,1))] * T
+## @var{in_cp} = [@var{out_cp} ones(rows (out_cp) ,1)] * T.tdata.Tinv
+## @var{out_cp} = [@var{in_cp} ones(rows (in_cp) ,1)] * T.tdata.T
 ## @end group
 ## @end example
 ## This transformation is well suited when parallel lines in one space
@@ -77,9 +77,9 @@
 ##
 ## @example
 ## @group
-## [u v w] = [@var{out_cp} ones(rows (out_cp,1))] * Tinv
+## [u v w] = [@var{out_cp} ones(rows (out_cp) ,1)] * T.tdata.Tinv
 ## @var{in_cp} = [u./w, v./w];
-## [x y z] = [@var{in_cp} ones(rows (in_cp,1))] * T
+## [x y z] = [@var{in_cp} ones(rows (in_cp) ,1)] * T.tdata.T
 ## @var{out_cp} = [x./z y./z];
 ## @end group
 ## @end example
@@ -98,15 +98,15 @@
 ## @example
 ## @group
 ## Second order:  
-## [u v] = [1 x y x*y x^2 y^2] * Tinv
+## [u v] = [1 x y x*y x^2 y^2] * T.tdata.Tinv
 ## @end group
 ## @group
 ## Third order:   
-## [u v] = [1 x y x*y x^2 y^2 y*x^2 x*y^2 x^3 y^3] * Tinv
+## [u v] = [1 x y x*y x^2 y^2 y*x^2 x*y^2 x^3 y^3] * T.tdata.Tinv
 ## @end group
 ## @group
 ## Fourth order:  
-## [u v] = [1 x y x*y x^2 y^2 y*x^2 x*y^2 x^3 y^3 x^3*y x^2*y^2 x*y^3 x^4 y^4] * Tinv
+## [u v] = [1 x y x*y x^2 y^2 y*x^2 x*y^2 x^3 y^3 x^3*y x^2*y^2 x*y^3 x^4 y^4] * T.tdata.Tinv
 ## @end group
 ## @end example
 ## This transform is well suited when lines in one space become curves
@@ -114,9 +114,6 @@
 ## @end table
 ## @seealso{tformfwd, tforminv, maketform}
 ## @end deftypefn
-
-## Author: Pantxo Diribarne <pantxo@dibona>
-## Created: 2012-09-05
 
 function trans = cp2tform (crw, cap, ttype, opt)
   if (nargin < 3)
