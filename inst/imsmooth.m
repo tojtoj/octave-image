@@ -45,7 +45,7 @@
 ## numbers, but the result has the same type as the input. Also, the size of the
 ## smoothed image is the same as the input image.
 ##
-## @strong{Isotropic Gaussian smoothing}
+## @strong{Gaussian - Isotropic Gaussian smoothing}
 ##
 ## The image is convolved with a Gaussian filter with spread @var{sigma}.
 ## By default @var{sigma} is @math{0.5}, but this can be changed. If the third
@@ -53,7 +53,7 @@
 ##
 ## The image is extrapolated symmetrically before the convolution operation.
 ##
-## @strong{Rectangular averaging linear filter}
+## @strong{Average - Rectangular averaging linear filter}
 ##
 ## The image is convolved with @var{N} by @var{M} rectangular averaging filter.
 ## By default a 3 by 3 filter is used, but this can e changed. If the third
@@ -63,7 +63,7 @@
 ##
 ## The image is extrapolated symmetrically before the convolution operation.
 ##
-## @strong{Circular averaging linear filter}
+## @strong{Disk - Circular averaging linear filter}
 ##
 ## The image is convolved with circular averaging filter. By default the filter
 ## has a radius of 5, but this can e changed. If the third input argument is a
@@ -71,7 +71,7 @@
 ##
 ## The image is extrapolated symmetrically before the convolution operation.
 ##
-## @strong{Median filtering}
+## @strong{Median - Median filtering}
 ##
 ## Each pixel is replaced with the median of the pixels in the local area. By
 ## default, this area is 3 by 3, but this can be changed. If the third input
@@ -80,7 +80,7 @@
 ##
 ## The image is extrapolated symmetrically before the filtering is performed.
 ##
-## @strong{Gaussian bilateral filtering}
+## @strong{Bilateral - Gaussian bilateral filtering}
 ##
 ## The image is smoothed using Gaussian bilateral filtering as described by
 ## Tomasi and Manduchi [2]. The filtering result is computed as
@@ -148,7 +148,7 @@
 ## @var{J} = imsmooth(@var{I}, "p&m", 25, 0.25, @var{g});
 ## @end example
 ##
-## @strong{Custom Gaussian Smoothing}
+## @strong{Custom Gaussian - Custom Gaussian Smoothing}
 ##
 ## The image is smoothed using a Gaussian filter with a spatially varying covariance
 ## matrix. The third and fourth input arguments contain the Eigenvalues of the
