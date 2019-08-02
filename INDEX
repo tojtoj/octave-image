@@ -192,3 +192,22 @@ Utilities
  padarray
  phantom
  psf2otf
+Image Registration
+ @imref2d/contains.m
+ @imref2d/disp.m
+ @imref2d/imref2d.m
+ @imref2d/intrinsicToWorld.m
+ @imref2d/sizesMatch.m
+ @imref2d/subsasgn.m
+ @imref2d/subsref.m
+ @imref2d/worldToIntrinsic.m
+ @imref2d/worldToSubscript.m
+ @imref3d/contains.m
+ @imref3d/disp.m
+ @imref3d/imref3d.m
+ @imref3d/intrinsicToWorld.m
+ @imref3d/subsasgn.m
+ @imref3d/subsref.m
+ @imref3d/worldToIntrinsic.m
+ @imref3d/worldToSubscript.m
+

@@ -63,119 +63,17 @@ function [warped, valid] = imremap(im, XI, YI, interp = "linear", extrapval = 0)
   ## Interpolate
   sz = size (im);
   n_planes = prod (sz(3:end));
+  sz(1:2) = size (XI);
+  warped = zeros(sz);
   for i = 1:n_planes
-    warped(:,:,i) = grayinterp (im(:,:,i), XI, YI, interp, 0);
+    warped(:,:,i) = interp2 (double(im(:,:,i)), XI, YI, interp, extrapval);
   endfor
-
-  valid = !isna(warped);
-  warped(!valid) = extrapval;
 
   ## we return image on same class as input
   warped = cast (warped, class (im));
 
 endfunction
 
-function [warped, valid] = grayinterp(im, XI, YI, interp, extrapval)
-  if (strcmp(interp, "cubic"))
-    warped = graybicubic(double(im), XI, YI, 0);
-  else
-    warped = interp2(double(im), XI, YI, interp, 0);
-  endif
-  valid = !isna(warped);
-  warped(!valid) = extrapval;
-endfunction
-
-## -*- texinfo -*-
-## @deftypefn {Function File} {@var{zi}=} bicubic (@var{x}, @var{y}, @var{z}, @var{xi}, @var{yi})
-## Reference:
-## Image Processing, Analysis, and Machine Vision, 2nd Ed.
-## Sonka et.al.
-## Brooks/Cole Publishing Company
-## ISBN: 0-534-95393-X
-## @seealso{interp2}
-## @end deftypefn
-
-function ZI = graybicubic (Z, XI, YI, extrapval = 0)
-  ## Allocate output
-  [Zr, Zc] = size(XI);
-  ZI = zeros(Zr, Zc);
-
-  ## Find inliers
-  inside = ! (XI < 1 | XI > columns (Z) | YI < 1 | YI > rows (Z));
-
-  ## Scale XI and YI to match indices of Z (not needed when interpolating images)
-  #XI = (columns(Z)-1) * (XI - 1) / (columns (Z) -1)) + 1;
-  #YI = (rows(Z)-1)    * (YI - 1) / (rows (Z) -1)) + 1;
-
-  ## Start the real work
-  K = floor(XI);
-  L = floor(YI);
-
-  ## Coefficients
-  AY1  = bc((YI-L+1)); AX1  = bc((XI-K+1));
-  AY0  = bc((YI-L+0)); AX0  = bc((XI-K+0));
-  AY_1 = bc((YI-L-1)); AX_1 = bc((XI-K-1));
-  AY_2 = bc((YI-L-2)); AX_2 = bc((XI-K-2));
-
-  ## Perform interpolation
-  sz = size(Z);
-  %ZI(inside) = AY_2 .* AX_2 .* Z(sym_sub2ind(sz, L+2, K+2)) ...
-  ZI = AY_2 .* AX_2 .* Z(sym_sub2ind(sz, L+2, K+2)) ...
-     + AY_2 .* AX_1 .* Z(sym_sub2ind(sz, L+2, K+1))    ...
-     + AY_2 .* AX0  .* Z(sym_sub2ind(sz, L+2, K)) ...
-     + AY_2 .* AX1  .* Z(sym_sub2ind(sz, L+2, K-1)) ...
-     + AY_1 .* AX_2 .* Z(sym_sub2ind(sz, L+1, K+2)) ...
-     + AY_1 .* AX_1 .* Z(sym_sub2ind(sz, L+1, K+1))    ...
-     + AY_1 .* AX0  .* Z(sym_sub2ind(sz, L+1, K)) ...
-     + AY_1 .* AX1  .* Z(sym_sub2ind(sz, L+1, K-1)) ...
-     + AY0  .* AX_2 .* Z(sym_sub2ind(sz, L,   K+2)) ...
-     + AY0  .* AX_1 .* Z(sym_sub2ind(sz, L,   K+1))    ...
-     + AY0  .* AX0  .* Z(sym_sub2ind(sz, L,   K)) ...
-     + AY0  .* AX1  .* Z(sym_sub2ind(sz, L,   K-1)) ...
-     + AY1  .* AX_2 .* Z(sym_sub2ind(sz, L-1, K+2)) ...
-     + AY1  .* AX_1 .* Z(sym_sub2ind(sz, L-1, K+1))    ...
-     + AY1  .* AX0  .* Z(sym_sub2ind(sz, L-1, K)) ...
-     + AY1  .* AX1  .* Z(sym_sub2ind(sz, L-1, K-1));
-  ZI(!inside) = extrapval;
-
-endfunction
-
-## Checks if data is meshgrided
-function b = isgriddata(X)
-  D = X - repmat(X(1,:), rows(X), 1);
-  b = all(D(:) == 0);
-endfunction
-
-## Checks if data is equally spaced (assumes data is meshgrided)
-function b = isequallyspaced(X)
-  Dx = gradient(X(1,:));
-  b = all(Dx == Dx(1));
-endfunction
-
-## Computes the interpolation coefficients
-function o = bc(x)
-  x = abs(x);
-  o = zeros(size(x));
-  idx1 = (x < 1);
-  idx2 = !idx1 & (x < 2);
-  o(idx1) = 1 - 2.*x(idx1).^2 + x(idx1).^3;
-  o(idx2) = 4 - 8.*x(idx2) + 5.*x(idx2).^2 - x(idx2).^3;
-endfunction
-
-## This version of sub2ind behaves as if the data was symmetrically padded
-function ind = sym_sub2ind(sz, Y, X)
-  Y(Y<1) = 1 - Y(Y<1);
-  while (any(Y(:)>2*sz(1)))
-    Y(Y>2*sz(1)) = round( Y(Y>2*sz(1))/2 );
-  endwhile
-  Y(Y>sz(1)) = 1 + 2*sz(1) - Y(Y>sz(1));
-  X(X<1) = 1 - X(X<1);
-  while (any(X(:)>2*sz(2)))
-    X(X>2*sz(2)) = round( X(X>2*sz(2))/2 );
-  endwhile
-  X(X>sz(2)) = 1 + 2*sz(2) - X(X>sz(2));
-  ind = sub2ind(sz, Y, X);
-endfunction
 
 %!demo
 %! ## Generate a synthetic image and show it
