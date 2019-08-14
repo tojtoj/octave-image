@@ -32,7 +32,7 @@
 ##
 ## @item double or single
 ## Values are truncated to the interval [0 1] and then rescaled to the range
-## of values of the int16 class [0 255].
+## of values of the uint8 class [0 255].
 ##
 ## @item uint8
 ## Returns the same image.
