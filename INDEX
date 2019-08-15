@@ -85,6 +85,7 @@ Filtering and Transforms
  fspecial
  imfilter
  imtransform
+ integralImage
  intlut
  iradon
  nonmax_supress
