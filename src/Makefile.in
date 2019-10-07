@@ -12,7 +12,7 @@ libs = connectivity.o strel.o
 OCT_FILES = __spatial_filtering__.oct __bilateral__.oct __eps__.oct \
             __custom_gaussian_smoothing__.oct __boundary__.oct bwfill.oct \
             rotate_scale.oct hough_line.oct graycomatrix.oct bwdist.oct \
-            intlut.oct nonmax_supress.oct $(strel_dependent) $(conn_dependent)
+            intlut.oct nonmax_suppress.oct $(strel_dependent) $(conn_dependent)
 
 M_FILES = @M_FILES@
 

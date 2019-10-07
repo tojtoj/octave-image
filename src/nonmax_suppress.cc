@@ -19,16 +19,16 @@
 
 #include <octave/oct.h>
 
-DEFUN_DLD(nonmax_supress,args,nargout,"\
+DEFUN_DLD(nonmax_suppress,args,nargout,"\
 -*- texinfo -*-\n\
-@deftypefn {Loadable Function} {} nonmax_supress (@var{Es}, @var{Eo})\n\
+@deftypefn {Loadable Function} {} nonmax_suppress (@var{Es}, @var{Eo})\n\
 Performs non-maximum suppression on the given edge data. \
 @var{Es} is a matrix containing the edge strength (the length of \
 the gradient), and @var{Eo} is the edge normal orientation (the \
 direction of the gradient).\n\
 \n\
 @end deftypefn\n\
-@deftypefn {Loadable Function} {} nonmax_supress (@var{Es}, @var{Eo},\
+@deftypefn {Loadable Function} {} nonmax_suppress (@var{Es}, @var{Eo},\
  @var{low}, @var{high} )\n\
 Performs non-maximum suppression and hysteresis thresholdong, using \
 @var{low} and @var{high} as thresholds.\n\
