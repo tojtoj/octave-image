@@ -401,7 +401,7 @@ function [bw, thresh] = edge_canny (im, thresh = [], sigma = sqrt (2))
   else
     thresh = thresh(:).'; # always return a row vector
   endif
-  bw = nonmax_supress(Es, Eo, thresh(1), thresh(2));
+  bw = nonmax_suppress(Es, Eo, thresh(1), thresh(2));
 endfunction
 
 function [bw] = edge_lindeberg (im, sigma = 2)

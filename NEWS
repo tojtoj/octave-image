@@ -11,7 +11,12 @@
     also cause improved results in the functions imperspectivewarp,
     imresize, and imrotate when using the cubic or bicubic methods.
 
- ** Add "endpoints" keyword to bwmorph
+ ** Add "endpoints" keyword to bwmorph.
+
+ ** The function nonmax_supress was renamed nonmax_suppress to fix its
+    incorrect spelling.  The incorrectly named function is kept for
+    backwards compatibility.
+
 
  Summary of important user-visible changes for image 2.10.1 (2019/xx/xx):
 -------------------------------------------------------------------------
