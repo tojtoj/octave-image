@@ -22,7 +22,7 @@
 DEFUN_DLD(nonmax_supress,args,nargout,"\
 -*- texinfo -*-\n\
 @deftypefn {Loadable Function} {} nonmax_supress (@var{Es}, @var{Eo})\n\
-Performs non-maximum supression on the given edge data. \
+Performs non-maximum suppression on the given edge data. \
 @var{Es} is a matrix containing the edge strength (the length of \
 the gradient), and @var{Eo} is the edge normal orientation (the \
 direction of the gradient).\n\
@@ -30,7 +30,7 @@ direction of the gradient).\n\
 @end deftypefn\n\
 @deftypefn {Loadable Function} {} nonmax_supress (@var{Es}, @var{Eo},\
  @var{low}, @var{high} )\n\
-Performs non-maximum supression and hysteresis thresholdong, using \
+Performs non-maximum suppression and hysteresis thresholdong, using \
 @var{low} and @var{high} as thresholds.\n\
 \n\
 This function is designed to be used as part of the Canny edge \
@@ -68,7 +68,7 @@ Beware...\n\
   const int cols = Es.columns();
 
   /****************************
-   ** Non-maximum supression **
+   ** Non-maximum suppression **
    ****************************/
   Matrix In = Matrix( rows, cols, 0.0 );
   for (int r = 1; r < rows-1; r++) {
@@ -166,4 +166,3 @@ Beware...\n\
   retval.append(out);
   return retval;
 }
-
