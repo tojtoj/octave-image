@@ -6,6 +6,7 @@
       imref2d
       imref3d
       integralImage
+      integralImage3
 
  ** Improved the cubic interpolation method in imremap.  This should
     also cause improved results in the functions imperspectivewarp,

@@ -86,6 +86,7 @@ Filtering and Transforms
  imfilter
  imtransform
  integralImage
+ integralImage3
  intlut
  iradon
  nonmax_suppress
