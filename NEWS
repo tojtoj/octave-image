@@ -12,6 +12,9 @@
     also cause improved results in the functions imperspectivewarp,
     imresize, and imrotate when using the cubic or bicubic methods.
 
+ ** The function labelmatrix was changed for compatibility with the
+    upcoming Octave version 6.
+
  ** Add "endpoints" keyword to bwmorph.
 
  ** The function nonmax_supress was renamed nonmax_suppress to fix its
