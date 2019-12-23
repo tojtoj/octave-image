@@ -302,6 +302,28 @@ or with a binary matrix representing a connectivity array.  Defaults to\n\
 %! assert (bwconncomp (a, [0 1 0; 1 1 1; 0 1 0]).Connectivity, 4)
 
 %!test
+%! bw = logical ([
+%!   1  0  0  1  0  1  0
+%!   1  0  0  1  0  1  0
+%!   0  0  0  0  0  1  0
+%!   0  0  0  0  1  0  0
+%!   1  1  0  1  1  0  0
+%!   0  1  0  0  0  0  0
+%!   1  1  0  0  0  0  0
+%! ]);
+%! cc = bwconncomp (bw);
+%! cc = struct ();
+%! cc.Connectivity = 8;
+%! cc.ImageSize = [7 7];
+%! cc.NumObjects = 4;
+%! ## The commented line has the results from Matlab.  We return the
+%! ## same result but in a slightly different order.  Since the order
+%! ## is not defined, it is not required for compatibility.
+%! #cc.PixelIdxList = {[1;2], [5;7;12;13;14], [22;23], [26;32;33;36;37;38]};
+%! cc.PixelIdxList = {[1;2], [5;12;13;7;14], [22;23], [26;32;33;38;37;36]};
+%! assert (bwconncomp (bw), cc)
+
+%!test
 %! ## test that PixelIdxList is a row vector
 %! a = rand (40, 40) > 0.2;
 %! cc = bwconncomp (a, 4);

@@ -44,13 +44,28 @@ function labelled = labelmatrix (cc)
   else,                        cl = "double";
   endif
 
-  ## There's certainly a more efficient way to do this...
-  n = 1;
-  labels = cell2mat (cellfun (@(ind) repmat (n++, 1, numel(ind)),
-                     cc.PixelIdxList, "UniformOutput", false));
+  labels = repelem (1:n_obj, cellfun ("numel", cc.PixelIdxList));
   ind = cell2mat (cc.PixelIdxList');
 
   labelled = zeros (cc.ImageSize, cl);
   labelled(ind) = labels;
 
 endfunction
+
+%!test
+%! cc = struct ();
+%! cc.Connectivity = 8;
+%! cc.ImageSize = [7 7];
+%! cc.NumObjects = 4;
+%! cc.PixelIdxList = {[1;2], [5;7;12;13;14], [22;23], [26;32;33;36;37;38]};
+%!
+%! l = uint8 ([
+%!   1  0  0  3  0  4  0
+%!   1  0  0  3  0  4  0
+%!   0  0  0  0  0  4  0
+%!   0  0  0  0  4  0  0
+%!   2  2  0  4  4  0  0
+%!   0  2  0  0  0  0  0
+%!   2  2  0  0  0  0  0
+%! ]);
+%! assert (labelmatrix (cc), l)
