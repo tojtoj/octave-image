@@ -122,6 +122,7 @@ endfunction
 %! title (title_line);
 
 %!demo
+%! warning ("off", "Octave:data-file-in-path", "local");
 %! S = load ("penny.mat");
 %! I = uint8 (S.P);
 %! figure; imshow (I);
