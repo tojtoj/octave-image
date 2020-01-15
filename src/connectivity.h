@@ -39,9 +39,8 @@ namespace octave
         connectivity () = default;
 
         //! Will throw if val is bad
-        explicit connectivity (const octave_value& val);
         explicit connectivity (const boolNDArray& mask_arg);
-        explicit connectivity (const octave_idx_type& conn);
+        explicit connectivity (const uint conn);
         connectivity (const octave_idx_type& ndims, const std::string& type);
 
         boolNDArray mask;
@@ -76,35 +75,20 @@ namespace octave
                                                        const dim_vector& padded_size);
 
       private:
-        void ctor (const boolNDArray& mask_arg);
-        void ctor (const octave_idx_type& conn);
-
-        //! Like octave_value::double_value() but actually checks if scalar.
-        static double double_value (const octave_value& val);
-
-        //! Like octave_value::bool_array_value() but actually checks if
-        //! all values are zeros and one.
-        static boolNDArray bool_array_value (const octave_value& val);
-
         //! Like Array::ndims() but will return 1 dimension for ColumnVector
         static octave_idx_type ndims (const dim_vector& d);
         template<class T>
         static octave_idx_type ndims (const Array<T>& a);
     };
 
-    class invalid_conversion : public std::invalid_argument
-    {
-      public:
-        invalid_conversion (const std::string& what_arg)
-          : std::invalid_argument (what_arg) { }
-    };
-
-    class invalid_connectivity : public octave::image::invalid_conversion
+    class invalid_connectivity : public std::invalid_argument
     {
       public:
         invalid_connectivity (const std::string& what_arg)
-          : octave::image::invalid_conversion (what_arg) { }
+          : std::invalid_argument (what_arg) { }
     };
+
+    connectivity conndef (const octave_value& val);
   }
 }
 

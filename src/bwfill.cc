@@ -69,18 +69,9 @@ Note: bwfill is not recommended. Please use \"imfill\" instead.\n\
   const int nargin = args.length ();
 
   if (nargin < 2 || nargin > 4)
-    {
-      print_usage ();
-      return retval;
-    }
+    print_usage ();
 
-   const Matrix im = args (0).matrix_value ();
-   if (error_state)
-     {
-       error ("bwfill: first input argument must be a matrix");
-       return retval;
-     }
-
+  const Matrix im = args (0).matrix_value ();
   const int imM = im.rows ();
   const int imN = im.columns ();
 
@@ -98,10 +89,7 @@ Note: bwfill is not recommended. Please use \"imfill\" instead.\n\
     {
       // usage: bwfill (A, "holes", [N])
       if (nargin > 3)
-        {
-          print_usage ();
-          return retval;
-        }
+        print_usage ();
       fillmode = true;
 
       npoints = 2 * (imM + imN - 4); // don't start fill from corners
@@ -136,21 +124,11 @@ Note: bwfill is not recommended. Please use \"imfill\" instead.\n\
 
       {
         ColumnVector tmp (args (1).vector_value ());
-        if (error_state)
-          {
-            error ("bwfill: second input argument must be a string");
-            return retval;
-          }
         xseed = tmp;
       }
       {
         ColumnVector tmp (args (2).vector_value ());
-        if (error_state)
-          {
-            error ("bwfill: third input argument must be a string");
-            return retval;
-          }
-       yseed = tmp;
+        yseed = tmp;
       }
       npoints= xseed.numel ();
       if (nargin >= 4)
@@ -158,10 +136,7 @@ Note: bwfill is not recommended. Please use \"imfill\" instead.\n\
     }
 
   if (nb != 4 && nb != 8)
-    {
-      error ("bwfill: connectivity must be 4 or 8");
-      return retval;
-    }
+    error ("bwfill: connectivity must be 4 or 8");
 
 /*
  * put a one pixel thick boundary around the image

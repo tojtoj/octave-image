@@ -22,32 +22,13 @@
 
 #include <octave/oct.h>
 
+#define WANTS_OCTAVE_IMAGE_VALUE 1
+#include "octave-wrappers.h"
+
 using namespace octave::image;
 
-connectivity::connectivity (const octave_value& val)
-{
-  try
-    {ctor (double_value (val));}
-  catch (invalid_conversion& e)
-    {
-      try
-        {ctor (bool_array_value (val));}
-      catch (invalid_connectivity& e)
-        {throw;} // so it does not get caught by the parent invalid_conversion
-      catch (invalid_conversion& e)
-        {throw invalid_connectivity ("must be logical or in the set [4 6 8 18 26]");}
-    }
-  return;
-}
 
 connectivity::connectivity (const boolNDArray& mask_arg)
-{
-  ctor (mask_arg);
-  return;
-}
-
-void
-connectivity::ctor (const boolNDArray& mask_arg)
 {
   mask = mask_arg;
 
@@ -75,14 +56,7 @@ connectivity::ctor (const boolNDArray& mask_arg)
   return;
 }
 
-connectivity::connectivity (const octave_idx_type& conn)
-{
-  ctor (conn);
-  return;
-}
-
-void
-connectivity::ctor (const octave_idx_type& conn)
+connectivity::connectivity (const uint conn)
 {
   if (conn == 4)
     {
@@ -123,7 +97,8 @@ connectivity::ctor (const octave_idx_type& conn)
   else if (conn == 26)
     mask = boolNDArray (dim_vector (3, 3, 3), true);
   else
-    throw invalid_connectivity ("must be in the set [4 6 8 18 26]");
+    throw invalid_connectivity ("must be in the set [4 6 8 18 26]"
+                                " (was " + std::to_string (conn) + ")");
 
   return;
 }
@@ -273,29 +248,6 @@ connectivity::negative_neighbourhood (const dim_vector& size) const
 }
 
 
-double
-connectivity::double_value (const octave_value& val)
-{
-  const double conn = val.double_value ();
-  // Check is_scalar_type because the warning Octave:array-to-scalar
-  // is off by default and we will get the first element only.
-  if (error_state || ! val.is_scalar_type ())
-    throw invalid_conversion ("no conversion to double value");
-  return conn;
-}
-
-boolNDArray
-connectivity::bool_array_value (const octave_value& val)
-{
-  const boolNDArray mask = val.bool_array_value ();
-  // bool_array_value converts anything other than 0 to true, which will
-  // then validate as conn array, hence any_element_not_one_or_zero()
-  if (val.array_value ().any_element_not_one_or_zero ())
-    throw invalid_conversion ("no conversion to bool array value");
-  return mask;
-}
-
-
 octave_idx_type
 connectivity::ndims (const dim_vector& dims)
 {
@@ -340,4 +292,42 @@ connectivity::padding_mask (const dim_vector& size,
   boolNDArray mask (padded_size, false);
   set_padding (size, padded_size, mask, true);
   return mask;
+}
+
+
+connectivity
+octave::image::conndef (const octave_value& _val)
+{
+  octave_image::value val (_val);
+
+  // A mask may not not be of type logical/bool, it can be of any
+  // numeric type as long all values are zeros and ones (usually
+  // manually typed masks which by default are of type double.
+  if (val.islogical ()
+      || (val.isnumeric() && ! val.array_value ().any_element_not_one_or_zero ()))
+    {
+      try
+        {
+          return connectivity (val.bool_array_value ());
+        }
+      catch (invalid_connectivity& e)
+        {
+          error ("conndef: CONN %s", e.what ());
+        }
+    }
+  else if (val.isnumeric () && val.is_scalar_type ())
+    {
+      if (val.double_value () < 1)
+        error ("conndef: if CONN is a scalar it must be a positive number");
+      try
+        {
+          return connectivity (val.uint_value ());
+        }
+      catch (invalid_connectivity& e)
+        {
+          error ("conndef: CONN %s", e.what ());
+        }
+    }
+  else
+    error ("conndef: CONN must either be a logical array or a numeric scalar");
 }

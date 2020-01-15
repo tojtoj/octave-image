@@ -310,35 +310,22 @@ DEFUN_DLD(imreconstruct, args, , "\
   const octave_idx_type nargin = args.length ();
 
   if (nargin < 2 || nargin > 3)
-    {
-      print_usage ();
-      return octave_value_list ();
-    }
+    print_usage ();
   if (args(0).class_name () != args(1).class_name ())
-    {
-      error ("imreconstruct: MARKER and MASK must be of same class");
-      return octave_value_list ();
-    }
+    error ("imreconstruct: MARKER and MASK must be of same class");
 
   connectivity conn;
   if (nargin > 2)
-    {
-      try
-        { conn = connectivity (args(2)); }
-      catch (invalid_connectivity& e)
-        {
-          error ("imreconstruct: CONN %s", e.what ());
-          return octave_value_list ();
-        }
-    }
+    conn = conndef (args(2));
   else
     {
       try
-        { conn = connectivity (args(0).ndims (), "maximal"); }
+        {
+          conn = connectivity (args(0).ndims (), "maximal");
+        }
       catch (invalid_connectivity& e)
         {
-          error ("imreconstruct: unable to create connectivity");
-          return octave_value_list ();
+          error ("imreconstruct: unable to create connectivity (%s)", e.what ());
         }
     }
   octave_image::value marker (args(0));

@@ -293,21 +293,21 @@ or with a binary matrix representing a connectivity array.  Defaults to\n\
 {
   const octave_idx_type nargin = args.length ();
   if (nargin < 1 || nargin > 2)
-    {
-      print_usage ();
-      return octave_value_list ();
-    }
+    print_usage ();
 
   connectivity conn;
-  try
+  if (nargin > 1)
+    conn = octave::image::conndef (args(1));
+  else
     {
-      conn = (nargin > 1) ? connectivity (args(1)) :
-                            connectivity (args(0).ndims (), "maximal");
-    }
-  catch (invalid_connectivity& e)
-    {
-      error ("bwconncomp: MASK %s", e.what ());
-      return octave_value_list ();
+      try
+        {
+          conn = connectivity (args(0).ndims (), "maximal");
+        }
+      catch (invalid_connectivity& e)
+        {
+          error ("bwconncomp: failed to create MASK (%s)", e.what ());
+        }
     }
 
   const octave_image::value im (args(0));
@@ -341,9 +341,10 @@ or with a binary matrix representing a connectivity array.  Defaults to\n\
   else IF_TYPE(_uint8_type, uint8_)
   else IF_TYPE(logical, bool_)
 
+  // default case if all other above fail.
   error ("watershed: IM of unsupported class `%s'",
          im.class_name ().c_str ());
-  return octave_value_list ();
+
 #undef IF_TYPE
 }
 

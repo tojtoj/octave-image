@@ -63,11 +63,8 @@ im1 = rotate_scale( im0, [40,60; 50,50], [60,90; 60,90], [120,120]);\n\
        !args(0).is_matrix_type() ||
        !args(1).is_matrix_type() ||
        !args(2).is_matrix_type() ||
-       !args(3).is_matrix_type()
-       ) {
-      print_usage ();
-      return retval;
-   }
+       !args(3).is_matrix_type())
+     print_usage ();
 
    Matrix im0( args(0).matrix_value() );
    const double * im0p = im0.data();

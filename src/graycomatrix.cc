@@ -45,23 +45,14 @@ the different distances and angles to use.\n\
 
     octave_value_list retval;
 
-    if (args.length() != 4) {
-        print_usage ();
-        // 'I' must be integer values [0, nr_of_levels-1]
-
-        return retval;
-    }
+    if (args.length() != 4)
+      print_usage ();
 
     // Input arguments
     Matrix I = args(0).matrix_value();
     int L = args(1).int_value();
     ColumnVector d = ColumnVector(args(2).vector_value());
     ColumnVector th = ColumnVector(args(3).vector_value());
-
-    if (error_state) {
-        print_usage ();
-        return retval;
-    }
 
     // Create output NDArray, P
     dim_vector dim = dim_vector();

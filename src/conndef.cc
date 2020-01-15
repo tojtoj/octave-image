@@ -79,42 +79,24 @@ and returns itself.  In such case, it is equivalent to @code{iptcheckconn}.\n\
   const octave_idx_type nargin = args.length ();
 
   if (nargin < 1 || nargin > 2)
-    {
-      print_usage ();
-      return octave_value ();
-    }
+    print_usage ();
 
   connectivity conn;
   if (nargin == 1)
-    {
-      try
-        {conn = connectivity (args(0));}
-      catch (invalid_connectivity& e)
-        {
-          error ("conndef: CONN %s", e.what ());
-          return octave_value ();
-        }
-    }
+    conn = conndef (args(0));
   else
     {
-      const octave_idx_type arg0 = args(0).idx_type_value (true);
-      if (error_state || arg0 < 1)
-        {
-          error ("conndef: NDIMS must be a positive integer");
-          return octave_value ();
-        }
+      const octave_idx_type ndims = args(0).uint_value (true);
+      if (ndims < 1)
+        error ("conndef: NDIMS must be a positive integer");
       const std::string type = args(1).string_value ();
-      if (error_state)
-        {
-          error ("conndef: TYPE must be a string");
-          return octave_value ();
-        }
       try
-        {conn = connectivity (arg0, type);}
+        {
+          conn = connectivity (ndims, type);
+        }
       catch (invalid_connectivity& e)
         {
           error ("conndef: TYPE %s", e.what ());
-          return octave_value ();
         }
     }
 
@@ -175,7 +157,7 @@ and returns itself.  In such case, it is equivalent to @code{iptcheckconn}.\n\
 %!error conndef (char (2), "minimal")
 %!error conndef ("minimal", 3)
 %!error <TYPE must be "maximal" or "minimal"> conndef (3, "invalid")
-%!error <CONN must be logical or in the set> conndef (10)
+%!error <CONN must be in the set \[4 6 8 18 26\]> conndef (10)
 
 %!assert (conndef (2, "minimal"), conndef (4))
 %!assert (conndef (2, "maximal"), conndef (8))
@@ -212,43 +194,58 @@ center.\n\
   const octave_idx_type nargin = args.length ();
 
   if (nargin < 3 || nargin > 4)
-    {
-      print_usage ();
-      return octave_value ();
-    }
+    print_usage ();
 
   const std::string func = args(1).string_value ();
-  if (error_state)
-    {
-      error ("iptcheckconn: FUNC must be a string");
-      return octave_value ();
-    }
   const std::string var = args(2).string_value ();
-  if (error_state)
-    {
-      error ("iptcheckconn: VAR must be a string");
-      return octave_value ();
-    }
+
   int pos = 0;
   if (nargin > 3)
     {
       pos = args(3).int_value ();
-      if (error_state || pos < 1)
-        {
-          error ("iptcheckconn: POS must be a positive integer");
-          return octave_value ();
-        }
+      if (pos < 1)
+        error ("iptcheckconn: POS must be a positive integer");
     }
 
+  bool is_valid_conn = false;
+  std::string err_msg;
   try
-    {const connectivity conn (args(0));}
+    {
+      const connectivity conn = conndef (args(0));
+      is_valid_conn = true;
+    }
   catch (invalid_connectivity& e)
     {
+      err_msg = e.what ();
+    }
+  catch (octave::execution_exception& e)
+    {
+      err_msg = e.message ();
+    }
+
+  if (! is_valid_conn)
+    {
+      // We get the error message from conndef and then parse it to
+      // get the issue with the connectivity so we can throw it again
+      // formatted appropriately for iptcheckconn.  This parsing of
+      // the error message is not nice but:1) we don't want to
+      // duplicate the logic of conndef in iptcheckconn; 2) we prefer
+      // to use conndef and only have this function for Matlab
+      // compatibility; 3) this code is only used when conn is invalid
+      // so won't be happening many times (meaning performance here is
+      // not important); 4) we have plenty of tests to ensure that the
+      // commit message "surgery" will continue to work as expected.
+
+      const std::string token = "CONN ";
+      std::string::size_type n = err_msg.find(token);
+      if (n == std::string::npos)
+        error ("iptcheckconn: CONN is invalid but failed to parse error");
+      err_msg = err_msg.substr (n + token.size ());
       if (pos == 0)
-        error ("%s: %s %s", func.c_str (), var.c_str (), e.what ());
+        error ("%s: %s %s", func.c_str (), var.c_str (), err_msg.c_str ());
       else
         error ("%s: %s, at pos %i, %s",
-               func.c_str (), var.c_str (), pos, e.what ());
+               func.c_str (), var.c_str (), pos, err_msg.c_str ());
     }
   return octave_value ();
 }
@@ -257,21 +254,26 @@ center.\n\
 // the complete error message should be "expected error <.> but got none",
 // but how to escape <> within the error message?
 
-%!error <expected error> fail ("iptcheckconn ( 4, 'func', 'var')");
-%!error <expected error> fail ("iptcheckconn ( 6, 'func', 'var')");
-%!error <expected error> fail ("iptcheckconn ( 8, 'func', 'var')");
-%!error <expected error> fail ("iptcheckconn (18, 'func', 'var')");
-%!error <expected error> fail ("iptcheckconn (26, 'func', 'var')");
+%!test iptcheckconn ( 4, "func", "var")
+%!test iptcheckconn ( 6, "func", "var")
+%!test iptcheckconn ( 8, "func", "var")
+%!test iptcheckconn (18, "func", "var")
+%!test iptcheckconn (26, "func", "var")
 
-%!error <expected error> fail ("iptcheckconn (1, 'func', 'var')");
-%!error <expected error> fail ("iptcheckconn (ones (3, 1), 'func', 'var')");
-%!error <expected error> fail ("iptcheckconn (ones (3, 3), 'func', 'var')");
-%!error <expected error> fail ("iptcheckconn (ones (3, 3, 3), 'func', 'var')");
-%!error <expected error> fail ("iptcheckconn (ones (3, 3, 3, 3), 'func', 'var')");
+%!test iptcheckconn (1, "func", "var")
+%!test iptcheckconn (ones (3, 1), "func", "var")
+%!test iptcheckconn (ones (3, 3), "func", "var")
+%!test iptcheckconn (ones (3, 3, 3), "func", "var")
+%!test iptcheckconn (ones (3, 3, 3, 3), "func", "var")
 
-%!error <VAR must be logical or in> iptcheckconn (3, "func", "VAR");
-%!error <VAR center is not true> iptcheckconn ([1 1 1; 1 0 1; 1 1 1], "func", "VAR");
-%!error <VAR must be logical or in> iptcheckconn ([1 2 1; 1 1 1; 1 1 1], "func", "VAR");
-%!error <VAR is not symmetric relative to its center> iptcheckconn ([0 1 1; 1 1 1; 1 1 1], "func", "VAR");
-%!error <VAR is not 1x1, 3x1, 3x3, or 3x3x...x3> iptcheckconn (ones (3, 3, 3, 4), "func", "VAR");
+%!error <func: VAR must be in the set \[4 6 8 18 26\]>
+%!      iptcheckconn (3, "func", "VAR");
+%!error <func: VAR center is not true>
+%!      iptcheckconn ([1 1 1; 1 0 1; 1 1 1], "func", "VAR");
+%!error <func: VAR must either be a logical array or a numeric scalar>
+%!      iptcheckconn ([1 2 1; 1 1 1; 1 1 1], "func", "VAR");
+%!error <func: VAR is not symmetric relative to its center>
+%!      iptcheckconn ([0 1 1; 1 1 1; 1 1 1], "func", "VAR");
+%!error <func: VAR is not 1x1, 3x1, 3x3, or 3x3x...x3>
+%!      iptcheckconn (ones (3, 3, 3, 4), "func", "VAR");
 */

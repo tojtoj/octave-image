@@ -208,28 +208,23 @@ or with a binary matrix representing a connectivity array.  Defaults to\n\
 {
   const octave_idx_type nargin = args.length ();
   if (nargin < 1 || nargin > 2)
-    {
-      print_usage ();
-      return octave_value_list ();
-    }
+    print_usage ();
 
   const boolNDArray BW = args(0).bool_array_value ();
-  if (error_state)
-    {
-      error ("bwconncomp: BW must be a numeric or logical matrix");
-      return octave_value_list ();
-    }
 
   connectivity conn;
-  try
+  if (nargin > 1)
+    conn = conndef (args(1));
+  else
     {
-      conn = (nargin > 1) ? connectivity (args(1)) :
-                            connectivity (BW.ndims (), "maximal");
-    }
-  catch (invalid_connectivity& e)
-    {
-      error ("bwconncomp: MASK %s", e.what ());
-      return octave_value_list ();
+      try
+        {
+          conn = connectivity (BW.ndims (), "maximal");
+        }
+      catch (invalid_connectivity& e)
+        {
+          error ("bwconncomp: failed to create MASK (%s)", e.what ());
+        }
     }
 
   const std::vector<std::vector<octave_idx_type>> all_cc
@@ -366,35 +361,27 @@ or with a binary matrix representing a connectivity array.  Defaults to\n\
 {
   const octave_idx_type nargin = args.length ();
   if (nargin < 2 || nargin > 3)
-    {
-      print_usage ();
-      return octave_value_list ();
-    }
+    print_usage ();
 
   boolNDArray BW = args(0).bool_array_value ();
-  if (error_state)
-    {
-      error ("bwareaopen: BW must be a numeric or logical matrix");
-      return octave_value_list ();
-    }
-  const std::vector<octave_idx_type>::size_type lim
-    = args(1).idx_type_value ();
-  if (error_state || lim < 0)
-    {
-      error ("bwareaopen: LIM must be a non-negative scalar integer");
-      return octave_value_list ();
-    }
+
+  const std::vector<octave_idx_type>::size_type lim = args(1).idx_type_value ();
+  if (lim < 0)
+    error ("bwareaopen: LIM must be a non-negative scalar integer");
 
   connectivity conn;
-  try
+  if (nargin > 2)
+    conn = conndef (args(2));
+  else
     {
-      conn = (nargin > 2) ? connectivity (args(2)) :
-                            connectivity (BW.ndims (), "maximal");
-    }
-  catch (invalid_connectivity& e)
-    {
-      error ("bwareaopen: MASK %s", e.what ());
-      return octave_value_list ();
+      try
+        {
+          conn = connectivity (BW.ndims (), "maximal");
+        }
+      catch (invalid_connectivity& e)
+        {
+          error ("bwareaopen: failed to create MASK (%s)", e.what ());
+        }
     }
 
   const std::vector<std::vector<octave_idx_type>> all_cc
@@ -470,4 +457,3 @@ or with a binary matrix representing a connectivity array.  Defaults to\n\
 %!error bwareaopen (rand (10) > 0.5, 10, "maximal")
 %!error bwareaopen (rand (10) > 0.5, 10, [1 1 1; 0 1 1; 0 1 0])
 */
-

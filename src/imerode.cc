@@ -85,8 +85,6 @@ pad_matrix (const T& mt, const strel& se,
   const octave_idx_type ndims = mt.ndims ();
   const Array<octave_idx_type> pre_pad  = se.pre_pad  (ndims, shape);
   const Array<octave_idx_type> post_pad = se.post_pad (ndims, shape);
-  if (error_state)
-    return T ();
 
   dim_vector padded_size (mt.dims ());
   for (octave_idx_type dim = 0; dim < ndims; dim++)
@@ -260,8 +258,6 @@ erode (const T& im, const strel& se, const std::string& shape, const bool& erosi
       else
         padded = pad_matrix<T> (im, se, -octave_Inf, shape);
     }
-  if (error_state)
-    return octave_value ();
 
   const boolNDArray nhood = se.get_nhood ();
 
@@ -277,10 +273,7 @@ erode (const T& im, const strel& se, const std::string& shape, const bool& erosi
   const bool flat = se.flat ();
 
   if (typeid (P) == typeid (bool) && ! flat)
-    {
-      error ("only non flat structuring elements for binary images");
-      return octave_value ();
-    }
+    error ("only non flat structuring elements for binary images");
 
   dim_vector out_size (padded_size);
   for (octave_idx_type i = 0; i < ndims; i++)
@@ -343,26 +336,12 @@ base_action (const std::string& func, const bool& erosion, const octave_value_li
   octave_value retval;
   const octave_idx_type nargin = args.length ();
   if (nargin < 2 || nargin > 4)
-    {
-      print_usage (func);
-      return retval;
-    }
+    print_usage (func);
 
   // Default shape is "same"
   const std::string shape = nargin > 2? args(2).string_value () : "same";
-  if (error_state)
-    {
-      error ("%s: SHAPE must be a string", func.c_str ());
-      return retval;
-    }
 
   strel se (args(1));
-  if (error_state)
-    {
-      error ("%s: SE must be a strel object or matrix of 1's and 0's",
-             func.c_str ());
-      return retval;
-    }
   if (! erosion) // must be dilation, then get the se reflection
     se = se.reflect ();
 

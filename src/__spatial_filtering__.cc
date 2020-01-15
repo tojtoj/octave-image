@@ -362,20 +362,12 @@ available in @code{rangefilt}.\n\
   octave_value_list retval;
   const octave_idx_type nargin = args.length ();
   if (nargin < 4)
-    {
-      print_usage ();
-      return retval;
-    }
+    print_usage ();
 
   const octave_image::value A (args(0));
   const octave_image::value S (args(3));
 
   const boolNDArray domain = args(1).bool_array_value ();
-  if (error_state)
-    {
-      error ("__spatial_filtering__: A must be a logical matrix");
-      return retval;
-    }
 
   octave_idx_type len = 0;
   for (octave_idx_type i = 0; i < domain.numel (); i++)
@@ -394,11 +386,6 @@ available in @code{rangefilt}.\n\
   int arg4 = (nargin == 4) ? 0 : args(4).int_value ();
 
   const std::string method = args(2).string_value ();
-  if (error_state)
-    {
-      error ("__spatial_filtering__: method must be a string");
-      return retval;
-    }
 
   #define GENERAL_ACTION(MT, FUN, ET, MT_OUT, ET_OUT, FILTER_FUN) \
     retval = do_filtering<MT, ET, MT_OUT, ET_OUT> (A.FUN (), domain, \

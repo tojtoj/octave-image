@@ -493,26 +493,13 @@ Currently, only 2D images are supported.\n\
 
   const int nargin = args.length ();
   if (nargin < 1 || nargin > 2)
-    {
-      print_usage ();
-      return retval;
-    }
+    print_usage ();
 
   // for matlab compatibility, we do not actually check if the values are all
   // 0 and 1, any non-zero value is considered true
   const boolNDArray bw = args (0).bool_array_value ();
-  if (error_state)
-    {
-      error ("bwdist: BW must be a logical matrix");
-      return retval;
-    }
 
   std::string method = (nargin > 1) ? args (1).string_value () : "euclidean";
-  if (error_state)
-    {
-      error ("bwdist: METHOD must be a string");
-      return retval;
-    }
   for (octave_idx_type q = 0; q < octave_idx_type (method.length ()); q++)
     method[q] = tolower (method[q]);
 
