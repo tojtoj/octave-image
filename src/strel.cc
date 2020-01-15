@@ -54,8 +54,6 @@ octave::image::strel::strel (const octave_value& arg)
       strel_args(1) = se;
       // We are leaving the input check up to @strel
       se = octave_image::feval ("strel", strel_args)(0);
-      if (error_state)
-        return;
     }
 
   nhood   = octave_image::feval ("getnhood",  se)(0).bool_array_value ();
@@ -259,11 +257,7 @@ octave::image::strel::pre_pad (const octave_idx_type& mt_ndims,
   else if (shape == "full")
     pad_times = 2;
   else
-    {
-      error ("invalid SHAPE");
-      error_state = 1;
-      return Array<octave_idx_type> ();
-    }
+    error ("invalid SHAPE");
 
   Array<octave_idx_type> resized_origin (origin);
   dim_vector             resized_size (size);
@@ -293,11 +287,7 @@ octave::image::strel::post_pad (const octave_idx_type& mt_ndims,
   else if (shape == "full")
     pad_times = 2;
   else
-    {
-      error ("invalid SHAPE");
-      error_state = 1;
-      return Array<octave_idx_type> ();
-    }
+    error ("invalid SHAPE");
 
   Array<octave_idx_type> resized_origin (origin);
   dim_vector             resized_size (size);

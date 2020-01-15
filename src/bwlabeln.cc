@@ -363,30 +363,28 @@ See, for example, http://en.wikipedia.org/wiki/Union-find\n\
 
   const octave_idx_type nargin = args.length ();
   if (nargin < 1 || nargin > 2)
-    {
-      print_usage ();
-      return rval;
-    }
+    print_usage ();
 
   octave_image::value bw_value (args(0));
   if (! bw_value.isnumeric () && ! bw_value.islogical ())
-    {
-      error ("bwlabeln: BW must be a numeric or logical matrix");
-      return rval;
-    }
+    error ("bwlabeln: BW must be a numeric or logical matrix");
+
   boolNDArray BW = bw_value.bool_array_value ();
   dim_vector size_vec = BW.dims ();
 
   connectivity conn;
-  try
+  if (nargin == 2)
+    conn = conndef (args(1));
+  else
     {
-      conn = (nargin == 2) ? connectivity (args(1)) :
-                             connectivity (BW.ndims (), "maximal");
-    }
-  catch (invalid_connectivity& e)
-    {
-      error ("bwlabeln: MASK %s", e.what ());
-      return octave_value ();
+      try
+        {
+          conn = connectivity (BW.ndims (), "maximal");
+        }
+      catch (invalid_connectivity& e)
+        {
+          error ("bwlabeln: faild to create MASK (%s)", e.what ());
+        }
     }
 
   // The implementation in bwlabel_2d is faster so use it if we can
@@ -662,10 +660,7 @@ can be changed through the argument @var{n}, which can be either 4, 6, or 8.\n\
 
   const octave_idx_type nargin = args.length ();
   if (nargin < 1 || nargin > 2)
-    {
-      print_usage ();
-      return rval;
-    }
+    print_usage ();
 
   // We do not check error state after conversion to boolMatrix
   // because what we want is to actually get a boolean matrix
@@ -673,10 +668,8 @@ can be changed through the argument @var{n}, which can be either 4, 6, or 8.\n\
   octave_image::value bw_value (args(0));
   if ((! bw_value.isnumeric () && ! bw_value.islogical ()) ||
       bw_value.ndims () != 2)
-    {
-      error ("bwlabel: BW must be a 2D matrix");
-      return rval;
-    }
+    error ("bwlabel: BW must be a 2D matrix");
+
   // For some reason, we can't use bool_matrix_value() to get a
   // a boolMatrix since it will error if there's values other
   // than 0 and 1 (whatever bool_array_value() does, bool_matrix_value()
@@ -685,11 +678,9 @@ can be changed through the argument @var{n}, which can be either 4, 6, or 8.\n\
 
   // N-hood connectivity
   const octave_idx_type n = nargin < 2 ? 8 : args(1).idx_type_value ();
-  if (error_state || (n != 4 && n!= 6 && n != 8))
-    {
-      error ("bwlabel: BW must be a 2 dimensional matrix");
-      return rval;
-    }
+  if (n != 4 && n!= 6 && n != 8)
+    error ("bwlabel: BW must be a 2 dimensional matrix");
+
   return bwlabel_2d (BW, n);
 }
 

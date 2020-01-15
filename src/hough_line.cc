@@ -43,20 +43,12 @@ For a Matlab compatible Hough transform see hough.m\n\
   const int nargin = args.length ();
   const bool DEF_THETA = (nargin == 1);
 
-  if (1 > nargin || nargin > 2)
-    {
-      print_usage ();
-      return retval;
-    } 
+  if (nargin < 1 || nargin > 2)
+    print_usage ();
 
   const Matrix I = args (0).matrix_value ();
   const ColumnVector thetas = (DEF_THETA) ? ColumnVector (Range (-M_PI/2.0, M_PI/2.0, M_PI/180.0).matrix_value ()) 
                                           : ColumnVector (args (1).vector_value ());
-  if (error_state)
-    {
-      print_usage ();
-      return retval;
-    }
 
   const int r = I.rows ();
   const int c = I.columns ();

@@ -106,13 +106,6 @@ custom_gaussian_smoothing (const MT &I, const Matrix &lambda1, const Matrix &lam
   return J;
 }
 
-#define RETURN_IF_INVALID \
-      if (error_state) \
-        { \
-          error ("__custom_gaussian_smoothing__: invalid input"); \
-          return retval; \
-        }
-
 DEFUN_DLD (__custom_gaussian_smoothing__, args, ,"\
 -*- texinfo -*-\n\
 @deftypefn {Loadable Function} {@var{J} =} __custom_gaussian_smooting__ (@var{I}, @var{lambda1}, @var{lambda2}, @var{theta})\n\
@@ -131,89 +124,68 @@ interface to this function is available in @code{imsmooth}.\n\
   const int nargin = args.length ();
 
   if (nargin != 4)
-    {
-      print_usage ();
-      return retval;
-    }
+    print_usage ();
 
   const Matrix lambda1 = args (1).matrix_value ();
   const Matrix lambda2 = args (2).matrix_value ();
   const Matrix theta   = args (3).matrix_value ();
-   
-  RETURN_IF_INVALID;
 
   const octave_idx_type rows = args (0).rows();
   const octave_idx_type cols = args (0).columns();
   if (lambda1.rows () != rows || lambda1.columns () != cols
-    || lambda2.rows () != rows || lambda2.columns () != cols
-    || theta.rows () != rows || theta.columns () != cols)
-    {
-      error ("__custom_gaussian_smoothing__: size mismatch");
-      return retval;
-    }
+      || lambda2.rows () != rows || lambda2.columns () != cols
+      || theta.rows () != rows || theta.columns () != cols)
+    error ("__custom_gaussian_smoothing__: size mismatch");
 
   // Take action depending on input type
   //octave_value J;
   if (args(0).is_real_matrix())
     {
       const Matrix I = args(0).matrix_value();
-      RETURN_IF_INVALID;
       retval.append (custom_gaussian_smoothing<Matrix>(I, lambda1, lambda2, theta));
     } 
   else if (args(0).is_int8_type())
     {
       const int8NDArray I = args(0).int8_array_value();
-      RETURN_IF_INVALID;
       retval.append (custom_gaussian_smoothing<int8NDArray>(I, lambda1, lambda2, theta));
     } 
   else if (args(0).is_int16_type())
     {
       const int16NDArray I = args(0).int16_array_value();
-      RETURN_IF_INVALID;
       retval.append (custom_gaussian_smoothing<int16NDArray>(I, lambda1, lambda2, theta));
     } 
   else if (args(0).is_int32_type())
     {
       const int32NDArray I = args(0).int32_array_value();
-      RETURN_IF_INVALID;
       retval.append (custom_gaussian_smoothing<int32NDArray>(I, lambda1, lambda2, theta));
     } 
   else if (args(0).is_int64_type())
     {
       const int64NDArray I = args(0).int64_array_value();
-      RETURN_IF_INVALID;
       retval.append (custom_gaussian_smoothing<int64NDArray>(I, lambda1, lambda2, theta));
     } 
   else if (args(0).is_uint8_type())
     {
       const uint8NDArray I = args(0).uint8_array_value();
-      RETURN_IF_INVALID;
       retval.append (custom_gaussian_smoothing<uint8NDArray>(I, lambda1, lambda2, theta));
     } 
   else if (args(0).is_uint16_type())
     {
       const uint16NDArray I = args(0).uint16_array_value();
-      RETURN_IF_INVALID;
       retval.append (custom_gaussian_smoothing<uint16NDArray>(I, lambda1, lambda2, theta));
     } 
   else if (args(0).is_uint32_type())
     {
       const uint32NDArray I = args(0).uint32_array_value();
-      RETURN_IF_INVALID;
       retval.append (custom_gaussian_smoothing<uint32NDArray>(I, lambda1, lambda2, theta));
     } 
   else if (args(0).is_uint64_type())
     {
       const uint64NDArray I = args(0).uint64_array_value();
-      RETURN_IF_INVALID;
       retval.append (custom_gaussian_smoothing<uint64NDArray>(I, lambda1, lambda2, theta));
     } 
   else
-    {
-      error("__custom_gaussian_smoothing__: first input should be a real or integer array");
-      return retval;
-    }
+    error("__custom_gaussian_smoothing__: first input should be a real or integer array");
 
-  // Return
   return retval;
 }

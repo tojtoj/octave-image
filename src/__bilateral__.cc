@@ -107,25 +107,15 @@ be called directly. Instead use @code{imsmooth}.\n\
 {
   octave_value_list retval;
   if (args.length () != 3)
-    {
-      print_usage ();
-      return retval;
-    }
-  
+    print_usage ();
+
   const octave_idx_type ndims = args (0).ndims ();
   if (ndims != 2 && ndims != 3)
-    {
-      error ("__bilateral__: only 2 and 3 dimensional is supported");
-      return retval;
-    }
+    error ("__bilateral__: only 2 and 3 dimensional is supported");
+
   const double sigma_d = args (1).scalar_value ();
   const double sigma_r = args (2).scalar_value ();
-  if (error_state)
-    {
-      error("__bilateral__: invalid input");
-      return retval;
-    }
-    
+
   // Take action depending on input type
   if (args (0).is_real_matrix ())
     {
@@ -173,10 +163,7 @@ be called directly. Instead use @code{imsmooth}.\n\
       retval = bilateral<uint64NDArray> (im, sigma_d, sigma_r);
     } 
   else
-    {
-      error ("__bilateral__: first input should be a real or integer array");
-      return retval;
-    }
-    
+    error ("__bilateral__: first input should be a real or integer array");
+
   return retval;
 }

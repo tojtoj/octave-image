@@ -50,22 +50,13 @@ point is the same as the first.\n\
   // check number of arguments
   const int nargin = args.length ();
   if (nargin > 2 || nargout != 1)
-    {
-      error ("__boundary__: wrong number of input arguments");  
-      return retval;
-    }
+    error ("__boundary__: wrong number of input arguments");
 
   // extract arguments
   const boolMatrix unpadded = args (0).bool_matrix_value ();
   const int conn = (nargin > 1)
       ? (int) args (1).scalar_value ()
       : 8;
-    
-  if (error_state)
-    {
-      error ("__boundary__: internal error");
-      return retval;
-    }
 
   // pad to avoid boundary issues
   int rows = unpadded.rows ();

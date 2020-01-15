@@ -93,34 +93,22 @@ as @var{LUT}.\n\
   octave_value_list rv (1);
 
   if (args.length () != 2)
-    {
-      print_usage ();
-      return rv;
-    }
+    print_usage ();
 
   const std::string cls = args(0).class_name ();
   if (cls != args(1).class_name ())
-    {
-      error ("intlut: A and LUT must be of same class");
-      return rv;
-    }
+    error ("intlut: A and LUT must be of same class");
 
   const dim_vector lut_dims = args(1).dims ();
   if (lut_dims.length () != 2 || (lut_dims(0) > 1 && lut_dims(1) > 1))
-    {
-      error ("intlut: LUT must be a vector");
-      return rv;
-    }
+    error ("intlut: LUT must be a vector");
 
 #define IF_TYPE(TYPE, TYPE_RANGE) \
   if (args(0).is_ ## TYPE ## _type ()) \
     { \
       if (args(1).numel () != TYPE_RANGE) \
-        { \
-          error ("intlut: LUT must have " #TYPE_RANGE " elements for class %s", \
-                 cls.c_str ()); \
-          return rv; \
-        } \
+        error ("intlut: LUT must have " #TYPE_RANGE " elements for class %s", \
+               cls.c_str ()); \
       rv(0) = intlut (args(0).TYPE ## _array_value (), \
                       args(1).TYPE ## _array_value ()); \
     }
@@ -151,5 +139,5 @@ as @var{LUT}.\n\
 %!error <must be of same class> intlut (uint16 (1:20), uint8 (0:255));
 %!error <must have 256 elements> intlut (uint8 (1:20), uint8 (0:200));
 %!error <must have 65536 elements> intlut (uint16 (1:20), uint16 (0:500));
-%! error <LUST must be a vector> intlut (uint8 (56), uint8 (magic (16) -1))
+%!error <LUT must be a vector> intlut (uint8 (56), uint8 (magic (16) -1))
 */
