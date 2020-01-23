@@ -109,3 +109,4 @@ run: all
 clean:
 	$(RM) -r $(TARGET_DIR)
 	test ! -e src/Makefile || $(MAKE) -C src clean
+	cd src/ && $(RM) config.h config.log config.status configure Makefile
