@@ -44,7 +44,7 @@ function labelled = labelmatrix (cc)
   else,                        cl = "double";
   endif
 
-  labels = repelem (1:n_obj, cellfun ("numel", cc.PixelIdxList));
+  labels = repelems (1:n_obj, [1:n_obj; cellfun("numel", cc.PixelIdxList)]);
   ind = cell2mat (cc.PixelIdxList');
 
   labelled = zeros (cc.ImageSize, cl);
