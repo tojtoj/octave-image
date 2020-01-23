@@ -56,7 +56,7 @@ connectivity::connectivity (const boolNDArray& mask_arg)
   return;
 }
 
-connectivity::connectivity (const uint conn)
+connectivity::connectivity (const unsigned int conn)
 {
   if (conn == 4)
     {
