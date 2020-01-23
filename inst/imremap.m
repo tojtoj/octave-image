@@ -69,6 +69,10 @@ function [warped, valid] = imremap(im, XI, YI, interp = "linear", extrapval = 0)
     warped(:,:,i) = interp2 (double(im(:,:,i)), XI, YI, interp, extrapval);
   endfor
 
+  if (isargout (2))
+    valid = ! isna (warped);
+  endif
+
   ## we return image on same class as input
   warped = cast (warped, class (im));
 

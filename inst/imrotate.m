@@ -156,7 +156,11 @@ function [imgPost, H, valid] = imrotate (imgPre, thetaDeg, interp = "nearest", b
 
     imgPost = imcast (imgPost, in_class);
   else
-    [imgPost, valid] = imperspectivewarp(imgPre, H, interp, bbox, extrapval);
+    if (isargout (3))
+      [imgPost, valid] = imperspectivewarp(imgPre, H, interp, bbox, extrapval);
+    else
+      [imgPost] = imperspectivewarp(imgPre, H, interp, bbox, extrapval);
+    endif
   endif
 endfunction
 

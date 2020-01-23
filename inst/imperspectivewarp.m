@@ -49,7 +49,7 @@
 ## @seealso{imremap, imrotate, imresize, imshear, interp2}
 ## @end deftypefn
 
-function [warped, valid] = imperspectivewarp(im, P, interp = "linear", bbox = "loose", extrapolation_value = 0)
+function [varargout] = imperspectivewarp(im, P, interp = "linear", bbox = "loose", extrapolation_value = 0)
 
   if (nargin < 2 || nargin > 5)
     print_usage ();
@@ -121,7 +121,7 @@ function [warped, valid] = imperspectivewarp(im, P, interp = "linear", bbox = "l
 
   clear X Y D PD;
   
-  [warped, valid] = imremap (im, XI, YI, interp, extrapolation_value);
+  [varargout{1:nargout}] = imremap (im, XI, YI, interp, extrapolation_value);
 
 endfunction
 
