@@ -101,6 +101,30 @@ if test "$octave_image_cv_octave_style_is_functions" = yes; then
             [Define if octave_value has is* style like the Octave language.])
 fi
 
+## Since Octave 6.0 the exception throw in C++ has its own message.
+## Check for that.  In older Octave versions there's a single error
+## message at a time (see iptcheckconn code).
+AC_CACHE_CHECK([whether octave::execution_exception has message member],
+  [octave_image_cv_execution_exception_has_message],
+  [AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM([#include <error.h>],
+                     [try
+                        {
+                          error("test");
+                        }
+                      catch (octave::execution_exception& e)
+                        {
+                          std::string msg = e.message ();
+                        }])],
+    [octave_image_cv_execution_exception_has_message=yes],
+    [octave_image_cv_execution_exception_has_message=no])]
+)
+
+if test "$octave_image_cv_execution_exception_has_message" = yes; then
+  AC_DEFINE([HAVE_OCTAVE_EXCEPTION_MESSAGE], [1],
+            [Define if octave_exception has message member.])
+fi
+
 
 CXXFLAGS="$image_save_CXXFLAGS"
 

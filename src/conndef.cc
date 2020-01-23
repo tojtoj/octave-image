@@ -16,6 +16,8 @@
 
 #include <octave/oct.h>
 
+#include "config.h"
+
 #include "connectivity.h"
 using namespace octave::image;
 
@@ -207,12 +209,11 @@ center.\n\
         error ("iptcheckconn: POS must be a positive integer");
     }
 
-  bool is_valid_conn = false;
   std::string err_msg;
+#if defined HAVE_OCTAVE_EXCEPTION_MESSAGE
   try
     {
       const connectivity conn = conndef (args(0));
-      is_valid_conn = true;
     }
   catch (invalid_connectivity& e)
     {
@@ -222,8 +223,27 @@ center.\n\
     {
       err_msg = e.message ();
     }
+#else
+  {
+    octave::unwind_protect frame;
+    frame.protect_var (buffer_error_messages);
+    buffer_error_messages++;
+    try
+      {
+        const connectivity conn = conndef (args(0));
+      }
+    catch (invalid_connectivity& e)
+      {
+        err_msg = e.what ();
+      }
+    catch (octave::execution_exception& e)
+      {
+        err_msg = last_error_message ();
+      }
+  }
+#endif
 
-  if (! is_valid_conn)
+  if (! err_msg.empty ())
     {
       // We get the error message from conndef and then parse it to
       // get the issue with the connectivity so we can throw it again
