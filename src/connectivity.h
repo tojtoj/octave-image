@@ -40,7 +40,7 @@ namespace octave
 
         //! Will throw if val is bad
         explicit connectivity (const boolNDArray& mask_arg);
-        explicit connectivity (const uint conn);
+        explicit connectivity (const unsigned int conn);
         connectivity (const octave_idx_type& ndims, const std::string& type);
 
         boolNDArray mask;
