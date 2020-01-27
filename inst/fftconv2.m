@@ -126,10 +126,10 @@ endfunction
 %! b = repmat (10:-1:3, 7);
 %! assert (fftconv2 (a, b), conv2 (a, b), 1.8e4*eps)
 %! assert (fftconv2 (b, a), conv2 (b, a), 1.8e4*eps)
-%! assert (fftconv2 (a, b, "full"), conv2 (a, b, "full"), 1.3e4*eps)
-%! assert (fftconv2 (b, a, "full"), conv2 (b, a, "full"), 1.3e4*eps)
-%! assert (fftconv2 (a, b, "same"), conv2 (a, b, "same"), 1e4*eps)
-%! assert (fftconv2 (b, a, "same"), conv2 (b, a, "same"), 1e4*eps)
+%! assert (fftconv2 (a, b, "full"), conv2 (a, b, "full"), 1.8e4*eps)
+%! assert (fftconv2 (b, a, "full"), conv2 (b, a, "full"), 1.8e4*eps)
+%! assert (fftconv2 (a, b, "same"), conv2 (a, b, "same"), 1.8e4*eps)
+%! assert (fftconv2 (b, a, "same"), conv2 (b, a, "same"), 1.8e4*eps)
 %! assert (isempty (fftconv2 (a, b, "valid")));
 %! assert (fftconv2 (b, a, "valid"),  conv2 (b, a, "valid"), 1e4*eps)
 
