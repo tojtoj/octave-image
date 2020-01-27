@@ -52,12 +52,9 @@
 ##                   coordinates. To map a coordinate vector c = [x;y] to its
 ##           rotated location, compute round((@var{H} * [c; 1])(1:2)).
 ##
-##   @var{valid}    a binary matrix describing which pixels are valid,
-##                  and which pixels are extrapolated. This output is
-##                  not available if Fourier interpolation is used.
 ## @end deftypefn
 
-function [imgPost, H, valid] = imrotate (imgPre, thetaDeg, interp = "nearest", bbox = "loose", extrapval = 0)
+function [imgPost, H] = imrotate (imgPre, thetaDeg, interp = "nearest", bbox = "loose", extrapval = 0)
 
   if (nargin < 2 || nargin > 5)
     print_usage ();
@@ -152,15 +149,10 @@ function [imgPost, H, valid] = imrotate (imgPre, thetaDeg, interp = "nearest", b
         imgPost(:,:,i) = imrotate_Fourier(imgPre(:,:,i), thetaDeg, interp, bbox);
       endfor
     endif
-    valid = NA;
 
     imgPost = imcast (imgPost, in_class);
   else
-    if (isargout (3))
-      [imgPost, valid] = imperspectivewarp(imgPre, H, interp, bbox, extrapval);
-    else
-      [imgPost] = imperspectivewarp(imgPre, H, interp, bbox, extrapval);
-    endif
+    imgPost = imperspectivewarp(imgPre, H, interp, bbox, extrapval);
   endif
 endfunction
 

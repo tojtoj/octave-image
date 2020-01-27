@@ -21,6 +21,9 @@
     incorrect spelling.  The incorrectly named function is kept for
     backwards compatibility.
 
+ ** The functions imremap, imperspectivewrap, and imrotate no longer
+    return the `valid' output argument.
+
 
  Summary of important user-visible changes for image 2.10.1 (2019/xx/xx):
 -------------------------------------------------------------------------

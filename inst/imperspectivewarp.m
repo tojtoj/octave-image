@@ -15,7 +15,6 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{warped} = imperspectivewarp(@var{im}, @var{P}, @var{interp}, @var{bbox}, @var{extrapval})
-## @deftypefnx{Function File} [@var{warped}, @var{valid}] = imperspectivewarp(@dots{})
 ## Applies the spatial perspective homogeneous transformation @var{P} to the image @var{im}.
 ## The transformation matrix @var{P} must be a 3x3 homogeneous matrix, or 2x2 or 2x3
 ## affine transformation matrix.
@@ -43,13 +42,10 @@
 ## All values of the result that fall outside the original image will
 ## be set to @var{extrapval}.  The default value of @var{extrapval} is 0.
 ##
-## The optional output @var{valid} is a matrix of the same size as @var{warped}
-## that contains the value 1 in pixels where @var{warped} contains an interpolated
-## value, and 0 in pixels where @var{warped} contains an extrapolated value.
 ## @seealso{imremap, imrotate, imresize, imshear, interp2}
 ## @end deftypefn
 
-function [varargout] = imperspectivewarp(im, P, interp = "linear", bbox = "loose", extrapolation_value = 0)
+function [warped] = imperspectivewarp(im, P, interp = "linear", bbox = "loose", extrapolation_value = 0)
 
   if (nargin < 2 || nargin > 5)
     print_usage ();
@@ -120,8 +116,8 @@ function [varargout] = imperspectivewarp(im, P, interp = "linear", bbox = "loose
   YI = reshape(YI, sy, sx);
 
   clear X Y D PD;
-  
-  [varargout{1:nargout}] = imremap (im, XI, YI, interp, extrapolation_value);
+
+  warped = imremap (im, XI, YI, interp, extrapolation_value);
 
 endfunction
 
