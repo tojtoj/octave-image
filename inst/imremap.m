@@ -16,7 +16,6 @@
 ## -*- texinfo -*-
 ## @deftypefn {Function File} @var{warped} = imremap(@var{im}, @var{XI}, @var{YI})
 ## @deftypefnx{Function File} @var{warped} = imremap(@var{im}, @var{XI}, @var{YI}, @var{interp}, @var{extrapval})
-## @deftypefnx{Function File} [@var{warped}, @var{valid} ] = imremap(@dots{})
 ## Applies any geometric transformation to the image @var{im}.
 ##
 ## The arguments @var{XI} and @var{YI} are lookup tables that define the resulting
@@ -39,13 +38,10 @@
 ## All values of the result that fall outside the original image will
 ## be set to @var{extrapval}.  The default value of @var{extrapval} is 0.
 ##
-## The optional output @var{valid} is a matrix of the same size as @var{warped}
-## that contains the value 1 in pixels where @var{warped} contains an interpolated
-## value, and 0 in pixels where @var{warped} contains an extrapolated value.
 ## @seealso{imperspectivewarp, imrotate, imresize, imshear, interp2}
 ## @end deftypefn
 
-function [warped, valid] = imremap(im, XI, YI, interp = "linear", extrapval = 0)
+function [warped] = imremap(im, XI, YI, interp = "linear", extrapval = 0)
 
   if (nargin < 3 || nargin > 5)
     print_usage ();
@@ -68,10 +64,6 @@ function [warped, valid] = imremap(im, XI, YI, interp = "linear", extrapval = 0)
   for i = 1:n_planes
     warped(:,:,i) = interp2 (double(im(:,:,i)), XI, YI, interp, extrapval);
   endfor
-
-  if (isargout (2))
-    valid = ! isna (warped);
-  endif
 
   ## we return image on same class as input
   warped = cast (warped, class (im));
