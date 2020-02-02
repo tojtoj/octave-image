@@ -6,7 +6,7 @@
 ## without any warranty.
 
 AC_PREREQ([2.67])
-AC_INIT([Octave-Forge image package], [2.12.0])
+AC_INIT([Octave-Forge image package], [2.13.0+])
 
 AC_CONFIG_HEADERS([config.h])
 
