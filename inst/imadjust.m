@@ -410,7 +410,7 @@ endfunction
 %!     endfor
 %!   endfor
 %! endfor
-%! assert (imadjust (img, in, out, gamma), adj)
+%! assert (imadjust (img, in, out, gamma), adj, eps)
 
 ## Test how empty matrix is not really the default value
 %!test
