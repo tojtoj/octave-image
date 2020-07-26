@@ -32,12 +32,20 @@ function [RT,xp] = radon (I,theta)
     theta = 0:179;
   endif
 
-  if (! isnumeric (I) || ndims (I) != 2)
-    error("radon: I must be a MxN numeric matrix");
+  if (! isimage (I) || ndims (I) != 2)
+    error ("radon: I must be a MxN numeric matrix");
   endif
 
-  if (!isvector(theta))
-    error("radon: second input must be a vector");
+  if (! isvector (theta))
+    error ("radon: second input must be a vector");
+  endif
+
+  if (! isnumeric (theta))
+    error ("radon: second input must be a numeric vector");
+  endif
+
+  if (! isa (I, 'double'))
+    I = double (I);
   endif
 
   [m, n] = size (I);
@@ -65,7 +73,7 @@ function [RT,xp] = radon (I,theta)
   th = theta*pi/180;
 
   for l=1:length (theta)
-    # project each pixel to vector (-sin(th),cos(th))
+    # project each pixel to vector (-sin(th), cos(th))
     Xp = -sin (th(l)) * X + cos (th(l)) * Y;
     
     ip = Xp + b + 1;
@@ -79,5 +87,40 @@ function [RT,xp] = radon (I,theta)
 endfunction
 
 %!test
-%! A = radon(ones(2,2),30);
-%! assert (A,[0 0 0.608253175473055 2.103325780167649 1.236538105676658 0.051882938682637 0]',1e-10)
+%! A = radon (ones (2,2), 30);
+%! assert (A, [0 0 0.608253175473055 2.103325780167649 1.236538105676658 0.051882938682637 0]',1e-10)
+
+%!test
+%!# testing all types
+%! A = radon (single (ones (2,2)), 90);
+%! assert (A, B)
+%! A = radon (double (ones (2,2)), 90);
+%! assert (A, B)
+%! A = radon (int8 (ones (2,2)), 90);
+%! assert (A, B)
+%! A = radon (int32 (ones (2,2)), 90);
+%! assert (A, B)
+%! A = radon (int64 (ones (2,2)), 90);
+%! assert (A, B)
+%! A = radon (uint8 (ones (2,2)), 90);
+%! assert (A, B)
+%! A = radon (uint16 (ones (2,2)), 90);
+%! assert (A, B)
+%! A = radon (uint32 (ones (2,2)), 90);
+%! assert (A, B)
+%! A = radon (uint64 (ones (2,2)), 90);
+%! B = [0, 0.25, 1.75, 1.75, 0.25, 0. 0.]';
+%! assert (A, B)
+%! bug #58567
+%! A = radon (logical (ones (2,2)), 90);
+%! assert (A, B)
+
+%!error <Invalid call to radon>
+%! radon ();
+%!error <radon: I must be a MxN numeric matrix>
+%! radon ('xxx');
+%!error <radon: second input must be a vector>
+%! radon (ones (2, 2), ones (2,2));
+%!error <radon: second input must be a numeric vector>
+%! radon (ones (2, 2), 'xxx');
+
