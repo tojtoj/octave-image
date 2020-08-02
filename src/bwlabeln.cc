@@ -383,7 +383,7 @@ See, for example, http://en.wikipedia.org/wiki/Union-find\n\
         }
       catch (invalid_connectivity& e)
         {
-          error ("bwlabeln: faild to create MASK (%s)", e.what ());
+          error ("bwlabeln: failed to create MASK (%s)", e.what ());
         }
     }
 
