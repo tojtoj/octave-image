@@ -46,64 +46,64 @@
 ## @seealso{colfilt,inline,bestblk}
 ## @end deftypefn
 
-function B = blockproc(A, varargin)
-  if(nargin<3)
-    print_usage;
+function B = blockproc (A, varargin)
+  if (nargin < 3)
+    print_usage ();
   endif
-  
+
   ## check 'indexed' presence
-  indexed=false;
-  p=1;
-  if(ischar(varargin{1}) && strcmp(varargin{1}, "indexed"))
-    indexed=true;
-    p+=1;
-    if(isa(A,"uint8") || isa(A,"uint16"))
-      padval=0;
+  indexed = false;
+  p = 1;
+  if (ischar (varargin{1}) && strcmp (varargin{1}, "indexed"))
+    indexed = true;
+    p += 1;
+    if (isa (A, "uint8") || isa (A, "uint16"))
+      padval = 0;
     else
-      padval=1; 
+      padval = 1;
     endif
   else
-    padval=0;
+    padval = 0;
   endif
 
-  ## check [m,n]
-  if(!isvector(varargin{p}))
-    error("blockproc: expected [m,n] but param is not a vector.");
+  ## check [m, n]
+  if (! isvector (varargin{p}))
+    error ("blockproc: expected [m,n] but param is not a vector.");
   endif
-  if(length(varargin{p})!=2)
-    error("blockproc: expected [m,n] but param has wrong length.");
+  if (length (varargin{p}) != 2)
+    error ("blockproc: expected [m,n] but param has wrong length.");
   endif
-  sblk=varargin{p}(:);
-  p+=1;
+  sblk = varargin{p}(:);
+  p += 1;
 
-  ## check [mborder,nborder]
-  if(nargin<p)
-    error("blockproc: required parameters haven't been supplied.");
+  ## check [mborder, nborder]
+  if (nargin < p)
+    error ("blockproc: required parameters haven't been supplied.");
   endif
 
-  if(isvector(varargin{p}) && isnumeric(varargin{p})) 
-    if(length(varargin{p})!=2)
-      error("blockproc: expected [mborder,nborder] but param has wrong length.");
+  if (isvector (varargin{p}) && isnumeric (varargin{p}))
+    if (length (varargin{p}) != 2)
+      error ("blockproc: expected [mborder,nborder] but param has wrong length.");
     endif
-    sborder=varargin{p}(:);
-    p+=1;
+    sborder = varargin{p}(:);
+    p += 1;
   else
-    sborder=[0;0];
+    sborder = [0; 0];
   endif
 
   ## check fun
   ## TODO: add proper checks for this one
-  if(nargin<p)
-    error("blockproc: required parameters haven't been supplied.");
+  if (nargin < p)
+    error ("blockproc: required parameters haven't been supplied.");
   endif
 
-  fun=varargin{p};
-  if(!isa(fun,"function_handle") &&
-     !isa(fun,"inline function") &&
-     !ischar(fun))
-    error("blockproc: invalid fun parameter.");
+  fun = varargin{p};
+  if (! isa (fun, "function_handle")
+      && ! isa (fun, "inline function")
+      && ! ischar (fun))
+    error ("blockproc: invalid FUN parameter.");
   endif
-  
+
   ## remaining params are params to fun
   ## extra params are p+1:nargin-1
 
@@ -111,57 +111,71 @@ function B = blockproc(A, varargin)
   ## and right borders
   ## The "-" makes the function output needed elements to fill another
   ## block directly
-  sp=mod(-size(A)',sblk);
+  sp = mod (-size (A)', sblk);
 
-  if(any(sp))
-    A=padarray(A,sp,padval,'post');
+  if (any (sp))
+    A = padarray (A, sp, padval, "post");
   endif
 
   ## we store A size without border padding to iterate later
-  soa=size(A);
-  
+  soa = size (A);
+
   ## If we have borders then we need more padding
-  if(any(sborder))
-    A=padarray(A,sborder,padval);
+  if (any (sborder))
+    A = padarray (A, sborder, padval);
   endif
 
   ## calculate end of block
-  eblk=sblk+sborder*2-1;
+  eblk = sblk + sborder * 2 - 1;
 
   ## now we can process by blocks
   ## we try to preserve fun return type by concatenating everything
-  for i=1:sblk(1):soa(1)
+  for i = 1:sblk(1):soa(1)
     ## This assures r has the same class as returned by fun
-    r=feval(fun,A(i:i+eblk(1),1:1+eblk(2)),varargin{p+1:nargin-1});
-    for j=1+sblk(2):sblk(2):soa(2)
-      r=horzcat(r,feval(fun,A(i:i+eblk(1),j:j+eblk(2)),varargin{p+1:nargin-1}));
+    r = feval (fun, A(i:i+eblk(1),1:1+eblk(2)), varargin{p+1:nargin-1});
+    for j = 1 + sblk(2):sblk(2):soa(2)
+      r = horzcat (r, feval (fun, A(i:i+eblk(1), j:j+eblk(2)),
+                             varargin{p+1:nargin-1}));
     endfor
-    if(i==1) ## this assures B has the same class as A
-      B=r;
+    if (i == 1) ## this assures B has the same class as A
+      B = r;
     else
-      B=vertcat(B,r);
+      B = vertcat (B, r);
     endif
   endfor
 endfunction
 
 %!demo
-%! blockproc(eye(6),[2,2],inline("any(x(:))","x"))
+%! blockproc (eye (6), [2, 2], @(x) any (x(:)))
 %! # Returns a 3-by-3 diagonal
 
 
-%!assert(blockproc(eye(6),[2,2],"sum"),blockproc(eye(6),[2,2],@sum));
-%!assert(blockproc(eye(6),[2,2],"sum"),blockproc(eye(6),[2,2],inline("sum(x)","x")));
-%!assert(blockproc(eye(6),[1,2],@sum),kron(eye(3),[1;1]));
-%!assert(blockproc(eye(6),[2,2],inline("any(x(:))","x")),eye(3)!=0);
-%!assert(blockproc(eye(6),[1,2],[1,1],inline("sum(x(:))","x")),[2,1,0;3,2,0;2,3,1;1,3,2;0,2,3;0,1,2]);
-%!assert(blockproc(eye(6),'indexed',[1,2],[1,1],inline("sum(x(:))","x")),[8,5,6;6,2,3;5,3,4;4,3,5;3,2,6;6,5,8]);
-%!assert(blockproc(eye(6),[2,3],[4,3],inline("sum(x(:))","x")),ones(3,2)*6);
+%!assert (blockproc (eye (6), [2, 2], "sum"),
+%!        blockproc (eye (6), [2, 2], @sum))
+%!assert (blockproc (eye (6), [2, 2], "sum"),
+%!        blockproc (eye (6), [2, 2], @(x) sum (x)))
+%!assert (blockproc (eye (6), [1,2], @sum),
+%!        kron (eye (3), [1; 1]))
+%!assert (blockproc (eye (6), [2,2], @(x) any (x(:))),
+%!        eye (3) != 0)
+%!assert (blockproc (eye (6), [1,2],[1,1], @(x) sum (x(:))),
+%!        [2,1,0; 3,2,0; 2,3,1; 1,3,2; 0,2,3; 0,1,2])
+%!assert (blockproc (eye (6), "indexed", [1, 2], [1, 1], @(x) sum (x(:))),
+%!        [8,5,6; 6,2,3; 5,3,4; 4,3,5; 3,2,6; 6,5,8])
+%!assert (blockproc (eye (6), [2,3],[4,3], @(x) sum (x(:))),
+%!        ones (3, 2) * 6)
 
 % Some int* and uint* tests
-%!assert(blockproc(eye(6),[2,2],inline("int8(sum(x(:)))","x")),eye(3,"int8")*2);
+%!assert (blockproc (eye (6), [2, 2], @(x) int8 (sum (x(:)))),
+%!        eye (3, "int8") * 2)
 
 % Padding is 0 even for indexed
-%!assert(blockproc(uint8(eye(6)),[1,2],[1,1],inline("sum(x(:))","x")),[2,1,0;3,2,0;2,3,1;1,3,2;0,2,3;0,1,2]);
-%!assert(blockproc(uint8(eye(6)),'indexed',[1,2],[1,1],inline("sum(x(:))","x")),[2,1,0;3,2,0;2,3,1;1,3,2;0,2,3;0,1,2]);
-%!assert(blockproc(uint16(eye(6)),[1,2],[1,1],inline("sum(x(:))","x")),[2,1,0;3,2,0;2,3,1;1,3,2;0,2,3;0,1,2]);
-%!assert(blockproc(uint16(eye(6)),'indexed',[1,2],[1,1],inline("sum(x(:))","x")),[2,1,0;3,2,0;2,3,1;1,3,2;0,2,3;0,1,2]);
+%!assert (blockproc (uint8 (eye (6)), [1,2], [1,1], @(x) sum (x(:))),
+%!        [2,1,0; 3,2,0; 2,3,1; 1,3,2; 0,2,3; 0,1,2])
+%!assert (blockproc (uint8 (eye (6)), "indexed", [1,2], [1,1], @(x) sum (x(:))),
+%!        [2,1,0; 3,2,0; 2,3,1; 1,3,2; 0,2,3; 0,1,2]);
+%!assert (blockproc (uint16 (eye (6)), [1,2], [1,1], @(x) sum (x(:))),
+%!        [2,1,0; 3,2,0; 2,3,1; 1,3,2; 0,2,3; 0,1,2]);
+%!assert (blockproc (uint16 (eye (6)), "indexed", [1,2], [1,1],
+%!                   @(x) sum (x(:))),
+%!        [2,1,0; 3,2,0; 2,3,1; 1,3,2; 0,2,3; 0,1,2]);
