@@ -100,6 +100,7 @@ function B = blockproc (A, varargin)
   fun = varargin{p};
   if (! isa (fun, "function_handle")
       && ! isa (fun, "inline function")
+      && ! isa (fun, "inline")
       && ! ischar (fun))
     error ("blockproc: invalid FUN parameter.");
   endif
@@ -179,3 +180,7 @@ endfunction
 %!assert (blockproc (uint16 (eye (6)), "indexed", [1,2], [1,1],
 %!                   @(x) sum (x(:))),
 %!        [2,1,0; 3,2,0; 2,3,1; 1,3,2; 0,2,3; 0,1,2]);
+
+# Support "inline" functions as long as Octave itself does (bug #59022)
+%!assert (blockproc (eye (6), [2, 2], "sum"),
+%!        blockproc (eye (6), [2, 2], inline ("sum (x)", "x")))
