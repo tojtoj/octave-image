@@ -302,7 +302,7 @@ endfunction
 %! T = cp2tform (crw, cap, ttype);
 %! crw2 = tforminv (T, cap);
 %! finalerr = norm (crw - crw2)/npt;
-%! assert (finalerr < eps, "norm = %3.2e ( > eps)", finalerr)
+%! assert (finalerr < 2*eps, "norm = %3.2e ( > 2*eps)", finalerr)
 
 %!test
 %! npt = 100000;
