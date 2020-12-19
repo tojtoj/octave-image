@@ -159,6 +159,66 @@ function recon = back_project (proj, theta, interpolation, dim)
   
 endfunction
 
+## test all input types:
+%!assert (iradon (single ([0; 1; 1; 0]), 90));
+%!assert (iradon (double ([0; 1; 1; 0]), 90));
+%!assert (iradon (int8 ([0; 1; 1; 0]), 90));
+%!assert (iradon (int16 ([0; 1; 1; 0]), 90));
+%!assert (iradon (int32 ([0; 1; 1; 0]), 90));
+%!assert (iradon (int64 ([0; 1; 1; 0]), 90));
+%!assert (iradon (uint8 ([0; 1; 1; 0]), 90));
+%!assert (iradon (uint16 ([0; 1; 1; 0]), 90));
+%!assert (iradon (uint32 ([0; 1; 1; 0]), 90));
+%!assert (iradon (uint64 ([0; 1; 1; 0]), 90));
+%!assert (iradon (logical ([0; 1; 1; 0]), 90));
+
+## test some valid input syntax:
+%!assert (iradon (ones (5), 1:5));
+%!assert (iradon (ones (5), 1:5, 'nearest'));
+%!assert (iradon (ones (5), 1:5, 'linear'));
+%!assert (iradon (ones (5), 1:5, 'spline'));
+%!assert (iradon (ones (5), 1:5, 'pchip'));
+%!assert (iradon (ones (5), 1:5, 'linear', 'None'));
+%!assert (iradon (ones (5), 1:5, 'linear', 'Ram-Lak'));
+%!assert (iradon (ones (5), 1:5, 'linear', 'Shepp-Logan'));
+%!assert (iradon (ones (5), 1:5, 'linear', 'Cosine'));
+%!assert (iradon (ones (5), 1:5, 'linear', 'Hamming'));
+%!assert (iradon (ones (5), 1:5, 'linear', 'Hann'));
+%!assert (iradon (ones (5), 1:5, 'linear', 'None', 0.45));
+%!assert (iradon (ones (5), 1:5, 'linear', 'None', 0.45, 5));
+
+%!test
+%! [R, F] = iradon (ones (5), 1:5);
+%! assert(isvector(F));
+%! assert(ismatrix(R));
+
+## test some invalid input syntax:
+%!error iradon ();
+%!error iradon ('xxx');
+%!error iradon (ones (2), 'xxx');
+%!error iradon (ones (5), 1:5, 'foo');
+%!error iradon (ones (5), 1:5, 'linear', 'foo');
+%!error iradon (ones (5), 1:5, 'linear', 'none', 'foo');
+%!error iradon (ones (5), 1:5, 'linear', 'none', 0.65, 'foo');
+
+## test numeric values of output:
+%!test
+%! A = iradon([0; 1; 1; 0], 90);
+%! A_matlab = 0.4671 .* ones (2);
+%! assert (A, A_matlab, 0.02); # as Matlab compatible as iradon outputs currently get
+
+%!test
+%! P = phantom (128); 
+%! R = radon (P, 0:179);
+%! IR = iradon (R, 0:179, [], [], [], 128); # (errors in Matlab)
+%! D = P - IR;
+%! maxdiff = max (abs (D(:)));
+%! maxdiff_matlab = 0.3601;
+%! assert(maxdiff, maxdiff_matlab, 0.002);
+%! meandiff = mean (abs (D(:)));
+%! meandiff_matlab = 0.0218;
+%! assert (meandiff, meandiff_matlab, 0.001);
+
 %!demo
 %! P = phantom ();
 %! figure, imshow (P, []), title ("Original image")
