@@ -463,28 +463,31 @@ endfunction
 %! in_u8_d = im2double (in_u8);
 %! in_u16_d = im2double (in_u16);
 %! in_i16_d = im2double (in_i16);
+%! lim_u8 =  eps + 0.5 / double (intmax ("uint8"));
+%! lim_u16 = eps + 0.5 / double (intmax ("uint16"));
+%! lim_i16 = eps + 0.5 / ( double (intmax("int16")) - double (intmin ("int16")) );
 %!
 %! ## default values
-%! assert (imadjust (in_u8), im2uint8 (imadjust (in_u8_d)))
-%! assert (imadjust (in_u16), im2uint16 (imadjust (in_u16_d)))
-%! assert (imadjust (in_i16), im2int16 (imadjust (in_i16_d)))
+%! assert (im2double (imadjust (in_u8)), imadjust (in_u8_d), lim_u8)
+%! assert (im2double( imadjust (in_u16)), imadjust (in_u16_d), lim_u16)
+%! assert (im2double( imadjust (in_i16)), imadjust (in_i16_d), lim_i16)
 %!
 %! ## single adjustment for all planes
 %! args = {[.3; .7], [.1; .9], [1.5]};
-%! assert (imadjust (in_u8, args{:}), im2uint8 (imadjust (in_u8_d, args{:})))
-%! assert (imadjust (in_u16, args{:}), im2uint16 (imadjust (in_u16_d, args{:})))
-%! assert (imadjust (in_i16, args{:}), im2int16 (imadjust (in_i16_d, args{:})))
+%! assert (im2double (imadjust (in_u8, args{:})), imadjust (in_u8_d, args{:}), lim_u8)
+%! assert (im2double  (imadjust (in_u16, args{:})), imadjust (in_u16_d, args{:}), lim_u16)
+%! assert (im2double (imadjust (in_i16, args{:})), imadjust (in_i16_d, args{:}), lim_i16) 
 %!
 %! ## single adjustment for all planes (mixed with some complement)
 %! args = {reshape([.2 .3 .25 .1 0 .1; .9 .7 .85 .9 1 .8], [2 2 3]),
 %!         reshape([.1 .2 .05 .9 1 .3; .9 .85 .7 .1 0 .9], [2 2 3]),
 %!         reshape([1 .75 1 1.2 1.5 2], [1 2 3])};
-%! assert (imadjust (in_u8, args{:}), im2uint8 (imadjust (in_u8_d, args{:})))
-%! assert (imadjust (in_u16, args{:}), im2uint16 (imadjust (in_u16_d, args{:})))
-%! assert (imadjust (in_i16, args{:}), im2int16 (imadjust (in_i16_d, args{:})))
+%! assert (im2double (imadjust (in_u8, args{:})), imadjust (in_u8_d, args{:}), lim_u8)
+%! assert (im2double (imadjust (in_u16, args{:})), imadjust (in_u16_d, args{:}), lim_u16)
+%! assert (im2double (imadjust (in_i16, args{:})), imadjust (in_i16_d, args{:}), lim_i16)
 %!
 %! ## test use of [] as limit and negative
 %! args = {[], [.95; 0], 1.25};
-%! assert (imadjust (in_u8, args{:}), im2uint8 (imadjust (in_u8_d, args{:})))
-%! assert (imadjust (in_u16, args{:}), im2uint16 (imadjust (in_u16_d, args{:})))
-%! assert (imadjust (in_i16, args{:}), im2int16 (imadjust (in_i16_d, args{:})))
+%! assert (im2double (imadjust (in_u8, args{:})), imadjust (in_u8_d, args{:}), lim_u8)
+%! assert (im2double (imadjust (in_u16, args{:})), imadjust (in_u16_d, args{:}), lim_u16)
+%! assert (im2double (imadjust (in_i16, args{:})), imadjust (in_i16_d, args{:}), lim_i16)
