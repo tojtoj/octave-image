@@ -16,7 +16,6 @@
 
 ## -*- texinfo -*-
 ## @deftypefn  {} {} grayslice (@var{I})
-## @deftypefnx {} {} grayslice (@var{I}, @var{n})
 ## @deftypefnx {} {} grayslice (@var{I}, @var{v})
 ## Create indexed image from intensity image using multilevel thresholding.
 ##
@@ -54,6 +53,11 @@ function sliced = grayslice (I, n = 10)
            "grayslice: N and V must be numeric");
   endif
 
+  if isa (I, "int16")
+  ## Convert int16 images to uint16, because that is what Matlab does.
+    I = im2uint16 (I);
+  endif
+  
   if (isscalar (n) && n >= 1)
     ## For Matlab compatibility, don't check if N is an integer but
     ## don't allow n < 1 either.
@@ -275,3 +279,66 @@ endfunction
 %!error <N must be a positive number> x = grayslice ([1 2; 3 4], 0)
 %!error <N must be a positive number> x = grayslice ([1 2; 3 4], -1)
 %!error <N and V must be numeric> x = grayslice ([1 2; 3 4], "foo")
+
+%!test
+%! ## test output values for all input classes
+%!
+%! klasse = "uint8";
+%! im = cast ([intmin(klasse): intmax(klasse)], klasse);
+%! erg05 = grayslice (im, 0.5);
+%! first1_erg05 = im(find (erg05)(1));
+%! assert (first1_erg05, cast (1, klasse));
+%! erg5 = grayslice (im, 5);
+%! first1_erg5 = im(find (erg5)(1));
+%! assert (first1_erg5, cast (51, klasse));
+%! ergint5 = grayslice (im, uint8 (5));
+%! first1_ergint5 = im(find (ergint5)(1));
+%! assert (first1_ergint5, cast (51, klasse));
+%! 
+%! klasse = "uint16";
+%! im = cast ([intmin(klasse): intmax(klasse)], klasse);
+%! erg05 = grayslice (im, 0.5);
+%! first1_erg05 = im(find (erg05)(1));
+%! assert (first1_erg05, cast (1, klasse));
+%! erg5 = grayslice (im, 5);
+%! first1_erg5 = im(find (erg5)(1));
+%! assert (first1_erg5, cast (13107, klasse));
+%! ergint5 = grayslice (im, uint8 (5));
+%! first1_ergint5 = im(find (ergint5)(1));
+%! assert (first1_ergint5, cast (13107, klasse));
+%!
+%! klasse = "int16";
+%! im = cast ([intmin(klasse): intmax(klasse)], klasse);
+%! erg05 = grayslice (im, 0.5);
+%! first1_erg05 = im(find (erg05)(1));
+%! assert (first1_erg05, cast (-32767, klasse));
+%! erg5 = grayslice (im, 5);
+%! first1_erg5 = im(find (erg5)(1));
+%! assert (first1_erg5, cast (-19661, klasse));
+%! ergint5 = grayslice (im, uint8 (5));
+%! first1_ergint5 = im(find (ergint5)(1));
+%! assert (first1_ergint5, cast (-19661, klasse));
+%! 
+%! klasse = "single";
+%! im = cast ([0:0.001:1], klasse);
+%! erg05 = grayslice (im, 0.5);
+%! first1_erg05 = im(find (erg05)(1));
+%! assert (first1_erg05, cast (0.5, klasse));
+%! erg5 = grayslice (im, 5);
+%! first1_erg5 = im(find (erg5)(1));
+%! assert (first1_erg5, cast (0.2, klasse));
+%! ergint5 = grayslice (im, uint8 (5));
+%! first1_ergint5 = im(find (ergint5)(1));
+%! assert (first1_ergint5, cast (0.2, klasse));
+%! 
+%! klasse = "double";
+%! im = cast ([0:0.001:1], klasse);
+%! erg05 = grayslice (im, 0.5);
+%! first1_erg05 = im(find (erg05)(1));
+%! assert (first1_erg05, cast (0.5, klasse));
+%! erg5 = grayslice (im, 5);
+%! first1_erg5 = im(find (erg5)(1));
+%! assert (first1_erg5, cast (0.2, klasse));
+%! ergint5 = grayslice (im, uint8 (5));
+%! first1_ergint5 = im(find (ergint5)(1));
+%! assert (first1_ergint5, cast (0.2, klasse));
