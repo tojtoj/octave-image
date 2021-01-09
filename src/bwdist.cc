@@ -421,8 +421,8 @@ static float
 quasi_euclidean (short x, short y)
 {
   static const float sqrt2_1 = sqrt (2) - 1;
-  return abs(x)>abs(y) ? (abs(x) + sqrt2_1 * abs(y)) :
-                         (sqrt2_1 * abs(x) + abs(y)) ;
+  return abs(x)>abs(y) ? (fabs(x) + sqrt2_1 * fabs(y)) :
+                         (sqrt2_1 * fabs(x) + fabs(y)) ;
 }
 
 static FloatMatrix
