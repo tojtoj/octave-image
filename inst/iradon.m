@@ -207,17 +207,85 @@ endfunction
 %! A_matlab = 0.4671 .* ones (2);
 %! assert (A, A_matlab, 0.02); # as Matlab compatible as iradon outputs currently get
 
+## test numeric values of output for "none" filter:
+%!test
+%! A = iradon (radon (ones (2, 2), 0:5), 0:5, "nearest", "none");
+%! A_matlab = [1, 1, 1, 1]' * [0.4264, 2.7859, 2.7152, 0.3557];
+%! assert (A, A_matlab, 0.0001);
+
+## test numeric values of output for all filter types:
 %!test
 %! P = phantom (128); 
 %! R = radon (P, 0:179);
-%! IR = iradon (R, 0:179, [], [], [], 128); # (errors in Matlab)
+%!
+%! IR = iradon (R, 0:179, [], [], [], 128); # (errors in Matlab because of []s)
 %! D = P - IR;
 %! maxdiff = max (abs (D(:)));
 %! maxdiff_matlab = 0.3601;
-%! assert(maxdiff, maxdiff_matlab, 0.002);
+%! assert (maxdiff, maxdiff_matlab, 0.002);
 %! meandiff = mean (abs (D(:)));
 %! meandiff_matlab = 0.0218;
 %! assert (meandiff, meandiff_matlab, 0.001);
+%!
+%! filtername = "None";
+%! IR = iradon (R, 0:179, [], filtername, [], 128);
+%! D = P - IR;
+%! maxdiff = max (abs (D(:)));
+%! maxdiff_matlab = 36.5671;
+%! assert (maxdiff, maxdiff_matlab, 0.0001);
+%! meandiff = mean (abs (D(:)));
+%! meandiff_matlab = 24.6302;
+%! assert (meandiff, meandiff_matlab, 0.0001);
+%!
+%! filtername = "Ram-Lak"; # is same as default
+%! IR = iradon (R, 0:179, [], filtername, [], 128);
+%! D = P - IR;
+%! maxdiff = max (abs (D(:)));
+%! maxdiff_matlab = 0.3601;
+%! assert (maxdiff, maxdiff_matlab, 0.002); 
+%! meandiff = mean (abs (D(:)));
+%! meandiff_matlab = 0.0218;
+%! assert (meandiff, meandiff_matlab, 0.001);
+%!
+%! filtername = "Hamming";
+%! IR = iradon (R, 0:179, [], filtername, [], 128);
+%! D = P - IR;
+%! maxdiff = max (abs (D(:)));
+%! maxdiff_matlab = 0.5171;
+%! assert (maxdiff, maxdiff_matlab, 0.005);
+%! meandiff = mean (abs (D(:)));
+%! meandiff_matlab = 0.0278;
+%! assert (meandiff, meandiff_matlab, 0.003);
+%!
+%! filtername = "Shepp-Logan";
+%! IR = iradon (R, 0:179, [], filtername, [], 128);
+%! D = P - IR;
+%! maxdiff = max (abs (D(:)));
+%! maxdiff_matlab = 0.3941;
+%! assert (maxdiff, maxdiff_matlab, 0.005);
+%! meandiff = mean (abs (D(:)));
+%! meandiff_matlab = 0.0226;
+%! assert (meandiff, meandiff_matlab, 0.0015);
+%!
+%! filtername = "Cosine";
+%! IR = iradon (R, 0:179, [], filtername, [], 128);
+%! D = P - IR;
+%! maxdiff = max (abs (D(:)));
+%! maxdiff_matlab = 0.4681;
+%! assert (maxdiff, maxdiff_matlab, 0.005);
+%! meandiff = mean (abs (D(:)));
+%! meandiff_matlab = 0.0249;
+%! assert (meandiff, meandiff_matlab, 0.002);
+%!
+%! filtername = "Hann";
+%! IR = iradon (R, 0:179, [], filtername, [], 128);
+%! D = P - IR;
+%! maxdiff = max (abs (D(:)));
+%! maxdiff_matlab = 0.5334;
+%! assert (maxdiff, maxdiff_matlab, 0.005);
+%! meandiff = mean (abs (D(:)));
+%! meandiff_matlab = 0.0285;
+%! assert (meandiff, meandiff_matlab, 0.0025);
 
 %!demo
 %! P = phantom ();
