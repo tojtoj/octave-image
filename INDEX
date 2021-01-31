@@ -33,6 +33,7 @@ Analysis and Statistics
 Arithmetics
  imabsdiff
  imadd
+ imapplymatrix
  imcomplement
  imdivide
  imlincomb
